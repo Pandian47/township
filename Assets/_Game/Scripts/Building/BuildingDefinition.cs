@@ -9,6 +9,7 @@ namespace TownBuilder
         Residential,
         Production,
         Decoration,
+        Farming,
     }
 
     /// <summary>
@@ -31,8 +32,16 @@ namespace TownBuilder
         [Tooltip("Maximum number the player may own. 0 = unlimited.")]
         [SerializeField, Min(0)] private int maxCount;
 
+        [Header("Gameplay roles")]
+        [Tooltip("This building is a field where crops can be planted.")]
+        [SerializeField] private bool isFarmPlot;
+        [Tooltip("Extra barn capacity this building adds (e.g. Barn, Silo).")]
+        [SerializeField, Min(0)] private int storageCapacityBonus;
+
         public string Id => id;
         public int MaxCount => maxCount;
+        public bool IsFarmPlot => isFarmPlot;
+        public int StorageCapacityBonus => storageCapacityBonus;
         public string DisplayName => string.IsNullOrEmpty(displayName) ? id : displayName;
         public BuildingCategory Category => category;
         public Sprite Sprite => sprite;
@@ -60,6 +69,12 @@ namespace TownBuilder
             unlockLevel = newUnlockLevel;
             coinCost = newCoinCost;
             removable = isRemovable;
+        }
+
+        public void EditorConfigureRoles(bool farmPlot, int storageBonus)
+        {
+            isFarmPlot = farmPlot;
+            storageCapacityBonus = storageBonus;
         }
 #endif
     }

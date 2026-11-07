@@ -15,6 +15,10 @@ namespace TownBuilder
         [Header("Ads")]
         [SerializeField] private RewardedCoinsButton rewardedCoinsButton;
 
+        [Header("Farming")]
+        [SerializeField] private FieldPanel fieldPanel;
+        [SerializeField] private ToastView toast;
+
         [Header("Bottom navigation")]
         [SerializeField] private GameObject bottomNavigation;
         [SerializeField] private Button buildButton;
@@ -34,15 +38,19 @@ namespace TownBuilder
         [SerializeField] private Button deselectButton;
 
         private PlacementSystem _placement;
+        private FarmingController _farming;
         private Wallet _wallet;
 
-        public void Initialize(PlacementSystem placement, Wallet wallet, PlayerProgress progress, GameContent content,
-            IAdService ads, Action onMenu)
+        public void Initialize(PlacementSystem placement, FarmingController farming, Wallet wallet, PlayerProgress progress,
+            GameContent content, IAdService ads, Action onMenu)
         {
             _placement = placement;
+            _farming = farming;
             _wallet = wallet;
 
-            topBar.Bind(wallet, progress);
+            topBar.Bind(wallet, progress, farming.Inventory);
+            fieldPanel.Initialize(farming, content, wallet, ads, onPlanted: () => _placement.Cancel());
+            farming.Notification += toast.Show;
 
             bool adsOn = content.AdsConfig != null && content.AdsConfig.AdsEnabled && !(ads is NoAdService);
             rewardedCoinsButton.gameObject.SetActive(adsOn);
@@ -72,13 +80,15 @@ namespace TownBuilder
         {
             if (_placement != null) _placement.StateChanged -= Refresh;
             if (_wallet != null) _wallet.Changed -= Refresh;
+            if (_farming != null) _farming.Notification -= toast.Show;
         }
 
         private void AskRemove()
         {
             if (!_placement.TryGetTargetDefinition(out var definition)) return;
-            confirmDialog.Show($"Remove {definition.DisplayName}?\nThis cannot be undone and coins are not refunded.", "Remove",
-                () => _placement.RemoveSelected());
+            bool hasCrop = _farming.GetStage(_placement.TargetInstanceId) != PlotStage.Empty;
+            string warning = hasCrop ? "\nThe crop growing on it will be lost." : "\nThis cannot be undone and coins are not refunded.";
+            confirmDialog.Show($"Remove {definition.DisplayName}?{warning}", "Remove", () => _placement.RemoveSelected());
         }
 
         private void Refresh()
@@ -104,6 +114,10 @@ namespace TownBuilder
                 selectionNameText.text = definition.DisplayName;
                 removeButton.interactable = definition.Removable;
             }
+
+            bool fieldSelected = selected && definition != null && definition.IsFarmPlot;
+            if (fieldSelected && fieldPanel.PlotId != _placement.TargetInstanceId) fieldPanel.ShowFor(_placement.TargetInstanceId);
+            else if (!fieldSelected && fieldPanel.PlotId != null) fieldPanel.Hide();
         }
 
         private string BuildPlacementInfo(PlacementSystem.Mode mode, BuildingDefinition definition)

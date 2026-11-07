@@ -38,18 +38,37 @@ Automated coverage today: 29 EditMode tests (grid rules, wallet, save store, mig
 - [ ] Press Home, swipe the app away, reopen → Continue → identical town and coins
 - [ ] Frame rate stays smooth (target 60 FPS) while panning and zooming
 
-## Milestone 2: Town building polish (weeks 5–8)
-Construction timers (timestamp-based), building rotation/flip (if wanted), placement sound/FX,
-selection outline shader, a Tile Palette for map editing, the first AI art set (tiles + 5 buildings).
+## Milestone 2: Core loop, v0.1 playable prototype (current)
 
-## Milestone 3: Farming (weeks 9–12)
-Field plots, CropDefinition, planting UI, growth stages from timestamps, harvesting, inventory, barn capacity.
+Reordered from the original plan: farming and production make the game playable, so they come before polish.
 
-## Milestone 4: Factories and economy (weeks 13–18)
-FactoryDefinition and RecipeDefinition, production queues (timestamp-based), product inventory, XP and level curve.
+| Step | Feature | Status |
+|---|---|---|
+| 1 | Farming: Field building, Wheat/Corn, growth timers, harvest, barn capacity, rewarded "Finish now" | **Done** (53 tests) |
+| 2 | Barn screen: list items, sell for coins, capacity upgrade | Next |
+| 3 | Production: Bakery recipes (Bread, Corn bread), production queue, timers | Planned |
+| 4 | Orders and levels: order board, coin + XP rewards, level curve, unlocks | Planned |
 
-## Milestone 5: Orders and progression (weeks 19–24)
-Truck orders, train deliveries, rewards, level unlocks, quests, land expansion.
+**v0.1 definition of done:** plant wheat → harvest → bake bread → deliver it for coins → place a building →
+close and reopen with nothing lost.
+
+### Device checklist (step 1: farming)
+- [ ] New Game shows 3 fields to the right of the Town Hall
+- [ ] Tap a field → crop picker → Wheat → the field shows sprouts and the panel closes
+- [ ] Tap the growing field → time left counts down; "Finish now (watch ad)" plays a test ad and completes the crop
+- [ ] Tap a ready field → "+2 Wheat +1 XP" toast, the barn counter increases, the field is empty again
+- [ ] Plant, close the app for longer than the grow time, reopen → the crop is ready
+- [ ] Build a Barn → barn capacity rises by 50
+
+## Milestone 3: Town building polish
+Construction timers (timestamp-based), placement sound/FX, selection outline, a Tile Palette for map editing,
+the first AI art set (tiles, buildings, crops).
+
+## Milestone 4: Factories and economy
+More factories and recipes (dairy, sugar, feed mill), production upgrades.
+
+## Milestone 5: Orders and progression
+Train deliveries, quests, land expansion.
 
 ## Milestone 6: Visual polish (months 7–9)
 Building and crop animations, vehicles, UI transitions (switch to TextMeshPro), audio, particles.

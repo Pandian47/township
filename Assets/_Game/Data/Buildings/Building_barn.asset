@@ -20,3 +20,6 @@ MonoBehaviour:
   unlockLevel: 1
   coinCost: 300
   removable: 1
+  maxCount: 0
+  isFarmPlot: 0
+  storageCapacityBonus: 50

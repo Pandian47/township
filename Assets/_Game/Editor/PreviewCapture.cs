@@ -51,8 +51,18 @@ namespace TownBuilder.EditorTools
             var layout = new (string id, int x, int y)[]
             {
                 ("town_hall", 18, 18), ("cottage", 13, 19), ("cottage", 13, 22), ("barn", 20, 12),
-                ("bakery", 17, 12), ("silo", 23, 19), ("silo", 22, 17), ("cottage", 18, 22),
+                ("bakery", 17, 12), ("silo", 24, 19), ("cottage", 18, 22),
+                ("field", 21, 17), ("field", 22, 17), ("field", 23, 17), ("field", 24, 17),
+                ("field", 21, 18), ("field", 22, 18), ("field", 23, 18), ("field", 24, 18),
             };
+
+            // Crop stage per field (index into growth sprites; -1 = empty) to check crop art and depth sorting.
+            var cropStages = new (string crop, float progress)[]
+            {
+                ("wheat", 0f), ("wheat", 0.4f), ("wheat", 0.8f), ("wheat", 1f),
+                ("corn", 0f), ("corn", 0.4f), ("corn", 0.8f), ("corn", 1f),
+            };
+            int fieldIndex = 0;
 
             var town = new Town(grid.Bounds, grid.BlockedCells);
             foreach (var (id, x, y) in layout)
@@ -63,6 +73,19 @@ namespace TownBuilder.EditorTools
                 var view = UnityEngine.Object.Instantiate(prefab);
                 view.Setup(id, def);
                 view.SetAnchor(grid.FootprintAnchorWorld(new GridCoord(x, y)));
+
+                if (def.IsFarmPlot && fieldIndex < cropStages.Length && content.TryGetCrop(cropStages[fieldIndex].crop, out var crop))
+                {
+                    // Same setup as FarmingController.GetCropRenderer.
+                    var cropGo = new GameObject("Crop");
+                    cropGo.transform.SetParent(view.transform, false);
+                    cropGo.transform.localPosition = new Vector3(0f, -FarmingController.CropSortOffset, 0f);
+                    var sr = cropGo.AddComponent<SpriteRenderer>();
+                    sr.sortingLayerName = SortingLayers.Objects;
+                    sr.spriteSortPoint = SpriteSortPoint.Pivot;
+                    sr.sprite = crop.SpriteForProgress(cropStages[fieldIndex].progress);
+                    fieldIndex++;
+                }
             }
 
             // Show a placement preview (bakery) on free grass.
@@ -89,7 +112,7 @@ namespace TownBuilder.EditorTools
             return outputPath;
         }
 
-        public enum HudState { None, Idle, Shop, Placing }
+        public enum HudState { None, Idle, Shop, Placing, Field }
 
         /// <summary>Command line: renders MainMenu + Town (idle, shop, placing) with UI into the folder after -previewOut.</summary>
         public static void CaptureUiFromCommandLine()
@@ -103,6 +126,7 @@ namespace TownBuilder.EditorTools
                 Capture(Path.Combine(folder, "Preview_Town_Idle.png"), HudState.Idle);
                 Capture(Path.Combine(folder, "Preview_Town_Shop.png"), HudState.Shop);
                 Capture(Path.Combine(folder, "Preview_Town_Placing.png"), HudState.Placing);
+                Capture(Path.Combine(folder, "Preview_Town_Field.png"), HudState.Field);
             }
             catch (Exception e)
             {
@@ -129,7 +153,8 @@ namespace TownBuilder.EditorTools
 
             var wallet = new Wallet(1350, 20);
             var progress = new PlayerProgress(1, 0);
-            UnityEngine.Object.FindAnyObjectByType<TopBarView>().Bind(wallet, progress);
+            var barn = new Inventory(50); barn.TryAdd("wheat", 12); barn.TryAdd("corn", 6);
+            UnityEngine.Object.FindAnyObjectByType<TopBarView>().Bind(wallet, progress, barn);
 
             Find(canvas, "PlacementActionBar").SetActive(state == HudState.Placing);
             Find(canvas, "SelectionActionBar").SetActive(false);
@@ -139,6 +164,23 @@ namespace TownBuilder.EditorTools
             {
                 Find(canvas, "PlacementActionBar").transform.Find("Info").GetComponent<UnityEngine.UI.Text>().text =
                     $"{placing.DisplayName}  -  {placing.CoinCost:N0} coins\nDrag or tap to position";
+            }
+
+            if (state == HudState.Field)
+            {
+                var selection = Find(canvas, "SelectionActionBar");
+                selection.SetActive(true);
+                selection.transform.Find("Name").GetComponent<UnityEngine.UI.Text>().text = "Field";
+                var fieldRoot = Find(canvas, "FieldPanel").transform.Find("Root").gameObject;
+                fieldRoot.SetActive(true);
+                var template = fieldRoot.GetComponentsInChildren<CropButtonView>(true).First();
+                foreach (var crop in content.Crops)
+                {
+                    var b = UnityEngine.Object.Instantiate(template, template.transform.parent);
+                    b.gameObject.SetActive(true);
+                    b.Bind(crop, null);
+                    b.Refresh(true, true);
+                }
             }
 
             if (state == HudState.Shop)

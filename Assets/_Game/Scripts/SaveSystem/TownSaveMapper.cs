@@ -28,8 +28,59 @@ namespace TownBuilder
             }
         }
 
-        public static void WriteTo(SaveData save, Town town, Wallet wallet, PlayerProgress progress)
+        /// <summary>
+        /// Restores inventory and growing crops. Call after <see cref="LoadBuildings"/>. Crops on fields that no
+        /// longer exist, or of crops removed from the game, are dropped with a warning. Growth duration comes from the
+        /// current CropDefinition, so rebalancing applies to crops already in the ground.
+        /// </summary>
+        public static void LoadFarming(SaveData save, Town town, GameContent content, FarmPlots plots, Inventory inventory,
+            List<string> warnings)
         {
+            foreach (var item in save.inventory) inventory.Restore(item.itemId, item.amount);
+
+            foreach (var plot in save.cropPlots)
+            {
+                if (!town.TryGet(plot.plotInstanceId, out var field) ||
+                    !content.TryGetBuilding(field.DefinitionId, out var fieldDef) || !fieldDef.IsFarmPlot)
+                {
+                    warnings.Add($"Crop on missing field '{plot.plotInstanceId}' dropped.");
+                    continue;
+                }
+
+                if (!content.TryGetCrop(plot.cropId, out var crop))
+                {
+                    warnings.Add($"Unknown crop '{plot.cropId}' dropped.");
+                    continue;
+                }
+
+                plots.Restore(plot.plotInstanceId, crop.Id, plot.plantedAtUnixMs, crop.GrowDurationMs);
+            }
+        }
+
+        public static void WriteTo(SaveData save, Town town, Wallet wallet, PlayerProgress progress, FarmPlots plots = null,
+            Inventory inventory = null)
+        {
+            if (plots != null)
+            {
+                save.cropPlots.Clear();
+                foreach (var pair in plots.Crops)
+                {
+                    save.cropPlots.Add(new CropPlotSaveData
+                    {
+                        plotInstanceId = pair.Key,
+                        cropId = pair.Value.CropId,
+                        plantedAtUnixMs = pair.Value.PlantedAtUnixMs,
+                    });
+                }
+            }
+
+            if (inventory != null)
+            {
+                save.inventory.Clear();
+                foreach (var pair in inventory.Items)
+                    save.inventory.Add(new ItemStackSaveData { itemId = pair.Key, amount = pair.Value });
+            }
+
             save.player.coins = wallet.Coins;
             save.player.gems = wallet.Gems;
             save.player.level = progress.Level;

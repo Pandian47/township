@@ -20,8 +20,8 @@ namespace TownBuilder.EditorTools
     public static class ProjectSetup
     {
         public const string Root = "Assets/_Game";
-        public const string ApplicationId = "com.yourstudio.townbuilder";
-        public const string CompanyName = "YourStudio";
+        public const string ApplicationId = "com.pandian47.townbuilder";
+        public const string CompanyName = "Pandian47";
         public const string ProductName = "TownBuilder";
         public const string ContentPath = Root + "/ScriptableObjects/GameContent.asset";
         public const string BuildingPrefabPath = Root + "/Prefabs/Buildings/BuildingView.prefab";
@@ -40,10 +40,29 @@ namespace TownBuilder.EditorTools
         {
             public string Id, Name, Folder;
             public BuildingCategory Category;
-            public int W, H, HeightPx, Unlock, Cost, MaxCount;
-            public bool Removable;
+            public int W, H, HeightPx, Unlock, Cost, MaxCount, StorageBonus;
+            public bool Removable, FarmPlot;
             public Color32 Wall, Roof;
         }
+
+        private struct CropSeed
+        {
+            public string Id, Name;
+            public PlaceholderArtGenerator.CropStyle Style;
+            public int GrowSeconds, Yield, SeedCost, Xp, Unlock;
+        }
+
+        // Example balance values (not taken from any existing game). Tune them in the assets.
+        private static readonly CropSeed[] CropSeeds =
+        {
+            new CropSeed { Id = "wheat", Name = "Wheat", Style = PlaceholderArtGenerator.CropStyle.Wheat,
+                GrowSeconds = 120, Yield = 2, SeedCost = 0, Xp = 1, Unlock = 1 },
+            new CropSeed { Id = "corn", Name = "Corn", Style = PlaceholderArtGenerator.CropStyle.Corn,
+                GrowSeconds = 300, Yield = 3, SeedCost = 3, Xp = 2, Unlock = 1 },
+        };
+
+        // Fields placed in a new town, next to the Town Hall.
+        private static readonly Vector2Int[] StarterFieldOrigins = { new Vector2Int(21, 17), new Vector2Int(22, 17), new Vector2Int(23, 17) };
 
         // First content set for Milestone 1. Balance values are placeholders; tune them in the assets afterwards.
         private static readonly BuildingSeed[] Seeds =
@@ -55,14 +74,16 @@ namespace TownBuilder.EditorTools
                 W = 2, H = 2, HeightPx = 80, Unlock = 1, Cost = 150, Removable = true,
                 Wall = new Color32(250, 236, 200, 255), Roof = new Color32(214, 92, 70, 255) },
             new BuildingSeed { Id = "barn", Name = "Barn", Category = BuildingCategory.Production, Folder = "Production",
-                W = 2, H = 2, HeightPx = 110, Unlock = 1, Cost = 300, Removable = true,
+                W = 2, H = 2, HeightPx = 110, Unlock = 1, Cost = 300, Removable = true, StorageBonus = 50,
                 Wall = new Color32(190, 72, 56, 255), Roof = new Color32(120, 84, 64, 255) },
             new BuildingSeed { Id = "bakery", Name = "Bakery", Category = BuildingCategory.Production, Folder = "Production",
                 W = 2, H = 2, HeightPx = 95, Unlock = 1, Cost = 450, Removable = true,
                 Wall = new Color32(246, 214, 160, 255), Roof = new Color32(226, 140, 50, 255) },
             new BuildingSeed { Id = "silo", Name = "Silo", Category = BuildingCategory.Production, Folder = "Production",
-                W = 1, H = 1, HeightPx = 140, Unlock = 3, Cost = 250, Removable = true,
+                W = 1, H = 1, HeightPx = 140, Unlock = 3, Cost = 250, Removable = true, StorageBonus = 30,
                 Wall = new Color32(186, 196, 206, 255), Roof = new Color32(120, 136, 150, 255) },
+            new BuildingSeed { Id = "field", Name = "Field", Category = BuildingCategory.Farming, Folder = "Farming",
+                W = 1, H = 1, Unlock = 1, Cost = 20, Removable = true, MaxCount = 12, FarmPlot = true },
         };
 
         [MenuItem("TownBuilder/Setup/Run Full Setup", priority = 0)]
@@ -123,13 +144,17 @@ namespace TownBuilder.EditorTools
             CreateFolders();
             ConfigurePlayerSettings();
 
-            var art = PlaceholderArtGenerator.Generate(Seeds.Select(s => new PlaceholderArtGenerator.BuildingArtSpec
+            var art = PlaceholderArtGenerator.Generate(Seeds.Where(s => !s.FarmPlot).Select(s => new PlaceholderArtGenerator.BuildingArtSpec
             {
                 Id = s.Id, Folder = $"{PlaceholderArtGenerator.BuildingsArtFolder}/{s.Folder}", FootprintX = s.W, FootprintY = s.H,
                 HeightPx = s.HeightPx, Wall = s.Wall, Roof = s.Roof,
             }));
+            PlaceholderArtGenerator.EnsureFolder(PlaceholderArtGenerator.FarmingBuildingsFolder);
+            PlaceholderArtGenerator.EnsureFolder(PlaceholderArtGenerator.CropsArtFolder);
+            foreach (var s in Seeds.Where(s => s.FarmPlot)) art.Buildings[s.Id] = PlaceholderArtGenerator.CreateFieldSprite();
 
             CreateContent(art);
+            CreateCrops();
             ConfigureAds();
             CreateBuildingPrefab();
             AssetDatabase.SaveAssets();
@@ -149,7 +174,9 @@ namespace TownBuilder.EditorTools
         {
             PlayerSettings.companyName = CompanyName;
             PlayerSettings.productName = ProductName;
-            PlayerSettings.bundleVersion = "0.1.0";
+            // Version is owned by Player Settings (bump it per release). Only set it on a brand-new project.
+            if (string.IsNullOrEmpty(PlayerSettings.bundleVersion) || PlayerSettings.bundleVersion == "1.0")
+                PlayerSettings.bundleVersion = "0.1.0";
             PlayerSettings.colorSpace = ColorSpace.Linear;
 
             PlayerSettings.defaultInterfaceOrientation = UIOrientation.LandscapeLeft;
@@ -190,23 +217,72 @@ namespace TownBuilder.EditorTools
                     EditorUtility.SetDirty(def);
                 }
 
+                // Gameplay roles added in later milestones: only fill them in when still at their defaults.
+                bool rolesMissing = (s.FarmPlot && !def.IsFarmPlot) || (s.StorageBonus > 0 && def.StorageCapacityBonus == 0);
+                if (rolesMissing)
+                {
+                    def.EditorConfigureRoles(s.FarmPlot || def.IsFarmPlot, Math.Max(s.StorageBonus, def.StorageCapacityBonus));
+                    EditorUtility.SetDirty(def);
+                }
+
                 definitions.Add(def);
             }
 
             var contentPath = ContentPath;
             var content = AssetDatabase.LoadAssetAtPath<GameContent>(contentPath);
+            var field = definitions.First(d => d.Id == "field");
             if (content == null)
             {
                 content = ScriptableObject.CreateInstance<GameContent>();
                 var townHall = definitions.First(d => d.Id == "town_hall");
-                content.EditorConfigure(definitions, new List<StarterBuilding>
-                {
-                    new StarterBuilding { building = townHall, origin = new Vector2Int(18, 18) },
-                });
+                var starters = new List<StarterBuilding> { new StarterBuilding { building = townHall, origin = new Vector2Int(18, 18) } };
+                starters.AddRange(StarterFieldOrigins.Select(o => new StarterBuilding { building = field, origin = o }));
+                content.EditorConfigure(definitions, starters);
                 AssetDatabase.CreateAsset(content, contentPath);
+                return content;
             }
 
+            // Existing content: add new seed buildings (keep designer-added ones and their order).
+            var merged = content.Buildings.Where(b => b != null).ToList();
+            foreach (var def in definitions)
+                if (!merged.Contains(def)) merged.Add(def);
+            content.EditorSetBuildings(merged);
+
+            if (!content.StarterBuildings.Any(s => s.building == field))
+            {
+                var starters = content.StarterBuildings.ToList();
+                starters.AddRange(StarterFieldOrigins.Select(o => new StarterBuilding { building = field, origin = o }));
+                content.EditorSetStarters(starters);
+            }
+
+            EditorUtility.SetDirty(content);
             return content;
+        }
+
+        private static void CreateCrops()
+        {
+            var crops = new List<CropDefinition>();
+            foreach (var s in CropSeeds)
+            {
+                var path = $"{Root}/Data/Crops/Crop_{s.Id}.asset";
+                var crop = AssetDatabase.LoadAssetAtPath<CropDefinition>(path);
+                if (crop == null)
+                {
+                    crop = ScriptableObject.CreateInstance<CropDefinition>();
+                    crop.EditorConfigure(s.Id, s.Name, PlaceholderArtGenerator.CreateCropStages(s.Id, s.Style),
+                        s.GrowSeconds, s.Yield, s.SeedCost, s.Xp, s.Unlock);
+                    AssetDatabase.CreateAsset(crop, path);
+                }
+
+                crops.Add(crop);
+            }
+
+            var content = AssetDatabase.LoadAssetAtPath<GameContent>(ContentPath);
+            var merged = content.Crops.Where(c => c != null).ToList();
+            foreach (var c in crops)
+                if (!merged.Contains(c)) merged.Add(c);
+            content.EditorSetCrops(merged);
+            EditorUtility.SetDirty(content);
         }
 
         public const string AdsConfigPath = Root + "/ScriptableObjects/AdsConfig.asset";

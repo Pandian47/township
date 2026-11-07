@@ -23,12 +23,21 @@ Nothing is hard-coded in C#. The numbers below are **examples to start balancing
 
 Removing a building does not refund coins (yet).
 
+| field | Field | 1×1 | 1 | 20 | Yes (max 12, crop lost) |
+
+Storage: base barn capacity 50 (`GameContent.baseStorageCapacity`). Barn +50, Silo +30 (`storageCapacityBonus`).
+
+## Crops (implemented, `Data/Crops`)
+
+| Id | Growth | Yield | Seed cost | XP | Unlock |
+|---|---|---|---|---|---|
+| wheat | 2 min | 2 | free | 1 | 1 |
+| corn | 5 min | 3 | 3 coins | 2 | 1 |
+
 ## Planned (examples)
 
 | Crop | Growth | Yield | Seed cost |
 |---|---|---|---|
-| Wheat | 2 min | 2 | 0 |
-| Corn | 5 min | 3 | 2 |
 | Carrot | 10 min | 4 | 4 |
 
 | Bakery product | Ingredients | Time |

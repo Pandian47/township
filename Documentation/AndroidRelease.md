@@ -45,9 +45,9 @@ The script asks for the passwords and passes them to Unity only for that build.
 
 ### Step 3: before the first upload
 
-* Change `com.yourstudio.townbuilder` to your permanent package name (ProjectSetup.cs / Player Settings).
-  **It can never change after the first upload.**
-* Raise **Bundle Version Code** (Player Settings → Android) by 1 for every upload.
+* Package name is **`com.pandian47.townbuilder`**. It is permanent once uploaded, so never change it.
+* Raise **Bundle Version Code** (Player Settings → Android) by 1 for every upload, and the Version (e.g. 0.2.0).
+  Version history: 0.1.0 (1) = foundation + test ads · 0.2.0 (2) = farming.
 * Play Console needs: a developer account ($25 one-time), an app listing, a privacy policy URL, the content-rating
   questionnaire, a data-safety form, screenshots, and a 512×512 icon. Start with an **Internal testing** track.
 * New personal developer accounts must run a closed test (12+ testers for 14 days) before production access.

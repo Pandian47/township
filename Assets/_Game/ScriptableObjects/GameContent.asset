@@ -18,9 +18,20 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 1acd822bbedee1a48b720f7812e85e04, type: 2}
   - {fileID: 11400000, guid: cf71b11da8fd59048827ab1df972c7b8, type: 2}
   - {fileID: 11400000, guid: 9611f7e1e2fc83542ba1b113060c894b, type: 2}
+  - {fileID: 11400000, guid: 452c1344385c6ee4d936449de7a0dd15, type: 2}
+  crops:
+  - {fileID: 11400000, guid: a3036535aa3df024daad3d74b88f1f40, type: 2}
+  - {fileID: 11400000, guid: 62b818b79b6cf7947af8159c1d81b0fa, type: 2}
   startingCoins: 1500
   startingGems: 20
   starterBuildings:
   - building: {fileID: 11400000, guid: a8dadb330e4c2a4459824451695b4c99, type: 2}
     origin: {x: 18, y: 18}
+  - building: {fileID: 11400000, guid: 452c1344385c6ee4d936449de7a0dd15, type: 2}
+    origin: {x: 21, y: 17}
+  - building: {fileID: 11400000, guid: 452c1344385c6ee4d936449de7a0dd15, type: 2}
+    origin: {x: 22, y: 17}
+  - building: {fileID: 11400000, guid: 452c1344385c6ee4d936449de7a0dd15, type: 2}
+    origin: {x: 23, y: 17}
+  baseStorageCapacity: 50
   adsConfig: {fileID: 11400000, guid: 1e5cb2d5aaa6061439417a7434340494, type: 2}

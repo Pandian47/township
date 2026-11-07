@@ -54,6 +54,12 @@ namespace TownBuilder
 
         public event Action StateChanged;
 
+        /// <summary>
+        /// Optional hook asked when a placed building is tapped in Idle/Selected mode. Return true to consume the tap
+        /// (e.g. farming harvests a ready field instead of selecting it).
+        /// </summary>
+        public Func<PlacedBuilding, bool> BuildingTapInterceptor { get; set; }
+
         /// <summary>Raised whenever the town layout or wallet changed because of a player action (autosave hook).</summary>
         public event Action TownModified;
 
@@ -224,8 +230,21 @@ namespace TownBuilder
                 default:
                 {
                     var world = grid.ScreenToWorld(worldCamera, screenPosition);
-                    if (buildings.TryPick(world, out var building)) SelectBuilding(building.InstanceId);
-                    else EnterIdle();
+                    if (buildings.TryPick(world, out var building))
+                    {
+                        if (BuildingTapInterceptor != null && BuildingTapInterceptor(building))
+                        {
+                            if (CurrentMode == Mode.Selected) EnterIdle();
+                        }
+                        else
+                        {
+                            SelectBuilding(building.InstanceId);
+                        }
+                    }
+                    else
+                    {
+                        EnterIdle();
+                    }
                     break;
                 }
             }

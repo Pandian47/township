@@ -216,6 +216,8 @@ namespace TownBuilder.EditorTools
             Wire(buildingController, ("grid", isoGrid), ("buildingPrefab", buildingPrefab), ("buildingsRoot", buildingsRoot.transform));
             Wire(placement, ("worldCamera", cam), ("pointerInput", input), ("grid", isoGrid), ("buildings", buildingController),
                 ("highlighter", highlighter));
+            var farming = Go("FarmingController", systems.transform).AddComponent<FarmingController>();
+            Wire(farming, ("buildings", buildingController), ("placement", placement));
 
             // --- UI
             var uiRoot = Go("UI");
@@ -240,6 +242,7 @@ namespace TownBuilder.EditorTools
                 ("cameraController", cameraController),
                 ("buildings", buildingController),
                 ("placement", placement),
+                ("farming", farming),
                 ("hud", hud));
 
             EditorSceneManager.SaveScene(scene, TownPath);
@@ -319,11 +322,12 @@ namespace TownBuilder.EditorTools
             // --- Top bar
             var topBarRect = MakeRect("TopBar", safe, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -20), new Vector2(-60, 90));
             HRow(topBarRect, 24, TextAnchor.MiddleLeft);
-            var levelText = Pill(topBarRect, "LevelPill", 200);
+            var levelText = Pill(topBarRect, "LevelPill", 330);
             var coinsText = Pill(topBarRect, "CoinsPill", 340);
-            var gemsText = Pill(topBarRect, "GemsPill", 260);
+            var gemsText = Pill(topBarRect, "GemsPill", 240);
+            var barnText = Pill(topBarRect, "BarnPill", 300);
             var topBar = topBarRect.gameObject.AddComponent<TopBarView>();
-            Wire(topBar, ("levelText", levelText), ("coinsText", coinsText), ("gemsText", gemsText));
+            Wire(topBar, ("levelText", levelText), ("coinsText", coinsText), ("gemsText", gemsText), ("barnText", barnText));
 
             // --- Bottom navigation
             var nav = MakeRect("BottomNavigation", safe, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-30, 30), new Vector2(860, 130));
@@ -353,6 +357,10 @@ namespace TownBuilder.EditorTools
             var removeButton = MakeButton(selectionBar, "RemoveButton", "Remove", new Vector2(190, 100), Red);
             var deselectButton = MakeButton(selectionBar, "CloseButton", "Close", new Vector2(170, 100), Slate);
 
+            // --- Farming: field panel (above the selection bar) and toast
+            var fieldPanel = BuildFieldPanel(safe);
+            var toast = BuildToast(safe);
+
             // --- Shop
             var shop = BuildShop(canvas.transform);
 
@@ -361,6 +369,8 @@ namespace TownBuilder.EditorTools
 
             var hud = canvas.gameObject.AddComponent<TownHudController>();
             Wire(hud,
+                ("fieldPanel", fieldPanel),
+                ("toast", toast),
                 ("topBar", topBar),
                 ("shopPanel", shop),
                 ("confirmDialog", dialog),
@@ -378,6 +388,78 @@ namespace TownBuilder.EditorTools
                 ("removeButton", removeButton),
                 ("deselectButton", deselectButton));
             return hud;
+        }
+
+        private static FieldPanel BuildFieldPanel(RectTransform safe)
+        {
+            var container = Stretch("FieldPanel", safe);
+            var root = MakeRect("Root", container, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 196), new Vector2(1100, 260));
+            AddImage(root, PanelColor);
+
+            var titleRect = MakeRect("Title", root, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -10), new Vector2(-48, 54));
+            var title = Label(titleRect, "Text", "Field", 38, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
+
+            // Empty: crop buttons
+            var crops = MakeRect("Crops", root, Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
+            crops.offsetMin = new Vector2(24, 16);
+            crops.offsetMax = new Vector2(-24, -66);
+            HRow(crops, 20, TextAnchor.MiddleLeft);
+
+            var template = MakeRect("CropTemplate", crops, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(250, 176));
+            var bg = AddImage(template, Color.white);
+            Prefer(template, 250, 176);
+            var button = template.gameObject.AddComponent<Button>();
+            button.targetGraphic = bg;
+            var iconRect = MakeRect("Icon", template, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -6), new Vector2(-20, 92));
+            var icon = iconRect.gameObject.AddComponent<Image>();
+            icon.preserveAspect = true;
+            icon.raycastTarget = false;
+            var nameRect = MakeRect("Name", template, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 40), new Vector2(-12, 40));
+            var nameText = Label(nameRect, "Text", "Crop", 30, TextAnchor.MiddleCenter, Ink, FontStyle.Bold);
+            var infoRect = MakeRect("Info", template, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 6), new Vector2(-12, 36));
+            var infoText = Label(infoRect, "Text", "", 26, TextAnchor.MiddleCenter, Ink);
+            var cropView = template.gameObject.AddComponent<CropButtonView>();
+            Wire(cropView, ("button", button), ("icon", icon), ("nameText", nameText), ("infoText", infoText));
+            template.gameObject.SetActive(false);
+
+            // Growing / ready
+            var growing = MakeRect("Growing", root, Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
+            growing.offsetMin = new Vector2(24, 16);
+            growing.offsetMax = new Vector2(-24, -66);
+            var statusRect = MakeRect("Status", growing, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0, -10), new Vector2(680, 70));
+            var status = Label(statusRect, "Text", "", 36, TextAnchor.MiddleLeft, Ink);
+            var barBg = MakeRect("ProgressBar", growing, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0, 30), new Vector2(680, 36));
+            AddImage(barBg, new Color(0.82f, 0.78f, 0.7f), raycast: false);
+            var fillRect = Stretch("Fill", barBg, 4f);
+            var fill = AddImage(fillRect, Green, raycast: false);
+            fill.type = Image.Type.Filled;
+            fill.fillMethod = Image.FillMethod.Horizontal;
+            fill.fillAmount = 0.3f;
+            var action = MakeButton(growing, "ActionButton", "Finish now", new Vector2(320, 140), new Color(0.95f, 0.65f, 0.15f), out var actionLabel, 34);
+            var actionRect = (RectTransform)action.transform;
+            actionRect.anchorMin = actionRect.anchorMax = actionRect.pivot = new Vector2(1f, 0.5f);
+            actionRect.anchoredPosition = Vector2.zero;
+            growing.gameObject.SetActive(false);
+
+            var panel = container.gameObject.AddComponent<FieldPanel>();
+            Wire(panel, ("panelRoot", root.gameObject), ("titleText", title), ("cropsView", crops.gameObject), ("cropsParent", crops),
+                ("cropTemplate", cropView), ("growingView", growing.gameObject), ("statusText", status), ("progressFill", fill),
+                ("actionButton", action), ("actionLabel", actionLabel));
+            root.gameObject.SetActive(false);
+            return panel;
+        }
+
+        private static ToastView BuildToast(RectTransform safe)
+        {
+            var rect = MakeRect("Toast", safe, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 480), new Vector2(1000, 84));
+            AddImage(rect, new Color(0.1f, 0.12f, 0.16f, 0.85f), raycast: false);
+            var text = Label(rect, "Text", "", 38, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+            var group = rect.gameObject.AddComponent<CanvasGroup>();
+            group.alpha = 0f; // invisible until the first message
+            group.blocksRaycasts = false;
+            var toast = rect.gameObject.AddComponent<ToastView>();
+            Wire(toast, ("messageText", text));
+            return toast;
         }
 
         private static Text Pill(RectTransform parent, string name, float width)

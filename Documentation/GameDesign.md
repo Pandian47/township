@@ -14,8 +14,8 @@ level up → unlock buildings, crops and land → grow the town.
 | A | Isometric world, camera, terrain, roads, water | **Milestone 1: implemented** |
 | B | Building shop, placement, move, remove | **Milestone 1: implemented** (no construction timers yet) |
 | C | Save / load, new game / continue | **Milestone 1: implemented** |
-| D | Farming: plots, planting, growth timers, harvesting | Milestone 3 |
-| E | Inventory, barn capacity | Milestone 3–4 |
+| D | Farming: plots, planting, growth timers, harvesting | **Milestone 2 step 1: implemented** (Wheat, Corn) |
+| E | Inventory, barn capacity | **Barn capacity implemented** (base 50, +50 per Barn, +30 per Silo). Barn screen next |
 | F | Factories, recipes, production queues | Milestone 4 |
 | G | Coins, gems, XP, levels, rewards | Coins/gems exist; XP and levels in Milestone 4–5 |
 | H | Orders: truck, train, later ship and helicopter | Milestone 5 / 8 |
@@ -28,7 +28,16 @@ level up → unlock buildings, crops and land → grow the town.
 A player can open the Android game, plant wheat, wait for it to grow, harvest it, use it to make bread,
 earn coins, place a building, and close and reopen the game without losing progress.
 
-## Milestone 1 scope (current)
+## Milestone 2, step 1: farming (current)
+
+* **Field** building (1×1, 20 coins, up to 12). New towns start with 3 fields beside the Town Hall.
+* Tap an empty field to get the crop picker: **Wheat** (2 min, free seed, yields 2, +1 XP) or **Corn** (5 min, 3 coins, yields 3, +2 XP).
+* Crops grow in real time, including while the app is closed. Four visible growth stages.
+* Tap a ready field to **harvest** straight into the barn ("+2 Wheat +1 XP" toast). If the barn is full, harvesting is blocked and the crop stays.
+* A growing field shows the time left, a progress bar, and **Finish now (watch ad)**, a rewarded ad that completes the crop.
+* The top bar shows XP and **Barn used/capacity**. Removing a field with a crop on it warns that the crop will be lost.
+
+## Milestone 1 scope (done)
 
 * Boot → Main menu (Continue / New Game / Settings with music and SFX volume) → Town.
 * 36 × 36 starter map with grass, sand, a lake and roads. Water and roads cannot be built on.

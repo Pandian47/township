@@ -264,6 +264,139 @@ namespace TownBuilder.EditorTools
             }
         }
 
+        // ------------------------------------------------------------------ Farming
+
+        public const string CropsArtFolder = "Assets/_Game/Art/Crops";
+        public const string FarmingBuildingsFolder = BuildingsArtFolder + "/Farming";
+        private const int PlantHeadroom = 56; // extra pixels above the 1x1 diamond for tall plants
+
+        public enum CropStyle { Wheat, Corn }
+
+        /// <summary>1x1 field: tilled soil diamond with a slightly raised darker rim. Pivot = bottom corner (0.5, 0).</summary>
+        public static Sprite CreateFieldSprite() =>
+            CreateSprite($"{FarmingBuildingsFolder}/PH_Building_field.png", RenderField, new Vector2(0.5f, 0f), SpriteMeshType.FullRect);
+
+        /// <summary>Four growth stages (sprout, growing, almost, ready). Same canvas and pivot as the field so they overlay exactly.</summary>
+        public static Sprite[] CreateCropStages(string cropId, CropStyle style)
+        {
+            var sprites = new Sprite[4];
+            for (int stage = 0; stage < 4; stage++)
+            {
+                int s = stage;
+                sprites[stage] = CreateSprite($"{CropsArtFolder}/PH_Crop_{cropId}_{stage + 1}.png",
+                    () => RenderCrop(style, s), new Vector2(0.5f, 0f), SpriteMeshType.FullRect);
+            }
+
+            return sprites;
+        }
+
+        private static Texture2D RenderField()
+        {
+            int w = TileWidth, h = TileHeight + 6;
+            var tex = NewTexture(w, h);
+            var pixels = new Color32[w * h];
+            var soil = new Color32(150, 100, 60, 255);
+            for (int y = 0; y < h; y++)
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    // Diamond raised by 6 px: rim side faces below it.
+                    float px = x + 0.5f, py = y + 0.5f;
+                    float top = Mathf.Abs(px - HalfW) / HalfW + Mathf.Abs(py - 6 - HalfH) / HalfH;
+                    float bottom = Mathf.Abs(px - HalfW) / HalfW + Mathf.Abs(py - HalfH) / HalfH;
+                    Color32 c = new Color32(0, 0, 0, 0);
+                    if (top <= 0.98f)
+                    {
+                        float shade = top > 0.86f ? 0.8f : (((x + 2 * y) / 7) % 2 == 0 ? 0.92f : 1.04f); // rim + furrows
+                        c = Scale(soil, shade * (1f + (Hash(x, y) - 0.5f) * 0.06f));
+                    }
+                    else if (bottom <= 0.98f && py < HalfH + 6)
+                    {
+                        c = Scale(soil, px < HalfW ? 0.7f : 0.55f); // raised edge, lit left / shaded right
+                    }
+
+                    pixels[y * w + x] = c;
+                }
+            }
+
+            AddOutline(pixels, w, h);
+            tex.SetPixels32(pixels);
+            tex.Apply();
+            return tex;
+        }
+
+        private static Texture2D RenderCrop(CropStyle style, int stage)
+        {
+            int w = TileWidth, h = TileHeight + PlantHeadroom;
+            var tex = NewTexture(w, h);
+            var pixels = new Color32[w * h];
+
+            float[] heights = style == CropStyle.Wheat ? new[] { 7f, 16f, 25f, 32f } : new[] { 9f, 22f, 36f, 46f };
+            Color32 green = new Color32(70, 150, 50, 255);
+            Color32 color = stage switch
+            {
+                0 => new Color32(110, 190, 70, 255),
+                1 => green,
+                2 => style == CropStyle.Wheat ? new Color32(160, 180, 60, 255) : new Color32(60, 140, 45, 255),
+                _ => style == CropStyle.Wheat ? new Color32(230, 190, 70, 255) : new Color32(70, 150, 50, 255),
+            };
+            float plantHeight = heights[stage];
+
+            // Plant positions on a lattice inside the diamond, drawn back (high y) to front (low y).
+            var bases = new System.Collections.Generic.List<Vector2>();
+            for (int gy = 0; gy < 7; gy++)
+            for (int gx = 0; gx < 7; gx++)
+            {
+                // 0..1 along the two grid axes, shrunk around the centre so plants stay inside the rim.
+                float u = 0.5f + ((gx + 0.5f) / 7f - 0.5f) * 0.8f, v = 0.5f + ((gy + 0.5f) / 7f - 0.5f) * 0.8f;
+                var p = new Vector2(HalfW + (u - v) * HalfW, 6 + (u + v) * HalfH);
+                bases.Add(p);
+            }
+
+            bases.Sort((a, b) => b.y.CompareTo(a.y));
+            foreach (var b in bases)
+            {
+                float lean = (Hash((int)b.x, (int)b.y) - 0.5f) * 3f;
+                float hgt = plantHeight * (0.85f + Hash((int)b.y, (int)b.x) * 0.3f);
+                for (int i = 0; i < hgt; i++)
+                {
+                    int x = Mathf.RoundToInt(b.x + lean * i / Mathf.Max(1f, hgt));
+                    int y = Mathf.RoundToInt(b.y + i);
+                    var shade = Scale(color, 0.85f + 0.25f * i / Mathf.Max(1f, hgt));
+                    Plot(pixels, w, h, x, y, shade);
+                    Plot(pixels, w, h, x + 1, y, Scale(shade, 0.85f));
+                }
+
+                // Wheat ears / corn cobs on the last two stages.
+                if (stage == 3 && style == CropStyle.Wheat)
+                    FillEllipse(pixels, w, h, b.x + lean, b.y + hgt - 2, 2.2f, 5f, new Color32(245, 210, 95, 255));
+                if (stage >= 2 && style == CropStyle.Corn)
+                    FillEllipse(pixels, w, h, b.x + lean * 0.6f + 2, b.y + hgt * 0.6f, 2f, stage == 3 ? 5f : 3f,
+                        stage == 3 ? new Color32(250, 210, 60, 255) : new Color32(150, 200, 90, 255));
+            }
+
+            AddOutline(pixels, w, h);
+            tex.SetPixels32(pixels);
+            tex.Apply();
+            return tex;
+        }
+
+        private static void Plot(Color32[] pixels, int w, int h, int x, int y, Color32 c)
+        {
+            if (x < 0 || y < 0 || x >= w || y >= h) return;
+            pixels[y * w + x] = c;
+        }
+
+        private static void FillEllipse(Color32[] pixels, int w, int h, float cx, float cy, float rx, float ry, Color32 c)
+        {
+            for (int y = Mathf.FloorToInt(cy - ry); y <= Mathf.CeilToInt(cy + ry); y++)
+            for (int x = Mathf.FloorToInt(cx - rx); x <= Mathf.CeilToInt(cx + rx); x++)
+            {
+                float dx = (x + 0.5f - cx) / rx, dy = (y + 0.5f - cy) / ry;
+                if (dx * dx + dy * dy <= 1f) Plot(pixels, w, h, x, y, c);
+            }
+        }
+
         // ------------------------------------------------------------------ Helpers
 
         private static Sprite CreateSprite(string assetPath, System.Func<Texture2D> render, Vector2 pivot, SpriteMeshType meshType)

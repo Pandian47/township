@@ -20,6 +20,9 @@ namespace TownBuilder
         /// <summary>Tests set this to an isolated folder so they never touch the developer's real save.</summary>
         public static string SaveDirectoryOverride { get; set; }
 
+        /// <summary>Tests set this to a <see cref="ManualClock"/> to fast-forward crop and production timers.</summary>
+        public static IClock ClockOverride { get; set; }
+
         public GameContext Context { get; private set; }
 
         public static GameRoot GetOrCreate(GameContent content)
@@ -47,7 +50,7 @@ namespace TownBuilder
                 ? SaveDirectoryOverride
                 : Path.Combine(Application.persistentDataPath, SaveFolderName);
             var store = new JsonSaveStore(saveDirectory);
-            Context = new GameContext(content, store, new SystemClock(), CreateAdService(content.AdsConfig));
+            Context = new GameContext(content, store, ClockOverride ?? new SystemClock(), CreateAdService(content.AdsConfig));
             Current = this;
 
             Application.targetFrameRate = DefaultTargetFrameRate;

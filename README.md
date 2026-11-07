@@ -4,7 +4,7 @@ An original 2D isometric farming and town-building game for Android, built AI-fi
 
 > Genre inspiration: town-building and farming simulators. All art, UI, names and mechanics in this project must be original.
 
-## Status: Milestone 1 (foundation)
+## Status: Milestone 1 done · Milestone 2 (core loop) step 1 farming done
 
 | Feature | State |
 |---|---|
@@ -15,7 +15,8 @@ An original 2D isometric farming and town-building game for Android, built AI-fi
 | Coins / gems / level HUD | ✅ |
 | Offline JSON save: atomic writes, backup recovery, schema migration, autosave | ✅ |
 | AdMob test ads: rewarded "+100 coins", interstitial on Menu, GDPR consent ([Ads.md](Documentation/Ads.md)) | ✅ (test ids) |
-| Automated tests: 29 EditMode + 6 PlayMode | ✅ |
+| Farming: fields, Wheat/Corn growth timers, harvest, barn capacity, "Finish now" ad | ✅ |
+| Automated tests: 42 EditMode + 11 PlayMode | ✅ |
 | Placeholder art following the final art conventions | ✅ (replace with AI art) |
 | Android build | ⏳ install the Android Build Support module first |
 
@@ -58,8 +59,7 @@ Close the Editor before running batch commands on this project.
 ### Android build (after installing the module)
 
 1. File → Build Profiles → Android → **Switch Platform**.
-2. Player settings are already set: `com.yourstudio.townbuilder`, IL2CPP, ARM64, min API 26, Vulkan + GLES3, Landscape Left.
-   Change the company and package name before publishing.
+2. Player settings are already set: `com.pandian47.townbuilder` (permanent Play Store id), IL2CPP, ARM64, min API 26, Vulkan + GLES3, Landscape Left.
 3. Connect a phone with USB debugging enabled → **Build And Run** (APK for testing; enable *Build App Bundle* for Google Play).
 4. Work through the device checklist in `Documentation/DevelopmentRoadmap.md` (Milestone 1 acceptance).
 

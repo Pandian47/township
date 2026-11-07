@@ -112,6 +112,19 @@ Validation always goes through `Town.CanPlace(origin, size, ignoreId)`, which re
 `BuildingDefinition.maxCount` limits how many of a type the player may own (Town Hall = 1, 0 = unlimited).
 `removable = false` protects key buildings from removal.
 
+## 6b. Farming and inventory
+
+* **Domain:** `FarmPlots` holds the crop on each field, keyed by the field's building instance id, using UTC timestamps.
+  `Inventory` holds item counts with a capacity (the barn). Both are pure C# and covered by EditMode tests.
+* **Content:** `CropDefinition` (grow time, yield, seed cost, XP, 4 stage sprites). A building is a field when
+  `BuildingDefinition.isFarmPlot` is set. Storage buildings add `storageCapacityBonus`.
+* **Runtime:** `FarmingController` applies costs, yields and XP. It recalculates barn capacity when buildings change,
+  draws the crop as a child sprite of the field view (0.001 units lower, so it always sorts just in front of its own field),
+  and hooks `PlacementSystem.BuildingTapInterceptor` so a tap on a ready field harvests instead of selecting.
+* **UI:** `FieldPanel` (crop picker / timer / Finish now via `IAdService`), barn pill in `TopBarView`, `ToastView`.
+* **Saving:** `SaveData.cropPlots` (plot id, crop id, planted-at) and `SaveData.inventory`. Grow duration comes from the
+  current CropDefinition at load time, so rebalancing also applies to crops already planted.
+
 ## 7. Save system
 
 * `JsonSaveStore` writes `town.json.tmp`, flushes it to disk, then `File.Replace`s it over `town.json`, keeping the old file as `town.json.bak`.
