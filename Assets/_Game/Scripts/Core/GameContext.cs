@@ -19,6 +19,9 @@ namespace TownBuilder
 
         public GameContent Content { get; }
         public IAdService Ads { get; }
+
+        /// <summary>Music and sound effects (set by GameRoot; null only in unusual test setups).</summary>
+        public GameAudio Audio { get; internal set; }
         public JsonSaveStore SaveStore { get; }
         public IClock Clock { get; }
 

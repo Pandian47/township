@@ -166,6 +166,11 @@ Validation always goes through `Town.CanPlace(origin, size, ignoreId)`, which re
 * **Ads threading:** every AdMob/UMP callback goes through `MobileAdsEventExecutor.ExecuteInUpdate`, so game code
   always runs on Unity's main thread.
 
+## 6f. Audio
+
+`GameAudio` (persistent, on GameRoot) plays the music loop and sound effects by `SoundId` from `SoundLibrary`.
+`TownAudioBridge` maps Town events to sounds, and `ButtonSounds` adds the tap sound to every button. See Audio.md.
+
 ## 7. Save system
 
 * `JsonSaveStore` writes `town.json.tmp`, flushes it to disk, then `File.Replace`s it over `town.json`, keeping the old file as `town.json.bak`.

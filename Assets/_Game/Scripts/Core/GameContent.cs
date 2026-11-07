@@ -44,6 +44,9 @@ namespace TownBuilder
         [Tooltip("After skipping an order, the slot waits this long before a new order appears.")]
         [SerializeField, Min(0)] private int orderSkipCooldownSeconds = 60;
 
+        [Header("Audio")]
+        [SerializeField] private SoundLibrary soundLibrary;
+
         [Header("Monetisation")]
         [SerializeField] private AdsConfig adsConfig;
 
@@ -64,6 +67,7 @@ namespace TownBuilder
         }
 
         public AdsConfig AdsConfig => adsConfig;
+        public SoundLibrary SoundLibrary => soundLibrary;
         public int LevelUpCoinsPerLevel => levelUpCoinsPerLevel;
         public int LevelUpGems => levelUpGems;
         public int OrderSlots => orderSlots;

@@ -230,16 +230,7 @@ namespace TownBuilder.EditorTools
             CreateEventSystem(uiRoot.transform);
             var hud = BuildTownHud(canvas);
 
-            // --- Audio
-            var audioGo = Go("Audio");
-            var audioManagerGo = Go("AudioManager", audioGo.transform);
-            var music = audioManagerGo.AddComponent<AudioSource>();
-            music.loop = true;
-            music.playOnAwake = true;
-            var sfx = Go("Sfx", audioManagerGo.transform).AddComponent<AudioSource>();
-            sfx.playOnAwake = false;
-            var audioManager = audioManagerGo.AddComponent<AudioManager>();
-            Wire(audioManager, ("musicSource", music), ("sfxSource", sfx));
+            // Audio: music and sound effects are played by the persistent GameAudio on GameRoot (see GameAudio.cs).
 
             Wire(sceneController,
                 ("fallbackContent", content),
@@ -874,6 +865,7 @@ namespace TownBuilder.EditorTools
             scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
             scaler.matchWidthOrHeight = 0.5f;
             go.AddComponent<GraphicRaycaster>();
+            go.AddComponent<ButtonSounds>();
             return canvas;
         }
 

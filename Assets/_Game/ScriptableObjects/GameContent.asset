@@ -49,4 +49,5 @@ MonoBehaviour:
   levelUpGems: 1
   orderSlots: 3
   orderSkipCooldownSeconds: 60
+  soundLibrary: {fileID: 11400000, guid: 204402b4592b2d64d93691af848458eb, type: 2}
   adsConfig: {fileID: 11400000, guid: 1e5cb2d5aaa6061439417a7434340494, type: 2}

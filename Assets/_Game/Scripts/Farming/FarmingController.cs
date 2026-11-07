@@ -44,6 +44,11 @@ namespace TownBuilder
         /// <summary>Farm or inventory state changed because of a player action (autosave hook).</summary>
         public event Action Modified;
 
+        public event Action<string> Planted;
+        public event Action<string> Harvested;
+        /// <summary>A harvest or plant attempt failed (barn full, not enough coins...).</summary>
+        public event Action Failed;
+
         public FarmPlots Plots => _plots;
         public Inventory Inventory => _inventory;
         public long NowUnixMs => _clock.UtcNowUnixMs;
@@ -98,9 +103,10 @@ namespace TownBuilder
             if (!IsField(plotId, out _)) return PlantResult.NotAField;
             if (_plots.GetStage(plotId, NowUnixMs) != PlotStage.Empty) return PlantResult.NotEmpty;
             if (!IsUnlocked(crop)) return PlantResult.Locked;
-            if (!_wallet.TrySpendCoins(crop.SeedCoinCost)) return PlantResult.NotEnoughCoins;
+            if (!_wallet.TrySpendCoins(crop.SeedCoinCost)) { Failed?.Invoke(); return PlantResult.NotEnoughCoins; }
 
             _plots.TryPlant(plotId, crop.Id, crop.GrowDurationMs, NowUnixMs);
+            Planted?.Invoke(plotId);
             Modified?.Invoke();
             return PlantResult.Planted;
         }
@@ -119,6 +125,7 @@ namespace TownBuilder
             if (!_inventory.CanAdd(crop.HarvestYield))
             {
                 Notification?.Invoke($"Barn is full ({_inventory.Total}/{_inventory.Capacity}). Sell items or expand the barn.");
+                Failed?.Invoke();
                 return false;
             }
 
@@ -126,6 +133,7 @@ namespace TownBuilder
             _inventory.TryAdd(crop.Id, crop.HarvestYield);
             if (crop.HarvestXp > 0) _progress.AddXp(crop.HarvestXp);
             Notification?.Invoke($"+{crop.HarvestYield} {crop.DisplayName}   +{crop.HarvestXp} XP");
+            Harvested?.Invoke(plotId);
             Modified?.Invoke();
             return true;
         }

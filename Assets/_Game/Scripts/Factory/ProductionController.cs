@@ -41,6 +41,10 @@ namespace TownBuilder
         public event Action<string> Notification;
         public event Action Modified;
 
+        public event Action<string> Queued;
+        public event Action<string> Collected;
+        public event Action Failed;
+
         public Factories Factories => _factories;
         public long NowUnixMs => _clock.UtcNowUnixMs;
 
@@ -101,17 +105,20 @@ namespace TownBuilder
             if (queue.IsFull)
             {
                 Notification?.Invoke($"{def.DisplayName} queue is full. Collect finished products first.");
+                Failed?.Invoke();
                 return QueueResult.QueueFull;
             }
 
             if (!HasIngredients(recipe))
             {
                 Notification?.Invoke($"Not enough ingredients: needs {recipe.IngredientsText()}.");
+                Failed?.Invoke();
                 return QueueResult.MissingIngredients;
             }
 
             foreach (var i in recipe.Ingredients) _inventory.TryRemove(i.item.Id, i.amount);
             queue.TryEnqueue(recipe.Id, recipe.DurationMs, NowUnixMs);
+            Queued?.Invoke(factoryId);
             _factories.NotifyChanged(factoryId);
             Modified?.Invoke();
             return QueueResult.Queued;
@@ -138,6 +145,7 @@ namespace TownBuilder
                 if (!_inventory.CanAdd(recipe.OutputAmount))
                 {
                     Notification?.Invoke($"Barn is full ({_inventory.Total}/{_inventory.Capacity}). Sell items or expand the barn.");
+                    Failed?.Invoke();
                     break;
                 }
 
@@ -153,6 +161,7 @@ namespace TownBuilder
             {
                 if (xp > 0) _progress.AddXp(xp);
                 Notification?.Invoke(collected == 1 ? $"+{lastAmount} {lastName}   +{xp} XP" : $"Collected {collected} products   +{xp} XP");
+                Collected?.Invoke(factoryId);
                 _factories.NotifyChanged(factoryId);
                 Modified?.Invoke();
             }

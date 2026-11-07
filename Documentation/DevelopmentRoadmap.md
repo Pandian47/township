@@ -94,8 +94,8 @@ close and reopen with nothing lost.
 | Step | Feature | Status |
 |---|---|---|
 | 1 | Construction timers: build time per building, hammer badge, buildings work only when finished, build XP, finish early with an ad or gems | **Done** (v0.4.0) |
-| 2 | Sound effects and music (placement, harvest, collect, level-up, UI taps) | Next |
-| 3 | Visual feedback: selection outline, harvest/collect pop effects, floating "+2 Wheat" in the world | Planned |
+| 2 | Sound effects and music (placement, harvest, collect, level-up, UI taps): original placeholders, see Audio.md | **Done** (v0.5.0) |
+| 3 | Visual feedback: selection outline, harvest/collect pop effects, floating "+2 Wheat" in the world | Next |
 | 4 | UI text on TextMeshPro (sharper text on high-DPI phones) | Planned |
 | 5 | First AI art set dropped in (see ArtStyleGuide.md asset list) | Waiting on your art |
 
@@ -106,6 +106,13 @@ close and reopen with nothing lost.
 - [ ] A Barn under construction doesn't add storage until it's finished
 - [ ] When finished: "Barn is ready! +8 XP"
 - [ ] Close the app while building, reopen after the build time: the building is done
+
+### Device checklist (Milestone 3 step 2: sound)
+- [ ] Music starts on the main menu and keeps playing (no restart) when entering the town
+- [ ] Every button clicks; placing thunks; planting pops; harvesting chirps; collecting chimes; selling/delivering jingles
+- [ ] Level-up plays a fanfare; "Barn is full" / missing ingredients buzz
+- [ ] Settings → Music / Sound effects sliders change the volume immediately and are remembered
+- [ ] Sound stops when the app is in the background (phone home button)
 
 ## Milestone 4: Factories and economy
 More factories and recipes (dairy, sugar, feed mill), production upgrades.

@@ -34,6 +34,8 @@ namespace TownBuilder
 
         public event Action<string> Notification;
         public event Action Modified;
+        public event Action<int> Delivered;
+        public event Action Failed;
 
         public OrderBoard Board => _board;
         public long NowUnixMs => _clock.UtcNowUnixMs;
@@ -48,11 +50,13 @@ namespace TownBuilder
             {
                 Notification?.Invoke($"Order delivered!   +{order.RewardCoins:N0} coins   +{order.RewardXp} XP");
                 _board.Set(slot, Generate(availableAt: 0));
+                Delivered?.Invoke(slot);
                 Modified?.Invoke();
             }
             else if (result == DeliverResult.MissingItems)
             {
                 Notification?.Invoke("Not enough items for this order yet.");
+                Failed?.Invoke();
             }
 
             return result;

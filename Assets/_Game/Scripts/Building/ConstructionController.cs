@@ -32,6 +32,7 @@ namespace TownBuilder
 
         /// <summary>Raised when a building finishes construction (storage, production... become active).</summary>
         public event Action<string> Completed;
+        public event Action Failed;
 
         public ConstructionSites Sites => _sites;
         public long NowUnixMs => _clock.UtcNowUnixMs;
@@ -81,6 +82,7 @@ namespace TownBuilder
             if (!_wallet.TrySpendGems(cost))
             {
                 Notification?.Invoke($"You need {cost} gems.");
+                Failed?.Invoke();
                 return false;
             }
 

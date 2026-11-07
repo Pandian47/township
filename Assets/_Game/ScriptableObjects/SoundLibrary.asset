@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5041b7441da4916498b05dfb4579bc00, type: 3}
+  m_Name: SoundLibrary
+  m_EditorClassIdentifier: TownBuilder.Runtime::TownBuilder.SoundLibrary
+  sounds:
+  - id: 0
+    clip: {fileID: 8300000, guid: 5d6e53c05621bd044a9d11400a0535c0, type: 3}
+    volume: 0.6
+  - id: 1
+    clip: {fileID: 8300000, guid: 0716d35b7f69ad4498aed6cd64706e07, type: 3}
+    volume: 0.9
+  - id: 2
+    clip: {fileID: 8300000, guid: 135deccec19e4ef4db533dc240dbdfa9, type: 3}
+    volume: 0.8
+  - id: 3
+    clip: {fileID: 8300000, guid: 7ee1cd0b07512ff4b8845d8d4e078dd3, type: 3}
+    volume: 0.8
+  - id: 4
+    clip: {fileID: 8300000, guid: 1a74414bee0012546a77de26a1f91614, type: 3}
+    volume: 0.8
+  - id: 5
+    clip: {fileID: 8300000, guid: f5635030bb0ef524ca323f0e0dd46920, type: 3}
+    volume: 0.8
+  - id: 6
+    clip: {fileID: 8300000, guid: ba248583ef1c03b4e987d165237be9b9, type: 3}
+    volume: 0.8
+  - id: 7
+    clip: {fileID: 8300000, guid: e24cfd58f336b384289c87406beaad91, type: 3}
+    volume: 0.7
+  - id: 8
+    clip: {fileID: 8300000, guid: efc298d9de633534fac94ba5cca319a3, type: 3}
+    volume: 0.9
+  - id: 9
+    clip: {fileID: 8300000, guid: d744baf8070e5b14dbc44edcd8cfaf8c, type: 3}
+    volume: 0.6
+  music: {fileID: 8300000, guid: f133f3e1b0667dd4d9aed923050db089, type: 3}
+  musicVolume: 0.45

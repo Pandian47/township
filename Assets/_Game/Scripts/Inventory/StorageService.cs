@@ -34,6 +34,9 @@ namespace TownBuilder
         public event Action Modified;
 
         public event Action<string> Notification;
+        public event Action<string> Sold;
+        public event Action Expanded;
+        public event Action Failed;
 
         public Inventory Inventory { get; }
         public StorageUpgrades Upgrades { get; }
@@ -47,6 +50,7 @@ namespace TownBuilder
             if (result == SellResult.Sold)
             {
                 Notification?.Invoke($"Sold {amount} {item.DisplayName}   +{earned:N0} coins");
+                Sold?.Invoke(itemId);
                 Modified?.Invoke();
             }
 
@@ -60,10 +64,12 @@ namespace TownBuilder
             if (!Upgrades.TryUpgrade(_wallet))
             {
                 Notification?.Invoke(Upgrades.IsMaxed ? "The barn is fully expanded." : $"You need {Upgrades.NextCost:N0} coins.");
+                Failed?.Invoke();
                 return false;
             }
 
             Notification?.Invoke($"Barn expanded to {Inventory.Capacity}!");
+            Expanded?.Invoke();
             Modified?.Invoke();
             return true;
         }

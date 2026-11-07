@@ -158,6 +158,7 @@ namespace TownBuilder.EditorTools
             CreateCrops();
             CreateProduction();
             ConfigureAds();
+            ConfigureAudio();
             CreateBuildingPrefab();
             AssetDatabase.SaveAssets();
 
@@ -377,6 +378,20 @@ namespace TownBuilder.EditorTools
         }
 
         public const string AdsConfigPath = Root + "/ScriptableObjects/AdsConfig.asset";
+
+        /// <summary>Generates placeholder sounds + music (if missing) and links the SoundLibrary from GameContent.</summary>
+        private static void ConfigureAudio()
+        {
+            var library = PlaceholderAudioGenerator.CreateLibrary();
+            var content = AssetDatabase.LoadAssetAtPath<GameContent>(ContentPath);
+            var so = new SerializedObject(content);
+            var prop = so.FindProperty("soundLibrary");
+            if (prop.objectReferenceValue == null)
+            {
+                prop.objectReferenceValue = library;
+                so.ApplyModifiedPropertiesWithoutUndo();
+            }
+        }
 
         /// <summary>
         /// Creates AdsConfig (test ad units), links it from GameContent, and puts Google's TEST app id into the

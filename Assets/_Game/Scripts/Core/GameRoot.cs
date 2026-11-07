@@ -53,6 +53,10 @@ namespace TownBuilder
             Context = new GameContext(content, store, ClockOverride ?? new SystemClock(), CreateAdService(content.AdsConfig));
             Current = this;
 
+            var audio = gameObject.AddComponent<GameAudio>();
+            audio.Initialize(content.SoundLibrary);
+            Context.Audio = audio;
+
             Application.targetFrameRate = DefaultTargetFrameRate;
             QualitySettings.vSyncCount = 0;
             Screen.sleepTimeout = SleepTimeout.SystemSetting;

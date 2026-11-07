@@ -38,6 +38,7 @@ namespace TownBuilder
         private OrderBoard _orderBoard;
         private OrderService _orders;
         private ProgressionService _progression;
+        private TownAudioBridge _audioBridge;
         private float _saveDueAt = -1f;
 
         public Town Town => _town;
@@ -126,6 +127,8 @@ namespace TownBuilder
 
             _wallet.Changed += ScheduleSave; // e.g. coins from a rewarded ad
 
+            _audioBridge = new TownAudioBridge(_context.Audio, _town, placement, farming, production, construction, _storage, _orders, _progression);
+
             hud.Initialize(placement, farming, production, construction, _orders, _progression, _storage, _wallet, _progress, _context.Content, _context.Ads, ReturnToMainMenu);
         }
 
@@ -145,6 +148,7 @@ namespace TownBuilder
             if (_orders != null) _orders.Modified -= ScheduleSave;
             if (_progress != null) _progress.Changed -= ScheduleSave;
             _progression?.Dispose();
+            _audioBridge?.Dispose();
             if (_wallet != null) _wallet.Changed -= ScheduleSave;
         }
 
