@@ -1,0 +1,66 @@
+using TownBuilder.Domain;
+using UnityEngine;
+
+namespace TownBuilder
+{
+    public enum BuildingCategory
+    {
+        Community,
+        Residential,
+        Production,
+        Decoration,
+    }
+
+    /// <summary>
+    /// Static design data for one building type. Never stores player state.
+    /// The sprite's pivot must sit on the BOTTOM corner of the footprint diamond (see AssetImportGuide.md).
+    /// </summary>
+    [CreateAssetMenu(menuName = "TownBuilder/Building Definition", fileName = "Building_New")]
+    public sealed class BuildingDefinition : ScriptableObject
+    {
+        [Tooltip("Stable id stored in save files. Never change it after release.")]
+        [SerializeField] private string id;
+        [SerializeField] private string displayName;
+        [SerializeField] private BuildingCategory category;
+        [SerializeField] private Sprite sprite;
+        [Tooltip("Footprint in grid cells: x = along the grid X axis (right-hand front edge), y = along the grid Y axis (left-hand front edge).")]
+        [SerializeField] private Vector2Int footprint = new Vector2Int(2, 2);
+        [SerializeField, Min(1)] private int unlockLevel = 1;
+        [SerializeField, Min(0)] private int coinCost;
+        [SerializeField] private bool removable = true;
+        [Tooltip("Maximum number the player may own. 0 = unlimited.")]
+        [SerializeField, Min(0)] private int maxCount;
+
+        public string Id => id;
+        public int MaxCount => maxCount;
+        public string DisplayName => string.IsNullOrEmpty(displayName) ? id : displayName;
+        public BuildingCategory Category => category;
+        public Sprite Sprite => sprite;
+        public GridCoord FootprintSize => new GridCoord(Mathf.Max(1, footprint.x), Mathf.Max(1, footprint.y));
+        public int UnlockLevel => unlockLevel;
+        public int CoinCost => coinCost;
+        public bool Removable => removable;
+
+        private void OnValidate()
+        {
+            footprint = new Vector2Int(Mathf.Max(1, footprint.x), Mathf.Max(1, footprint.y));
+            if (id != null) id = id.Trim();
+        }
+
+#if UNITY_EDITOR
+        public void EditorConfigure(string newId, string newName, BuildingCategory newCategory, Sprite newSprite,
+            Vector2Int newFootprint, int newUnlockLevel, int newCoinCost, bool isRemovable, int newMaxCount)
+        {
+            maxCount = newMaxCount;
+            id = newId;
+            displayName = newName;
+            category = newCategory;
+            sprite = newSprite;
+            footprint = newFootprint;
+            unlockLevel = newUnlockLevel;
+            coinCost = newCoinCost;
+            removable = isRemovable;
+        }
+#endif
+    }
+}

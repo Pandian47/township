@@ -1,0 +1,25 @@
+* text=auto
+*.cs text eol=lf diff=csharp
+*.md text eol=lf
+*.json text eol=lf
+*.asmdef text eol=lf
+
+# Unity YAML: merge with UnityYAMLMerge if configured
+*.unity text eol=lf merge=unityyamlmerge
+*.prefab text eol=lf merge=unityyamlmerge
+*.asset text eol=lf merge=unityyamlmerge
+*.meta text eol=lf merge=unityyamlmerge
+*.mat text eol=lf merge=unityyamlmerge
+*.anim text eol=lf merge=unityyamlmerge
+*.controller text eol=lf merge=unityyamlmerge
+
+# Binary art/audio (consider Git LFS once the art set grows)
+*.png binary
+*.psd binary
+*.jpg binary
+*.wav binary
+*.mp3 binary
+*.ogg binary
+*.ttf binary
+*.otf binary
+*.fbx binary

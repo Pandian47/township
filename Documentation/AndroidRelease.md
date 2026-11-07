@@ -1,0 +1,54 @@
+# Android builds and Google Play release
+
+| File | Use | Signed with |
+|---|---|---|
+| `Builds/Android/TownBuilder-<version>-<code>.apk` | Install directly on your phone for testing | Unity debug key (automatic) |
+| `Builds/Android/TownBuilder-<version>-<code>.aab` | Upload to Google Play Console | **Your upload key** |
+
+`Builds/` is git-ignored. Never commit build outputs, keystores or passwords.
+
+## Test APK
+
+* Unity menu: **TownBuilder → Build → Android APK (test on device)**, or
+* command line (close the Unity Editor first):
+  ```bash
+  "/c/Program Files/Unity/Hub/Editor/6000.6.8f1/Editor/Unity.exe" -batchmode -quit -projectPath . -executeMethod TownBuilder.EditorTools.BuildTools.BuildApkFromCommandLine -logFile Logs/build-apk.log
+  ```
+
+Install it on your phone: enable **Developer options → USB debugging**, connect the phone, then run
+`adb install -r Builds/Android/<file>.apk`. You can also copy the APK to the phone and open it (allow "Install unknown apps").
+
+## Google Play bundle (AAB)
+
+### Step 1: create your upload key (once, by you)
+
+Run this in **your own** terminal. It asks for a password and your name or organisation:
+
+```powershell
+mkdir $env:USERPROFILE\keys -Force
+& "C:\Program Files\Unity\Hub\Editor\6000.6.8f1\Editor\Data\PlaybackEngines\AndroidPlayer\OpenJDK\bin\keytool.exe" -genkeypair -v -keystore "$env:USERPROFILE\keys\townbuilder-upload.keystore" -alias upload -keyalg RSA -keysize 2048 -validity 10000
+```
+
+**Back up the `.keystore` file and its password** (password manager plus an offline copy). If you use
+Play App Signing (the default), Google can reset a lost upload key, but that takes time. Keep the file outside this repository.
+
+### Step 2: build the signed AAB
+
+Close the Unity Editor, then:
+
+```powershell
+cd D:\01-Projects\05-Township\TownBuilder
+powershell -ExecutionPolicy Bypass -File .\Tools\build-aab.ps1
+```
+
+The script asks for the passwords and passes them to Unity only for that build.
+
+### Step 3: before the first upload
+
+* Change `com.yourstudio.townbuilder` to your permanent package name (ProjectSetup.cs / Player Settings).
+  **It can never change after the first upload.**
+* Raise **Bundle Version Code** (Player Settings → Android) by 1 for every upload.
+* Play Console needs: a developer account ($25 one-time), an app listing, a privacy policy URL, the content-rating
+  questionnaire, a data-safety form, screenshots, and a 512×512 icon. Start with an **Internal testing** track.
+* New personal developer accounts must run a closed test (12+ testers for 14 days) before production access.
+* Target API level is set to "Automatic (highest installed)", which meets Google Play's current requirement.

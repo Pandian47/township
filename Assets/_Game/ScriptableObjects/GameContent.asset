@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ea02f7b582d55d4a91b920292c8cc9b, type: 3}
+  m_Name: GameContent
+  m_EditorClassIdentifier: TownBuilder.Runtime::TownBuilder.GameContent
+  buildings:
+  - {fileID: 11400000, guid: a8dadb330e4c2a4459824451695b4c99, type: 2}
+  - {fileID: 11400000, guid: 07df3e1fff38285438b75529a94a730e, type: 2}
+  - {fileID: 11400000, guid: 1acd822bbedee1a48b720f7812e85e04, type: 2}
+  - {fileID: 11400000, guid: cf71b11da8fd59048827ab1df972c7b8, type: 2}
+  - {fileID: 11400000, guid: 9611f7e1e2fc83542ba1b113060c894b, type: 2}
+  startingCoins: 1500
+  startingGems: 20
+  starterBuildings:
+  - building: {fileID: 11400000, guid: a8dadb330e4c2a4459824451695b4c99, type: 2}
+    origin: {x: 18, y: 18}

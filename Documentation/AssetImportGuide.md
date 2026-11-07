@@ -1,0 +1,63 @@
+# Asset Import Guide
+
+How to bring AI-generated (or hand-made) art into the project so it lines up with the grid and sorts correctly.
+
+## 1. Global conventions
+
+| Setting | Value |
+|---|---|
+| Pixels Per Unit | **128** for every world sprite |
+| Projection | 2:1 isometric (dimetric). A ground diamond is twice as wide as it is tall |
+| Ground tile | **128 × 64 px** diamond, pivot **center (0.5, 0.5)** |
+| Building footprint (w × h cells) | Diamond base **(w + h) × 64 px wide**, **(w + h) × 32 px tall**. The image is taller because of the walls and roof |
+| Building pivot | **Bottom corner of the footprint diamond** = `(h / (w + h), 0)` normalised. In pixels: x = h × 64, y = 0 |
+| Light direction | From the upper left. Left faces are brighter, right faces are darker |
+| Background | Transparent PNG, no drop shadow outside the footprint area |
+| Texture import | Sprite (2D and UI), Single, Mesh Type Tight (buildings) or Full Rect (tiles), no mipmaps, Bilinear, Clamp |
+| Android override | ASTC 6×6, max size 2048 |
+
+Example sizes:
+
+| Building | Footprint | Base width | Pivot X |
+|---|---|---|---|
+| Silo | 1 × 1 | 128 px | 0.5 |
+| Cottage, Barn, Bakery | 2 × 2 | 256 px | 0.5 |
+| Town Hall | 3 × 3 | 384 px | 0.5 |
+| Warehouse (example) | 3 × 2 | 320 px | 0.4 |
+
+The image width must equal the base width exactly. Otherwise the footprint corners won't sit on the grid.
+The height is free (the walls and roof stick up).
+
+## 2. Replacing a placeholder
+
+Placeholders are named `PH_*.png`, for example `Art/Buildings/Production/PH_Building_barn.png`.
+
+1. Export your new art at the right **width** (table above) with a transparent background.
+2. Optional: rename it without the `PH_` prefix. If you rename it, do it **inside Unity** (Project window) so the `.meta` file follows.
+3. Easiest path: overwrite the PNG file **outside Unity, using the same file name**. The `.meta` file keeps the GUID, pivot, PPU and import settings, so every reference updates automatically.
+4. If the art is a new file instead, select it and apply the settings from section 1 in the Inspector
+   (Sprite Mode Single, PPU 128, Pivot Custom, the pivot value from the table). Then assign it to the `BuildingDefinition`'s **Sprite** field.
+5. Run **TownBuilder → Debug → Capture Town Preview**. It writes `Temp/TownPreview.png` with a sample town, so you can check alignment and depth sorting.
+
+## 3. New building type
+
+1. Right-click `Assets/_Game/Data/Buildings` → **Create → TownBuilder → Building Definition**.
+2. Fill in `id` (lower_snake_case, permanent), name, category, sprite, footprint, unlock level and cost.
+3. Add it to `Assets/_Game/ScriptableObjects/GameContent.asset → Buildings`.
+4. Press Play. It appears in the Build shop automatically.
+
+## 4. Tiles
+
+1. Put tile PNGs in `Art/Environment/Tiles`, 128 × 64 px, pivot center, PPU 128, Full Rect.
+2. Create a Tile asset: drag the sprite into a **Tile Palette** (Window → 2D → Tile Palette) or use **Create → 2D → Tiles → Tile**.
+3. Paint on `GroundTilemap` (buildable), `RoadTilemap` and `WaterTilemap` (blocked), or `FarmTilemap` (future farming).
+
+## 5. Validation checklist (per asset)
+
+- [ ] Transparent background, no stray pixels outside the silhouette
+- [ ] Correct width for its footprint; diamond base corners touch the image's left, right and bottom edges
+- [ ] Same isometric angle as the existing tiles (2:1)
+- [ ] Lighting from the upper left, soft shadows only inside the footprint
+- [ ] No text, logos or watermarks; nothing copied from existing games
+- [ ] Import settings match section 1 (PPU 128, pivot, Android ASTC)
+- [ ] Preview capture shows the building sitting exactly on its footprint and sorting correctly against neighbours
