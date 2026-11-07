@@ -31,6 +31,19 @@ namespace TownBuilder
         [SerializeField, Min(0)] private int storageExpansionBaseCost = 200;
         [SerializeField, Min(0)] private int storageExpansionMaxLevel = 10;
 
+        [Header("Levels")]
+        [Tooltip("XP needed for each level-up: entry 0 = level 1 to 2, entry 1 = level 2 to 3, ...")]
+        [SerializeField] private List<int> xpToNextLevel = new List<int> { 15, 30, 50, 80, 120, 170, 230, 300, 380, 470 };
+        [Tooltip("After the table, each level needs this much more XP than the previous one.")]
+        [SerializeField, Min(0)] private int xpIncreaseAfterTable = 100;
+        [SerializeField, Min(0)] private int levelUpCoinsPerLevel = 50;
+        [SerializeField, Min(0)] private int levelUpGems = 1;
+
+        [Header("Orders")]
+        [SerializeField, Min(1)] private int orderSlots = 3;
+        [Tooltip("After skipping an order, the slot waits this long before a new order appears.")]
+        [SerializeField, Min(0)] private int orderSkipCooldownSeconds = 60;
+
         [Header("Monetisation")]
         [SerializeField] private AdsConfig adsConfig;
 
@@ -51,6 +64,25 @@ namespace TownBuilder
         }
 
         public AdsConfig AdsConfig => adsConfig;
+        public int LevelUpCoinsPerLevel => levelUpCoinsPerLevel;
+        public int LevelUpGems => levelUpGems;
+        public int OrderSlots => orderSlots;
+        public long OrderSkipCooldownMs => orderSkipCooldownSeconds * 1000L;
+
+        public TownBuilder.Domain.LevelCurve CreateLevelCurve() =>
+            xpToNextLevel != null && xpToNextLevel.Count > 0
+                ? new TownBuilder.Domain.LevelCurve(xpToNextLevel, xpIncreaseAfterTable)
+                : TownBuilder.Domain.LevelCurve.Default;
+
+        /// <summary>Names of everything that unlocks exactly at <paramref name="level"/> (for the level-up dialog).</summary>
+        public List<string> UnlocksAtLevel(int level)
+        {
+            var names = new List<string>();
+            foreach (var b in buildings) if (b != null && b.UnlockLevel == level) names.Add(b.DisplayName);
+            foreach (var c in crops) if (c != null && c.UnlockLevel == level) names.Add(c.DisplayName);
+            foreach (var r in recipes) if (r != null && r.UnlockLevel == level) names.Add(r.DisplayName);
+            return names;
+        }
         public IReadOnlyList<BuildingDefinition> Buildings => buildings;
         public IReadOnlyList<CropDefinition> Crops => crops;
         public IReadOnlyList<StarterBuilding> StarterBuildings => starterBuildings;

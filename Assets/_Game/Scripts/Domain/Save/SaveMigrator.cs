@@ -54,6 +54,7 @@ namespace TownBuilder.Domain
             data.inventory ??= new List<ItemStackSaveData>();
             data.cropPlots ??= new List<CropPlotSaveData>();
             data.productionJobs ??= new List<ProductionJobSaveData>();
+            data.orders ??= new List<OrderSaveData>();
 
             if (data.player.level < 1) { warnings?.Add("Player level < 1, reset to 1."); data.player.level = 1; }
             if (data.player.xp < 0) { warnings?.Add("Negative XP reset to 0."); data.player.xp = 0; }
@@ -83,6 +84,8 @@ namespace TownBuilder.Domain
             data.inventory.RemoveAll(i => i == null || string.IsNullOrEmpty(i.itemId) || i.amount <= 0);
             data.cropPlots.RemoveAll(c => c == null || string.IsNullOrEmpty(c.plotInstanceId));
             data.productionJobs.RemoveAll(j => j == null || string.IsNullOrEmpty(j.factoryInstanceId) || string.IsNullOrEmpty(j.recipeId));
+            data.orders.RemoveAll(o => o == null || o.itemIds == null || o.amounts == null ||
+                                       o.itemIds.Count == 0 || o.itemIds.Count != o.amounts.Count);
         }
     }
 }

@@ -336,11 +336,12 @@ namespace TownBuilder.EditorTools
             Wire(topBar, ("levelText", levelText), ("coinsText", coinsText), ("gemsText", gemsText), ("barnText", barnText));
 
             // --- Bottom navigation
-            var nav = MakeRect("BottomNavigation", safe, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-30, 30), new Vector2(1100, 130));
+            var nav = MakeRect("BottomNavigation", safe, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-30, 30), new Vector2(1340, 130));
             HRow(nav, 24, TextAnchor.LowerRight);
             var adButton = MakeButton(nav, "RewardedAdButton", "Watch ad\n+100 coins", new Vector2(300, 120), new Color(0.95f, 0.65f, 0.15f), out var adLabel, 34);
             var rewarded = adButton.gameObject.AddComponent<RewardedCoinsButton>();
             Wire(rewarded, ("button", adButton), ("label", adLabel));
+            var ordersButton = MakeButton(nav, "OrdersButton", "Orders", new Vector2(220, 120), new Color(0.55f, 0.35f, 0.7f));
             var barnButton = MakeButton(nav, "BarnButton", "Barn", new Vector2(200, 120), new Color(0.62f, 0.38f, 0.25f));
             var menuButton = MakeButton(nav, "MenuButton", "Menu", new Vector2(200, 120), Slate);
             var buildButton = MakeButton(nav, "BuildButton", "Build", new Vector2(260, 120), Green, 48);
@@ -371,18 +372,23 @@ namespace TownBuilder.EditorTools
 
             // --- Barn screen
             var barnPanel = BuildBarnPanel(canvas.transform);
+            var ordersPanel = BuildOrdersPanel(canvas.transform);
 
             // --- Shop
             var shop = BuildShop(canvas.transform);
 
             // --- Confirm dialog (last = drawn on top)
             var dialog = CreateConfirmDialog(canvas.transform);
+            var levelUp = BuildLevelUpDialog(canvas.transform);
 
             var hud = canvas.gameObject.AddComponent<TownHudController>();
             Wire(hud,
                 ("fieldPanel", fieldPanel),
                 ("factoryPanel", factoryPanel),
                 ("barnPanel", barnPanel),
+                ("ordersPanel", ordersPanel),
+                ("ordersButton", ordersButton),
+                ("levelUpDialog", levelUp),
                 ("barnButton", barnButton),
                 ("barnPillButton", barnPillButton),
                 ("toast", toast),
@@ -403,6 +409,106 @@ namespace TownBuilder.EditorTools
                 ("removeButton", removeButton),
                 ("deselectButton", deselectButton));
             return hud;
+        }
+
+        private static OrdersPanel BuildOrdersPanel(Transform canvas)
+        {
+            var container = Stretch("OrdersPanel", canvas);
+            var root = Stretch("Root", container);
+            AddImage(root, Dim, rounded: false);
+
+            var window = MakeRect("Window", root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1640, 820));
+            AddImage(window, PanelColor);
+            var titleRect = MakeRect("Title", window, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -18), new Vector2(-80, 80));
+            Label(titleRect, "Text", "Orders", 54, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
+            var subRect = MakeRect("Subtitle", window, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -92), new Vector2(-80, 44));
+            Label(subRect, "Text", "Deliver goods for more coins than selling them, plus XP to level up.", 30, TextAnchor.MiddleLeft,
+                new Color(0.35f, 0.35f, 0.35f));
+
+            var close = MakeButton(window, "CloseButton", "X", new Vector2(90, 90), Red, 44);
+            var closeRect = (RectTransform)close.transform;
+            closeRect.anchorMin = closeRect.anchorMax = closeRect.pivot = new Vector2(1f, 1f);
+            closeRect.anchoredPosition = new Vector2(-20, -16);
+
+            var row = MakeRect("Cards", window, Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
+            row.offsetMin = new Vector2(30, 30);
+            row.offsetMax = new Vector2(-30, -150);
+            HRow(row, 30, TextAnchor.MiddleCenter);
+
+            var cards = new OrderCardView[3];
+            for (int c = 0; c < cards.Length; c++)
+            {
+                var card = MakeRect($"Order{c + 1}", row, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(500, 620));
+                AddImage(card, Color.white);
+                Prefer(card, 500, 620);
+
+                var icons = new Image[3];
+                var texts = new Text[3];
+                for (int r = 0; r < 3; r++)
+                {
+                    var line = MakeRect($"Line{r + 1}", card, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -24 - r * 108), new Vector2(-40, 96));
+                    var iconRect = MakeRect("Icon", line, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), Vector2.zero, new Vector2(96, 96));
+                    icons[r] = iconRect.gameObject.AddComponent<Image>();
+                    icons[r].raycastTarget = false;
+                    var textRect = MakeRect("Text", line, new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(0f, 0.5f), new Vector2(112, 0), new Vector2(-112, 0));
+                    texts[r] = textRect.gameObject.AddComponent<Text>();
+                    texts[r].font = UIFont;
+                    texts[r].fontSize = 34;
+                    texts[r].fontStyle = FontStyle.Bold;
+                    texts[r].alignment = TextAnchor.MiddleLeft;
+                    texts[r].raycastTarget = false;
+                    texts[r].horizontalOverflow = HorizontalWrapMode.Wrap;
+                }
+
+                var rewardRect = MakeRect("Reward", card, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 140), new Vector2(-40, 60));
+                var reward = Label(rewardRect, "Text", "+0 coins", 34, TextAnchor.MiddleCenter, Ink, FontStyle.Bold);
+
+                var waitRect = MakeRect("Waiting", card, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440, 160));
+                var waiting = Label(waitRect, "Text", "New order in", 38, TextAnchor.MiddleCenter, new Color(0.45f, 0.45f, 0.45f));
+
+                var buttons = MakeRect("Buttons", card, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 20), new Vector2(-40, 110));
+                HRow(buttons, 16, TextAnchor.MiddleCenter);
+                var skip = MakeButton(buttons, "SkipButton", "Skip", new Vector2(140, 100), Slate, 32);
+                var deliver = MakeButton(buttons, "DeliverButton", "Deliver", new Vector2(260, 100), Green, 38);
+
+                var view = card.gameObject.AddComponent<OrderCardView>();
+                Wire(view, ("rewardText", reward), ("waitingText", waiting), ("deliverButton", deliver), ("skipButton", skip));
+                WireArray(view, "rowIcons", icons);
+                WireArray(view, "rowTexts", texts);
+                cards[c] = view;
+            }
+
+            var panel = container.gameObject.AddComponent<OrdersPanel>();
+            Wire(panel, ("panelRoot", root.gameObject), ("closeButton", close));
+            WireArray(panel, "cards", cards);
+            root.gameObject.SetActive(false);
+            return panel;
+        }
+
+        private static LevelUpDialog BuildLevelUpDialog(Transform canvas)
+        {
+            var container = Stretch("LevelUpDialog", canvas);
+            var root = Stretch("Root", container);
+            AddImage(root, Dim, rounded: false);
+            var window = MakeRect("Window", root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(900, 560));
+            AddImage(window, new Color(1f, 0.95f, 0.75f));
+
+            var titleRect = MakeRect("Title", window, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -40), new Vector2(-60, 130));
+            var title = Label(titleRect, "Text", "Level 2!", 96, TextAnchor.MiddleCenter, new Color(0.85f, 0.45f, 0.1f), FontStyle.Bold);
+            var rewardsRect = MakeRect("Rewards", window, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -190), new Vector2(-60, 70));
+            var rewards = Label(rewardsRect, "Text", "+100 coins", 44, TextAnchor.MiddleCenter, Ink, FontStyle.Bold);
+            var unlocksRect = MakeRect("Unlocks", window, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -270), new Vector2(-80, 120));
+            var unlocks = Label(unlocksRect, "Text", "New: Corn", 38, TextAnchor.MiddleCenter, Ink);
+
+            var ok = MakeButton(window, "OkButton", "Great!", new Vector2(320, 110), Green, 44);
+            var okRect = (RectTransform)ok.transform;
+            okRect.anchorMin = okRect.anchorMax = okRect.pivot = new Vector2(0.5f, 0f);
+            okRect.anchoredPosition = new Vector2(0, 40);
+
+            var dialog = container.gameObject.AddComponent<LevelUpDialog>();
+            Wire(dialog, ("dialogRoot", root.gameObject), ("titleText", title), ("rewardsText", rewards), ("unlocksText", unlocks), ("okButton", ok));
+            root.gameObject.SetActive(false);
+            return dialog;
         }
 
         private static BarnPanel BuildBarnPanel(Transform canvas)

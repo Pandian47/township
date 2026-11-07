@@ -58,7 +58,7 @@ namespace TownBuilder.EditorTools
             new CropSeed { Id = "wheat", Name = "Wheat", Style = PlaceholderArtGenerator.CropStyle.Wheat,
                 GrowSeconds = 120, Yield = 2, SeedCost = 0, Xp = 1, Unlock = 1, SellPrice = 2 },
             new CropSeed { Id = "corn", Name = "Corn", Style = PlaceholderArtGenerator.CropStyle.Corn,
-                GrowSeconds = 300, Yield = 3, SeedCost = 3, Xp = 2, Unlock = 1, SellPrice = 4 },
+                GrowSeconds = 300, Yield = 3, SeedCost = 3, Xp = 2, Unlock = 2, SellPrice = 4 },
         };
 
         // Fields placed in a new town, next to the Town Hall.
@@ -286,7 +286,7 @@ namespace TownBuilder.EditorTools
             new RecipeSeed { Id = "bake_bread", ProductId = "bread", FactoryId = "bakery",
                 Ingredients = new[] { ("wheat", 2) }, Seconds = 180, Xp = 3, Unlock = 1 },
             new RecipeSeed { Id = "bake_corn_bread", ProductId = "corn_bread", FactoryId = "bakery",
-                Ingredients = new[] { ("corn", 2), ("wheat", 1) }, Seconds = 360, Xp = 5, Unlock = 1 },
+                Ingredients = new[] { ("corn", 2), ("wheat", 1) }, Seconds = 360, Xp = 5, Unlock = 2 },
         };
 
         private const int BakerySlots = 3;

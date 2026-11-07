@@ -39,6 +39,25 @@ Sell prices (`ItemDefinition.sellPrice`): Wheat 2 coins, Corn 4 coins, Bread 12,
 
 Value check: 2 Wheat sells for 4 coins, but as Bread it's worth 12 (+3 XP). Processing should always beat selling raw crops.
 
+## Levels (`GameContent` → Levels)
+
+| Level-up | XP needed | Total XP | Unlocks |
+|---|---|---|---|
+| 1 → 2 | 15 | 15 | Corn, Corn Bread |
+| 2 → 3 | 30 | 45 | Silo |
+| 3 → 4 | 50 | 95 | |
+| 4 → 5 | 80 | 175 | |
+| then | 120, 170, 230, 300, 380, 470, then +100 per level | | |
+
+Reward per level-up: 50 × new level coins + 1 gem. The save stores TOTAL XP, so the curve can be rebalanced safely.
+
+## Orders (`OrderGenerator`)
+
+* 3 slots. Items come from unlocked crops and products of unlocked recipes.
+* 1 line at level 1, up to 3 lines from level 4. Raw crops: 1 to (2 + level/2) each. Products: 1 to 2 each.
+* Reward = sell value × 1.6 + 5 coins, and XP = sell value / 4 (at least 1). Orders always pay more than the barn.
+* Skip: the slot waits 60 s, then a new order appears.
+
 ## Crops (implemented, `Data/Crops`)
 
 | Id | Growth | Yield | Seed cost | XP | Unlock |

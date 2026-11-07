@@ -43,4 +43,10 @@ MonoBehaviour:
   storageExpansionCapacity: 25
   storageExpansionBaseCost: 200
   storageExpansionMaxLevel: 10
+  xpToNextLevel: 0f0000001e000000320000005000000078000000aa000000e60000002c0100007c010000d6010000i
+  xpIncreaseAfterTable: 100
+  levelUpCoinsPerLevel: 50
+  levelUpGems: 1
+  orderSlots: 3
+  orderSkipCooldownSeconds: 60
   adsConfig: {fileID: 11400000, guid: 1e5cb2d5aaa6061439417a7434340494, type: 2}

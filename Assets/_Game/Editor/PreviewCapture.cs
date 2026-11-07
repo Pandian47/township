@@ -112,7 +112,7 @@ namespace TownBuilder.EditorTools
             return outputPath;
         }
 
-        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory }
+        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders }
 
         /// <summary>Command line: renders MainMenu + Town (idle, shop, placing) with UI into the folder after -previewOut.</summary>
         public static void CaptureUiFromCommandLine()
@@ -129,6 +129,7 @@ namespace TownBuilder.EditorTools
                 Capture(Path.Combine(folder, "Preview_Town_Field.png"), HudState.Field);
                 Capture(Path.Combine(folder, "Preview_Town_Barn.png"), HudState.Barn);
                 Capture(Path.Combine(folder, "Preview_Town_Factory.png"), HudState.Factory);
+                Capture(Path.Combine(folder, "Preview_Town_Orders.png"), HudState.Orders);
             }
             catch (Exception e)
             {
@@ -166,6 +167,22 @@ namespace TownBuilder.EditorTools
             {
                 Find(canvas, "PlacementActionBar").transform.Find("Info").GetComponent<UnityEngine.UI.Text>().text =
                     $"{placing.DisplayName}  -  {placing.CoinCost:N0} coins\nDrag or tap to position";
+            }
+
+            if (state == HudState.Orders)
+            {
+                var root = Find(canvas, "OrdersPanel").transform.Find("Root").gameObject;
+                root.SetActive(true);
+                barn.TryAdd("bread", 1);
+                var cards = root.GetComponentsInChildren<OrderCardView>(true);
+                var samples = new[]
+                {
+                    new Order(new[] { new OrderLine("bread", 2), new OrderLine("wheat", 4) }, 55, 7),
+                    new Order(new[] { new OrderLine("wheat", 3) }, 15, 2),
+                    new Order(new[] { new OrderLine("bread", 1) }, 24, 3, availableAtUnixMs: 45_000),
+                };
+                for (int i = 0; i < cards.Length; i++)
+                    cards[i].Show(samples[i], 0, i == 1, content, barn);
             }
 
             if (state == HudState.Factory)

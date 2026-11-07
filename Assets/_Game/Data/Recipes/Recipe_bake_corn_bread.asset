@@ -22,4 +22,4 @@ MonoBehaviour:
     amount: 1
   durationSeconds: 360
   xp: 5
-  unlockLevel: 1
+  unlockLevel: 2

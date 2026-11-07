@@ -19,6 +19,19 @@ namespace TownBuilder.Domain
         public List<ItemStackSaveData> inventory = new List<ItemStackSaveData>();
         public List<CropPlotSaveData> cropPlots = new List<CropPlotSaveData>();
         public List<ProductionJobSaveData> productionJobs = new List<ProductionJobSaveData>();
+        public List<OrderSaveData> orders = new List<OrderSaveData>();
+    }
+
+    /// <summary>One order-board slot. itemIds[i] / amounts[i] form one line.</summary>
+    [Serializable]
+    public sealed class OrderSaveData
+    {
+        public int slot;
+        public List<string> itemIds = new List<string>();
+        public List<int> amounts = new List<int>();
+        public long rewardCoins;
+        public long rewardXp;
+        public long availableAtUnixMs;
     }
 
     /// <summary>One queued/finished product in a factory. Jobs of one factory are saved in queue order.</summary>

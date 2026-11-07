@@ -8,7 +8,56 @@ namespace TownBuilder
     {
         public static Wallet CreateWallet(SaveData save) => new Wallet(save.player.coins, save.player.gems);
 
-        public static PlayerProgress CreateProgress(SaveData save) => new PlayerProgress(save.player.level, save.player.xp);
+        public static PlayerProgress CreateProgress(SaveData save, LevelCurve curve = null) =>
+            new PlayerProgress(save.player.level, save.player.xp, curve);
+
+        /// <summary>Restores order slots. Orders mentioning items that no longer exist are dropped (slot refilled later).</summary>
+        public static void LoadOrders(SaveData save, GameContent content, OrderBoard board, List<string> warnings)
+        {
+            foreach (var o in save.orders)
+            {
+                if (o.slot < 0 || o.slot >= board.SlotCount) continue;
+                var lines = new List<OrderLine>();
+                bool valid = true;
+                for (int i = 0; i < o.itemIds.Count; i++)
+                {
+                    if (!content.TryGetItem(o.itemIds[i], out _) || o.amounts[i] <= 0) { valid = false; break; }
+                    lines.Add(new OrderLine(o.itemIds[i], o.amounts[i]));
+                }
+
+                if (!valid)
+                {
+                    warnings.Add($"Order in slot {o.slot} referenced unknown items and was replaced.");
+                    continue;
+                }
+
+                board.Set(o.slot, new Order(lines, o.rewardCoins, o.rewardXp, o.availableAtUnixMs));
+            }
+        }
+
+        public static void WriteOrders(SaveData save, OrderBoard board)
+        {
+            save.orders.Clear();
+            for (int slot = 0; slot < board.SlotCount; slot++)
+            {
+                var order = board.Get(slot);
+                if (order == null) continue;
+                var data = new OrderSaveData
+                {
+                    slot = slot,
+                    rewardCoins = order.RewardCoins,
+                    rewardXp = order.RewardXp,
+                    availableAtUnixMs = order.AvailableAtUnixMs,
+                };
+                foreach (var line in order.Lines)
+                {
+                    data.itemIds.Add(line.ItemId);
+                    data.amounts.Add(line.Amount);
+                }
+
+                save.orders.Add(data);
+            }
+        }
 
         /// <summary>Adds saved buildings to the town. Entries whose definition no longer exists or no longer fit are skipped.</summary>
         public static void LoadBuildings(SaveData save, Town town, GameContent content, List<string> warnings)

@@ -144,6 +144,17 @@ Validation always goes through `Town.CanPlace(origin, size, ignoreId)`, which re
 * **UI:** `FactoryPanel` (recipe cards, queue slots, Collect, Finish now via `IAdService`).
 * **Saving:** `SaveData.productionJobs` (factory id, recipe id, start time), in queue order.
 
+## 6d. Levels and orders
+
+* **Domain:** `LevelCurve` (XP per level, cumulative thresholds). `PlayerProgress` (with a curve) levels up
+  automatically in `AddXp` and fires `LeveledUp` once per level gained. A loaded level that is behind its XP is
+  repaired, and a level ahead is kept. `OrderBoard`, `Order`, `OrderLine` and `OrderGenerator` are pure and seedable.
+  `TryDeliver` takes the items and pays coins + XP in one step.
+* **Runtime:** `ProgressionService` pays level-up rewards and reports unlocks (`GameContent.UnlocksAtLevel`).
+  `OrderService` fills empty slots with orders for unlocked items, and handles delivering and skipping.
+* **UI:** `OrdersPanel` + `OrderCardView`, `LevelUpDialog` (queues several level-ups), XP progress in `TopBarView`.
+* **Saving:** `SaveData.orders` (slot, item ids, amounts, rewards, available-at). Level and XP were already in `player`.
+
 ## 7. Save system
 
 * `JsonSaveStore` writes `town.json.tmp`, flushes it to disk, then `File.Replace`s it over `town.json`, keeping the old file as `town.json.bak`.

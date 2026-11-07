@@ -33,6 +33,9 @@ namespace TownBuilder
         private Inventory _inventory;
         private StorageService _storage;
         private Factories _factories;
+        private OrderBoard _orderBoard;
+        private OrderService _orders;
+        private ProgressionService _progression;
         private float _saveDueAt = -1f;
 
         public Town Town => _town;
@@ -43,6 +46,8 @@ namespace TownBuilder
         public Inventory Inventory => _inventory;
         public StorageService Storage => _storage;
         public ProductionController Production => production;
+        public OrderService Orders => _orders;
+        public ProgressionService Progression => _progression;
         public bool IsReady => _town != null;
 
         private void Start()
@@ -73,7 +78,7 @@ namespace TownBuilder
             grid.Build();
             _town = new Town(grid.Bounds, grid.BlockedCells);
             _wallet = TownSaveMapper.CreateWallet(save);
-            _progress = TownSaveMapper.CreateProgress(save);
+            _progress = TownSaveMapper.CreateProgress(save, _context.Content.CreateLevelCurve());
 
             buildings.Initialize(_town, _context.Content);
             TownSaveMapper.LoadBuildings(save, _town, _context.Content, warnings);
@@ -100,12 +105,19 @@ namespace TownBuilder
             production.Initialize(_town, _factories, _inventory, _progress, _context.Content, _context.Clock);
             production.Modified += ScheduleSave;
 
+            _progression = new ProgressionService(_progress, _wallet, content);
+            _orderBoard = new OrderBoard(content.OrderSlots);
+            TownSaveMapper.LoadOrders(save, content, _orderBoard, warnings);
+            _orders = new OrderService(_orderBoard, _inventory, _wallet, _progress, content, _context.Clock);
+            _orders.Modified += ScheduleSave;
+            _progress.Changed += ScheduleSave;
+
             cameraController.SetWorldBounds(grid.WorldBounds());
             cameraController.SnapTo(grid.WorldBounds().center, startOrthographicSize);
 
             _wallet.Changed += ScheduleSave; // e.g. coins from a rewarded ad
 
-            hud.Initialize(placement, farming, production, _storage, _wallet, _progress, _context.Content, _context.Ads, ReturnToMainMenu);
+            hud.Initialize(placement, farming, production, _orders, _progression, _storage, _wallet, _progress, _context.Content, _context.Ads, ReturnToMainMenu);
         }
 
         private void OnDestroy()
@@ -119,6 +131,9 @@ namespace TownBuilder
             if (placement != null) placement.TownModified -= ScheduleSave;
             if (farming != null) farming.Modified -= ScheduleSave;
             if (production != null) production.Modified -= ScheduleSave;
+            if (_orders != null) _orders.Modified -= ScheduleSave;
+            if (_progress != null) _progress.Changed -= ScheduleSave;
+            _progression?.Dispose();
             if (_wallet != null) _wallet.Changed -= ScheduleSave;
         }
 
@@ -144,6 +159,7 @@ namespace TownBuilder
                 TownSaveMapper.WriteTo(_context.ActiveSave, _town, _wallet, _progress, _plots, _inventory);
                 _context.ActiveSave.player.storageLevel = _storage.Upgrades.Level;
                 TownSaveMapper.WriteProduction(_context.ActiveSave, _factories);
+                TownSaveMapper.WriteOrders(_context.ActiveSave, _orderBoard);
                 _context.SaveActive();
             }
             catch (Exception e)

@@ -22,6 +22,11 @@ namespace TownBuilder
         [Header("Production")]
         [SerializeField] private FactoryPanel factoryPanel;
 
+        [Header("Orders and levels")]
+        [SerializeField] private OrdersPanel ordersPanel;
+        [SerializeField] private Button ordersButton;
+        [SerializeField] private LevelUpDialog levelUpDialog;
+
         [Header("Barn")]
         [SerializeField] private BarnPanel barnPanel;
         [Tooltip("The barn pill in the top bar also opens the barn.")]
@@ -49,15 +54,20 @@ namespace TownBuilder
         private PlacementSystem _placement;
         private FarmingController _farming;
         private ProductionController _production;
+        private OrderService _orders;
+        private ProgressionService _progression;
         private StorageService _storage;
         private Wallet _wallet;
 
-        public void Initialize(PlacementSystem placement, FarmingController farming, ProductionController production, StorageService storage, Wallet wallet,
+        public void Initialize(PlacementSystem placement, FarmingController farming, ProductionController production, OrderService orders,
+            ProgressionService progression, StorageService storage, Wallet wallet,
             PlayerProgress progress, GameContent content, IAdService ads, Action onMenu)
         {
             _placement = placement;
             _farming = farming;
             _production = production;
+            _orders = orders;
+            _progression = progression;
             _storage = storage;
             _wallet = wallet;
 
@@ -67,6 +77,11 @@ namespace TownBuilder
             storage.Notification += toast.Show;
             production.Notification += toast.Show;
             factoryPanel.Initialize(production, content, ads);
+
+            ordersPanel.Initialize(orders, content, storage.Inventory);
+            ordersButton.onClick.AddListener(OpenOrders);
+            orders.Notification += toast.Show;
+            progression.LeveledUp += levelUpDialog.Enqueue;
 
             barnPanel.Initialize(storage, content);
             barnButton.onClick.AddListener(OpenBarn);
@@ -103,6 +118,15 @@ namespace TownBuilder
             if (_farming != null) _farming.Notification -= toast.Show;
             if (_storage != null) _storage.Notification -= toast.Show;
             if (_production != null) _production.Notification -= toast.Show;
+            if (_orders != null) _orders.Notification -= toast.Show;
+            if (_progression != null) _progression.LeveledUp -= levelUpDialog.Enqueue;
+        }
+
+        private void OpenOrders()
+        {
+            if (_placement.CurrentMode == PlacementSystem.Mode.PlacingNew || _placement.CurrentMode == PlacementSystem.Mode.Moving) return;
+            _placement.Cancel();
+            ordersPanel.Open();
         }
 
         private void OpenBarn()

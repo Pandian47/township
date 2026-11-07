@@ -31,7 +31,9 @@ namespace TownBuilder
         private void Refresh()
         {
             if (_wallet == null || _progress == null) return;
-            levelText.text = $"Lv {_progress.Level}  ·  {_progress.Xp:N0} XP";
+            levelText.text = _progress.HasCurve && !_progress.IsMaxLevel
+                ? $"Lv {_progress.Level}  ·  {_progress.XpIntoLevel}/{_progress.XpForNextLevel} XP"
+                : $"Lv {_progress.Level}  ·  {_progress.Xp:N0} XP";
             coinsText.text = $"Coins  {_wallet.Coins:N0}";
             gemsText.text = $"Gems  {_wallet.Gems:N0}";
             if (_inventory != null && barnText != null)

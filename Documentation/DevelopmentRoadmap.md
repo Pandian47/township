@@ -47,7 +47,10 @@ Reordered from the original plan: farming and production make the game playable,
 | 1 | Farming: Field building, Wheat/Corn, growth timers, harvest, barn capacity, rewarded "Finish now" | **Done** (53 tests) |
 | 2 | Barn screen: list items, sell for coins, paid barn expansion | **Done** |
 | 3 | Production: Bakery recipes (Bread, Corn bread), production queue, timers, "Finish now" ad | **Done** |
-| 4 | Orders and levels: order board, coin + XP rewards, level curve, unlocks | Next |
+| 4 | Orders and levels: order board, coin + XP rewards, level curve, unlocks | **Done** |
+
+**v0.1 playable prototype: complete** (version 0.3.0, code 3). Next: the first AI art set (prompts in ArtStyleGuide.md),
+your device test, then Milestone 3 (polish).
 
 **v0.1 definition of done:** plant wheat → harvest → bake bread → deliver it for coins → place a building →
 close and reopen with nothing lost.
@@ -76,6 +79,15 @@ close and reopen with nothing lost.
 - [ ] "Finish now (watch ad)" completes the current item, and the next one starts right away
 - [ ] Bread appears in the Barn and sells for 12 coins
 - [ ] Queue bread, close the app for 10 minutes, reopen: the bread is ready
+
+### Device checklist (step 4: orders and levels)
+- [ ] Top bar shows "Lv 1 · 0/15 XP" and fills up as you harvest, bake and deliver
+- [ ] **Orders** button: 3 orders using only Wheat/Bread at level 1, with "have/need" in green or red
+- [ ] Deliver is enabled only when you have everything; delivering pays more coins than selling the same items
+- [ ] Skip → "New order in 1m 00s" countdown, then a new order appears
+- [ ] Reaching 15 XP → "Level 2!" dialog with +100 coins and +1 gem, "New: Corn, Corn Bread"; Corn is plantable
+- [ ] Level 3 unlocks the Silo in the shop
+- [ ] Close and reopen: level, XP and orders (including skip timers) are kept
 
 ## Milestone 3: Town building polish
 Construction timers (timestamp-based), placement sound/FX, selection outline, a Tile Palette for map editing,
