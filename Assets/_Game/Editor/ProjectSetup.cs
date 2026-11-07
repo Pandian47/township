@@ -49,16 +49,16 @@ namespace TownBuilder.EditorTools
         {
             public string Id, Name;
             public PlaceholderArtGenerator.CropStyle Style;
-            public int GrowSeconds, Yield, SeedCost, Xp, Unlock;
+            public int GrowSeconds, Yield, SeedCost, Xp, Unlock, SellPrice;
         }
 
         // Example balance values (not taken from any existing game). Tune them in the assets.
         private static readonly CropSeed[] CropSeeds =
         {
             new CropSeed { Id = "wheat", Name = "Wheat", Style = PlaceholderArtGenerator.CropStyle.Wheat,
-                GrowSeconds = 120, Yield = 2, SeedCost = 0, Xp = 1, Unlock = 1 },
+                GrowSeconds = 120, Yield = 2, SeedCost = 0, Xp = 1, Unlock = 1, SellPrice = 2 },
             new CropSeed { Id = "corn", Name = "Corn", Style = PlaceholderArtGenerator.CropStyle.Corn,
-                GrowSeconds = 300, Yield = 3, SeedCost = 3, Xp = 2, Unlock = 1 },
+                GrowSeconds = 300, Yield = 3, SeedCost = 3, Xp = 2, Unlock = 1, SellPrice = 4 },
         };
 
         // Fields placed in a new town, next to the Town Hall.
@@ -270,7 +270,7 @@ namespace TownBuilder.EditorTools
                 {
                     crop = ScriptableObject.CreateInstance<CropDefinition>();
                     crop.EditorConfigure(s.Id, s.Name, PlaceholderArtGenerator.CreateCropStages(s.Id, s.Style),
-                        s.GrowSeconds, s.Yield, s.SeedCost, s.Xp, s.Unlock);
+                        s.GrowSeconds, s.Yield, s.SeedCost, s.Xp, s.Unlock, s.SellPrice);
                     AssetDatabase.CreateAsset(crop, path);
                 }
 

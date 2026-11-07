@@ -26,6 +26,9 @@ Removing a building does not refund coins (yet).
 | field | Field | 1×1 | 1 | 20 | Yes (max 12, crop lost) |
 
 Storage: base barn capacity 50 (`GameContent.baseStorageCapacity`). Barn +50, Silo +30 (`storageCapacityBonus`).
+Paid expansion: +25 per level, level N costs N × 200 coins, up to 10 levels (`storageExpansion*` in GameContent).
+
+Sell prices (`ItemDefinition.sellPrice`): Wheat 2 coins, Corn 4 coins.
 
 ## Crops (implemented, `Data/Crops`)
 

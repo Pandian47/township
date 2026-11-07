@@ -19,8 +19,14 @@ namespace TownBuilder
         [SerializeField] private FieldPanel fieldPanel;
         [SerializeField] private ToastView toast;
 
+        [Header("Barn")]
+        [SerializeField] private BarnPanel barnPanel;
+        [Tooltip("The barn pill in the top bar also opens the barn.")]
+        [SerializeField] private Button barnPillButton;
+
         [Header("Bottom navigation")]
         [SerializeField] private GameObject bottomNavigation;
+        [SerializeField] private Button barnButton;
         [SerializeField] private Button buildButton;
         [SerializeField] private Button menuButton;
 
@@ -39,18 +45,25 @@ namespace TownBuilder
 
         private PlacementSystem _placement;
         private FarmingController _farming;
+        private StorageService _storage;
         private Wallet _wallet;
 
-        public void Initialize(PlacementSystem placement, FarmingController farming, Wallet wallet, PlayerProgress progress,
-            GameContent content, IAdService ads, Action onMenu)
+        public void Initialize(PlacementSystem placement, FarmingController farming, StorageService storage, Wallet wallet,
+            PlayerProgress progress, GameContent content, IAdService ads, Action onMenu)
         {
             _placement = placement;
             _farming = farming;
+            _storage = storage;
             _wallet = wallet;
 
-            topBar.Bind(wallet, progress, farming.Inventory);
+            topBar.Bind(wallet, progress, storage.Inventory);
             fieldPanel.Initialize(farming, content, wallet, ads, onPlanted: () => _placement.Cancel());
             farming.Notification += toast.Show;
+            storage.Notification += toast.Show;
+
+            barnPanel.Initialize(storage, content);
+            barnButton.onClick.AddListener(OpenBarn);
+            barnPillButton.onClick.AddListener(OpenBarn);
 
             bool adsOn = content.AdsConfig != null && content.AdsConfig.AdsEnabled && !(ads is NoAdService);
             rewardedCoinsButton.gameObject.SetActive(adsOn);
@@ -81,6 +94,14 @@ namespace TownBuilder
             if (_placement != null) _placement.StateChanged -= Refresh;
             if (_wallet != null) _wallet.Changed -= Refresh;
             if (_farming != null) _farming.Notification -= toast.Show;
+            if (_storage != null) _storage.Notification -= toast.Show;
+        }
+
+        private void OpenBarn()
+        {
+            if (_placement.CurrentMode == PlacementSystem.Mode.PlacingNew || _placement.CurrentMode == PlacementSystem.Mode.Moving) return;
+            _placement.Cancel();
+            barnPanel.Open();
         }
 
         private void AskRemove()

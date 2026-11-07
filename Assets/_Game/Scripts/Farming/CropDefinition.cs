@@ -4,16 +4,11 @@ namespace TownBuilder
 {
     /// <summary>
     /// Static data for one crop. Growth stage sprites are drawn on top of the field with the SAME pivot convention
-    /// as a 1x1 building (bottom corner of the diamond).
+    /// as a 1x1 building (bottom corner of the diamond). Id, name, icon and sell price come from <see cref="ItemDefinition"/>.
     /// </summary>
     [CreateAssetMenu(menuName = "TownBuilder/Crop Definition", fileName = "Crop_New")]
-    public sealed class CropDefinition : ScriptableObject
+    public sealed class CropDefinition : ItemDefinition
     {
-        [Tooltip("Stable id stored in saves and inventory. Never change it after release.")]
-        [SerializeField] private string id;
-        [SerializeField] private string displayName;
-        [Tooltip("Shown in shop/inventory UI.")]
-        [SerializeField] private Sprite icon;
         [Tooltip("Sprites from just planted to ready. The last one is shown when the crop is ready.")]
         [SerializeField] private Sprite[] growthStages = new Sprite[0];
         [SerializeField, Min(1)] private int growSeconds = 120;
@@ -23,9 +18,8 @@ namespace TownBuilder
         [SerializeField, Min(0)] private int harvestXp = 1;
         [SerializeField, Min(1)] private int unlockLevel = 1;
 
-        public string Id => id;
-        public string DisplayName => string.IsNullOrEmpty(displayName) ? id : displayName;
-        public Sprite Icon => icon != null ? icon : (growthStages.Length > 0 ? growthStages[growthStages.Length - 1] : null);
+        /// <summary>Falls back to the "ready" growth sprite when no dedicated icon is set.</summary>
+        public override Sprite Icon => base.Icon != null ? base.Icon : (growthStages.Length > 0 ? growthStages[growthStages.Length - 1] : null);
         public int GrowSeconds => Mathf.Max(1, growSeconds);
         public long GrowDurationMs => GrowSeconds * 1000L;
         public int HarvestYield => Mathf.Max(1, harvestYield);
@@ -44,12 +38,11 @@ namespace TownBuilder
         }
 
 #if UNITY_EDITOR
-        public void EditorConfigure(string newId, string newName, Sprite[] stages, int seconds, int yield, int seedCost, int xp, int unlock)
+        public void EditorConfigure(string newId, string newName, Sprite[] stages, int seconds, int yield, int seedCost, int xp,
+            int unlock, int sellPrice)
         {
-            id = newId;
-            displayName = newName;
+            EditorConfigureItem(newId, newName, stages != null && stages.Length > 0 ? stages[stages.Length - 1] : null, sellPrice);
             growthStages = stages;
-            icon = stages != null && stages.Length > 0 ? stages[stages.Length - 1] : null;
             growSeconds = seconds;
             harvestYield = yield;
             seedCoinCost = seedCost;

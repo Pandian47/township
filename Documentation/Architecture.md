@@ -122,6 +122,10 @@ Validation always goes through `Town.CanPlace(origin, size, ignoreId)`, which re
   draws the crop as a child sprite of the field view (0.001 units lower, so it always sorts just in front of its own field),
   and hooks `PlacementSystem.BuildingTapInterceptor` so a tap on a ready field harvests instead of selecting.
 * **UI:** `FieldPanel` (crop picker / timer / Finish now via `IAdService`), barn pill in `TopBarView`, `ToastView`.
+* **Items and barn:** every storable thing derives from `ItemDefinition` (id, name, icon, sell price); `CropDefinition`
+  now, products next. `GameContent.TryGetItem` finds any item. `StorageService` owns the barn: capacity = base +
+  storage buildings + paid expansions (`StorageUpgrades`, saved as `player.storageLevel`). Selling goes through
+  `Market.TrySell`, which updates inventory and wallet together. `BarnPanel` is the screen.
 * **Saving:** `SaveData.cropPlots` (plot id, crop id, planted-at) and `SaveData.inventory`. Grow duration comes from the
   current CropDefinition at load time, so rebalancing also applies to crops already planted.
 

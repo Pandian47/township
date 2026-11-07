@@ -15,7 +15,7 @@ level up → unlock buildings, crops and land → grow the town.
 | B | Building shop, placement, move, remove | **Milestone 1: implemented** (no construction timers yet) |
 | C | Save / load, new game / continue | **Milestone 1: implemented** |
 | D | Farming: plots, planting, growth timers, harvesting | **Milestone 2 step 1: implemented** (Wheat, Corn) |
-| E | Inventory, barn capacity | **Barn capacity implemented** (base 50, +50 per Barn, +30 per Silo). Barn screen next |
+| E | Inventory, barn capacity | **Implemented:** barn screen, sell for coins, paid expansion (+25 per level), base 50, +50 per Barn, +30 per Silo |
 | F | Factories, recipes, production queues | Milestone 4 |
 | G | Coins, gems, XP, levels, rewards | Coins/gems exist; XP and levels in Milestone 4–5 |
 | H | Orders: truck, train, later ship and helicopter | Milestone 5 / 8 |

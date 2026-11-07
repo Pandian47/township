@@ -34,4 +34,7 @@ MonoBehaviour:
   - building: {fileID: 11400000, guid: 452c1344385c6ee4d936449de7a0dd15, type: 2}
     origin: {x: 23, y: 17}
   baseStorageCapacity: 50
+  storageExpansionCapacity: 25
+  storageExpansionBaseCost: 200
+  storageExpansionMaxLevel: 10
   adsConfig: {fileID: 11400000, guid: 1e5cb2d5aaa6061439417a7434340494, type: 2}

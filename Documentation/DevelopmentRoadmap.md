@@ -45,8 +45,8 @@ Reordered from the original plan: farming and production make the game playable,
 | Step | Feature | Status |
 |---|---|---|
 | 1 | Farming: Field building, Wheat/Corn, growth timers, harvest, barn capacity, rewarded "Finish now" | **Done** (53 tests) |
-| 2 | Barn screen: list items, sell for coins, capacity upgrade | Next |
-| 3 | Production: Bakery recipes (Bread, Corn bread), production queue, timers | Planned |
+| 2 | Barn screen: list items, sell for coins, paid barn expansion | **Done** |
+| 3 | Production: Bakery recipes (Bread, Corn bread), production queue, timers | Next |
 | 4 | Orders and levels: order board, coin + XP rewards, level curve, unlocks | Planned |
 
 **v0.1 definition of done:** plant wheat → harvest → bake bread → deliver it for coins → place a building →
@@ -59,6 +59,13 @@ close and reopen with nothing lost.
 - [ ] Tap a ready field → "+2 Wheat +1 XP" toast, the barn counter increases, the field is empty again
 - [ ] Plant, close the app for longer than the grow time, reopen → the crop is ready
 - [ ] Build a Barn → barn capacity rises by 50
+
+### Device checklist (step 2: barn)
+- [ ] The **Barn** button (bottom bar) and the **Barn 0/50** pill (top bar) both open the Barn screen
+- [ ] Harvested crops appear as cards: name, "x12 · 2 coins each", Sell 1, Sell all
+- [ ] Sell 1 / Sell all add the right coins and update the barn count; the card disappears at 0
+- [ ] Expand (+25 for 200 coins, then 400, 600...) raises capacity; the button greys out if you can't afford it
+- [ ] Close and reopen the app: the barn contents and expansion are kept
 
 ## Milestone 3: Town building polish
 Construction timers (timestamp-based), placement sound/FX, selection outline, a Tile Palette for map editing,

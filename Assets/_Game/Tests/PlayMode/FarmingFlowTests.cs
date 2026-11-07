@@ -131,6 +131,58 @@ namespace TownBuilder.Tests
             Assert.IsFalse(scene.Farming.Plots.TryGetCrop(fieldId, out _));
         }
 
+        [UnityTest]
+        public IEnumerator Barn_SellCrops_ForCoins_AndExpand_Persists()
+        {
+            yield return LoadTown();
+            var scene = Object.FindAnyObjectByType<TownSceneController>();
+            var content = GameRoot.Current.Context.Content;
+            content.TryGetCrop("wheat", out var wheat);
+
+            scene.Inventory.TryAdd("wheat", 10);
+            long coins = scene.Wallet.Coins;
+            Assert.AreEqual(SellResult.Sold, scene.Storage.Sell("wheat", 4));
+            Assert.AreEqual(coins + 4 * wheat.SellPrice, scene.Wallet.Coins);
+            Assert.AreEqual(SellResult.Sold, scene.Storage.SellAll("wheat"));
+            Assert.AreEqual(0, scene.Inventory.Count("wheat"));
+
+            int capacity = scene.Inventory.Capacity;
+            Assert.IsTrue(scene.Storage.TryExpand());
+            Assert.AreEqual(capacity + content.StorageExpansionCapacity, scene.Inventory.Capacity);
+
+            // Restart: expansion level survives.
+            scene.SaveNow();
+            Object.DestroyImmediate(GameRoot.Current.gameObject);
+            yield return null;
+            SceneManager.LoadScene(SceneNames.MainMenu);
+            yield return WaitFor(() => GameRoot.Current != null);
+            Assert.IsTrue(GameRoot.Current.Context.ContinueGame().Succeeded);
+            SceneManager.LoadScene(SceneNames.Town);
+            yield return WaitForTown();
+            scene = Object.FindAnyObjectByType<TownSceneController>();
+            Assert.AreEqual(1, scene.Storage.Upgrades.Level);
+            Assert.AreEqual(capacity + content.StorageExpansionCapacity, scene.Inventory.Capacity);
+        }
+
+        [UnityTest]
+        public IEnumerator BarnButton_OpensBarnScreen_WithItems()
+        {
+            yield return LoadTown();
+            var scene = Object.FindAnyObjectByType<TownSceneController>();
+            scene.Inventory.TryAdd("corn", 5);
+
+            var barnButton = GameObject.Find("BarnButton").GetComponent<UnityEngine.UI.Button>();
+            barnButton.onClick.Invoke();
+            var panel = Object.FindAnyObjectByType<BarnPanel>();
+            Assert.IsTrue(panel.IsOpen);
+
+            var item = panel.GetComponentsInChildren<BarnItemView>(includeInactive: false).FirstOrDefault();
+            Assert.NotNull(item, "Barn should show a card for corn");
+            var texts = string.Join(" | ", item.GetComponentsInChildren<UnityEngine.UI.Text>().Select(t => t.text));
+            StringAssert.Contains("Corn", texts);
+            StringAssert.Contains("x5", texts);
+        }
+
         // ------------------------------------------------------------------ helpers
 
         private static IEnumerator LoadTown()

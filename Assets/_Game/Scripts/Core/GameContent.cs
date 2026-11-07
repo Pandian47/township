@@ -23,6 +23,11 @@ namespace TownBuilder
         [Header("Storage")]
         [Tooltip("Barn capacity before any storage buildings (Barn, Silo...) add their bonus.")]
         [SerializeField, Min(0)] private int baseStorageCapacity = 50;
+        [Tooltip("Capacity added by each paid barn expansion.")]
+        [SerializeField, Min(1)] private int storageExpansionCapacity = 25;
+        [Tooltip("Coins for the first expansion; expansion N costs N x this.")]
+        [SerializeField, Min(0)] private int storageExpansionBaseCost = 200;
+        [SerializeField, Min(0)] private int storageExpansionMaxLevel = 10;
 
         [Header("Monetisation")]
         [SerializeField] private AdsConfig adsConfig;
@@ -37,6 +42,9 @@ namespace TownBuilder
         public long StartingCoins => startingCoins < 0 ? 0 : startingCoins;
         public long StartingGems => startingGems < 0 ? 0 : startingGems;
         public int BaseStorageCapacity => baseStorageCapacity;
+        public int StorageExpansionCapacity => storageExpansionCapacity;
+        public int StorageExpansionBaseCost => storageExpansionBaseCost;
+        public int StorageExpansionMaxLevel => storageExpansionMaxLevel;
 
         public bool TryGetBuilding(string id, out BuildingDefinition definition)
         {
@@ -54,8 +62,16 @@ namespace TownBuilder
             return _cropsById.TryGetValue(id, out definition);
         }
 
-        /// <summary>Display name for any item id (crops now, products later).</summary>
-        public string ItemName(string itemId) => TryGetCrop(itemId, out var crop) ? crop.DisplayName : itemId;
+        /// <summary>Any storable item by id (crops now, products later).</summary>
+        public bool TryGetItem(string id, out ItemDefinition item)
+        {
+            item = null;
+            if (TryGetCrop(id, out var crop)) { item = crop; return true; }
+            return false;
+        }
+
+        /// <summary>Display name for any item id.</summary>
+        public string ItemName(string itemId) => TryGetItem(itemId, out var item) ? item.DisplayName : itemId;
 
         /// <summary>Returns human-readable content problems. Empty list = content is valid.</summary>
         public List<string> Validate()

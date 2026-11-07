@@ -112,7 +112,7 @@ namespace TownBuilder.EditorTools
             return outputPath;
         }
 
-        public enum HudState { None, Idle, Shop, Placing, Field }
+        public enum HudState { None, Idle, Shop, Placing, Field, Barn }
 
         /// <summary>Command line: renders MainMenu + Town (idle, shop, placing) with UI into the folder after -previewOut.</summary>
         public static void CaptureUiFromCommandLine()
@@ -127,6 +127,7 @@ namespace TownBuilder.EditorTools
                 Capture(Path.Combine(folder, "Preview_Town_Shop.png"), HudState.Shop);
                 Capture(Path.Combine(folder, "Preview_Town_Placing.png"), HudState.Placing);
                 Capture(Path.Combine(folder, "Preview_Town_Field.png"), HudState.Field);
+                Capture(Path.Combine(folder, "Preview_Town_Barn.png"), HudState.Barn);
             }
             catch (Exception e)
             {
@@ -164,6 +165,23 @@ namespace TownBuilder.EditorTools
             {
                 Find(canvas, "PlacementActionBar").transform.Find("Info").GetComponent<UnityEngine.UI.Text>().text =
                     $"{placing.DisplayName}  -  {placing.CoinCost:N0} coins\nDrag or tap to position";
+            }
+
+            if (state == HudState.Barn)
+            {
+                var barnRoot = Find(canvas, "BarnPanel").transform.Find("Root").gameObject;
+                barnRoot.SetActive(true);
+                barnRoot.transform.Find("Window/Title/Text").GetComponent<UnityEngine.UI.Text>().text = $"Barn   {barn.Total}/{barn.Capacity}";
+                barnRoot.transform.Find("Window/Empty").gameObject.SetActive(false);
+                barnRoot.transform.Find("Window/ExpandButton/Label").GetComponent<UnityEngine.UI.Text>().text = "Expand +25\n200 coins";
+                var template = barnRoot.GetComponentsInChildren<BarnItemView>(true).First();
+                foreach (var pair in barn.Items)
+                {
+                    content.TryGetItem(pair.Key, out var item);
+                    var view = UnityEngine.Object.Instantiate(template, template.transform.parent);
+                    view.gameObject.SetActive(true);
+                    view.Show(pair.Key, item, pair.Value, null, null);
+                }
             }
 
             if (state == HudState.Field)

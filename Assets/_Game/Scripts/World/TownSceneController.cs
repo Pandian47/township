@@ -30,6 +30,7 @@ namespace TownBuilder
         private PlayerProgress _progress;
         private FarmPlots _plots;
         private Inventory _inventory;
+        private StorageService _storage;
         private float _saveDueAt = -1f;
 
         public Town Town => _town;
@@ -38,6 +39,7 @@ namespace TownBuilder
         public PlacementSystem Placement => placement;
         public FarmingController Farming => farming;
         public Inventory Inventory => _inventory;
+        public StorageService Storage => _storage;
         public bool IsReady => _town != null;
 
         private void Start()
@@ -78,6 +80,12 @@ namespace TownBuilder
             TownSaveMapper.LoadFarming(save, _town, _context.Content, _plots, _inventory, warnings);
             foreach (var w in warnings) Debug.LogWarning($"[Town] {w}");
 
+            var content = _context.Content;
+            var upgrades = new StorageUpgrades(save.player.storageLevel, content.StorageExpansionCapacity,
+                content.StorageExpansionBaseCost, content.StorageExpansionMaxLevel);
+            _storage = new StorageService(_town, _inventory, _wallet, upgrades, content);
+            _storage.Modified += ScheduleSave;
+
             placement.Initialize(_town, _wallet, _progress, _context.Content);
             placement.TownModified += ScheduleSave;
 
@@ -89,11 +97,17 @@ namespace TownBuilder
 
             _wallet.Changed += ScheduleSave; // e.g. coins from a rewarded ad
 
-            hud.Initialize(placement, farming, _wallet, _progress, _context.Content, _context.Ads, ReturnToMainMenu);
+            hud.Initialize(placement, farming, _storage, _wallet, _progress, _context.Content, _context.Ads, ReturnToMainMenu);
         }
 
         private void OnDestroy()
         {
+            if (_storage != null)
+            {
+                _storage.Modified -= ScheduleSave;
+                _storage.Dispose();
+            }
+
             if (placement != null) placement.TownModified -= ScheduleSave;
             if (farming != null) farming.Modified -= ScheduleSave;
             if (_wallet != null) _wallet.Changed -= ScheduleSave;
@@ -119,6 +133,7 @@ namespace TownBuilder
             try
             {
                 TownSaveMapper.WriteTo(_context.ActiveSave, _town, _wallet, _progress, _plots, _inventory);
+                _context.ActiveSave.player.storageLevel = _storage.Upgrades.Level;
                 _context.SaveActive();
             }
             catch (Exception e)

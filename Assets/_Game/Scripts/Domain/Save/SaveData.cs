@@ -27,6 +27,8 @@ namespace TownBuilder.Domain
         public long xp;
         public long coins;
         public long gems;
+        /// <summary>Paid barn expansions bought (added in v0.2; missing in older saves = 0).</summary>
+        public int storageLevel;
     }
 
     [Serializable]

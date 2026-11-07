@@ -65,7 +65,6 @@ namespace TownBuilder
             placement.BuildingTapInterceptor = OnBuildingTapped;
 
             foreach (var b in _town.Buildings) OnBuildingAdded(b);
-            RecalculateCapacity();
         }
 
         private void OnDestroy()
@@ -119,7 +118,7 @@ namespace TownBuilder
 
             if (!_inventory.CanAdd(crop.HarvestYield))
             {
-                Notification?.Invoke($"Barn is full ({_inventory.Total}/{_inventory.Capacity}). Build a Barn for more space.");
+                Notification?.Invoke($"Barn is full ({_inventory.Total}/{_inventory.Capacity}). Sell items or expand the barn.");
                 return false;
             }
 
@@ -158,7 +157,6 @@ namespace TownBuilder
 
         private void OnBuildingAdded(PlacedBuilding building)
         {
-            if (_content.TryGetBuilding(building.DefinitionId, out var def) && def.StorageCapacityBonus > 0) RecalculateCapacity();
             if (IsField(building.InstanceId, out _)) RefreshPlot(building.InstanceId);
         }
 
@@ -166,15 +164,6 @@ namespace TownBuilder
         {
             _cropRenderers.Remove(building.InstanceId);
             _plots.Clear(building.InstanceId);
-            if (_content.TryGetBuilding(building.DefinitionId, out var def) && def.StorageCapacityBonus > 0) RecalculateCapacity();
-        }
-
-        private void RecalculateCapacity()
-        {
-            int capacity = _content.BaseStorageCapacity;
-            foreach (var b in _town.Buildings)
-                if (_content.TryGetBuilding(b.DefinitionId, out var def)) capacity += def.StorageCapacityBonus;
-            _inventory.SetCapacity(capacity);
         }
 
         private void RefreshPlot(string plotId)

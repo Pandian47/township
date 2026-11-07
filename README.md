@@ -4,7 +4,7 @@ An original 2D isometric farming and town-building game for Android, built AI-fi
 
 > Genre inspiration: town-building and farming simulators. All art, UI, names and mechanics in this project must be original.
 
-## Status: Milestone 1 done · Milestone 2 (core loop) step 1 farming done
+## Status: Milestone 1 done · Milestone 2 (core loop) steps 1–2 done (farming, barn)
 
 | Feature | State |
 |---|---|
@@ -16,7 +16,8 @@ An original 2D isometric farming and town-building game for Android, built AI-fi
 | Offline JSON save: atomic writes, backup recovery, schema migration, autosave | ✅ |
 | AdMob test ads: rewarded "+100 coins", interstitial on Menu, GDPR consent ([Ads.md](Documentation/Ads.md)) | ✅ (test ids) |
 | Farming: fields, Wheat/Corn growth timers, harvest, barn capacity, "Finish now" ad | ✅ |
-| Automated tests: 42 EditMode + 11 PlayMode | ✅ |
+| Barn screen: sell crops for coins, paid barn expansion | ✅ |
+| Automated tests: 48 EditMode + 13 PlayMode | ✅ |
 | Placeholder art following the final art conventions | ✅ (replace with AI art) |
 | Android build | ⏳ install the Android Build Support module first |
 

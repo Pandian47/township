@@ -326,15 +326,19 @@ namespace TownBuilder.EditorTools
             var coinsText = Pill(topBarRect, "CoinsPill", 340);
             var gemsText = Pill(topBarRect, "GemsPill", 240);
             var barnText = Pill(topBarRect, "BarnPill", 300);
+            var barnPill = barnText.transform.parent.gameObject;
+            var barnPillButton = barnPill.AddComponent<Button>();
+            barnPillButton.targetGraphic = barnPill.GetComponent<Image>();
             var topBar = topBarRect.gameObject.AddComponent<TopBarView>();
             Wire(topBar, ("levelText", levelText), ("coinsText", coinsText), ("gemsText", gemsText), ("barnText", barnText));
 
             // --- Bottom navigation
-            var nav = MakeRect("BottomNavigation", safe, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-30, 30), new Vector2(860, 130));
+            var nav = MakeRect("BottomNavigation", safe, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-30, 30), new Vector2(1100, 130));
             HRow(nav, 24, TextAnchor.LowerRight);
             var adButton = MakeButton(nav, "RewardedAdButton", "Watch ad\n+100 coins", new Vector2(300, 120), new Color(0.95f, 0.65f, 0.15f), out var adLabel, 34);
             var rewarded = adButton.gameObject.AddComponent<RewardedCoinsButton>();
             Wire(rewarded, ("button", adButton), ("label", adLabel));
+            var barnButton = MakeButton(nav, "BarnButton", "Barn", new Vector2(200, 120), new Color(0.62f, 0.38f, 0.25f));
             var menuButton = MakeButton(nav, "MenuButton", "Menu", new Vector2(200, 120), Slate);
             var buildButton = MakeButton(nav, "BuildButton", "Build", new Vector2(260, 120), Green, 48);
 
@@ -361,6 +365,9 @@ namespace TownBuilder.EditorTools
             var fieldPanel = BuildFieldPanel(safe);
             var toast = BuildToast(safe);
 
+            // --- Barn screen
+            var barnPanel = BuildBarnPanel(canvas.transform);
+
             // --- Shop
             var shop = BuildShop(canvas.transform);
 
@@ -370,6 +377,9 @@ namespace TownBuilder.EditorTools
             var hud = canvas.gameObject.AddComponent<TownHudController>();
             Wire(hud,
                 ("fieldPanel", fieldPanel),
+                ("barnPanel", barnPanel),
+                ("barnButton", barnButton),
+                ("barnPillButton", barnPillButton),
                 ("toast", toast),
                 ("topBar", topBar),
                 ("shopPanel", shop),
@@ -388,6 +398,73 @@ namespace TownBuilder.EditorTools
                 ("removeButton", removeButton),
                 ("deselectButton", deselectButton));
             return hud;
+        }
+
+        private static BarnPanel BuildBarnPanel(Transform canvas)
+        {
+            var container = Stretch("BarnPanel", canvas);
+            var root = Stretch("Root", container);
+            AddImage(root, Dim, rounded: false);
+
+            var window = MakeRect("Window", root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1640, 820));
+            AddImage(window, PanelColor);
+
+            var titleRect = MakeRect("Title", window, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -18), new Vector2(-80, 80));
+            var title = Label(titleRect, "Text", "Barn", 54, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
+
+            var close = MakeButton(window, "CloseButton", "X", new Vector2(90, 90), Red, 44);
+            var closeRect = (RectTransform)close.transform;
+            closeRect.anchorMin = closeRect.anchorMax = closeRect.pivot = new Vector2(1f, 1f);
+            closeRect.anchoredPosition = new Vector2(-20, -16);
+
+            // Items grid
+            var items = MakeRect("Items", window, Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
+            items.offsetMin = new Vector2(30, 170);
+            items.offsetMax = new Vector2(-30, -120);
+            var grid = items.gameObject.AddComponent<GridLayoutGroup>();
+            grid.cellSize = new Vector2(360, 250);
+            grid.spacing = new Vector2(20, 20);
+            grid.startCorner = GridLayoutGroup.Corner.UpperLeft;
+            grid.childAlignment = TextAnchor.UpperLeft;
+
+            var template = MakeRect("ItemTemplate", items, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(360, 250));
+            AddImage(template, Color.white);
+            var iconRect = MakeRect("Icon", template, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(12, -10), new Vector2(110, 100));
+            var icon = iconRect.gameObject.AddComponent<Image>();
+            icon.preserveAspect = true;
+            icon.raycastTarget = false;
+            var nameRect = MakeRect("Name", template, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, 1f), new Vector2(124, -14), new Vector2(-134, 50));
+            var nameText = Label(nameRect, "Text", "Item x0", 32, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
+            var priceRect = MakeRect("Price", template, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, 1f), new Vector2(124, -62), new Vector2(-134, 62));
+            var priceText = Label(priceRect, "Text", "0 coins each", 24, TextAnchor.MiddleLeft, Ink);
+
+            var buttons = MakeRect("Buttons", template, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 12), new Vector2(-24, 110));
+            HRow(buttons, 12, TextAnchor.MiddleCenter);
+            var sellOne = MakeButton(buttons, "SellOneButton", "Sell 1", new Vector2(140, 100), Blue, 30);
+            var sellAll = MakeButton(buttons, "SellAllButton", "Sell all", new Vector2(180, 100), Green, out var sellAllLabel, 28);
+
+            var itemView = template.gameObject.AddComponent<BarnItemView>();
+            Wire(itemView, ("icon", icon), ("nameText", nameText), ("priceText", priceText), ("sellOneButton", sellOne),
+                ("sellAllButton", sellAll), ("sellAllLabel", sellAllLabel));
+            template.gameObject.SetActive(false);
+
+            var emptyRect = MakeRect("Empty", window, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 40), new Vector2(1200, 120));
+            var empty = Label(emptyRect, "Text", "Your barn is empty.\nHarvest crops to fill it.", 40, TextAnchor.MiddleCenter, new Color(0.4f, 0.4f, 0.4f));
+
+            // Footer: expansion
+            var expand = MakeButton(window, "ExpandButton", "Expand", new Vector2(420, 120), new Color(0.62f, 0.38f, 0.25f), out var expandLabel, 34);
+            var expandRect = (RectTransform)expand.transform;
+            expandRect.anchorMin = expandRect.anchorMax = expandRect.pivot = new Vector2(1f, 0f);
+            expandRect.anchoredPosition = new Vector2(-30, 26);
+            var hintRect = MakeRect("Hint", window, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0f, 0f), new Vector2(30, 26), new Vector2(-520, 120));
+            Label(hintRect, "Text", "Sell crops for coins. Build a Barn (+50) or Silo (+30), or expand here for more space.",
+                30, TextAnchor.MiddleLeft, new Color(0.35f, 0.35f, 0.35f));
+
+            var panel = container.gameObject.AddComponent<BarnPanel>();
+            Wire(panel, ("panelRoot", root.gameObject), ("titleText", title), ("itemsParent", items), ("itemTemplate", itemView),
+                ("emptyText", empty), ("expandButton", expand), ("expandLabel", expandLabel), ("closeButton", close));
+            root.gameObject.SetActive(false);
+            return panel;
         }
 
         private static FieldPanel BuildFieldPanel(RectTransform safe)

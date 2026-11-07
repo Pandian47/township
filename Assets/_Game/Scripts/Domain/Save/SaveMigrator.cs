@@ -58,6 +58,7 @@ namespace TownBuilder.Domain
             if (data.player.xp < 0) { warnings?.Add("Negative XP reset to 0."); data.player.xp = 0; }
             if (data.player.coins < 0) { warnings?.Add("Negative coins reset to 0."); data.player.coins = 0; }
             if (data.player.gems < 0) { warnings?.Add("Negative gems reset to 0."); data.player.gems = 0; }
+            if (data.player.storageLevel < 0) { warnings?.Add("Negative storage level reset to 0."); data.player.storageLevel = 0; }
 
             var seenIds = new HashSet<string>();
             data.buildings.RemoveAll(b =>
