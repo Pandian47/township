@@ -1,5 +1,6 @@
 using System;
 using GoogleMobileAds.Api;
+using GoogleMobileAds.Common;
 using GoogleMobileAds.Ump.Api;
 using UnityEngine;
 
@@ -10,6 +11,9 @@ namespace TownBuilder
     /// Start-up order required by Google: 1) update consent (UMP, shows the GDPR form where required)
     /// 2) MobileAds.Initialize only if ads may be requested 3) preload rewarded + interstitial.
     /// Ads are reloaded after every show and retried with back-off after a failed load.
+    ///
+    /// Threading: SDK callbacks can arrive on a background thread. Every callback is forwarded with
+    /// <see cref="OnMain"/> (MobileAdsEventExecutor.ExecuteInUpdate) before touching game state or Unity objects.
     /// </summary>
     public sealed class AdMobAdService : IAdService
     {
@@ -42,24 +46,23 @@ namespace TownBuilder
         public bool PrivacyOptionsRequired =>
             ConsentInformation.PrivacyOptionsRequirementStatus == PrivacyOptionsRequirementStatus.Required;
 
+        private static void OnMain(Action action) => MobileAdsEventExecutor.ExecuteInUpdate(action);
+
         public void Initialize()
         {
-            // Deliver every ad callback on the main thread so game code can touch Unity objects safely.
-            MobileAds.RaiseAdEventsOnUnityMainThread = true;
-
             var parameters = new ConsentRequestParameters { TagForUnderAgeOfConsent = _config.TagForUnderAgeOfConsent };
-            ConsentInformation.Update(parameters, updateError =>
+            ConsentInformation.Update(parameters, updateError => OnMain(() =>
             {
                 if (updateError != null) Debug.LogWarning($"[Ads] Consent update failed: {updateError.Message}");
 
-                ConsentForm.LoadAndShowConsentFormIfRequired(formError =>
+                ConsentForm.LoadAndShowConsentFormIfRequired(formError => OnMain(() =>
                 {
                     if (formError != null) Debug.LogWarning($"[Ads] Consent form: {formError.Message}");
                     StateChanged?.Invoke();
                     if (ConsentInformation.CanRequestAds()) InitializeSdk();
                     else Debug.Log("[Ads] Consent not given; ads stay off.");
-                });
-            });
+                }));
+            }));
 
             // Returning players with consent from a previous session can start immediately.
             if (ConsentInformation.CanRequestAds()) InitializeSdk();
@@ -78,22 +81,23 @@ namespace TownBuilder
             _rewarded = null;
             _lastRewardedShownAt = Time.realtimeSinceStartup;
 
-            ad.OnAdFullScreenContentClosed += () =>
+            ad.OnAdFullScreenContentClosed += () => OnMain(() =>
             {
                 ad.Destroy();
                 onFinished?.Invoke(earned);
                 LoadRewarded();
                 StateChanged?.Invoke();
-            };
-            ad.OnAdFullScreenContentFailed += error =>
+            });
+            ad.OnAdFullScreenContentFailed += error => OnMain(() =>
             {
                 Debug.LogWarning($"[Ads] Rewarded failed to show: {error.GetMessage()}");
                 ad.Destroy();
                 onFinished?.Invoke(false);
                 LoadRewarded();
                 StateChanged?.Invoke();
-            };
-            ad.Show(reward => earned = true);
+            });
+            // The reward callback fires before "closed"; both are queued in order on the main thread.
+            ad.Show(reward => OnMain(() => earned = true));
             StateChanged?.Invoke();
         }
 
@@ -109,30 +113,30 @@ namespace TownBuilder
             var ad = _interstitial;
             _interstitial = null;
             _lastInterstitialShownAt = Time.realtimeSinceStartup;
-            ad.OnAdFullScreenContentClosed += () =>
+            ad.OnAdFullScreenContentClosed += () => OnMain(() =>
             {
                 ad.Destroy();
                 LoadInterstitial();
                 onClosed?.Invoke();
-            };
-            ad.OnAdFullScreenContentFailed += error =>
+            });
+            ad.OnAdFullScreenContentFailed += error => OnMain(() =>
             {
                 ad.Destroy();
                 LoadInterstitial();
                 onClosed?.Invoke();
-            };
+            });
             ad.Show();
         }
 
         public void ShowPrivacyOptions(Action onClosed)
         {
-            ConsentForm.ShowPrivacyOptionsForm(error =>
+            ConsentForm.ShowPrivacyOptionsForm(error => OnMain(() =>
             {
                 if (error != null) Debug.LogWarning($"[Ads] Privacy options: {error.Message}");
                 StateChanged?.Invoke();
                 if (ConsentInformation.CanRequestAds()) InitializeSdk();
                 onClosed?.Invoke();
-            });
+            }));
         }
 
         // ------------------------------------------------------------------
@@ -141,19 +145,19 @@ namespace TownBuilder
         {
             if (_initialized) return;
             _initialized = true;
-            MobileAds.Initialize(status =>
+            MobileAds.Initialize(status => OnMain(() =>
             {
                 Debug.Log($"[Ads] Google Mobile Ads initialised ({(_config.UseTestAds ? "TEST ads" : "LIVE ads")}).");
                 LoadRewarded();
                 LoadInterstitial();
-            });
+            }));
         }
 
         private void LoadRewarded()
         {
             if (_loadingRewarded || _rewarded != null) return;
             _loadingRewarded = true;
-            RewardedAd.Load(_config.RewardedAdUnitId, new AdRequest(), (ad, error) =>
+            RewardedAd.Load(_config.RewardedAdUnitId, new AdRequest(), (ad, error) => OnMain(() =>
             {
                 _loadingRewarded = false;
                 if (error != null || ad == null)
@@ -167,14 +171,14 @@ namespace TownBuilder
                 _rewardedRetryDelay = 2f;
                 _rewarded = ad;
                 StateChanged?.Invoke();
-            });
+            }));
         }
 
         private void LoadInterstitial()
         {
             if (_loadingInterstitial || _interstitial != null) return;
             _loadingInterstitial = true;
-            InterstitialAd.Load(_config.InterstitialAdUnitId, new AdRequest(), (ad, error) =>
+            InterstitialAd.Load(_config.InterstitialAdUnitId, new AdRequest(), (ad, error) => OnMain(() =>
             {
                 _loadingInterstitial = false;
                 if (error != null || ad == null)
@@ -186,7 +190,7 @@ namespace TownBuilder
 
                 _interstitialRetryDelay = 2f;
                 _interstitial = ad;
-            });
+            }));
         }
     }
 }

@@ -21,6 +21,7 @@ namespace TownBuilder
         [SerializeField] private PlacementSystem placement;
         [SerializeField] private FarmingController farming;
         [SerializeField] private ProductionController production;
+        [SerializeField] private ConstructionController construction;
         [SerializeField] private TownHudController hud;
         [SerializeField] private float startOrthographicSize = 6f;
         [SerializeField] private float autosaveDelaySeconds = 2f;
@@ -33,6 +34,7 @@ namespace TownBuilder
         private Inventory _inventory;
         private StorageService _storage;
         private Factories _factories;
+        private ConstructionSites _sites;
         private OrderBoard _orderBoard;
         private OrderService _orders;
         private ProgressionService _progression;
@@ -46,6 +48,7 @@ namespace TownBuilder
         public Inventory Inventory => _inventory;
         public StorageService Storage => _storage;
         public ProductionController Production => production;
+        public ConstructionController Construction => construction;
         public OrderService Orders => _orders;
         public ProgressionService Progression => _progression;
         public bool IsReady => _town != null;
@@ -82,6 +85,8 @@ namespace TownBuilder
 
             buildings.Initialize(_town, _context.Content);
             TownSaveMapper.LoadBuildings(save, _town, _context.Content, warnings);
+            _sites = new ConstructionSites();
+            TownSaveMapper.LoadConstruction(save, _town, _context.Content, _sites);
 
             _plots = new FarmPlots();
             _inventory = new Inventory(_context.Content.BaseStorageCapacity);
@@ -93,7 +98,8 @@ namespace TownBuilder
             var content = _context.Content;
             var upgrades = new StorageUpgrades(save.player.storageLevel, content.StorageExpansionCapacity,
                 content.StorageExpansionBaseCost, content.StorageExpansionMaxLevel);
-            _storage = new StorageService(_town, _inventory, _wallet, upgrades, content);
+            _storage = new StorageService(_town, _inventory, _wallet, upgrades, content, id => !_sites.IsUnderConstruction(id));
+            _sites.Changed += OnConstructionChanged;
             _storage.Modified += ScheduleSave;
 
             placement.Initialize(_town, _wallet, _progress, _context.Content);
@@ -103,9 +109,12 @@ namespace TownBuilder
             farming.Modified += ScheduleSave;
 
             production.Initialize(_town, _factories, _inventory, _progress, _context.Content, _context.Clock);
+            production.SetBuiltCheck(id => !_sites.IsUnderConstruction(id));
             production.Modified += ScheduleSave;
 
             _progression = new ProgressionService(_progress, _wallet, content);
+            construction.Initialize(_town, _sites, _wallet, _progress, content, _context.Clock);
+            construction.Modified += ScheduleSave;
             _orderBoard = new OrderBoard(content.OrderSlots);
             TownSaveMapper.LoadOrders(save, content, _orderBoard, warnings);
             _orders = new OrderService(_orderBoard, _inventory, _wallet, _progress, content, _context.Clock);
@@ -117,7 +126,7 @@ namespace TownBuilder
 
             _wallet.Changed += ScheduleSave; // e.g. coins from a rewarded ad
 
-            hud.Initialize(placement, farming, production, _orders, _progression, _storage, _wallet, _progress, _context.Content, _context.Ads, ReturnToMainMenu);
+            hud.Initialize(placement, farming, production, construction, _orders, _progression, _storage, _wallet, _progress, _context.Content, _context.Ads, ReturnToMainMenu);
         }
 
         private void OnDestroy()
@@ -131,6 +140,8 @@ namespace TownBuilder
             if (placement != null) placement.TownModified -= ScheduleSave;
             if (farming != null) farming.Modified -= ScheduleSave;
             if (production != null) production.Modified -= ScheduleSave;
+            if (construction != null) construction.Modified -= ScheduleSave;
+            if (_sites != null) _sites.Changed -= OnConstructionChanged;
             if (_orders != null) _orders.Modified -= ScheduleSave;
             if (_progress != null) _progress.Changed -= ScheduleSave;
             _progression?.Dispose();
@@ -156,7 +167,7 @@ namespace TownBuilder
 
             try
             {
-                TownSaveMapper.WriteTo(_context.ActiveSave, _town, _wallet, _progress, _plots, _inventory);
+                TownSaveMapper.WriteTo(_context.ActiveSave, _town, _wallet, _progress, _plots, _inventory, _sites);
                 _context.ActiveSave.player.storageLevel = _storage.Upgrades.Level;
                 TownSaveMapper.WriteProduction(_context.ActiveSave, _factories);
                 TownSaveMapper.WriteOrders(_context.ActiveSave, _orderBoard);
@@ -170,6 +181,9 @@ namespace TownBuilder
         }
 
         private void ScheduleSave() => _saveDueAt = Time.unscaledTime + autosaveDelaySeconds;
+
+        // Storage bonuses only count for finished buildings.
+        private void OnConstructionChanged(string instanceId) => _storage?.Refresh();
 
         private void ReturnToMainMenu()
         {

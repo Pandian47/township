@@ -76,6 +76,9 @@ namespace TownBuilder
         /// <summary>Raised whenever the town layout or wallet changed because of a player action (autosave hook).</summary>
         public event Action TownModified;
 
+        /// <summary>A NEW building was bought and placed (not raised for loaded or moved buildings).</summary>
+        public event Action<PlacedBuilding> BuildingPlaced;
+
         public Mode CurrentMode { get; private set; } = Mode.Idle;
         public PlacementResult PreviewValidity { get; private set; } = PlacementResult.Valid;
         public BuildingDefinition ActiveDefinition => _definition;
@@ -158,7 +161,7 @@ namespace TownBuilder
                 if (!_wallet.TrySpendCoins(definition.CoinCost)) return false;
 
                 string id = Guid.NewGuid().ToString("N");
-                var result = _town.TryAdd(id, definition.Id, _previewOrigin, definition.FootprintSize, out _);
+                var result = _town.TryAdd(id, definition.Id, _previewOrigin, definition.FootprintSize, out var placed);
                 if (result != PlacementResult.Valid)
                 {
                     _wallet.AddCoins(definition.CoinCost); // refund; should not happen because CanConfirm checked it
@@ -168,6 +171,7 @@ namespace TownBuilder
 
                 DestroyPreview();
                 EnterIdle();
+                BuildingPlaced?.Invoke(placed);
                 TownModified?.Invoke();
                 return true;
             }

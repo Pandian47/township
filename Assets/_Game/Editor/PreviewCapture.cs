@@ -112,7 +112,7 @@ namespace TownBuilder.EditorTools
             return outputPath;
         }
 
-        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders }
+        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction }
 
         /// <summary>Command line: renders MainMenu + Town (idle, shop, placing) with UI into the folder after -previewOut.</summary>
         public static void CaptureUiFromCommandLine()
@@ -130,6 +130,7 @@ namespace TownBuilder.EditorTools
                 Capture(Path.Combine(folder, "Preview_Town_Barn.png"), HudState.Barn);
                 Capture(Path.Combine(folder, "Preview_Town_Factory.png"), HudState.Factory);
                 Capture(Path.Combine(folder, "Preview_Town_Orders.png"), HudState.Orders);
+                Capture(Path.Combine(folder, "Preview_Town_Construction.png"), HudState.Construction);
             }
             catch (Exception e)
             {
@@ -167,6 +168,31 @@ namespace TownBuilder.EditorTools
             {
                 Find(canvas, "PlacementActionBar").transform.Find("Info").GetComponent<UnityEngine.UI.Text>().text =
                     $"{placing.DisplayName}  -  {placing.CoinCost:N0} coins\nDrag or tap to position";
+            }
+
+            if (state == HudState.Construction)
+            {
+                var selection = Find(canvas, "SelectionActionBar");
+                selection.SetActive(true);
+                selection.transform.Find("Name").GetComponent<UnityEngine.UI.Text>().text = "Bakery";
+                var root = Find(canvas, "ConstructionPanel").transform.Find("Root").gameObject;
+                root.SetActive(true);
+                root.transform.Find("Title/Text").GetComponent<UnityEngine.UI.Text>().text = "Bakery: under construction";
+                root.transform.Find("Status/Text").GetComponent<UnityEngine.UI.Text>().text = "Ready in 1m 12s";
+                root.transform.Find("Buttons/AdButton/Label").GetComponent<UnityEngine.UI.Text>().text = "Finish now (ad)";
+                root.transform.Find("Buttons/GemsButton/Label").GetComponent<UnityEngine.UI.Text>().text = "Finish now  2 gems";
+
+                // Hammer badge above the bakery, like ConstructionController does.
+                var icon = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.ConstructionIconPath);
+                var bakeryView = UnityEngine.Object.FindObjectsByType<BuildingView>().First(v => v.Definition != null && v.Definition.Id == "bakery");
+                var go = new GameObject("ConstructionIcon");
+                go.transform.SetParent(bakeryView.transform, false);
+                var sr = go.AddComponent<SpriteRenderer>();
+                sr.sprite = icon;
+                sr.sortingLayerName = SortingLayers.WorldUI;
+                float top = bakeryView.SpriteRenderer.bounds.max.y - bakeryView.transform.position.y;
+                go.transform.localPosition = new Vector3(bakeryView.SpriteRenderer.bounds.center.x - bakeryView.transform.position.x, top + 0.3f, 0f);
+                go.transform.localScale = Vector3.one * 0.5f;
             }
 
             if (state == HudState.Orders)

@@ -397,6 +397,42 @@ namespace TownBuilder.EditorTools
             }
         }
 
+        // ------------------------------------------------------------------ Icons
+
+        public const string ConstructionIconPath = UiArtFolder + "/PH_Icon_Construction.png";
+
+        /// <summary>Hammer in a round badge, floated above buildings under construction. 128x128, pivot centre.</summary>
+        public static Sprite CreateConstructionIcon() =>
+            CreateSprite(ConstructionIconPath, RenderConstructionIcon, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+
+        private static Texture2D RenderConstructionIcon()
+        {
+            const int size = 128;
+            var tex = NewTexture(size, size);
+            var pixels = new Color32[size * size];
+            var badge = new Color32(250, 200, 60, 255);
+            var handle = new Color32(140, 90, 50, 255);
+            var head = new Color32(110, 115, 125, 255);
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float dx = x + 0.5f - 64f, dy = y + 0.5f - 64f;
+                if (dx * dx + dy * dy > 60f * 60f) continue;
+                var c = badge;
+
+                // Rotate into hammer space (45 degrees).
+                float u = (dx + dy) * 0.7071f, v = (dy - dx) * 0.7071f;
+                if (Mathf.Abs(v) < 6f && u > -40f && u < 22f) c = handle;           // handle
+                if (u > 14f && u < 34f && Mathf.Abs(v) < 26f) c = head;             // head
+                pixels[y * size + x] = c;
+            }
+
+            AddOutline(pixels, size, size);
+            tex.SetPixels32(pixels);
+            tex.Apply();
+            return tex;
+        }
+
         // ------------------------------------------------------------------ Products
 
         public const string ProductsArtFolder = "Assets/_Game/Art/Products";

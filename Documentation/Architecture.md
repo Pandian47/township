@@ -155,6 +155,17 @@ Validation always goes through `Town.CanPlace(origin, size, ignoreId)`, which re
 * **UI:** `OrdersPanel` + `OrderCardView`, `LevelUpDialog` (queues several level-ups), XP progress in `TopBarView`.
 * **Saving:** `SaveData.orders` (slot, item ids, amounts, rewards, available-at). Level and XP were already in `player`.
 
+## 6e. Construction
+
+* **Domain:** `ConstructionSites` maps instance id → `ConstructionSite` (UTC start and duration). A building without
+  an entry is complete. `TakeFinished` returns each finished site exactly once, so XP is granted once.
+* **Runtime:** `ConstructionController` starts a site on `PlacementSystem.BuildingPlaced` (new purchases only),
+  shows the hammer badge, completes sites (XP, toast, `Completed` event) and handles finishing with an ad or gems.
+  `StorageService` and `ProductionController` treat buildings under construction as inactive.
+* **Saving:** `BuildingSaveData.constructionEndsAtUnixMs` (0 = built). Duration comes from the current definition.
+* **Ads threading:** every AdMob/UMP callback goes through `MobileAdsEventExecutor.ExecuteInUpdate`, so game code
+  always runs on Unity's main thread.
+
 ## 7. Save system
 
 * `JsonSaveStore` writes `town.json.tmp`, flushes it to disk, then `File.Replace`s it over `town.json`, keeping the old file as `town.json.bak`.

@@ -48,6 +48,7 @@ namespace TownBuilder.Tests
             Assert.IsTrue(scene.Placement.BeginPlacement(bakeryDef));
             Assert.IsTrue(scene.Placement.Confirm());
             string bakeryId = scene.Town.Buildings.First(b => b.DefinitionId == "bakery").InstanceId;
+            Assert.IsTrue(scene.Construction.FinishNow(bakeryId), "finish construction so the bakery works");
             scene.Inventory.TryAdd("wheat", 4);
 
             Assert.AreEqual(QueueResult.Queued, scene.Production.Enqueue(bakeryId, bread));
@@ -91,6 +92,7 @@ namespace TownBuilder.Tests
             scene.Placement.BeginPlacement(bakeryDef);
             scene.Placement.Confirm();
             string bakeryId = scene.Town.Buildings.First(b => b.DefinitionId == "bakery").InstanceId;
+            Assert.IsTrue(scene.Construction.FinishNow(bakeryId), "finish construction so the bakery works");
             scene.Inventory.TryAdd("wheat", 20);
 
             for (int i = 0; i < bakeryDef.ProductionSlots; i++)
@@ -112,6 +114,7 @@ namespace TownBuilder.Tests
             scene.Placement.BeginPlacement(bakeryDef);
             scene.Placement.Confirm();
             string bakeryId = scene.Town.Buildings.First(b => b.DefinitionId == "bakery").InstanceId;
+            Assert.IsTrue(scene.Construction.FinishNow(bakeryId), "finish construction so the bakery works");
             scene.Inventory.TryAdd("wheat", 2);
             scene.Production.Enqueue(bakeryId, bread);
             _clock.Advance(bread.DurationMs);

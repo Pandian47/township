@@ -12,14 +12,17 @@ namespace TownBuilder
         private readonly Town _town;
         private readonly Wallet _wallet;
         private readonly GameContent _content;
+        private readonly Func<string, bool> _isBuilt;
 
-        public StorageService(Town town, Inventory inventory, Wallet wallet, StorageUpgrades upgrades, GameContent content)
+        public StorageService(Town town, Inventory inventory, Wallet wallet, StorageUpgrades upgrades, GameContent content,
+            Func<string, bool> isBuilt = null)
         {
             _town = town;
             Inventory = inventory;
             _wallet = wallet;
             Upgrades = upgrades;
             _content = content;
+            _isBuilt = isBuilt;
 
             _town.BuildingAdded += OnBuildingsChanged;
             _town.BuildingRemoved += OnBuildingsChanged;
@@ -77,11 +80,17 @@ namespace TownBuilder
             if (_content.TryGetBuilding(building.DefinitionId, out var def) && def.StorageCapacityBonus > 0) RecalculateCapacity();
         }
 
+        /// <summary>Recalculate capacity, e.g. when a storage building finishes construction.</summary>
+        public void Refresh() => RecalculateCapacity();
+
         private void RecalculateCapacity()
         {
             int capacity = _content.BaseStorageCapacity + Upgrades.BonusCapacity;
             foreach (var b in _town.Buildings)
+            {
+                if (_isBuilt != null && !_isBuilt(b.InstanceId)) continue; // under construction: no bonus yet
                 if (_content.TryGetBuilding(b.DefinitionId, out var def)) capacity += def.StorageCapacityBonus;
+            }
             Inventory.SetCapacity(capacity);
         }
     }

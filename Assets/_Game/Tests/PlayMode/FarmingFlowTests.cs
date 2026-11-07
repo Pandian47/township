@@ -114,6 +114,9 @@ namespace TownBuilder.Tests
 
             Assert.IsTrue(scene.Placement.BeginPlacement(barn));
             Assert.IsTrue(scene.Placement.Confirm());
+            string barnId = scene.Town.Buildings.First(b => b.DefinitionId == "barn").InstanceId;
+            Assert.AreEqual(before, scene.Inventory.Capacity, "no bonus while under construction");
+            Assert.IsTrue(scene.Construction.FinishNow(barnId));
             Assert.AreEqual(before + barn.StorageCapacityBonus, scene.Inventory.Capacity);
         }
 

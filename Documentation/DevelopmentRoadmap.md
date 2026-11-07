@@ -89,9 +89,23 @@ close and reopen with nothing lost.
 - [ ] Level 3 unlocks the Silo in the shop
 - [ ] Close and reopen: level, XP and orders (including skip timers) are kept
 
-## Milestone 3: Town building polish
-Construction timers (timestamp-based), placement sound/FX, selection outline, a Tile Palette for map editing,
-the first AI art set (tiles, buildings, crops).
+## Milestone 3: Town building polish (current)
+
+| Step | Feature | Status |
+|---|---|---|
+| 1 | Construction timers: build time per building, hammer badge, buildings work only when finished, build XP, finish early with an ad or gems | **Done** (v0.4.0) |
+| 2 | Sound effects and music (placement, harvest, collect, level-up, UI taps) | Next |
+| 3 | Visual feedback: selection outline, harvest/collect pop effects, floating "+2 Wheat" in the world | Planned |
+| 4 | UI text on TextMeshPro (sharper text on high-DPI phones) | Planned |
+| 5 | First AI art set dropped in (see ArtStyleGuide.md asset list) | Waiting on your art |
+
+### Device checklist (Milestone 3 step 1: construction)
+- [ ] Buy a Cottage: "Building Cottage... ready in 30s" toast and a hammer badge above it
+- [ ] Tap it: "Cottage: under construction", countdown and bar, "Finish now (watch ad)" and "Finish now 1 gem"
+- [ ] A Bakery under construction can't bake; its recipe panel appears once it's finished
+- [ ] A Barn under construction doesn't add storage until it's finished
+- [ ] When finished: "Barn is ready! +8 XP"
+- [ ] Close the app while building, reopen after the build time: the building is done
 
 ## Milestone 4: Factories and economy
 More factories and recipes (dairy, sugar, feed mill), production upgrades.

@@ -218,6 +218,9 @@ namespace TownBuilder.EditorTools
                 ("highlighter", highlighter));
             var farming = Go("FarmingController", systems.transform).AddComponent<FarmingController>();
             var production = Go("ProductionController", systems.transform).AddComponent<ProductionController>();
+            var construction = Go("ConstructionController", systems.transform).AddComponent<ConstructionController>();
+            Wire(construction, ("buildings", buildingController), ("placement", placement),
+                ("constructionIcon", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.ConstructionIconPath)));
             Wire(production, ("buildings", buildingController), ("placement", placement));
             Wire(farming, ("buildings", buildingController), ("placement", placement));
 
@@ -246,6 +249,7 @@ namespace TownBuilder.EditorTools
                 ("placement", placement),
                 ("farming", farming),
                 ("production", production),
+                ("construction", construction),
                 ("hud", hud));
 
             EditorSceneManager.SaveScene(scene, TownPath);
@@ -368,6 +372,7 @@ namespace TownBuilder.EditorTools
             // --- Farming: field panel (above the selection bar) and toast
             var fieldPanel = BuildFieldPanel(safe);
             var factoryPanel = BuildFactoryPanel(safe);
+            var constructionPanel = BuildConstructionPanel(safe);
             var toast = BuildToast(safe);
 
             // --- Barn screen
@@ -385,6 +390,7 @@ namespace TownBuilder.EditorTools
             Wire(hud,
                 ("fieldPanel", fieldPanel),
                 ("factoryPanel", factoryPanel),
+                ("constructionPanel", constructionPanel),
                 ("barnPanel", barnPanel),
                 ("ordersPanel", ordersPanel),
                 ("ordersButton", ordersButton),
@@ -574,6 +580,36 @@ namespace TownBuilder.EditorTools
             var panel = container.gameObject.AddComponent<BarnPanel>();
             Wire(panel, ("panelRoot", root.gameObject), ("titleText", title), ("itemsParent", items), ("itemTemplate", itemView),
                 ("emptyText", empty), ("expandButton", expand), ("expandLabel", expandLabel), ("closeButton", close));
+            root.gameObject.SetActive(false);
+            return panel;
+        }
+
+        private static ConstructionPanel BuildConstructionPanel(RectTransform safe)
+        {
+            var container = Stretch("ConstructionPanel", safe);
+            var root = MakeRect("Root", container, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 196), new Vector2(1100, 220));
+            AddImage(root, PanelColor);
+
+            var titleRect = MakeRect("Title", root, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -10), new Vector2(-48, 54));
+            var title = Label(titleRect, "Text", "Building: under construction", 36, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
+            var statusRect = MakeRect("Status", root, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(24, -72), new Vector2(440, 56));
+            var status = Label(statusRect, "Text", "Ready in 1m 00s", 34, TextAnchor.MiddleLeft, Ink);
+            var barBg = MakeRect("ProgressBar", root, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(24, 34), new Vector2(440, 36));
+            AddImage(barBg, new Color(0.82f, 0.78f, 0.7f), raycast: false);
+            var fillRect = Stretch("Fill", barBg, 4f);
+            var fill = AddImage(fillRect, new Color(0.95f, 0.65f, 0.15f), raycast: false);
+            fill.type = Image.Type.Filled;
+            fill.fillMethod = Image.FillMethod.Horizontal;
+            fill.fillAmount = 0.4f;
+
+            var buttons = MakeRect("Buttons", root, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-24, 20), new Vector2(580, 130));
+            HRow(buttons, 16, TextAnchor.MiddleRight);
+            var ad = MakeButton(buttons, "AdButton", "Finish now", new Vector2(280, 120), new Color(0.95f, 0.65f, 0.15f), out var adLabel, 30);
+            var gems = MakeButton(buttons, "GemsButton", "Finish now", new Vector2(280, 120), new Color(0.3f, 0.6f, 0.85f), out var gemsLabel, 30);
+
+            var panel = container.gameObject.AddComponent<ConstructionPanel>();
+            Wire(panel, ("panelRoot", root.gameObject), ("titleText", title), ("statusText", status), ("progressFill", fill),
+                ("adButton", ad), ("adLabel", adLabel), ("gemsButton", gems), ("gemsLabel", gemsLabel));
             root.gameObject.SetActive(false);
             return panel;
         }

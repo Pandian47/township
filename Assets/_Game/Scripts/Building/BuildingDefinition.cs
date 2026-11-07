@@ -43,6 +43,12 @@ namespace TownBuilder
         [Tooltip("How many products can be queued (including finished ones waiting to be collected).")]
         [SerializeField, Min(1)] private int productionSlots = 3;
 
+        [Header("Construction")]
+        [Tooltip("Seconds to build after placing. 0 = ready instantly.")]
+        [SerializeField, Min(0)] private int buildSeconds;
+        [Tooltip("XP granted when construction completes.")]
+        [SerializeField, Min(0)] private int buildXp;
+
         public string Id => id;
         public int MaxCount => maxCount;
         public bool IsFarmPlot => isFarmPlot;
@@ -50,6 +56,8 @@ namespace TownBuilder
         public IReadOnlyList<RecipeDefinition> Recipes => recipes;
         public bool IsFactory => recipes != null && recipes.Count > 0;
         public int ProductionSlots => Mathf.Max(1, productionSlots);
+        public long BuildDurationMs => buildSeconds * 1000L;
+        public int BuildXp => buildXp;
         public string DisplayName => string.IsNullOrEmpty(displayName) ? id : displayName;
         public BuildingCategory Category => category;
         public Sprite Sprite => sprite;
@@ -77,6 +85,12 @@ namespace TownBuilder
             unlockLevel = newUnlockLevel;
             coinCost = newCoinCost;
             removable = isRemovable;
+        }
+
+        public void EditorConfigureConstruction(int seconds, int xp)
+        {
+            buildSeconds = seconds;
+            buildXp = xp;
         }
 
         public void EditorConfigureFactory(List<RecipeDefinition> newRecipes, int slots)

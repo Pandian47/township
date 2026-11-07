@@ -23,6 +23,18 @@ Nothing is hard-coded in C#. The numbers below are **examples to start balancing
 
 Removing a building does not refund coins (yet).
 
+### Construction (`BuildingDefinition.buildSeconds`, `buildXp`)
+
+| Building | Build time | XP on completion |
+|---|---|---|
+| Cottage | 30 s | 5 |
+| Barn | 1 min | 8 |
+| Silo | 1.5 min | 6 |
+| Bakery | 2 min | 10 |
+| Town Hall, Field | instant | 0 |
+
+Finish early: a rewarded ad, or 1 gem per started minute left.
+
 | field | Field | 1×1 | 1 | 20 | Yes (max 12, crop lost) |
 
 Storage: base barn capacity 50 (`GameContent.baseStorageCapacity`). Barn +50, Silo +30 (`storageCapacityBonus`).

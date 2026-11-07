@@ -36,6 +36,7 @@ namespace TownBuilder
         private GameContent _content;
         private IClock _clock;
         private float _nextRefresh;
+        private Func<string, bool> _isBuilt;
 
         public event Action<string> Notification;
         public event Action Modified;
@@ -63,11 +64,15 @@ namespace TownBuilder
 
         // ------------------------------------------------------------------ Queries
 
+        /// <summary>Factories under construction don't produce yet.</summary>
+        public void SetBuiltCheck(Func<string, bool> isBuilt) => _isBuilt = isBuilt;
+
         public bool IsFactory(string instanceId, out BuildingDefinition definition)
         {
             definition = null;
             return _town != null && _town.TryGet(instanceId, out var b) &&
-                   _content.TryGetBuilding(b.DefinitionId, out definition) && definition.IsFactory;
+                   _content.TryGetBuilding(b.DefinitionId, out definition) && definition.IsFactory &&
+                   (_isBuilt == null || _isBuilt(instanceId));
         }
 
         public ProductionQueue GetQueue(string factoryId) =>

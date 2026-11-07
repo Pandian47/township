@@ -61,6 +61,8 @@ namespace TownBuilder.Domain
         public string definitionId;
         public int x;
         public int y;
+        /// <summary>UTC ms when construction finishes; 0 = built (also for saves older than v0.4).</summary>
+        public long constructionEndsAtUnixMs;
     }
 
     [Serializable]

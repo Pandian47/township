@@ -145,8 +145,19 @@ namespace TownBuilder
             }
         }
 
+        /// <summary>Restores buildings that were still under construction. Duration comes from the current definition.</summary>
+        public static void LoadConstruction(SaveData save, Town town, GameContent content, ConstructionSites sites)
+        {
+            foreach (var entry in save.buildings)
+            {
+                if (entry.constructionEndsAtUnixMs <= 0 || !town.TryGet(entry.instanceId, out _)) continue;
+                if (!content.TryGetBuilding(entry.definitionId, out var def) || def.BuildDurationMs <= 0) continue;
+                sites.Restore(entry.instanceId, entry.constructionEndsAtUnixMs, def.BuildDurationMs);
+            }
+        }
+
         public static void WriteTo(SaveData save, Town town, Wallet wallet, PlayerProgress progress, FarmPlots plots = null,
-            Inventory inventory = null)
+            Inventory inventory = null, ConstructionSites sites = null)
         {
             if (plots != null)
             {
@@ -183,6 +194,7 @@ namespace TownBuilder
                     definitionId = b.DefinitionId,
                     x = b.Origin.X,
                     y = b.Origin.Y,
+                    constructionEndsAtUnixMs = sites != null && sites.TryGet(b.InstanceId, out var site) ? site.EndUnixMs : 0,
                 });
             }
         }

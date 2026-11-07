@@ -40,7 +40,7 @@ namespace TownBuilder.EditorTools
         {
             public string Id, Name, Folder;
             public BuildingCategory Category;
-            public int W, H, HeightPx, Unlock, Cost, MaxCount, StorageBonus;
+            public int W, H, HeightPx, Unlock, Cost, MaxCount, StorageBonus, BuildSeconds, BuildXp;
             public bool Removable, FarmPlot;
             public Color32 Wall, Roof;
         }
@@ -71,16 +71,16 @@ namespace TownBuilder.EditorTools
                 W = 3, H = 3, HeightPx = 150, Unlock = 1, Cost = 0, Removable = false, MaxCount = 1,
                 Wall = new Color32(240, 226, 196, 255), Roof = new Color32(70, 120, 190, 255) },
             new BuildingSeed { Id = "cottage", Name = "Cottage", Category = BuildingCategory.Residential, Folder = "Residential",
-                W = 2, H = 2, HeightPx = 80, Unlock = 1, Cost = 150, Removable = true,
+                W = 2, H = 2, HeightPx = 80, Unlock = 1, Cost = 150, Removable = true, BuildSeconds = 30, BuildXp = 5,
                 Wall = new Color32(250, 236, 200, 255), Roof = new Color32(214, 92, 70, 255) },
             new BuildingSeed { Id = "barn", Name = "Barn", Category = BuildingCategory.Production, Folder = "Production",
-                W = 2, H = 2, HeightPx = 110, Unlock = 1, Cost = 300, Removable = true, StorageBonus = 50,
+                W = 2, H = 2, HeightPx = 110, Unlock = 1, Cost = 300, Removable = true, StorageBonus = 50, BuildSeconds = 60, BuildXp = 8,
                 Wall = new Color32(190, 72, 56, 255), Roof = new Color32(120, 84, 64, 255) },
             new BuildingSeed { Id = "bakery", Name = "Bakery", Category = BuildingCategory.Production, Folder = "Production",
-                W = 2, H = 2, HeightPx = 95, Unlock = 1, Cost = 450, Removable = true,
+                W = 2, H = 2, HeightPx = 95, Unlock = 1, Cost = 450, Removable = true, BuildSeconds = 120, BuildXp = 10,
                 Wall = new Color32(246, 214, 160, 255), Roof = new Color32(226, 140, 50, 255) },
             new BuildingSeed { Id = "silo", Name = "Silo", Category = BuildingCategory.Production, Folder = "Production",
-                W = 1, H = 1, HeightPx = 140, Unlock = 3, Cost = 250, Removable = true, StorageBonus = 30,
+                W = 1, H = 1, HeightPx = 140, Unlock = 3, Cost = 250, Removable = true, StorageBonus = 30, BuildSeconds = 90, BuildXp = 6,
                 Wall = new Color32(186, 196, 206, 255), Roof = new Color32(120, 136, 150, 255) },
             new BuildingSeed { Id = "field", Name = "Field", Category = BuildingCategory.Farming, Folder = "Farming",
                 W = 1, H = 1, Unlock = 1, Cost = 20, Removable = true, MaxCount = 12, FarmPlot = true },
@@ -152,6 +152,7 @@ namespace TownBuilder.EditorTools
             PlaceholderArtGenerator.EnsureFolder(PlaceholderArtGenerator.FarmingBuildingsFolder);
             PlaceholderArtGenerator.EnsureFolder(PlaceholderArtGenerator.CropsArtFolder);
             foreach (var s in Seeds.Where(s => s.FarmPlot)) art.Buildings[s.Id] = PlaceholderArtGenerator.CreateFieldSprite();
+            PlaceholderArtGenerator.CreateConstructionIcon();
 
             CreateContent(art);
             CreateCrops();
@@ -209,6 +210,7 @@ namespace TownBuilder.EditorTools
                 {
                     def = ScriptableObject.CreateInstance<BuildingDefinition>();
                     def.EditorConfigure(s.Id, s.Name, s.Category, art.Buildings[s.Id], new Vector2Int(s.W, s.H), s.Unlock, s.Cost, s.Removable, s.MaxCount);
+                    def.EditorConfigureConstruction(s.BuildSeconds, s.BuildXp);
                     AssetDatabase.CreateAsset(def, path);
                 }
                 else if (def.Sprite == null)

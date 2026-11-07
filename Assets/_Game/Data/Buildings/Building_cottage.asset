@@ -20,3 +20,5 @@ MonoBehaviour:
   unlockLevel: 1
   coinCost: 150
   removable: 1
+  buildSeconds: 30
+  buildXp: 5

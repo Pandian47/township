@@ -19,6 +19,9 @@ namespace TownBuilder
         [SerializeField] private FieldPanel fieldPanel;
         [SerializeField] private ToastView toast;
 
+        [Header("Construction")]
+        [SerializeField] private ConstructionPanel constructionPanel;
+
         [Header("Production")]
         [SerializeField] private FactoryPanel factoryPanel;
 
@@ -54,18 +57,20 @@ namespace TownBuilder
         private PlacementSystem _placement;
         private FarmingController _farming;
         private ProductionController _production;
+        private ConstructionController _construction;
         private OrderService _orders;
         private ProgressionService _progression;
         private StorageService _storage;
         private Wallet _wallet;
 
-        public void Initialize(PlacementSystem placement, FarmingController farming, ProductionController production, OrderService orders,
+        public void Initialize(PlacementSystem placement, FarmingController farming, ProductionController production, ConstructionController construction, OrderService orders,
             ProgressionService progression, StorageService storage, Wallet wallet,
             PlayerProgress progress, GameContent content, IAdService ads, Action onMenu)
         {
             _placement = placement;
             _farming = farming;
             _production = production;
+            _construction = construction;
             _orders = orders;
             _progression = progression;
             _storage = storage;
@@ -77,6 +82,9 @@ namespace TownBuilder
             storage.Notification += toast.Show;
             production.Notification += toast.Show;
             factoryPanel.Initialize(production, content, ads);
+            constructionPanel.Initialize(construction, ads);
+            construction.Notification += toast.Show;
+            construction.Completed += OnConstructionCompleted;
 
             ordersPanel.Initialize(orders, content, storage.Inventory);
             ordersButton.onClick.AddListener(OpenOrders);
@@ -119,8 +127,15 @@ namespace TownBuilder
             if (_storage != null) _storage.Notification -= toast.Show;
             if (_production != null) _production.Notification -= toast.Show;
             if (_orders != null) _orders.Notification -= toast.Show;
+            if (_construction != null)
+            {
+                _construction.Notification -= toast.Show;
+                _construction.Completed -= OnConstructionCompleted;
+            }
             if (_progression != null) _progression.LeveledUp -= levelUpDialog.Enqueue;
         }
+
+        private void OnConstructionCompleted(string instanceId) => Refresh();
 
         private void OpenOrders()
         {
@@ -172,7 +187,12 @@ namespace TownBuilder
                 removeButton.interactable = definition.Removable;
             }
 
-            bool factorySelected = selected && definition != null && definition.IsFactory;
+            string target = _placement.TargetInstanceId;
+            bool building = selected && target != null && !_construction.IsBuilt(target);
+            if (building && constructionPanel.InstanceId != target) constructionPanel.ShowFor(target, definition != null ? definition.DisplayName : "Building");
+            else if (!building && constructionPanel.InstanceId != null) constructionPanel.Hide();
+
+            bool factorySelected = selected && !building && definition != null && _production.IsFactory(target, out _);
             if (factorySelected && factoryPanel.FactoryId != _placement.TargetInstanceId) factoryPanel.ShowFor(_placement.TargetInstanceId);
             else if (!factorySelected && factoryPanel.FactoryId != null) factoryPanel.Hide();
 
