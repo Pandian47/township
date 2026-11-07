@@ -18,6 +18,16 @@ namespace TownBuilder.Domain
         public List<BuildingSaveData> buildings = new List<BuildingSaveData>();
         public List<ItemStackSaveData> inventory = new List<ItemStackSaveData>();
         public List<CropPlotSaveData> cropPlots = new List<CropPlotSaveData>();
+        public List<ProductionJobSaveData> productionJobs = new List<ProductionJobSaveData>();
+    }
+
+    /// <summary>One queued/finished product in a factory. Jobs of one factory are saved in queue order.</summary>
+    [Serializable]
+    public sealed class ProductionJobSaveData
+    {
+        public string factoryInstanceId;
+        public string recipeId;
+        public long startUnixMs;
     }
 
     [Serializable]

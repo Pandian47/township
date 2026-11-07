@@ -58,7 +58,20 @@ namespace TownBuilder
         /// Optional hook asked when a placed building is tapped in Idle/Selected mode. Return true to consume the tap
         /// (e.g. farming harvests a ready field instead of selecting it).
         /// </summary>
-        public Func<PlacedBuilding, bool> BuildingTapInterceptor { get; set; }
+        public void AddTapInterceptor(Func<PlacedBuilding, bool> interceptor)
+        {
+            if (interceptor != null && !_tapInterceptors.Contains(interceptor)) _tapInterceptors.Add(interceptor);
+        }
+
+        private readonly System.Collections.Generic.List<Func<PlacedBuilding, bool>> _tapInterceptors =
+            new System.Collections.Generic.List<Func<PlacedBuilding, bool>>();
+
+        private bool InterceptTap(PlacedBuilding building)
+        {
+            foreach (var interceptor in _tapInterceptors)
+                if (interceptor(building)) return true;
+            return false;
+        }
 
         /// <summary>Raised whenever the town layout or wallet changed because of a player action (autosave hook).</summary>
         public event Action TownModified;
@@ -232,7 +245,7 @@ namespace TownBuilder
                     var world = grid.ScreenToWorld(worldCamera, screenPosition);
                     if (buildings.TryPick(world, out var building))
                     {
-                        if (BuildingTapInterceptor != null && BuildingTapInterceptor(building))
+                        if (InterceptTap(building))
                         {
                             if (CurrentMode == Mode.Selected) EnterIdle();
                         }

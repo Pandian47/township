@@ -155,6 +155,7 @@ namespace TownBuilder.EditorTools
 
             CreateContent(art);
             CreateCrops();
+            CreateProduction();
             ConfigureAds();
             CreateBuildingPrefab();
             AssetDatabase.SaveAssets();
@@ -257,6 +258,94 @@ namespace TownBuilder.EditorTools
 
             EditorUtility.SetDirty(content);
             return content;
+        }
+
+        private struct ProductSeed
+        {
+            public string Id, Name;
+            public PlaceholderArtGenerator.ProductStyle Style;
+            public int SellPrice;
+        }
+
+        private struct RecipeSeed
+        {
+            public string Id, ProductId, FactoryId;
+            public (string item, int amount)[] Ingredients;
+            public int Seconds, Xp, Unlock;
+        }
+
+        // Example values (not from any existing game).
+        private static readonly ProductSeed[] ProductSeeds =
+        {
+            new ProductSeed { Id = "bread", Name = "Bread", Style = PlaceholderArtGenerator.ProductStyle.Bread, SellPrice = 12 },
+            new ProductSeed { Id = "corn_bread", Name = "Corn Bread", Style = PlaceholderArtGenerator.ProductStyle.CornBread, SellPrice = 22 },
+        };
+
+        private static readonly RecipeSeed[] RecipeSeeds =
+        {
+            new RecipeSeed { Id = "bake_bread", ProductId = "bread", FactoryId = "bakery",
+                Ingredients = new[] { ("wheat", 2) }, Seconds = 180, Xp = 3, Unlock = 1 },
+            new RecipeSeed { Id = "bake_corn_bread", ProductId = "corn_bread", FactoryId = "bakery",
+                Ingredients = new[] { ("corn", 2), ("wheat", 1) }, Seconds = 360, Xp = 5, Unlock = 1 },
+        };
+
+        private const int BakerySlots = 3;
+
+        private static void CreateProduction()
+        {
+            PlaceholderArtGenerator.EnsureFolder(PlaceholderArtGenerator.ProductsArtFolder);
+            var content = AssetDatabase.LoadAssetAtPath<GameContent>(ContentPath);
+
+            var products = content.Products.Where(p => p != null).ToList();
+            foreach (var s in ProductSeeds)
+            {
+                var path = $"{Root}/Data/Products/Product_{s.Id}.asset";
+                var product = AssetDatabase.LoadAssetAtPath<ProductDefinition>(path);
+                if (product == null)
+                {
+                    product = ScriptableObject.CreateInstance<ProductDefinition>();
+                    product.EditorConfigure(s.Id, s.Name, PlaceholderArtGenerator.CreateProductIcon(s.Id, s.Style), s.SellPrice);
+                    AssetDatabase.CreateAsset(product, path);
+                }
+
+                if (!products.Contains(product)) products.Add(product);
+            }
+
+            var recipes = content.Recipes.Where(r => r != null).ToList();
+            var byFactory = new Dictionary<string, List<RecipeDefinition>>();
+            foreach (var s in RecipeSeeds)
+            {
+                var path = $"{Root}/Data/Recipes/Recipe_{s.Id}.asset";
+                var recipe = AssetDatabase.LoadAssetAtPath<RecipeDefinition>(path);
+                if (recipe == null)
+                {
+                    recipe = ScriptableObject.CreateInstance<RecipeDefinition>();
+                    var output = products.First(p => p.Id == s.ProductId);
+                    var ingredients = s.Ingredients.Select(i =>
+                    {
+                        content.TryGetItem(i.item, out var item);
+                        if (item == null) item = products.FirstOrDefault(p => p.Id == i.item);
+                        return new Ingredient { item = item, amount = i.amount };
+                    }).ToList();
+                    recipe.EditorConfigure(s.Id, output, 1, ingredients, s.Seconds, s.Xp, s.Unlock);
+                    AssetDatabase.CreateAsset(recipe, path);
+                }
+
+                if (!recipes.Contains(recipe)) recipes.Add(recipe);
+                if (!byFactory.TryGetValue(s.FactoryId, out var list)) byFactory[s.FactoryId] = list = new List<RecipeDefinition>();
+                list.Add(recipe);
+            }
+
+            content.EditorSetProduction(products, recipes);
+            EditorUtility.SetDirty(content);
+
+            // Turn the seeded buildings into factories (only if a designer hasn't configured recipes already).
+            foreach (var pair in byFactory)
+            {
+                if (!content.TryGetBuilding(pair.Key, out var factory) || factory.IsFactory) continue;
+                factory.EditorConfigureFactory(pair.Value, BakerySlots);
+                EditorUtility.SetDirty(factory);
+            }
         }
 
         private static void CreateCrops()

@@ -19,6 +19,9 @@ namespace TownBuilder
         [SerializeField] private FieldPanel fieldPanel;
         [SerializeField] private ToastView toast;
 
+        [Header("Production")]
+        [SerializeField] private FactoryPanel factoryPanel;
+
         [Header("Barn")]
         [SerializeField] private BarnPanel barnPanel;
         [Tooltip("The barn pill in the top bar also opens the barn.")]
@@ -45,14 +48,16 @@ namespace TownBuilder
 
         private PlacementSystem _placement;
         private FarmingController _farming;
+        private ProductionController _production;
         private StorageService _storage;
         private Wallet _wallet;
 
-        public void Initialize(PlacementSystem placement, FarmingController farming, StorageService storage, Wallet wallet,
+        public void Initialize(PlacementSystem placement, FarmingController farming, ProductionController production, StorageService storage, Wallet wallet,
             PlayerProgress progress, GameContent content, IAdService ads, Action onMenu)
         {
             _placement = placement;
             _farming = farming;
+            _production = production;
             _storage = storage;
             _wallet = wallet;
 
@@ -60,6 +65,8 @@ namespace TownBuilder
             fieldPanel.Initialize(farming, content, wallet, ads, onPlanted: () => _placement.Cancel());
             farming.Notification += toast.Show;
             storage.Notification += toast.Show;
+            production.Notification += toast.Show;
+            factoryPanel.Initialize(production, content, ads);
 
             barnPanel.Initialize(storage, content);
             barnButton.onClick.AddListener(OpenBarn);
@@ -95,6 +102,7 @@ namespace TownBuilder
             if (_wallet != null) _wallet.Changed -= Refresh;
             if (_farming != null) _farming.Notification -= toast.Show;
             if (_storage != null) _storage.Notification -= toast.Show;
+            if (_production != null) _production.Notification -= toast.Show;
         }
 
         private void OpenBarn()
@@ -108,7 +116,11 @@ namespace TownBuilder
         {
             if (!_placement.TryGetTargetDefinition(out var definition)) return;
             bool hasCrop = _farming.GetStage(_placement.TargetInstanceId) != PlotStage.Empty;
-            string warning = hasCrop ? "\nThe crop growing on it will be lost." : "\nThis cannot be undone and coins are not refunded.";
+            var queue = _production.GetQueue(_placement.TargetInstanceId);
+            bool hasProducts = queue != null && !queue.IsEmpty;
+            string warning = hasCrop ? "\nThe crop growing on it will be lost."
+                : hasProducts ? "\nProducts in its queue (and their ingredients) will be lost."
+                : "\nThis cannot be undone and coins are not refunded.";
             confirmDialog.Show($"Remove {definition.DisplayName}?{warning}", "Remove", () => _placement.RemoveSelected());
         }
 
@@ -135,6 +147,10 @@ namespace TownBuilder
                 selectionNameText.text = definition.DisplayName;
                 removeButton.interactable = definition.Removable;
             }
+
+            bool factorySelected = selected && definition != null && definition.IsFactory;
+            if (factorySelected && factoryPanel.FactoryId != _placement.TargetInstanceId) factoryPanel.ShowFor(_placement.TargetInstanceId);
+            else if (!factorySelected && factoryPanel.FactoryId != null) factoryPanel.Hide();
 
             bool fieldSelected = selected && definition != null && definition.IsFarmPlot;
             if (fieldSelected && fieldPanel.PlotId != _placement.TargetInstanceId) fieldPanel.ShowFor(_placement.TargetInstanceId);

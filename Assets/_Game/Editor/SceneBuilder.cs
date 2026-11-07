@@ -217,6 +217,8 @@ namespace TownBuilder.EditorTools
             Wire(placement, ("worldCamera", cam), ("pointerInput", input), ("grid", isoGrid), ("buildings", buildingController),
                 ("highlighter", highlighter));
             var farming = Go("FarmingController", systems.transform).AddComponent<FarmingController>();
+            var production = Go("ProductionController", systems.transform).AddComponent<ProductionController>();
+            Wire(production, ("buildings", buildingController), ("placement", placement));
             Wire(farming, ("buildings", buildingController), ("placement", placement));
 
             // --- UI
@@ -243,6 +245,7 @@ namespace TownBuilder.EditorTools
                 ("buildings", buildingController),
                 ("placement", placement),
                 ("farming", farming),
+                ("production", production),
                 ("hud", hud));
 
             EditorSceneManager.SaveScene(scene, TownPath);
@@ -363,6 +366,7 @@ namespace TownBuilder.EditorTools
 
             // --- Farming: field panel (above the selection bar) and toast
             var fieldPanel = BuildFieldPanel(safe);
+            var factoryPanel = BuildFactoryPanel(safe);
             var toast = BuildToast(safe);
 
             // --- Barn screen
@@ -377,6 +381,7 @@ namespace TownBuilder.EditorTools
             var hud = canvas.gameObject.AddComponent<TownHudController>();
             Wire(hud,
                 ("fieldPanel", fieldPanel),
+                ("factoryPanel", factoryPanel),
                 ("barnPanel", barnPanel),
                 ("barnButton", barnButton),
                 ("barnPillButton", barnPillButton),
@@ -467,6 +472,83 @@ namespace TownBuilder.EditorTools
             return panel;
         }
 
+        private static FactoryPanel BuildFactoryPanel(RectTransform safe)
+        {
+            var container = Stretch("FactoryPanel", safe);
+            var root = MakeRect("Root", container, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 196), new Vector2(1640, 330));
+            AddImage(root, PanelColor);
+
+            var titleRect = MakeRect("Title", root, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(24, -10), new Vector2(600, 54));
+            var title = Label(titleRect, "Text", "Bakery", 38, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
+            var queueTitleRect = MakeRect("QueueTitle", root, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-24, -10), new Vector2(620, 54));
+            var queueTitle = Label(queueTitleRect, "Text", "Queue 0/3", 32, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
+
+            // Recipes (left)
+            var recipes = MakeRect("Recipes", root, new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), Vector2.zero, new Vector2(960, 0));
+            recipes.offsetMin = new Vector2(24, 16);
+            recipes.offsetMax = new Vector2(984, -70);
+            HRow(recipes, 16, TextAnchor.MiddleLeft);
+
+            var template = MakeRect("RecipeTemplate", recipes, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(300, 240));
+            var bg = AddImage(template, Color.white);
+            Prefer(template, 300, 240);
+            var button = template.gameObject.AddComponent<Button>();
+            button.targetGraphic = bg;
+            var iconRect = MakeRect("Icon", template, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -6), new Vector2(-20, 100));
+            var icon = iconRect.gameObject.AddComponent<Image>();
+            icon.preserveAspect = true;
+            icon.raycastTarget = false;
+            var nameRect = MakeRect("Name", template, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 84), new Vector2(-12, 44));
+            var nameText = Label(nameRect, "Text", "Product", 30, TextAnchor.MiddleCenter, Ink, FontStyle.Bold);
+            var ingRect = MakeRect("Ingredients", template, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 6), new Vector2(-12, 76));
+            var ingText = Label(ingRect, "Text", "", 24, TextAnchor.MiddleCenter, Ink);
+            var recipeView = template.gameObject.AddComponent<RecipeButtonView>();
+            Wire(recipeView, ("button", button), ("icon", icon), ("nameText", nameText), ("ingredientsText", ingText));
+            template.gameObject.SetActive(false);
+
+            // Queue (right): slots + buttons
+            var queue = MakeRect("Queue", root, new Vector2(1f, 0f), new Vector2(1f, 1f), new Vector2(1f, 0.5f), Vector2.zero, Vector2.zero);
+            queue.offsetMin = new Vector2(-640, 16);
+            queue.offsetMax = new Vector2(-24, -70);
+            var slotsRow = MakeRect("Slots", queue, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(0, 140));
+            HRow(slotsRow, 12, TextAnchor.UpperLeft);
+
+            var slotViews = new QueueSlotView[4];
+            for (int i = 0; i < slotViews.Length; i++)
+            {
+                var slot = MakeRect($"Slot{i + 1}", slotsRow, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(144, 140));
+                Prefer(slot, 144, 140);
+                var slotBg = AddImage(slot, Color.white, raycast: false);
+                var slotIconRect = MakeRect("Icon", slot, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -4), new Vector2(-16, 78));
+                var slotIcon = slotIconRect.gameObject.AddComponent<Image>();
+                slotIcon.raycastTarget = false;
+                var statusRect = MakeRect("Status", slot, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 22), new Vector2(-8, 34));
+                var status = Label(statusRect, "Text", "Empty", 24, TextAnchor.MiddleCenter, Ink);
+                var barBg = MakeRect("Bar", slot, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 6), new Vector2(-16, 14));
+                AddImage(barBg, new Color(0.82f, 0.78f, 0.7f), raycast: false);
+                var fillRect = Stretch("Fill", barBg, 2f);
+                var fill = AddImage(fillRect, Green, raycast: false);
+                fill.type = Image.Type.Filled;
+                fill.fillMethod = Image.FillMethod.Horizontal;
+                var view = slot.gameObject.AddComponent<QueueSlotView>();
+                Wire(view, ("background", slotBg), ("icon", slotIcon), ("statusText", status), ("progressFill", fill));
+                slotViews[i] = view;
+            }
+
+            var actions = MakeRect("Actions", queue, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), Vector2.zero, new Vector2(0, 90));
+            HRow(actions, 12, TextAnchor.MiddleLeft);
+            var collect = MakeButton(actions, "CollectButton", "Collect", new Vector2(260, 86), Green, out var collectLabel, 32);
+            var finish = MakeButton(actions, "FinishNowButton", "Finish now", new Vector2(300, 86), new Color(0.95f, 0.65f, 0.15f), out var finishLabel, 28);
+
+            var panel = container.gameObject.AddComponent<FactoryPanel>();
+            Wire(panel, ("panelRoot", root.gameObject), ("titleText", title), ("queueTitleText", queueTitle),
+                ("recipesParent", recipes), ("recipeTemplate", recipeView), ("collectButton", collect), ("collectLabel", collectLabel),
+                ("finishNowButton", finish), ("finishNowLabel", finishLabel));
+            WireArray(panel, "slots", slotViews);
+            root.gameObject.SetActive(false);
+            return panel;
+        }
+
         private static FieldPanel BuildFieldPanel(RectTransform safe)
         {
             var container = Stretch("FieldPanel", safe);
@@ -528,7 +610,7 @@ namespace TownBuilder.EditorTools
 
         private static ToastView BuildToast(RectTransform safe)
         {
-            var rect = MakeRect("Toast", safe, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 480), new Vector2(1000, 84));
+            var rect = MakeRect("Toast", safe, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 560), new Vector2(1000, 84));
             AddImage(rect, new Color(0.1f, 0.12f, 0.16f, 0.85f), raycast: false);
             var text = Label(rect, "Text", "", 38, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
             var group = rect.gameObject.AddComponent<CanvasGroup>();

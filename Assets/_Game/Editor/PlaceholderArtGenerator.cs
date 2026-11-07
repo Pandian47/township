@@ -397,6 +397,61 @@ namespace TownBuilder.EditorTools
             }
         }
 
+        // ------------------------------------------------------------------ Products
+
+        public const string ProductsArtFolder = "Assets/_Game/Art/Products";
+
+        public enum ProductStyle { Bread, CornBread }
+
+        /// <summary>128x128 product icon (UI and the "ready" bubble above factories). Pivot centre.</summary>
+        public static Sprite CreateProductIcon(string productId, ProductStyle style) =>
+            CreateSprite($"{ProductsArtFolder}/PH_Product_{productId}.png", () => RenderProduct(style), new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+
+        private static Texture2D RenderProduct(ProductStyle style)
+        {
+            const int size = 128;
+            var tex = NewTexture(size, size);
+            var pixels = new Color32[size * size];
+
+            if (style == ProductStyle.Bread)
+            {
+                // Oval loaf: darker crust, lighter top, three diagonal scores.
+                var crust = new Color32(190, 120, 55, 255);
+                var top = new Color32(225, 165, 85, 255);
+                for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float dx = (x + 0.5f - 64f) / 54f, dy = (y + 0.5f - 58f) / 34f;
+                    float d = dx * dx + dy * dy;
+                    if (d > 1f) continue;
+                    var c = dy > -0.1f ? Scale(top, 1f - d * 0.15f) : crust;
+                    float score = (x - 1.2f * y) % 26f;
+                    if (dy > 0f && d < 0.75f && score > -3f && score < 3f && Mathf.Abs(dx) < 0.7f) c = Scale(crust, 0.85f);
+                    pixels[y * size + x] = c;
+                }
+            }
+            else
+            {
+                // Square golden corn bread with small kernels.
+                var body = new Color32(235, 190, 70, 255);
+                for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float px = Mathf.Abs(x + 0.5f - 64f), py = Mathf.Abs(y + 0.5f - 60f);
+                    bool inside = px < 46f && py < 38f && (px < 38f || py < 30f || (px - 38f) * (px - 38f) + (py - 30f) * (py - 30f) < 64f);
+                    if (!inside) continue;
+                    var c = y > 60 ? Scale(body, 1.08f) : Scale(body, 0.88f);
+                    if (y > 64 && ((x / 9) + (y / 9)) % 3 == 0 && x % 9 < 4 && y % 9 < 4) c = new Color32(250, 225, 120, 255);
+                    pixels[y * size + x] = c;
+                }
+            }
+
+            AddOutline(pixels, size, size);
+            tex.SetPixels32(pixels);
+            tex.Apply();
+            return tex;
+        }
+
         // ------------------------------------------------------------------ Helpers
 
         private static Sprite CreateSprite(string assetPath, System.Func<Texture2D> render, Vector2 pivot, SpriteMeshType meshType)

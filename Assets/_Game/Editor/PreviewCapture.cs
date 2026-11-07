@@ -112,7 +112,7 @@ namespace TownBuilder.EditorTools
             return outputPath;
         }
 
-        public enum HudState { None, Idle, Shop, Placing, Field, Barn }
+        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory }
 
         /// <summary>Command line: renders MainMenu + Town (idle, shop, placing) with UI into the folder after -previewOut.</summary>
         public static void CaptureUiFromCommandLine()
@@ -128,6 +128,7 @@ namespace TownBuilder.EditorTools
                 Capture(Path.Combine(folder, "Preview_Town_Placing.png"), HudState.Placing);
                 Capture(Path.Combine(folder, "Preview_Town_Field.png"), HudState.Field);
                 Capture(Path.Combine(folder, "Preview_Town_Barn.png"), HudState.Barn);
+                Capture(Path.Combine(folder, "Preview_Town_Factory.png"), HudState.Factory);
             }
             catch (Exception e)
             {
@@ -165,6 +166,34 @@ namespace TownBuilder.EditorTools
             {
                 Find(canvas, "PlacementActionBar").transform.Find("Info").GetComponent<UnityEngine.UI.Text>().text =
                     $"{placing.DisplayName}  -  {placing.CoinCost:N0} coins\nDrag or tap to position";
+            }
+
+            if (state == HudState.Factory)
+            {
+                var selection = Find(canvas, "SelectionActionBar");
+                selection.SetActive(true);
+                selection.transform.Find("Name").GetComponent<UnityEngine.UI.Text>().text = "Bakery";
+                var root = Find(canvas, "FactoryPanel").transform.Find("Root").gameObject;
+                root.SetActive(true);
+                content.TryGetBuilding("bakery", out var bakeryDef);
+                var template = root.GetComponentsInChildren<RecipeButtonView>(true).First();
+                foreach (var recipe in bakeryDef.Recipes)
+                {
+                    var b = UnityEngine.Object.Instantiate(template, template.transform.parent);
+                    b.gameObject.SetActive(true);
+                    b.Bind(recipe, null);
+                    b.Refresh(true, recipe.Id == "bake_bread", false);
+                }
+
+                var slots = root.GetComponentsInChildren<QueueSlotView>(true);
+                var icon0 = bakeryDef.Recipes[0].Output.Icon;
+                slots[0].ShowReady(icon0);
+                slots[1].ShowActive(icon0, 0.4f, "1m 48s");
+                slots[2].ShowWaiting(bakeryDef.Recipes[1].Output.Icon);
+                slots[3].gameObject.SetActive(false);
+                root.transform.Find("QueueTitle/Text").GetComponent<UnityEngine.UI.Text>().text = "Queue 3/3";
+                root.transform.Find("Queue/Actions/CollectButton/Label").GetComponent<UnityEngine.UI.Text>().text = "Collect (1)";
+                root.transform.Find("Queue/Actions/FinishNowButton/Label").GetComponent<UnityEngine.UI.Text>().text = "Finish now (ad)";
             }
 
             if (state == HudState.Barn)

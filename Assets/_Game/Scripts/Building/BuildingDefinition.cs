@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TownBuilder.Domain;
 using UnityEngine;
 
@@ -37,11 +38,18 @@ namespace TownBuilder
         [SerializeField] private bool isFarmPlot;
         [Tooltip("Extra barn capacity this building adds (e.g. Barn, Silo).")]
         [SerializeField, Min(0)] private int storageCapacityBonus;
+        [Tooltip("Recipes this building can produce. Any recipe makes it a factory.")]
+        [SerializeField] private List<RecipeDefinition> recipes = new List<RecipeDefinition>();
+        [Tooltip("How many products can be queued (including finished ones waiting to be collected).")]
+        [SerializeField, Min(1)] private int productionSlots = 3;
 
         public string Id => id;
         public int MaxCount => maxCount;
         public bool IsFarmPlot => isFarmPlot;
         public int StorageCapacityBonus => storageCapacityBonus;
+        public IReadOnlyList<RecipeDefinition> Recipes => recipes;
+        public bool IsFactory => recipes != null && recipes.Count > 0;
+        public int ProductionSlots => Mathf.Max(1, productionSlots);
         public string DisplayName => string.IsNullOrEmpty(displayName) ? id : displayName;
         public BuildingCategory Category => category;
         public Sprite Sprite => sprite;
@@ -69,6 +77,12 @@ namespace TownBuilder
             unlockLevel = newUnlockLevel;
             coinCost = newCoinCost;
             removable = isRemovable;
+        }
+
+        public void EditorConfigureFactory(List<RecipeDefinition> newRecipes, int slots)
+        {
+            recipes = newRecipes;
+            productionSlots = slots;
         }
 
         public void EditorConfigureRoles(bool farmPlot, int storageBonus)

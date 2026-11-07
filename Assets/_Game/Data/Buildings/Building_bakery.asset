@@ -20,3 +20,10 @@ MonoBehaviour:
   unlockLevel: 1
   coinCost: 450
   removable: 1
+  maxCount: 0
+  isFarmPlot: 0
+  storageCapacityBonus: 0
+  recipes:
+  - {fileID: 11400000, guid: 37df8db348431214fb0c6fdc709d0821, type: 2}
+  - {fileID: 11400000, guid: 7c6e5a274375a044380944114d8d4e2b, type: 2}
+  productionSlots: 3

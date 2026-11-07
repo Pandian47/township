@@ -46,8 +46,8 @@ Reordered from the original plan: farming and production make the game playable,
 |---|---|---|
 | 1 | Farming: Field building, Wheat/Corn, growth timers, harvest, barn capacity, rewarded "Finish now" | **Done** (53 tests) |
 | 2 | Barn screen: list items, sell for coins, paid barn expansion | **Done** |
-| 3 | Production: Bakery recipes (Bread, Corn bread), production queue, timers | Next |
-| 4 | Orders and levels: order board, coin + XP rewards, level curve, unlocks | Planned |
+| 3 | Production: Bakery recipes (Bread, Corn bread), production queue, timers, "Finish now" ad | **Done** |
+| 4 | Orders and levels: order board, coin + XP rewards, level curve, unlocks | Next |
 
 **v0.1 definition of done:** plant wheat → harvest → bake bread → deliver it for coins → place a building →
 close and reopen with nothing lost.
@@ -66,6 +66,16 @@ close and reopen with nothing lost.
 - [ ] Sell 1 / Sell all add the right coins and update the barn count; the card disappears at 0
 - [ ] Expand (+25 for 200 coins, then 400, 600...) raises capacity; the button greys out if you can't afford it
 - [ ] Close and reopen the app: the barn contents and expansion are kept
+
+### Device checklist (step 3: bakery)
+- [ ] Build a Bakery (450 coins), then tap it: the Bakery panel shows Bread (2 Wheat, 3m) and Corn Bread (2 Corn + 1 Wheat, 6m)
+- [ ] Recipes you can't afford show red ingredients and can't be tapped
+- [ ] Tap Bread twice: 2 Wheat is taken each time; the queue shows "3m 00s" (with a bar) then "Waiting"
+- [ ] After 3 minutes, a bread icon floats above the Bakery; tap the Bakery to collect: "+1 Bread +3 XP"
+- [ ] With 3 items queued, recipe cards grey out (queue full)
+- [ ] "Finish now (watch ad)" completes the current item, and the next one starts right away
+- [ ] Bread appears in the Barn and sells for 12 coins
+- [ ] Queue bread, close the app for 10 minutes, reopen: the bread is ready
 
 ## Milestone 3: Town building polish
 Construction timers (timestamp-based), placement sound/FX, selection outline, a Tile Palette for map editing,

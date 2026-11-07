@@ -22,6 +22,12 @@ MonoBehaviour:
   crops:
   - {fileID: 11400000, guid: a3036535aa3df024daad3d74b88f1f40, type: 2}
   - {fileID: 11400000, guid: 62b818b79b6cf7947af8159c1d81b0fa, type: 2}
+  products:
+  - {fileID: 11400000, guid: 283e0dc43b6fa8848829f17a7b436934, type: 2}
+  - {fileID: 11400000, guid: d1dc078b5b939504d8656b5e7eb9fcca, type: 2}
+  recipes:
+  - {fileID: 11400000, guid: 37df8db348431214fb0c6fdc709d0821, type: 2}
+  - {fileID: 11400000, guid: 7c6e5a274375a044380944114d8d4e2b, type: 2}
   startingCoins: 1500
   startingGems: 20
   starterBuildings:

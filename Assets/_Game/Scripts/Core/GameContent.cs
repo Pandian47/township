@@ -13,6 +13,8 @@ namespace TownBuilder
     {
         [SerializeField] private List<BuildingDefinition> buildings = new List<BuildingDefinition>();
         [SerializeField] private List<CropDefinition> crops = new List<CropDefinition>();
+        [SerializeField] private List<ProductDefinition> products = new List<ProductDefinition>();
+        [SerializeField] private List<RecipeDefinition> recipes = new List<RecipeDefinition>();
 
         [Header("New game")]
         [SerializeField] private long startingCoins = 1500;
@@ -34,6 +36,19 @@ namespace TownBuilder
 
         private Dictionary<string, BuildingDefinition> _buildingsById;
         private Dictionary<string, CropDefinition> _cropsById;
+        private Dictionary<string, ProductDefinition> _productsById;
+        private Dictionary<string, RecipeDefinition> _recipesById;
+
+        public IReadOnlyList<ProductDefinition> Products => products;
+        public IReadOnlyList<RecipeDefinition> Recipes => recipes;
+
+        public bool TryGetRecipe(string id, out RecipeDefinition recipe)
+        {
+            recipe = null;
+            if (string.IsNullOrEmpty(id)) return false;
+            EnsureIndex();
+            return _recipesById.TryGetValue(id, out recipe);
+        }
 
         public AdsConfig AdsConfig => adsConfig;
         public IReadOnlyList<BuildingDefinition> Buildings => buildings;
@@ -67,6 +82,8 @@ namespace TownBuilder
         {
             item = null;
             if (TryGetCrop(id, out var crop)) { item = crop; return true; }
+            EnsureIndex();
+            if (_productsById.TryGetValue(id, out var product)) { item = product; return true; }
             return false;
         }
 
@@ -97,6 +114,14 @@ namespace TownBuilder
                 if (c.SpriteForProgress(1f) == null) problems.Add($"Crop '{c.Id}' has no growth sprites.");
             }
 
+            foreach (var r in recipes)
+            {
+                if (r == null) continue;
+                if (r.Output == null) problems.Add($"Recipe '{r.Id}' has no output product.");
+                foreach (var i in r.Ingredients)
+                    if (i.item == null) problems.Add($"Recipe '{r.Id}' has an empty ingredient.");
+            }
+
             return problems;
         }
 
@@ -107,11 +132,22 @@ namespace TownBuilder
         {
             _buildingsById = null;
             _cropsById = null;
+            _productsById = null;
+            _recipesById = null;
         }
 
         private void EnsureIndex()
         {
-            if (_buildingsById != null && _cropsById != null) return;
+            if (_buildingsById != null && _cropsById != null && _productsById != null && _recipesById != null) return;
+
+            _productsById = new Dictionary<string, ProductDefinition>();
+            foreach (var p in products)
+                if (p != null && !string.IsNullOrEmpty(p.Id) && !_productsById.ContainsKey(p.Id)) _productsById.Add(p.Id, p);
+
+            _recipesById = new Dictionary<string, RecipeDefinition>();
+            foreach (var r in recipes)
+                if (r != null && !string.IsNullOrEmpty(r.Id) && !_recipesById.ContainsKey(r.Id)) _recipesById.Add(r.Id, r);
+
             _buildingsById = new Dictionary<string, BuildingDefinition>();
             foreach (var b in buildings)
             {
@@ -132,6 +168,13 @@ namespace TownBuilder
         {
             buildings = definitions;
             starterBuildings = starters;
+            ResetIndex();
+        }
+
+        public void EditorSetProduction(List<ProductDefinition> productDefinitions, List<RecipeDefinition> recipeDefinitions)
+        {
+            products = productDefinitions;
+            recipes = recipeDefinitions;
             ResetIndex();
         }
 

@@ -28,7 +28,16 @@ Removing a building does not refund coins (yet).
 Storage: base barn capacity 50 (`GameContent.baseStorageCapacity`). Barn +50, Silo +30 (`storageCapacityBonus`).
 Paid expansion: +25 per level, level N costs N × 200 coins, up to 10 levels (`storageExpansion*` in GameContent).
 
-Sell prices (`ItemDefinition.sellPrice`): Wheat 2 coins, Corn 4 coins.
+Sell prices (`ItemDefinition.sellPrice`): Wheat 2 coins, Corn 4 coins, Bread 12, Corn Bread 22.
+
+## Bakery (implemented, `Data/Recipes`, 3 queue slots)
+
+| Recipe | Ingredients | Time | XP | Product sells for |
+|---|---|---|---|---|
+| bake_bread → Bread | 2 Wheat | 3 min | 3 | 12 coins |
+| bake_corn_bread → Corn Bread | 2 Corn + 1 Wheat | 6 min | 5 | 22 coins |
+
+Value check: 2 Wheat sells for 4 coins, but as Bread it's worth 12 (+3 XP). Processing should always beat selling raw crops.
 
 ## Crops (implemented, `Data/Crops`)
 

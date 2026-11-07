@@ -57,6 +57,45 @@ namespace TownBuilder
             }
         }
 
+        /// <summary>Restores factory queues (in saved order). Jobs of missing factories or removed recipes are dropped.</summary>
+        public static void LoadProduction(SaveData save, Town town, GameContent content, Factories factories, List<string> warnings)
+        {
+            foreach (var job in save.productionJobs)
+            {
+                if (!town.TryGet(job.factoryInstanceId, out var building) ||
+                    !content.TryGetBuilding(building.DefinitionId, out var def) || !def.IsFactory)
+                {
+                    warnings.Add($"Production in missing factory '{job.factoryInstanceId}' dropped.");
+                    continue;
+                }
+
+                if (!content.TryGetRecipe(job.recipeId, out var recipe))
+                {
+                    warnings.Add($"Unknown recipe '{job.recipeId}' dropped.");
+                    continue;
+                }
+
+                factories.GetOrCreate(job.factoryInstanceId, def.ProductionSlots).Restore(recipe.Id, job.startUnixMs, recipe.DurationMs);
+            }
+        }
+
+        public static void WriteProduction(SaveData save, Factories factories)
+        {
+            save.productionJobs.Clear();
+            foreach (var pair in factories.Queues)
+            {
+                foreach (var job in pair.Value.Jobs)
+                {
+                    save.productionJobs.Add(new ProductionJobSaveData
+                    {
+                        factoryInstanceId = pair.Key,
+                        recipeId = job.RecipeId,
+                        startUnixMs = job.StartUnixMs,
+                    });
+                }
+            }
+        }
+
         public static void WriteTo(SaveData save, Town town, Wallet wallet, PlayerProgress progress, FarmPlots plots = null,
             Inventory inventory = null)
         {

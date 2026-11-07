@@ -62,7 +62,7 @@ namespace TownBuilder
             _town.BuildingAdded += OnBuildingAdded;
             _town.BuildingRemoved += OnBuildingRemoved;
             _plots.PlotChanged += RefreshPlot;
-            placement.BuildingTapInterceptor = OnBuildingTapped;
+            placement.AddTapInterceptor(OnBuildingTapped);
 
             foreach (var b in _town.Buildings) OnBuildingAdded(b);
         }

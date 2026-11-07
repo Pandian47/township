@@ -129,6 +129,21 @@ Validation always goes through `Town.CanPlace(origin, size, ignoreId)`, which re
 * **Saving:** `SaveData.cropPlots` (plot id, crop id, planted-at) and `SaveData.inventory`. Grow duration comes from the
   current CropDefinition at load time, so rebalancing also applies to crops already planted.
 
+## 6c. Production (factories)
+
+* **Domain:** `ProductionQueue` (per factory) runs jobs one after another, using UTC start times. A new job starts when
+  the previous one ends, or immediately if idle. Finished jobs wait in their slot until collected, so they still count
+  toward the slot limit. `FinishActiveNow` completes the current job and pulls later jobs forward. `Factories` maps
+  factory instance id → queue.
+* **Content:** `ProductDefinition : ItemDefinition`, and `RecipeDefinition` (output, ingredients, duration, XP, unlock).
+  A building is a factory when `BuildingDefinition.recipes` is not empty. `productionSlots` sets the queue size.
+* **Runtime:** `ProductionController` takes ingredients from the barn when a recipe is queued. It collects finished
+  products into the barn (stopping when the barn is full) and grants XP, and shows a floating product icon above
+  factories with something ready. `PlacementSystem` supports several tap interceptors: a ready field harvests and a
+  ready factory collects.
+* **UI:** `FactoryPanel` (recipe cards, queue slots, Collect, Finish now via `IAdService`).
+* **Saving:** `SaveData.productionJobs` (factory id, recipe id, start time), in queue order.
+
 ## 7. Save system
 
 * `JsonSaveStore` writes `town.json.tmp`, flushes it to disk, then `File.Replace`s it over `town.json`, keeping the old file as `town.json.bak`.
