@@ -145,6 +145,28 @@ namespace TownBuilder.Tests
             Assert.IsFalse(scene.Placement.BeginPlacement(hallDefinition));
         }
 
+        [UnityTest]
+        public IEnumerator RewardedAdButton_GrantsCoins_AndSaves()
+        {
+            yield return LoadTown();
+            var scene = Object.FindAnyObjectByType<TownSceneController>();
+            var config = GameRoot.Current.Context.Content.AdsConfig;
+            Assert.NotNull(config, "GameContent should reference AdsConfig");
+            Assert.IsInstanceOf<SimulatedAdService>(GameRoot.Current.Context.Ads, "Editor must never call real ads");
+
+            var adButton = Object.FindAnyObjectByType<RewardedCoinsButton>();
+            Assert.NotNull(adButton, "Rewarded ad button missing from the HUD");
+            var button = adButton.GetComponent<UnityEngine.UI.Button>();
+            Assert.IsTrue(button.interactable);
+
+            long before = scene.Wallet.Coins;
+            button.onClick.Invoke();
+            Assert.AreEqual(before + config.RewardedCoins, scene.Wallet.Coins);
+
+            scene.SaveNow();
+            Assert.AreEqual(before + config.RewardedCoins, GameRoot.Current.Context.SaveStore.Load().Data.player.coins);
+        }
+
         // ------------------------------------------------------------------ helpers
 
         private static IEnumerator LoadTown()

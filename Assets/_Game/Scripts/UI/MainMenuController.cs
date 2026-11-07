@@ -20,6 +20,8 @@ namespace TownBuilder
         [SerializeField] private Slider musicSlider;
         [SerializeField] private Slider sfxSlider;
         [SerializeField] private Button closeSettingsButton;
+        [Tooltip("Re-opens the ad consent form. Required by Google in GDPR regions; hidden elsewhere.")]
+        [SerializeField] private Button privacyOptionsButton;
 
         private GameContext _context;
 
@@ -31,7 +33,12 @@ namespace TownBuilder
 
             continueButton.onClick.AddListener(OnContinue);
             newGameButton.onClick.AddListener(OnNewGame);
-            settingsButton.onClick.AddListener(() => settingsPanel.SetActive(true));
+            settingsButton.onClick.AddListener(() =>
+            {
+                privacyOptionsButton.gameObject.SetActive(_context.Ads.PrivacyOptionsRequired);
+                settingsPanel.SetActive(true);
+            });
+            privacyOptionsButton.onClick.AddListener(() => _context.Ads.ShowPrivacyOptions(null));
             closeSettingsButton.onClick.AddListener(() => settingsPanel.SetActive(false));
 
             musicSlider.SetValueWithoutNotify(AudioPreferences.MusicVolume);

@@ -47,12 +47,25 @@ namespace TownBuilder
                 ? SaveDirectoryOverride
                 : Path.Combine(Application.persistentDataPath, SaveFolderName);
             var store = new JsonSaveStore(saveDirectory);
-            Context = new GameContext(content, store, new SystemClock());
+            Context = new GameContext(content, store, new SystemClock(), CreateAdService(content.AdsConfig));
             Current = this;
 
             Application.targetFrameRate = DefaultTargetFrameRate;
             QualitySettings.vSyncCount = 0;
             Screen.sleepTimeout = SleepTimeout.SystemSetting;
+        }
+
+        /// <summary>Real AdMob on Android/iOS devices, a simulated service in the Editor, nothing when disabled.</summary>
+        private IAdService CreateAdService(AdsConfig config)
+        {
+            if (config == null || !config.AdsEnabled) return new NoAdService();
+            if (Application.isEditor) return new SimulatedAdService();
+            if (Application.platform != RuntimePlatform.Android && Application.platform != RuntimePlatform.IPhonePlayer)
+                return new NoAdService();
+
+            var admob = new AdMobAdService(config, gameObject.AddComponent<CoroutineRunner>());
+            admob.Initialize();
+            return admob;
         }
 
         private void OnDestroy()

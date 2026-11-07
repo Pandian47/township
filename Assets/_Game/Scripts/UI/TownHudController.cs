@@ -12,6 +12,9 @@ namespace TownBuilder
         [SerializeField] private BuildingShopPanel shopPanel;
         [SerializeField] private ConfirmDialog confirmDialog;
 
+        [Header("Ads")]
+        [SerializeField] private RewardedCoinsButton rewardedCoinsButton;
+
         [Header("Bottom navigation")]
         [SerializeField] private GameObject bottomNavigation;
         [SerializeField] private Button buildButton;
@@ -33,12 +36,17 @@ namespace TownBuilder
         private PlacementSystem _placement;
         private Wallet _wallet;
 
-        public void Initialize(PlacementSystem placement, Wallet wallet, PlayerProgress progress, GameContent content, Action onMenu)
+        public void Initialize(PlacementSystem placement, Wallet wallet, PlayerProgress progress, GameContent content,
+            IAdService ads, Action onMenu)
         {
             _placement = placement;
             _wallet = wallet;
 
             topBar.Bind(wallet, progress);
+
+            bool adsOn = content.AdsConfig != null && content.AdsConfig.AdsEnabled && !(ads is NoAdService);
+            rewardedCoinsButton.gameObject.SetActive(adsOn);
+            if (adsOn) rewardedCoinsButton.Initialize(ads, wallet, content.AdsConfig.RewardedCoins);
             shopPanel.Initialize(content, wallet, progress, _placement.CanBuildMore, d => _placement.BeginPlacement(d));
 
             buildButton.onClick.AddListener(() =>
@@ -79,7 +87,7 @@ namespace TownBuilder
             bool placing = mode == PlacementSystem.Mode.PlacingNew || mode == PlacementSystem.Mode.Moving;
             bool selected = mode == PlacementSystem.Mode.Selected;
 
-            bottomNavigation.SetActive(!placing && !selected);
+            bottomNavigation.SetActive(!placing && !selected); // also hides the rewarded-ad button inside it
             placementBar.SetActive(placing);
             selectionBar.SetActive(selected);
 

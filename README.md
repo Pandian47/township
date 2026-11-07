@@ -14,7 +14,8 @@ An original 2D isometric farming and town-building game for Android, built AI-fi
 | Build shop, placement preview, validation, move, remove | ✅ |
 | Coins / gems / level HUD | ✅ |
 | Offline JSON save: atomic writes, backup recovery, schema migration, autosave | ✅ |
-| Automated tests: 29 EditMode + 5 PlayMode | ✅ |
+| AdMob test ads: rewarded "+100 coins", interstitial on Menu, GDPR consent ([Ads.md](Documentation/Ads.md)) | ✅ (test ids) |
+| Automated tests: 29 EditMode + 6 PlayMode | ✅ |
 | Placeholder art following the final art conventions | ✅ (replace with AI art) |
 | Android build | ⏳ install the Android Build Support module first |
 

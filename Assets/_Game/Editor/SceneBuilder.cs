@@ -101,13 +101,14 @@ namespace TownBuilder.EditorTools
             // Settings panel
             var settingsRoot = Stretch("SettingsPanel", canvas.transform);
             AddImage(settingsRoot, Dim, rounded: false);
-            var window = MakeRect("Window", settingsRoot, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(860, 560));
+            var window = MakeRect("Window", settingsRoot, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(860, 680));
             AddImage(window, PanelColor);
             VColumn(window, 24, TextAnchor.UpperCenter, 40);
             var header = Label(window, "Title", "Settings", 56, TextAnchor.MiddleCenter, Ink, FontStyle.Bold);
             Prefer(header, 760, 80);
             var music = SliderRow(window, "Music");
             var sfx = SliderRow(window, "Sound effects");
+            var privacyButton = MakeButton(window, "PrivacyOptionsButton", "Privacy & ads", new Vector2(400, 90), Blue, 36);
             var closeSettings = MakeButton(window, "CloseButton", "Close", new Vector2(300, 100), Slate);
 
             var dialog = CreateConfirmDialog(canvas.transform);
@@ -124,7 +125,8 @@ namespace TownBuilder.EditorTools
                 ("settingsPanel", settingsRoot.gameObject),
                 ("musicSlider", music),
                 ("sfxSlider", sfx),
-                ("closeSettingsButton", closeSettings));
+                ("closeSettingsButton", closeSettings),
+                ("privacyOptionsButton", privacyButton));
 
             EditorSceneManager.SaveScene(scene, MainMenuPath);
         }
@@ -324,8 +326,11 @@ namespace TownBuilder.EditorTools
             Wire(topBar, ("levelText", levelText), ("coinsText", coinsText), ("gemsText", gemsText));
 
             // --- Bottom navigation
-            var nav = MakeRect("BottomNavigation", safe, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-30, 30), new Vector2(520, 130));
+            var nav = MakeRect("BottomNavigation", safe, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-30, 30), new Vector2(860, 130));
             HRow(nav, 24, TextAnchor.LowerRight);
+            var adButton = MakeButton(nav, "RewardedAdButton", "Watch ad\n+100 coins", new Vector2(300, 120), new Color(0.95f, 0.65f, 0.15f), out var adLabel, 34);
+            var rewarded = adButton.gameObject.AddComponent<RewardedCoinsButton>();
+            Wire(rewarded, ("button", adButton), ("label", adLabel));
             var menuButton = MakeButton(nav, "MenuButton", "Menu", new Vector2(200, 120), Slate);
             var buildButton = MakeButton(nav, "BuildButton", "Build", new Vector2(260, 120), Green, 48);
 
@@ -361,6 +366,7 @@ namespace TownBuilder.EditorTools
                 ("confirmDialog", dialog),
                 ("bottomNavigation", nav.gameObject),
                 ("buildButton", buildButton),
+                ("rewardedCoinsButton", rewarded),
                 ("menuButton", menuButton),
                 ("placementBar", placementBar.gameObject),
                 ("placementInfoText", placementInfo),

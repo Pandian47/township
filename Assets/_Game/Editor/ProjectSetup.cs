@@ -130,6 +130,7 @@ namespace TownBuilder.EditorTools
             }));
 
             CreateContent(art);
+            ConfigureAds();
             CreateBuildingPrefab();
             AssetDatabase.SaveAssets();
 
@@ -206,6 +207,51 @@ namespace TownBuilder.EditorTools
             }
 
             return content;
+        }
+
+        public const string AdsConfigPath = Root + "/ScriptableObjects/AdsConfig.asset";
+
+        /// <summary>
+        /// Creates AdsConfig (test ad units), links it from GameContent, and puts Google's TEST app id into the
+        /// Google Mobile Ads settings if none is set yet. Replace both with your real ids before release.
+        /// </summary>
+        private static void ConfigureAds()
+        {
+            var config = AssetDatabase.LoadAssetAtPath<AdsConfig>(AdsConfigPath);
+            if (config == null)
+            {
+                config = ScriptableObject.CreateInstance<AdsConfig>();
+                AssetDatabase.CreateAsset(config, AdsConfigPath);
+            }
+
+            var content = AssetDatabase.LoadAssetAtPath<GameContent>(ContentPath);
+            var so = new SerializedObject(content);
+            var prop = so.FindProperty("adsConfig");
+            if (prop.objectReferenceValue == null)
+            {
+                prop.objectReferenceValue = config;
+                so.ApplyModifiedPropertiesWithoutUndo();
+            }
+
+            var settingsType = Type.GetType("GoogleMobileAds.Editor.GoogleMobileAdsSettings, GoogleMobileAds.Editor");
+            var load = settingsType?.GetMethod("LoadInstance",
+                System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public);
+            if (load == null)
+            {
+                Debug.LogWarning("[ProjectSetup] Google Mobile Ads plugin not found; set the AdMob app id manually.");
+                return;
+            }
+
+            var settings = (UnityEngine.Object)load.Invoke(null, null);
+            var settingsSo = new SerializedObject(settings);
+            var appId = settingsSo.FindProperty("adMobAndroidAppId");
+            if (appId != null && string.IsNullOrWhiteSpace(appId.stringValue))
+            {
+                appId.stringValue = AdsConfig.GoogleTestAppIdAndroid;
+                settingsSo.ApplyModifiedPropertiesWithoutUndo();
+                EditorUtility.SetDirty(settings);
+                Debug.Log("[ProjectSetup] AdMob Android app id set to Google's TEST id.");
+            }
         }
 
         private static BuildingView CreateBuildingPrefab()

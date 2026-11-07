@@ -75,12 +75,15 @@ namespace TownBuilder
             cameraController.SetWorldBounds(grid.WorldBounds());
             cameraController.SnapTo(grid.WorldBounds().center, startOrthographicSize);
 
-            hud.Initialize(placement, _wallet, _progress, _context.Content, ReturnToMainMenu);
+            _wallet.Changed += ScheduleSave; // e.g. coins from a rewarded ad
+
+            hud.Initialize(placement, _wallet, _progress, _context.Content, _context.Ads, ReturnToMainMenu);
         }
 
         private void OnDestroy()
         {
             if (placement != null) placement.TownModified -= ScheduleSave;
+            if (_wallet != null) _wallet.Changed -= ScheduleSave;
         }
 
         private void Update()
@@ -117,7 +120,8 @@ namespace TownBuilder
         private void ReturnToMainMenu()
         {
             SaveNow();
-            SceneManager.LoadScene(SceneNames.MainMenu);
+            // Natural break point: an interstitial may show here (respects the cooldown in AdsConfig).
+            _context.Ads.ShowInterstitialIfAllowed(() => SceneManager.LoadScene(SceneNames.MainMenu));
         }
     }
 }

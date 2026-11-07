@@ -23,3 +23,4 @@ MonoBehaviour:
   starterBuildings:
   - building: {fileID: 11400000, guid: a8dadb330e4c2a4459824451695b4c99, type: 2}
     origin: {x: 18, y: 18}
+  adsConfig: {fileID: 11400000, guid: 1e5cb2d5aaa6061439417a7434340494, type: 2}

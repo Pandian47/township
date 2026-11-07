@@ -19,8 +19,12 @@ namespace TownBuilder
         [Tooltip("Buildings placed automatically when a new town is created.")]
         [SerializeField] private List<StarterBuilding> starterBuildings = new List<StarterBuilding>();
 
+        [Header("Monetisation")]
+        [SerializeField] private AdsConfig adsConfig;
+
         private Dictionary<string, BuildingDefinition> _buildingsById;
 
+        public AdsConfig AdsConfig => adsConfig;
         public IReadOnlyList<BuildingDefinition> Buildings => buildings;
         public IReadOnlyList<StarterBuilding> StarterBuildings => starterBuildings;
         public long StartingCoins => startingCoins < 0 ? 0 : startingCoins;

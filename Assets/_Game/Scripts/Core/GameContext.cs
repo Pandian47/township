@@ -9,14 +9,16 @@ namespace TownBuilder
     /// </summary>
     public sealed class GameContext
     {
-        public GameContext(GameContent content, JsonSaveStore saveStore, IClock clock)
+        public GameContext(GameContent content, JsonSaveStore saveStore, IClock clock, IAdService ads)
         {
             Content = content ? content : throw new ArgumentNullException(nameof(content));
             SaveStore = saveStore ?? throw new ArgumentNullException(nameof(saveStore));
             Clock = clock ?? throw new ArgumentNullException(nameof(clock));
+            Ads = ads ?? new NoAdService();
         }
 
         public GameContent Content { get; }
+        public IAdService Ads { get; }
         public JsonSaveStore SaveStore { get; }
         public IClock Clock { get; }
 

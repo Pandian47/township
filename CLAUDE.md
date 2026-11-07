@@ -21,6 +21,7 @@ The project owner is a React/TypeScript developer who is new to Unity. Explain a
 7. Don't add manager singletons. `GameRoot` is the only global; pass dependencies through `Initialize(...)` or serialized references.
 8. Anything that depth-sorts (buildings, crops, trees, characters, vehicles) goes on the **Objects** sorting layer with its pivot at the bottom footprint corner.
 9. No new packages, SDKs, Firebase or backend code without the owner's approval (offline-first).
+   Approved so far: Google Mobile Ads (AdMob) + External Dependency Manager. See `Documentation/Ads.md`. Gameplay talks to `IAdService` only.
 10. Original content only: never copy names, art, UI or numbers from existing games.
 11. A feature is done only when the code compiles, **all tests pass**, and you've stated what still needs a device test.
 
