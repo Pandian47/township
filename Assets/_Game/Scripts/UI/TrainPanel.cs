@@ -65,6 +65,15 @@ namespace TownBuilder
             if (_train == null) return;
             var train = _train.Train;
             titleText.text = "Train Station";
+            if (!_train.IsOpen)
+            {
+                cratesRow.SetActive(false);
+                sendButton.gameObject.SetActive(false);
+                callButton.gameObject.SetActive(false);
+                statusText.text = $"Opens at level {_train.UnlockLevel}. The first train comes right away.";
+                return;
+            }
+
             bool here = train.IsAtStation;
             cratesRow.SetActive(here);
             sendButton.gameObject.SetActive(here);

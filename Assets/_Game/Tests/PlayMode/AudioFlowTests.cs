@@ -58,7 +58,8 @@ namespace TownBuilder.Tests
             Assert.AreEqual(SoundId.Harvest, audio.LastSound);
 
             scene.Progress.AddXp(1000);
-            Assert.AreEqual(SoundId.LevelUp, audio.LastSound);
+            // Other sounds may follow in the same moment (e.g. the station opening at level 5), so check the history.
+            Assert.IsTrue(audio.PlayedWithin(SoundId.LevelUp, 0.5f));
         }
 
         [UnityTest]

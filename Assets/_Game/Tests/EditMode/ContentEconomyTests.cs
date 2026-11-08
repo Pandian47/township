@@ -180,6 +180,11 @@ namespace TownBuilder.Tests
         {
             Assert.IsTrue(_content.TryGetBuilding(_content.TrainStationId, out var station), "train station building");
             Assert.AreEqual(1, station.MaxCount, "only one station");
+            Assert.IsFalse(station.Movable, "fixed landmark");
+            Assert.IsFalse(station.ShowInShop, "not sold in the shop");
+            Assert.IsFalse(station.Removable);
+            Assert.AreEqual(5, station.UnlockLevel, "opens at level 5");
+            Assert.IsTrue(_content.StarterBuildings.Any(s => s.building == station), "every town starts with it");
             Assert.NotNull(_content.TrainAtStationSprite, "station sprite with the train");
             Assert.Greater(_content.TrainCrates, 0);
             Assert.Greater(_content.TrainCoinMultiplier, 1f, "train crates must pay more than the barn");

@@ -247,6 +247,14 @@ Same art style, lighting and outline as the cottage. Create a small wooden signp
 Background: plain solid flat magenta (#FF00FF).
 ```
 
+## Railway
+
+### Rail texture → `rail.png` (optional; turned into the isometric rail tile)
+
+```
+Create a seamless tileable square texture seen straight from above (top-down, flat, no perspective): a single railway track running exactly vertically through the middle, two steel rails on dark wooden sleepers on a light gravel bed, with short green grass on both sides. Cartoon game style matching the cottage, no text. Top and bottom edges must tile seamlessly.
+```
+
 ---
 
 Do a **test set first**: cottage, field, wheat_4, bread and grass. Send those, check them in the game preview, and

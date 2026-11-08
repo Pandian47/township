@@ -39,7 +39,8 @@ namespace TownBuilder.Tests
             var content = GameRoot.Current.Context.Content;
             int startPlots = (content.LandStartMax.x - content.LandStartMin.x + 1) * (content.LandStartMax.y - content.LandStartMin.y + 1);
             Assert.AreEqual(startPlots, land.Owned.Count);
-            Assert.IsTrue(scene.Town.Buildings.All(b => land.IsCellUnlocked(b.Origin)), "starter buildings stand on owned land");
+            Assert.IsTrue(scene.Town.Buildings.Where(b => content.TryGetBuilding(b.DefinitionId, out var d) && d.Movable)
+                .All(b => land.IsCellUnlocked(b.Origin)), "starter buildings stand on owned land (the station is a landmark by the railway)");
             Assert.AreEqual(land.PlotsForSale().Count(), scene.LandController.SignCount, "one sign per plot for sale");
         }
 

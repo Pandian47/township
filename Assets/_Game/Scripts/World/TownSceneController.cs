@@ -98,6 +98,7 @@ namespace TownBuilder
 
             buildings.Initialize(_town, _context.Content);
             TownSaveMapper.LoadBuildings(save, _town, _context.Content, warnings);
+            TownSaveMapper.EnsureFixedBuildings(_town, _context.Content, warnings);
             _sites = new ConstructionSites();
             TownSaveMapper.LoadConstruction(save, _town, _context.Content, _sites);
 
@@ -105,7 +106,7 @@ namespace TownBuilder
             var c0 = _context.Content;
             _land = new LandPlots(grid.Bounds, c0.LandPlotSize, new PlotCoord(c0.LandStartMin.x, c0.LandStartMin.y),
                 new PlotCoord(c0.LandStartMax.x, c0.LandStartMax.y));
-            TownSaveMapper.LoadLand(save, _town, _land);
+            TownSaveMapper.LoadLand(save, _town, _land, c0);
             _town.SetLandCheck(_land.IsCellUnlocked);
 
             _plots = new FarmPlots();

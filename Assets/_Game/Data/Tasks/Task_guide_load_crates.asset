@@ -17,7 +17,7 @@ MonoBehaviour:
   targetItem: {fileID: 0}
   targetBuilding: {fileID: 0}
   amount: 3
-  unlockLevel: 6
+  unlockLevel: 5
   repeatable: 0
   rewardCoins: 60
   rewardXp: 8

@@ -218,6 +218,12 @@ only while a finished Train Station exists, pays rewards, swaps the station spri
 while the train is there, and raises Arrived / CrateFilled / Departed / Rewarded (sound + floating coins via the bridges).
 `TrainPanel` opens when the station is selected. Saved in `SaveData.train`.
 
+The station is a **landmark** (`BuildingDefinition.movable = false`, `showInShop = false`, a non-movable starter building).
+`TownSaveMapper.EnsureFixedBuildings` puts every landmark at its starter spot on load (old saves get it; a player building
+in the way moves to the nearest free spot), and `LoadBuildings` relocates rather than drops a building whose cell became
+blocked. The railway is the `RailTilemap` (a blocking tilemap painted by `SceneBuilder.PaintRailway`). The station is
+closed (padlock badge, "Opens at level N") until the player reaches its unlock level.
+
 ## 6g5. Building materials
 
 `MaterialDefinition : ItemDefinition` (`GameContent.Materials`, found by `TryGetItem`), so the barn, selling and saving

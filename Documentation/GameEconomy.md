@@ -25,7 +25,7 @@ Nothing is hard-coded in C#. The numbers below are **examples to start balancing
 | dairy_shed | Dairy Shed | 2×2 | 6 | 1,000 | Yes |
 | sugar_mill | Sugar Mill | 2×2 | 7 | 1,000 | Yes |
 | creamery | Creamery | 2×2 | 8 | 1,400 | Yes |
-| train_station | Train Station | 3×2 | 6 | 600 | Yes (max 1) |
+| train_station | Train Station | 2×3 | 5 | — (landmark: every town has it, fixed place, not movable/removable) | No |
 
 Removing a building does not refund coins (yet).
 
@@ -150,7 +150,9 @@ Reward per level-up: 100 × new level coins + 1 gem (`levelUpCoinsPerLevel`: 50 
 
 ## Train (Milestone 5 step 2, `GameContent` → Train)
 
-* The Train Station (level 6, 600 coins, 3 min build, 15 XP) gets its first train as soon as it is finished.
+* The Train Station is a **landmark**: every town has it beside the railway (grid column 9, the full map length) at a
+  fixed spot (10, 18). It shows a padlock until **level 5**; the first train arrives as soon as it opens.
+  The railway cells can't be built on.
 * A train brings **6 crates**. Each asks for an item the player can already make (same pool as orders):
   cheap items (value ≤ 10) 3–6 per crate, mid (≤ 40) 2–3, valuable 1–2.
 * Crate reward: item value × amount × **1.4** coins and value × amount / **4** XP (selling to the barn = 1×).

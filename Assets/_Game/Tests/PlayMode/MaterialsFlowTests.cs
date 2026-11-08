@@ -40,13 +40,7 @@ namespace TownBuilder.Tests
             yield return LoadTown();
             var scene = Object.FindAnyObjectByType<TownSceneController>();
             var content = GameRoot.Current.Context.Content;
-            content.TryGetBuilding(content.TrainStationId, out var stationDef);
-            scene.Progress.AddXp(10_000);
-            scene.Wallet.AddCoins(10_000);
-            scene.Placement.BeginPlacement(stationDef);
-            scene.Placement.Confirm();
-            string station = scene.Town.Buildings.First(b => b.DefinitionId == stationDef.Id).InstanceId;
-            scene.Construction.FinishNow(station);
+            scene.Progress.AddXp(10_000); // the station opens at its level
             yield return new WaitForSecondsRealtime(0.3f);
 
             // A known crate that also pays 1 Planks.

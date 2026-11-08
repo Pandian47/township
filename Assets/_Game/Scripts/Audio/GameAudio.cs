@@ -19,6 +19,10 @@ namespace TownBuilder
         /// <summary>For tests and debugging: the last sound requested and how many have played.</summary>
         public SoundId? LastSound { get; private set; }
         public int PlayCount { get; private set; }
+
+        /// <summary>True if <paramref name="id"/> was played in the last <paramref name="seconds"/> (tests, debugging).</summary>
+        public bool PlayedWithin(SoundId id, float seconds) =>
+            _lastPlayed.TryGetValue(id, out var t) && Time.unscaledTime - t <= seconds;
         public bool IsMusicPlaying => _music != null && _music.isPlaying;
 
         public void Initialize(SoundLibrary library)

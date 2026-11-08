@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using TownBuilder.Domain;
 
 namespace TownBuilder
@@ -100,13 +101,17 @@ namespace TownBuilder
         /// Restores owned land. Old saves (no land yet) and new towns get the start area plus every plot that has a
         /// building on it; plots under buildings are always kept owned.
         /// </summary>
-        public static void LoadLand(SaveData save, Town town, LandPlots land)
+        public static void LoadLand(SaveData save, Town town, LandPlots land, GameContent content = null)
         {
             var occupied = new List<GridCoord>();
             foreach (var b in town.Buildings)
+            {
+                // Fixed landmarks don't make the land around them free.
+                if (content != null && content.TryGetBuilding(b.DefinitionId, out var def) && !def.Movable) continue;
                 for (int dx = 0; dx < b.Size.X; dx++)
                 for (int dy = 0; dy < b.Size.Y; dy++)
                     occupied.Add(new GridCoord(b.Origin.X + dx, b.Origin.Y + dy));
+            }
 
             if (save.land.ownedPlots.Count == 0)
             {
@@ -162,11 +167,74 @@ namespace TownBuilder
                     continue;
                 }
 
-                var result = town.TryAdd(entry.instanceId, entry.definitionId, new GridCoord(entry.x, entry.y),
-                    definition.FootprintSize, out _);
-                if (result != PlacementResult.Valid)
+                var origin = new GridCoord(entry.x, entry.y);
+                var result = town.TryAdd(entry.instanceId, entry.definitionId, origin, definition.FootprintSize, out _);
+                if (result == PlacementResult.Valid) continue;
+
+                // The map changed under it (e.g. new railway): move it to the nearest free spot rather than lose it.
+                if (TryFindFreeOrigin(town, origin, definition.FootprintSize, null, out var free) &&
+                    town.TryAdd(entry.instanceId, entry.definitionId, free, definition.FootprintSize, out _) == PlacementResult.Valid)
+                    warnings.Add($"Building '{entry.definitionId}' moved from ({entry.x},{entry.y}) to ({free.X},{free.Y}): {result}.");
+                else
                     warnings.Add($"Building '{entry.definitionId}' at ({entry.x},{entry.y}) skipped: {result}.");
             }
+        }
+
+        /// <summary>
+        /// Fixed landmarks (non-movable starter buildings, e.g. the Train Station) always stand at their starter spot.
+        /// Old saves get them added; a player building in the way is moved to the nearest free spot.
+        /// </summary>
+        public static void EnsureFixedBuildings(Town town, GameContent content, List<string> warnings)
+        {
+            foreach (var starter in content.StarterBuildings)
+            {
+                var def = starter.building;
+                if (def == null || def.Movable) continue;
+                var origin = new GridCoord(starter.origin.x, starter.origin.y);
+                var size = def.FootprintSize;
+                var existing = town.Buildings.FirstOrDefault(b => b.DefinitionId == def.Id);
+                if (existing != null && existing.Origin == origin) continue;
+
+                string id = existing != null ? existing.InstanceId : System.Guid.NewGuid().ToString("N");
+                if (existing != null) town.Remove(existing.InstanceId);
+
+                // Clear the spot: move whatever stands there out of the landmark's footprint.
+                var target = new GridRect(origin.X, origin.Y, size.X, size.Y);
+                foreach (var other in town.Buildings.ToList())
+                {
+                    var rect = new GridRect(other.Origin.X, other.Origin.Y, other.Size.X, other.Size.Y);
+                    if (!Overlaps(rect, target)) continue;
+                    if (TryFindFreeOrigin(town, other.Origin, other.Size, target, out var free, other.InstanceId) &&
+                        town.TryMove(other.InstanceId, free) == PlacementResult.Valid)
+                        warnings.Add($"'{other.DefinitionId}' moved to ({free.X},{free.Y}) to make room for the {def.DisplayName}.");
+                }
+
+                var result = town.TryAdd(id, def.Id, origin, size, out _);
+                if (result != PlacementResult.Valid) warnings.Add($"{def.DisplayName} could not be placed at ({origin.X},{origin.Y}): {result}.");
+            }
+        }
+
+        private static bool Overlaps(GridRect a, GridRect b) =>
+            a.MinX < b.MaxX && b.MinX < a.MaxX && a.MinY < b.MaxY && b.MinY < a.MaxY;
+
+        /// <summary>Spiral search for the closest origin where the footprint fits (optionally avoiding a reserved rect).</summary>
+        private static bool TryFindFreeOrigin(Town town, GridCoord start, GridCoord size, GridRect? avoid, out GridCoord found,
+            string ignoreId = null)
+        {
+            for (int r = 1; r <= 20; r++)
+            for (int dx = -r; dx <= r; dx++)
+            for (int dy = -r; dy <= r; dy++)
+            {
+                if (System.Math.Abs(dx) != r && System.Math.Abs(dy) != r) continue;
+                var candidate = new GridCoord(start.X + dx, start.Y + dy);
+                if (avoid.HasValue && Overlaps(new GridRect(candidate.X, candidate.Y, size.X, size.Y), avoid.Value)) continue;
+                if (town.CanPlace(candidate, size, ignoreId) != PlacementResult.Valid) continue;
+                found = candidate;
+                return true;
+            }
+
+            found = start;
+            return false;
         }
 
         /// <summary>

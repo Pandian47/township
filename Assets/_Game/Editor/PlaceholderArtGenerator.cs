@@ -130,6 +130,80 @@ namespace TownBuilder.EditorTools
             tex.Apply();
         }
 
+        public const string RailTileName = "PH_Tile_Rail";
+        public const string LockIconPath = UiArtFolder + "/PH_Icon_Lock.png";
+
+        /// <summary>Railway tile: grass with a gravel bed, sleepers and two rails running along the grid's Y axis (screen up-left).</summary>
+        public static Tile CreateRailTile()
+        {
+            var sprite = CreateSprite($"{TilesArtFolder}/{RailTileName}.png", RenderRailTile, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+            var tilePath = TileAssetPath(RailTileName);
+            var tile = AssetDatabase.LoadAssetAtPath<Tile>(tilePath);
+            if (tile == null)
+            {
+                tile = ScriptableObject.CreateInstance<Tile>();
+                tile.sprite = sprite;
+                tile.colliderType = Tile.ColliderType.None;
+                AssetDatabase.CreateAsset(tile, tilePath);
+            }
+
+            return tile;
+        }
+
+        private static Texture2D RenderRailTile()
+        {
+            var tex = NewTexture(TileWidth, TileHeight);
+            var pixels = new Color32[TileWidth * TileHeight];
+            var grass = new Color32(118, 186, 82, 255);
+            for (int y = 0; y < TileHeight; y++)
+            for (int x = 0; x < TileWidth; x++)
+            {
+                float dx = (x + 0.5f - HalfW) / HalfW, dy = (y + 0.5f - HalfH) / HalfH;
+                if (Mathf.Abs(dx) + Mathf.Abs(dy) > 1.02f) continue;
+                float across = (dx + dy) * 0.5f;  // across the track (grid X), -0.5..0.5
+                float along = (dy - dx) * 0.5f;   // along the track (grid Y)
+                Color32 c = Scale(grass, 1f + (Hash(x, y) - 0.5f) * 0.08f);
+                if (Mathf.Abs(across) < 0.26f) c = Scale(new Color32(156, 146, 132, 255), 0.94f + Hash(x * 3, y) * 0.12f); // gravel
+                float sleeperPhase = ((along + 1f) * 4f) % 1f;
+                if (Mathf.Abs(across) < 0.22f && sleeperPhase < 0.32f) c = new Color32(122, 86, 56, 255);                  // sleepers
+                if (Mathf.Abs(Mathf.Abs(across) - 0.13f) < 0.022f) c = new Color32(176, 182, 192, 255);                    // rails
+                pixels[y * TileWidth + x] = c;
+            }
+
+            tex.SetPixels32(pixels);
+            tex.Apply();
+            return tex;
+        }
+
+        /// <summary>Padlock badge (shown above a landmark that hasn't opened yet).</summary>
+        public static Sprite CreateLockIcon() =>
+            CreateSprite(LockIconPath, RenderLockIcon, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+
+        private static Texture2D RenderLockIcon()
+        {
+            const int size = 96;
+            var tex = NewTexture(size, size);
+            var pixels = new Color32[size * size];
+            var gold = new Color32(240, 186, 56, 255);
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float px = x + 0.5f - 48f, py = y + 0.5f;
+                bool body = Mathf.Abs(px) < 28f && py > 10f && py < 54f;
+                float r = Mathf.Sqrt(px * px + (py - 54f) * (py - 54f));
+                bool shackle = py >= 54f && r > 14f && r < 22f;
+                if (!body && !shackle) continue;
+                Color32 c = shackle ? new Color32(160, 166, 176, 255) : Scale(gold, py > 40f ? 1.08f : 0.95f);
+                if (body && px * px + (py - 34f) * (py - 34f) < 30f) c = new Color32(90, 60, 30, 255); // keyhole
+                pixels[y * size + x] = c;
+            }
+
+            AddOutline(pixels, size, size);
+            tex.SetPixels32(pixels);
+            tex.Apply();
+            return tex;
+        }
+
         public const string LockedTileName = "PH_Tile_Locked";
         public const string SaleSignPath = "Assets/_Game/Art/Environment/PH_Sign_ForSale.png";
 

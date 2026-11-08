@@ -43,21 +43,30 @@ namespace TownBuilder.Tests
             var train = scene.Train;
             content.TryGetBuilding(content.TrainStationId, out var stationDef);
 
-            Assert.IsFalse(train.HasStation);
-            Assert.IsFalse(scene.Placement.BeginPlacement(stationDef), "station needs level 6");
-
-            scene.Progress.AddXp(10_000);
-            scene.Wallet.AddCoins(10_000);
-            Assert.IsTrue(scene.Placement.BeginPlacement(stationDef));
-            Assert.IsTrue(scene.Placement.Confirm());
-            string station = scene.Town.Buildings.First(b => b.DefinitionId == stationDef.Id).InstanceId;
-            yield return new WaitForSecondsRealtime(0.3f);
-            Assert.IsFalse(train.Train.IsAtStation, "no train while the station is being built");
-
-            Assert.IsTrue(scene.Construction.FinishNow(station));
-            yield return new WaitForSecondsRealtime(0.3f);
+            // Every town has the station at its fixed spot by the railway, closed until its level.
+            string station = scene.Town.Buildings.Single(b => b.DefinitionId == stationDef.Id).InstanceId;
+            Assert.AreEqual(content.StarterBuildings.First(s => s.building == stationDef).origin.x, scene.Town.Buildings.Single(b => b.InstanceId == station).Origin.X);
             Assert.IsTrue(train.IsStation(station));
-            Assert.IsTrue(train.Train.IsAtStation, "the first train arrives when the station is finished");
+            Assert.IsFalse(train.IsOpen);
+            Assert.IsFalse(train.HasStation);
+            yield return new WaitForSecondsRealtime(0.3f);
+            Assert.IsTrue(train.LockBadgeVisible, "lock badge while closed");
+            Assert.IsFalse(train.Train.IsAtStation, "no train before the station opens");
+
+            // Not for sale, not movable, not removable.
+            scene.Placement.SelectBuilding(station);
+            Assert.IsFalse(scene.Placement.BeginMoveSelected(), "the station can't be moved");
+            Assert.IsFalse(scene.Placement.RemoveSelected(), "or removed");
+            scene.Placement.Cancel();
+            Assert.IsFalse(scene.Placement.BeginPlacement(stationDef), "and there is no second one to buy");
+
+            // Reaching its level opens it; the first train arrives right away.
+            scene.Progress.AddXp(10_000);
+            Assert.GreaterOrEqual(scene.Progress.Level, train.UnlockLevel);
+            yield return new WaitForSecondsRealtime(0.3f);
+            Assert.IsTrue(train.IsOpen);
+            Assert.IsFalse(train.LockBadgeVisible);
+            Assert.IsTrue(train.Train.IsAtStation, "the first train arrives when the station opens");
             Assert.AreEqual(content.TrainCrates, train.Train.Crates.Count);
 
             var view = Object.FindObjectsByType<BuildingView>().First(v => v.InstanceId == station);
@@ -102,13 +111,7 @@ namespace TownBuilder.Tests
             yield return LoadTown();
             var scene = Object.FindAnyObjectByType<TownSceneController>();
             var content = GameRoot.Current.Context.Content;
-            content.TryGetBuilding(content.TrainStationId, out var stationDef);
             scene.Progress.AddXp(10_000);
-            scene.Wallet.AddCoins(10_000);
-            scene.Placement.BeginPlacement(stationDef);
-            scene.Placement.Confirm();
-            string station = scene.Town.Buildings.First(b => b.DefinitionId == stationDef.Id).InstanceId;
-            scene.Construction.FinishNow(station);
             yield return new WaitForSecondsRealtime(0.3f);
 
             var first = scene.Train.Train.Crates[0];
@@ -131,6 +134,29 @@ namespace TownBuilder.Tests
             long coins = scene.Wallet.Coins;
             Assert.IsTrue(scene.Train.SendOff());
             Assert.AreEqual(coins, scene.Wallet.Coins, "no bonus for a partly loaded train");
+        }
+
+        [UnityTest]
+        public IEnumerator OldSave_GetsTheStation_AndABuildingInTheWayMoves()
+        {
+            // A save from before the fixed station: a cottage right where the station goes, no station.
+            var save = NewGameFactory.Create(0, 1500, 20);
+            save.buildings.Add(new BuildingSaveData { instanceId = "cottage_on_spot", definitionId = "cottage", x = 10, y = 19 });
+            new JsonSaveStore(_saveDir).Save(save);
+
+            SceneManager.LoadScene(SceneNames.MainMenu);
+            float end = Time.realtimeSinceStartup + 5f;
+            while (GameRoot.Current == null && Time.realtimeSinceStartup < end) yield return null;
+            Assert.IsTrue(GameRoot.Current.Context.ContinueGame().Succeeded);
+            yield return LoadTown();
+            var scene = Object.FindAnyObjectByType<TownSceneController>();
+            var content = GameRoot.Current.Context.Content;
+
+            var station = scene.Town.Buildings.Single(b => b.DefinitionId == content.TrainStationId);
+            var spot = content.StarterBuildings.First(s => s.building != null && s.building.Id == content.TrainStationId).origin;
+            Assert.AreEqual(new GridCoord(spot.x, spot.y), station.Origin, "station at its fixed spot");
+            Assert.IsTrue(scene.Town.TryGet("cottage_on_spot", out var cottage), "the cottage is kept");
+            Assert.AreNotEqual(new GridCoord(10, 19), cottage.Origin, "but moved out of the way");
         }
 
         private static IEnumerator LoadTown()

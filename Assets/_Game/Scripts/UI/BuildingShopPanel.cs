@@ -36,7 +36,7 @@ namespace TownBuilder
 
             foreach (var definition in content.Buildings)
             {
-                if (definition == null) continue;
+                if (definition == null || !definition.ShowInShop) continue;
                 var item = Instantiate(itemTemplate, itemsParent);
                 item.gameObject.SetActive(true);
                 item.Bind(definition, OnItemClicked);

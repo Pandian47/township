@@ -69,6 +69,8 @@ MonoBehaviour:
     origin: {x: 22, y: 17}
   - building: {fileID: 11400000, guid: 452c1344385c6ee4d936449de7a0dd15, type: 2}
     origin: {x: 23, y: 17}
+  - building: {fileID: 11400000, guid: b024bc892ccf84444a9f2cf8b5220f6f, type: 2}
+    origin: {x: 10, y: 18}
   baseStorageCapacity: 50
   storageExpansionCapacity: 25
   storageExpansionBaseCost: 200

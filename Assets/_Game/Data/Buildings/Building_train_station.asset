@@ -16,14 +16,16 @@ MonoBehaviour:
   displayName: Train Station
   category: 0
   sprite: {fileID: 21300000, guid: 65a6814a065483349ad01d7893d50919, type: 3}
-  footprint: {x: 3, y: 2}
-  unlockLevel: 6
-  coinCost: 600
-  removable: 1
+  footprint: {x: 2, y: 3}
+  unlockLevel: 5
+  coinCost: 0
+  removable: 0
   maxCount: 1
+  movable: 0
+  showInShop: 0
   isFarmPlot: 0
   storageCapacityBonus: 0
   recipes: []
   productionSlots: 3
-  buildSeconds: 180
-  buildXp: 15
+  buildSeconds: 0
+  buildXp: 0

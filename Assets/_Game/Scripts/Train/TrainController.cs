@@ -14,6 +14,9 @@ namespace TownBuilder
     {
         [SerializeField] private TownBuildingController buildings;
         [SerializeField] private float refreshInterval = 0.25f;
+        [Tooltip("Badge shown above the station until it opens.")]
+        [SerializeField] private Sprite lockIcon;
+        [SerializeField] private float lockIconScale = 0.55f;
 
         private Town _town;
         private Train _train;
@@ -28,6 +31,8 @@ namespace TownBuilder
         private float _nextRefresh;
         private string _spriteStationId;
         private bool _spriteShowsTrain;
+        private SpriteRenderer _lockBadge;
+        private bool _wasOpen;
 
         public event Action<string> Notification;
         public event Action Modified;
@@ -54,13 +59,28 @@ namespace TownBuilder
             _clock = clock;
             _isBuilt = isBuilt;
             _candidates = candidates;
+            _progress.LeveledUp += OnLeveledUp;
+            _wasOpen = IsOpen;
+            Tick();
+        }
+
+        private void OnDestroy()
+        {
+            if (_progress != null) _progress.LeveledUp -= OnLeveledUp;
+        }
+
+        private void OnLeveledUp(int level)
+        {
+            if (_wasOpen || !IsOpen) return;
+            _wasOpen = true;
+            Notification?.Invoke("The Train Station is open! Your first train is arriving.");
             Tick();
         }
 
         // ------------------------------------------------------------------ Queries
 
-        /// <summary>The finished Train Station's instance id, or null if there is none (yet).</summary>
-        public string StationId
+        /// <summary>The Train Station building (open or not), or null.</summary>
+        public string StationBuildingId
         {
             get
             {
@@ -71,9 +91,19 @@ namespace TownBuilder
             }
         }
 
+        /// <summary>Level at which the station opens (its building's unlock level).</summary>
+        public int UnlockLevel => _content.TryGetBuilding(_content.TrainStationId, out var def) ? def.UnlockLevel : 1;
+
+        /// <summary>The station exists and the player's level is high enough: the train runs.</summary>
+        public bool IsOpen => StationBuildingId != null && _progress != null && _progress.IsUnlocked(UnlockLevel);
+
+        /// <summary>The open station's instance id (null while closed or missing).</summary>
+        public string StationId => IsOpen ? StationBuildingId : null;
+
         public bool HasStation => StationId != null;
 
-        public bool IsStation(string instanceId) => instanceId != null && instanceId == StationId;
+        /// <summary>True for the station building, also while it's still closed (so its panel can say when it opens).</summary>
+        public bool IsStation(string instanceId) => instanceId != null && instanceId == StationBuildingId;
 
         public long RemainingMs => _train.RemainingMs(NowUnixMs);
 
@@ -192,6 +222,7 @@ namespace TownBuilder
         /// <summary>Station sprite: with the train at the platform while it's here, empty platform otherwise.</summary>
         private void RefreshSprite()
         {
+            RefreshLockBadge();
             string station = StationId;
             bool showTrain = station != null && _train.IsAtStation && _content.TrainAtStationSprite != null;
             if (station == _spriteStationId && showTrain == _spriteShowsTrain) return;
@@ -200,5 +231,36 @@ namespace TownBuilder
             if (station == null || !buildings.TryGetView(station, out var view) || view.Definition == null) return;
             view.SpriteRenderer.sprite = showTrain ? _content.TrainAtStationSprite : view.Definition.Sprite;
         }
+
+        /// <summary>Lock badge above the station while it's closed.</summary>
+        private void RefreshLockBadge()
+        {
+            string building = StationBuildingId;
+            bool show = building != null && !IsOpen && lockIcon != null;
+            if (!show)
+            {
+                if (_lockBadge != null) _lockBadge.enabled = false;
+                return;
+            }
+
+            if (!buildings.TryGetView(building, out var view)) return;
+            if (_lockBadge == null || _lockBadge.transform.parent != view.transform)
+            {
+                if (_lockBadge != null) Destroy(_lockBadge.gameObject);
+                var go = new GameObject("LockBadge");
+                go.transform.SetParent(view.transform, false);
+                _lockBadge = go.AddComponent<SpriteRenderer>();
+                _lockBadge.sprite = lockIcon;
+                _lockBadge.sortingLayerName = SortingLayers.WorldUI;
+                float top = view.SpriteRenderer.bounds.max.y - view.transform.position.y;
+                float centre = view.SpriteRenderer.bounds.center.x - view.transform.position.x;
+                go.transform.localPosition = new Vector3(centre, top + 0.3f, 0f);
+                go.transform.localScale = Vector3.one * lockIconScale;
+            }
+
+            _lockBadge.enabled = true;
+        }
+
+        public bool LockBadgeVisible => _lockBadge != null && _lockBadge.enabled;
     }
 }

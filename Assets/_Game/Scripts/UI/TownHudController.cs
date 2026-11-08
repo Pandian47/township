@@ -230,6 +230,7 @@ namespace TownBuilder
             {
                 selectionNameText.text = definition.DisplayName;
                 removeButton.interactable = definition.Removable;
+                moveButton.interactable = definition.Movable;
             }
 
             string target = _placement.TargetInstanceId;

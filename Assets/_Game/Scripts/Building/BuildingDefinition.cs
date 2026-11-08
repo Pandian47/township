@@ -32,6 +32,10 @@ namespace TownBuilder
         [SerializeField] private bool removable = true;
         [Tooltip("Maximum number the player may own. 0 = unlimited.")]
         [SerializeField, Min(0)] private int maxCount;
+        [Tooltip("False for landmarks with a fixed place in every town (e.g. the Train Station by the railway).")]
+        [SerializeField] private bool movable = true;
+        [Tooltip("False for buildings the player can't buy (landmarks that every town already has).")]
+        [SerializeField] private bool showInShop = true;
 
         [Header("Gameplay roles")]
         [Tooltip("This building is a field where crops can be planted.")]
@@ -65,6 +69,14 @@ namespace TownBuilder
         public int UnlockLevel => unlockLevel;
         public int CoinCost => coinCost;
         public bool Removable => removable;
+        public bool Movable => movable;
+        public bool ShowInShop => showInShop;
+
+        public void EditorConfigureLandmark(bool isMovable, bool inShop)
+        {
+            movable = isMovable;
+            showInShop = inShop;
+        }
 
         private void OnValidate()
         {

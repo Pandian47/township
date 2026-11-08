@@ -200,7 +200,9 @@ and **land expansion** spends those materials.
 | 4 | **Land expansion**: the map starts with a buildable area in the middle; surrounding plots are fenced off and bought with coins + materials | Level 3+ | **Done** (v0.17.0) |
 | 5 | Balance pass (EconomyReport extended with train income, materials and land; BalanceTests guard rails) | | **Done** (v0.18.0) |
 
-**Milestone 5 complete** (v0.18.0). Balance changes: level-up coins 100 × level, land ring 2 at level 9.
+**Milestone 5 complete** (v0.18.0). **v0.19.0** (after your feedback): the Train Station is a fixed landmark by a
+fixed railway (every town has it, it can't be moved, removed or bought), it opens at level 5 instead of 6, and the full
+AI art set (48 images) is imported. Balance changes: level-up coins 100 × level, land ring 2 at level 9.
 Still open: AI art for the new items (27 images in ArtPrompts.md) and the device checklists below.
 
 Design notes:
@@ -226,8 +228,8 @@ Design notes:
 - [ ] The tasks panel never covers the bottom panels (field, factory, shop)
 
 ### Device checklist (Milestone 5 step 2: train)
-- [ ] Level 6: Train Station in the shop (600 coins, wide 3×2 building, only one allowed); "Build a Train Station" task
-- [ ] While it's being built there is no train; when finished the train arrives ("The train has arrived!") and the station shows the train
+- [ ] (v0.19) The Train Station stands by the railway from the start, with a padlock; it's not in the shop and Move/Remove are greyed out
+- [ ] Tap it before level 5: "Opens at level 5"; reaching level 5: "The Train Station is open!", the padlock goes and the first train arrives
 - [ ] Tap the station: 6 crates (item, Have x/y in green/red, reward); Load is enabled only when you have enough
 - [ ] Loading a crate: items leave the barn, coins + XP, "+coins" floats above the station
 - [ ] All 6 loaded: "Send train / +N bonus" pays the bonus; sending early says "(no bonus)"
@@ -238,7 +240,7 @@ Design notes:
 ### Device checklist (Milestone 5 step 3: building materials)
 - [ ] Some train crates show "+1 Planks / Bricks / Nails" on top; loading one adds the material to the barn and it floats up
 - [ ] From level 3, tasks like "Deliver 2 orders" (+1 Planks) and "Make 4 Bread" (+1 Nails) appear
-- [ ] Level 6: "Load 3 train crates" task (+2 Planks)
+- [ ] Level 5: "Load 3 train crates" task (+2 Planks)
 - [ ] Planks, Bricks and Nails show in the Barn with their icons and can be sold (10 / 14 / 8 coins)
 - [ ] With a full barn, claiming a task that pays materials says the barn is full and keeps the task claimable
 

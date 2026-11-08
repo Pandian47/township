@@ -33,7 +33,8 @@ An original 2D isometric farming and town-building game for Android, built AI-fi
 | Building materials (Planks, Bricks, Nails) from train crates and tasks (Milestone 5 step 3) | ✅ (placeholder icons) |
 | Land expansion: buy plots around the town with coins + materials (Milestone 5 step 4) | ✅ (placeholder sign) |
 | Balance model covers train, materials and land, with guard-rail tests (Milestone 5 step 5) | ✅ |
-| Automated tests: 132 EditMode + 46 PlayMode | ✅ |
+| Fixed railway + Train Station landmark (opens at level 5); full AI art set | ✅ |
+| Automated tests: 132 EditMode + 47 PlayMode | ✅ |
 | First AI art set (buildings, field, crops, items, ground) + `AiArtImporter` tool | ✅ |
 | Android build | ⏳ install the Android Build Support module first |
 

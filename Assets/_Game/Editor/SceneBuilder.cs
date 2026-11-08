@@ -182,11 +182,13 @@ namespace TownBuilder.EditorTools
             var farm = CreateTilemap("FarmTilemap", gridGo.transform, 1);
             var road = CreateTilemap("RoadTilemap", gridGo.transform, 2);
             var water = CreateTilemap("WaterTilemap", gridGo.transform, 3);
+            var rail = CreateTilemap("RailTilemap", gridGo.transform, 2);
             PaintStarterMap(ground, road, water, art);
+            PaintRailway(rail, road, water);
 
             var isoGrid = gridGo.AddComponent<IsoGrid>();
             Wire(isoGrid, ("grid", grid), ("groundTilemap", ground));
-            WireArray(isoGrid, "blockingTilemaps", water, road);
+            WireArray(isoGrid, "blockingTilemaps", water, road, rail);
 
             var buildingsRoot = Go("Buildings", world.transform);
             Go("Crops", world.transform);
@@ -228,7 +230,8 @@ namespace TownBuilder.EditorTools
             Wire(land, ("grid", isoGrid), ("placement", placement), ("lockedTilemap", lockedLand), ("signsRoot", landSigns.transform),
                 ("lockedTile", AssetDatabase.LoadAssetAtPath<TileBase>(PlaceholderArtGenerator.TileAssetPath(PlaceholderArtGenerator.LockedTileName))),
                 ("saleSign", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.SaleSignPath)));
-            Wire(train, ("buildings", buildingController));
+            Wire(train, ("buildings", buildingController),
+                ("lockIcon", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.LockIconPath)));
             Wire(construction, ("buildings", buildingController), ("placement", placement),
                 ("constructionIcon", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.ConstructionIconPath)));
             Wire(production, ("buildings", buildingController), ("placement", placement));
@@ -271,6 +274,30 @@ namespace TownBuilder.EditorTools
                 ("landController", land));
 
             EditorSceneManager.SaveScene(scene, TownPath);
+        }
+
+        /// <summary>
+        /// The fixed railway: one grid column across the whole map, along the Train Station's front-left side. Skips road
+        /// crossings, water and the station itself. Rail cells block building.
+        /// </summary>
+        private static void PaintRailway(Tilemap rail, Tilemap road, Tilemap water)
+        {
+            var tile = AssetDatabase.LoadAssetAtPath<TileBase>(PlaceholderArtGenerator.TileAssetPath(PlaceholderArtGenerator.RailTileName));
+            int x = ProjectSetup.RailColumn;
+            var station = ProjectSetup.TrainStationOrigin;
+            var cells = new List<Vector3Int>();
+            for (int y = 0; y < MapSize; y++)
+            {
+                var cell = new Vector3Int(x, y, 0);
+                bool underStation = x >= station.x && x < station.x + 2 && y >= station.y && y < station.y + ProjectSetup.TrainStationHeight;
+                if (underStation || road.HasTile(cell) || water.HasTile(cell)) continue;
+                cells.Add(cell);
+            }
+
+            rail.SetTiles(cells.ToArray(), Enumerable.Repeat(tile, cells.Count).ToArray());
+            rail.RefreshAllTiles();
+            rail.CompressBounds();
+            EditorUtility.SetDirty(rail);
         }
 
         private static void PaintStarterMap(Tilemap ground, Tilemap road, Tilemap water, PlaceholderArtGenerator.Result art)

@@ -144,6 +144,7 @@ namespace TownBuilder
         public bool BeginMoveSelected()
         {
             if (CurrentMode != Mode.Selected || !_town.TryGet(_targetInstanceId, out var building)) return false;
+            if (_content.TryGetBuilding(building.DefinitionId, out var def) && !def.Movable) return false;
             if (!buildings.TryGetView(building.InstanceId, out var view)) return false;
 
             _preview = view;

@@ -49,6 +49,8 @@ namespace TownBuilder.EditorTools
             public BuildingCategory Category;
             public int W, H, HeightPx, Unlock, Cost, MaxCount, StorageBonus, BuildSeconds, BuildXp;
             public bool Removable, FarmPlot;
+            /// <summary>Landmark: fixed place in every town, not movable, not sold in the shop.</summary>
+            public bool Fixed;
             public Color32 Wall, Roof;
         }
 
@@ -73,6 +75,14 @@ namespace TownBuilder.EditorTools
             new CropSeed { Id = "sugarcane", Name = "Sugarcane", Style = PlaceholderArtGenerator.CropStyle.Sugarcane,
                 GrowSeconds = 720, Yield = 3, SeedCost = 5, Xp = 3, Unlock = 7, SellPrice = 8 },
         };
+
+        /// <summary>Fixed Train Station spot (2x3 footprint). Its platform track lies along its front-left side, over the railway.</summary>
+        public static readonly Vector2Int TrainStationOrigin = new Vector2Int(10, 18);
+        public const int TrainStationHeight = 3;
+
+        /// <summary>The railway: every cell of this grid column (except road crossings and water) is track. It runs along
+        /// the station's front-left side, so the station's own platform track lies on top of it.</summary>
+        public const int RailColumn = 9;
 
         // Fields placed in a new town, next to the Town Hall.
         private static readonly Vector2Int[] StarterFieldOrigins = { new Vector2Int(21, 17), new Vector2Int(22, 17), new Vector2Int(23, 17) };
@@ -106,7 +116,7 @@ namespace TownBuilder.EditorTools
                 Wall = new Color32(250, 244, 226, 255), Roof = new Color32(90, 150, 200, 255) },
             // Milestone 5 step 2: the train.
             new BuildingSeed { Id = "train_station", Name = "Train Station", Category = BuildingCategory.Community, Folder = "Community",
-                W = 3, H = 2, HeightPx = 95, Unlock = 6, Cost = 600, Removable = true, MaxCount = 1, BuildSeconds = 180, BuildXp = 15,
+                W = 2, H = 3, HeightPx = 95, Unlock = 5, Cost = 0, Removable = false, MaxCount = 1, Fixed = true,
                 Wall = new Color32(220, 196, 150, 255), Roof = new Color32(60, 110, 140, 255) },
             // Milestone 4 step 2: animal buildings (factories that turn feed into animal products).
             new BuildingSeed { Id = "chicken_coop", Name = "Chicken Coop", Category = BuildingCategory.Farming, Folder = "Farming",
@@ -188,6 +198,8 @@ namespace TownBuilder.EditorTools
             foreach (var s in Seeds.Where(s => s.FarmPlot)) art.Buildings[s.Id] = PlaceholderArtGenerator.CreateFieldSprite();
             PlaceholderArtGenerator.CreateConstructionIcon();
             PlaceholderArtGenerator.CreateLockedTile();
+            PlaceholderArtGenerator.CreateRailTile();
+            PlaceholderArtGenerator.CreateLockIcon();
             PlaceholderArtGenerator.CreateSaleSign();
             var trainSprite = CreateTrainAtStationSprite();
 
@@ -254,6 +266,7 @@ namespace TownBuilder.EditorTools
                     def = ScriptableObject.CreateInstance<BuildingDefinition>();
                     def.EditorConfigure(s.Id, s.Name, s.Category, art.Buildings[s.Id], new Vector2Int(s.W, s.H), s.Unlock, s.Cost, s.Removable, s.MaxCount);
                     def.EditorConfigureConstruction(s.BuildSeconds, s.BuildXp);
+                    if (s.Fixed) def.EditorConfigureLandmark(false, false);
                     AssetDatabase.CreateAsset(def, path);
                 }
                 else if (def.Sprite == null)
@@ -298,6 +311,15 @@ namespace TownBuilder.EditorTools
             {
                 var starters = content.StarterBuildings.ToList();
                 starters.AddRange(StarterFieldOrigins.Select(o => new StarterBuilding { building = field, origin = o }));
+                content.EditorSetStarters(starters);
+            }
+
+            // The Train Station is a landmark at a fixed spot beside the railway.
+            var station = definitions.First(d => d.Id == "train_station");
+            if (!content.StarterBuildings.Any(s => s.building == station))
+            {
+                var starters = content.StarterBuildings.ToList();
+                starters.Add(new StarterBuilding { building = station, origin = TrainStationOrigin });
                 content.EditorSetStarters(starters);
             }
 
@@ -484,11 +506,11 @@ namespace TownBuilder.EditorTools
             new TaskSeed("make_cheese", TaskKind.Collect, "cheese", 1, 9, 120, 10, repeatable: true),
 
             // Milestone 5 step 3: tasks that pay building materials.
-            new TaskSeed("guide_load_crates", TaskKind.LoadCrates, null, 3, 6, 60, 8, material: "planks", materialAmount: 2),
+            new TaskSeed("guide_load_crates", TaskKind.LoadCrates, null, 3, 5, 60, 8, material: "planks", materialAmount: 2),
             new TaskSeed("orders_for_planks", TaskKind.Deliver, null, 2, 3, 30, 4, repeatable: true, material: "planks", materialAmount: 1),
             new TaskSeed("bread_for_nails", TaskKind.Collect, "bread", 4, 3, 30, 4, repeatable: true, material: "nails", materialAmount: 1),
             new TaskSeed("corn_for_bricks", TaskKind.Harvest, "corn", 12, 4, 30, 5, repeatable: true, material: "bricks", materialAmount: 1),
-            new TaskSeed("load_crates", TaskKind.LoadCrates, null, 4, 6, 60, 8, repeatable: true, material: "bricks", materialAmount: 1),
+            new TaskSeed("load_crates", TaskKind.LoadCrates, null, 4, 5, 60, 8, repeatable: true, material: "bricks", materialAmount: 1),
 
             // Milestone 5 step 4.
             new TaskSeed("guide_buy_land", TaskKind.BuyLand, null, 1, 3, 50, 6, material: "planks", materialAmount: 1),
