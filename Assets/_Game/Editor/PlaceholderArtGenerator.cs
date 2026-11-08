@@ -446,7 +446,7 @@ namespace TownBuilder.EditorTools
 
         public const string ProductsArtFolder = "Assets/_Game/Art/Products";
 
-        public enum ProductStyle { Bread, CornBread, ChickenFeed, CowFeed }
+        public enum ProductStyle { Bread, CornBread, ChickenFeed, CowFeed, Egg, Milk }
 
         /// <summary>128x128 product icon (UI and the "ready" bubble above factories). Pivot centre.</summary>
         public static Sprite CreateProductIcon(string productId, ProductStyle style) =>
@@ -458,7 +458,40 @@ namespace TownBuilder.EditorTools
             var tex = NewTexture(size, size);
             var pixels = new Color32[size * size];
 
-            if (style == ProductStyle.ChickenFeed || style == ProductStyle.CowFeed)
+            if (style == ProductStyle.Egg)
+            {
+                // Cream egg, a little wider at the bottom, with a soft highlight.
+                var shell = new Color32(244, 232, 210, 255);
+                for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float dx = (x + 0.5f - 64f) / 34f, py = y + 0.5f - 60f;
+                    float dy = py > 0f ? py / 50f : py / 40f;
+                    float d = dx * dx + dy * dy;
+                    if (d > 1f) continue;
+                    var c = Scale(shell, 0.86f + 0.18f * (1f - d));
+                    if ((x - 52f) * (x - 52f) + (y - 82f) * (y - 82f) < 60f) c = new Color32(255, 252, 245, 255);
+                    pixels[y * size + x] = c;
+                }
+            }
+            else if (style == ProductStyle.Milk)
+            {
+                // Milk bottle: white body, narrow neck, blue cap.
+                var glass = new Color32(250, 250, 248, 255);
+                for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float px = Mathf.Abs(x + 0.5f - 64f), py = y + 0.5f;
+                    float half = py < 74f ? 30f : py < 92f ? Mathf.Lerp(30f, 14f, (py - 74f) / 18f) : 14f;
+                    bool body = py > 10f && py < 112f && px < half;
+                    bool cap = py >= 104f && py < 120f && px < 16f;
+                    if (!body && !cap) continue;
+                    var c = cap ? new Color32(70, 130, 210, 255) : Scale(glass, 0.86f + 0.14f * (1f - px / 30f));
+                    if (!cap && py > 30f && py < 56f) c = new Color32(120, 170, 230, 255);
+                    pixels[y * size + x] = c;
+                }
+            }
+            else if (style == ProductStyle.ChickenFeed || style == ProductStyle.CowFeed)
             {
                 // Burlap feed sack, tied at the top, with a coloured band (yellow = chicken, green = cow).
                 var sack = new Color32(205, 178, 128, 255);

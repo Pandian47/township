@@ -69,6 +69,17 @@ namespace TownBuilder.Tests
             Assert.AreEqual(mill.UnlockLevel, soybean.UnlockLevel, "Soybean arrives together with the Feed Mill");
         }
 
+        [Test]
+        public void AnimalBuildings_TurnFeedIntoAnimalProducts()
+        {
+            Assert.IsTrue(_content.TryGetBuilding("chicken_coop", out var coop));
+            Assert.IsTrue(_content.TryGetBuilding("dairy_shed", out var dairy));
+            Assert.AreEqual("egg", coop.Recipes.Single().Output.Id);
+            Assert.AreEqual("chicken_feed", coop.Recipes.Single().Ingredients.Single().item.Id);
+            Assert.AreEqual("milk", dairy.Recipes.Single().Output.Id);
+            Assert.AreEqual("cow_feed", dairy.Recipes.Single().Ingredients.Single().item.Id);
+        }
+
         /// <summary>Earliest level at which each item can be obtained (crops: their unlock; products: their cheapest recipe).</summary>
         private Dictionary<string, int> ItemUnlockLevels()
         {

@@ -21,6 +21,8 @@ Nothing is hard-coded in C#. The numbers below are **examples to start balancing
 | bakery | Bakery | 2×2 | 1 | 450 | Yes |
 | silo | Silo | 1×1 | 3 | 250 | Yes |
 | feed_mill | Feed Mill | 2×2 | 4 | 600 | Yes |
+| chicken_coop | Chicken Coop | 2×2 | 5 | 800 | Yes |
+| dairy_shed | Dairy Shed | 2×2 | 6 | 1,200 | Yes |
 
 Removing a building does not refund coins (yet).
 
@@ -33,6 +35,8 @@ Removing a building does not refund coins (yet).
 | Silo | 1.5 min | 6 |
 | Bakery | 2 min | 10 |
 | Feed Mill | 2.5 min | 12 |
+| Chicken Coop | 3 min | 14 |
+| Dairy Shed | 4 min | 18 |
 | Town Hall, Field | instant | 0 |
 
 Finish early: a rewarded ad, or 1 gem per started minute left.
@@ -42,7 +46,7 @@ Finish early: a rewarded ad, or 1 gem per started minute left.
 Storage: base barn capacity 50 (`GameContent.baseStorageCapacity`). Barn +50, Silo +30 (`storageCapacityBonus`).
 Paid expansion: +25 per level, level N costs N × 200 coins, up to 10 levels (`storageExpansion*` in GameContent).
 
-Sell prices (`ItemDefinition.sellPrice`): Wheat 2 coins, Corn 4, Soybean 6, Bread 12, Corn Bread 22, Chicken Feed 16, Cow Feed 34.
+Sell prices (`ItemDefinition.sellPrice`): Wheat 2 coins, Corn 4, Soybean 6, Bread 12, Corn Bread 22, Chicken Feed 16, Cow Feed 34, Egg 26, Milk 52.
 
 ## Bakery (implemented, `Data/Recipes`, 3 queue slots)
 
@@ -60,7 +64,16 @@ Value check: 2 Wheat sells for 4 coins, but as Bread it's worth 12 (+3 XP). Proc
 | make_chicken_feed → Chicken Feed | 2 Wheat + 1 Corn (8) | 4 min | 3 | 16 coins | 4 |
 | make_cow_feed → Cow Feed | 2 Corn + 2 Soybean (20) | 7 min | 5 | 34 coins | 5 |
 
-Feeds are the ingredients for animal buildings (Milestone 4 step 2). Until then they can be sold or delivered in orders.
+## Animal buildings (Milestone 4 step 2, 3 queue slots each)
+
+Animal buildings are factories: queue a feeding, the animals produce while you're away, tap to collect.
+
+| Building | Recipe | Feed (value) | Time | XP | Product sells for | Unlock |
+|---|---|---|---|---|---|---|
+| Chicken Coop | collect_eggs → Egg | 1 Chicken Feed (16) | 6 min | 4 | 26 coins | 5 |
+| Dairy Shed | collect_milk → Milk | 1 Cow Feed (34) | 10 min | 6 | 52 coins | 6 |
+
+Full chain value: 2 Wheat + 1 Corn (8 coins raw) → Chicken Feed (16) → Egg (26).
 
 **Automatic checks** (`ContentEconomyTests`, run with the EditMode tests): every recipe's product is worth more than
 its ingredients, every recipe belongs to exactly one factory, and no recipe unlocks before its factory or any of
@@ -73,8 +86,9 @@ its ingredients.
 | 1 → 2 | 15 | 15 | Corn, Corn Bread |
 | 2 → 3 | 30 | 45 | Silo |
 | 3 → 4 | 50 | 95 | Feed Mill, Soybean, Chicken Feed |
-| 4 → 5 | 80 | 175 | Cow Feed |
-| then | 120, 170, 230, 300, 380, 470, then +100 per level | | |
+| 4 → 5 | 80 | 175 | Cow Feed, Chicken Coop, Egg |
+| 5 → 6 | 120 | 295 | Dairy Shed, Milk |
+| then | 170, 230, 300, 380, 470, then +100 per level | | |
 
 Reward per level-up: 50 × new level coins + 1 gem. The save stores TOTAL XP, so the curve can be rebalanced safely.
 

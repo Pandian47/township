@@ -146,6 +146,30 @@ Same icon prompt as bread (section 15–16). Items:
 * `chicken_feed`: "a small burlap sack of chicken feed with a yellow band, a few grains spilling out, no lettering"
 * `cow_feed`: "a burlap sack of cattle feed with a green band, a few pellets spilling out, no lettering"
 
+## Milestone 4 step 2: animal buildings, egg, milk
+
+### Chicken Coop → `chicken_coop.png`
+
+```
+Same art style, angle, lighting and outline as the cottage. Create a cute wooden chicken coop with a small ramp, a nesting box with straw, a low fenced run and three white chickens around it, on a 2x2 tile footprint (same width as the cottage). No signs or lettering.
+One single object, centered, fully visible, nothing cropped. No grass or ground outside the coop's own fenced base, no shadow outside the base, no text.
+Background: plain solid flat magenta (#FF00FF).
+```
+
+### Dairy Shed → `dairy_shed.png`
+
+```
+Same art style, angle, lighting and outline as the cottage. Create a small white dairy shed with a dark grey roof, an open stall with hay, a milk churn by the door and one friendly black-and-white cow standing beside it, on a 2x2 tile footprint (same width as the cottage). No signs or lettering.
+One single object, centered, fully visible, nothing cropped. No ground around it, no shadow outside the base, no text.
+Background: plain solid flat magenta (#FF00FF).
+```
+
+### Icons → `egg.png`, `milk.png`
+
+Same icon prompt as bread (section 15–16). Items:
+* `egg`: "two fresh cream-colored eggs in a little straw nest"
+* `milk`: "a glass bottle of fresh milk with a blue cap, no label text"
+
 ---
 
 Do a **test set first**: cottage, field, wheat_4, bread and grass. Send those, check them in the game preview, and
