@@ -43,8 +43,9 @@ namespace TownBuilder.EditorTools
             ConfigureCommon();
             EditorUserBuildSettings.buildAppBundle = false;
             PlayerSettings.Android.useCustomKeystore = false; // debug signing, fine for side-loading
+            // Test APKs include developer mode (DEV button); the Play Store bundle (AAB) never does.
             return Build($"{OutputFolder}/TownBuilder-{PlayerSettings.bundleVersion}-{PlayerSettings.Android.bundleVersionCode}.apk",
-                BuildOptions.None);
+                BuildOptions.None, "TOWNBUILDER_DEVTOOLS");
         }
 
         public static BuildResult BuildAab()
@@ -111,7 +112,7 @@ namespace TownBuilder.EditorTools
             return true;
         }
 
-        private static BuildResult Build(string outputPath, BuildOptions options)
+        private static BuildResult Build(string outputPath, BuildOptions options, params string[] extraDefines)
         {
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
             var scenes = EditorBuildSettings.scenes.Where(s => s.enabled).Select(s => s.path).ToArray();
@@ -124,6 +125,7 @@ namespace TownBuilder.EditorTools
                 target = BuildTarget.Android,
                 targetGroup = BuildTargetGroup.Android,
                 options = options,
+                extraScriptingDefines = extraDefines,
             });
 
             var summary = report.summary;

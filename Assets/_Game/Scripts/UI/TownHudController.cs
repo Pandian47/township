@@ -15,6 +15,7 @@ namespace TownBuilder
         [SerializeField] private TasksPanel tasksPanel;
         [SerializeField] private TrainPanel trainPanel;
         [SerializeField] private LandPanel landPanel;
+        [SerializeField] private DevPanel devPanel;
 
         [Header("Ads")]
         [SerializeField] private RewardedCoinsButton rewardedCoinsButton;
@@ -146,6 +147,12 @@ namespace TownBuilder
         }
 
         /// <summary>Land expansion: tapping locked land opens the land panel.</summary>
+        /// <summary>Developer-mode shortcuts (Editor and test APKs only; hidden otherwise).</summary>
+        public void InitializeDev(TownSceneController scene, GameContent content)
+        {
+            if (devPanel != null) devPanel.Initialize(scene, content, toast.Show);
+        }
+
         public void InitializeLand(LandController land)
         {
             if (land == null || landPanel == null) return;

@@ -435,6 +435,7 @@ namespace TownBuilder.EditorTools
             // --- Confirm dialog (last = drawn on top)
             var dialog = CreateConfirmDialog(canvas.transform);
             var levelUp = BuildLevelUpDialog(canvas.transform);
+            var devPanel = BuildDevPanel(canvas.transform);
 
             var hud = canvas.gameObject.AddComponent<TownHudController>();
             Wire(hud,
@@ -454,6 +455,7 @@ namespace TownBuilder.EditorTools
                 ("shopPanel", shop),
                 ("confirmDialog", dialog),
                 ("tasksPanel", tasksPanel),
+                ("devPanel", devPanel),
                 ("bottomNavigation", nav.gameObject),
                 ("buildButton", buildButton),
                 ("rewardedCoinsButton", rewarded),
@@ -799,6 +801,40 @@ namespace TownBuilder.EditorTools
             Wire(panel, ("panelRoot", root.gameObject), ("titleText", title), ("cropsView", crops.gameObject), ("cropsParent", crops),
                 ("cropTemplate", cropView), ("growingView", growing.gameObject), ("statusText", status), ("progressFill", fill),
                 ("actionButton", action), ("actionLabel", actionLabel));
+            root.gameObject.SetActive(false);
+            return panel;
+        }
+
+        /// <summary>Developer mode: "DEV" button top-right + a panel of testing shortcuts (hidden in Google Play builds).</summary>
+        private static DevPanel BuildDevPanel(Transform canvas)
+        {
+            var container = Stretch("DevPanel", canvas);
+            var open = MakeButton(container, "DevButton", "DEV", new Vector2(110, 76), new Color(0.55f, 0.2f, 0.6f), 30);
+            var openRect = (RectTransform)open.transform;
+            openRect.anchorMin = openRect.anchorMax = openRect.pivot = new Vector2(1f, 1f);
+            openRect.anchoredPosition = new Vector2(-30, -20);
+
+            var root = Stretch("Root", container);
+            AddImage(root, Dim, rounded: false);
+            var window = MakeRect("Window", root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(640, 900));
+            AddImage(window, PanelColor);
+            VColumn(window, 18, TextAnchor.UpperCenter, 30);
+            var title = Label(window, "Title", "Developer mode (test builds only)", 34, TextAnchor.MiddleCenter, Ink, FontStyle.Bold);
+            Prefer(title, 560, 60);
+
+            Button Row(string name, string label, Color color) => MakeButton(window, name, label, new Vector2(560, 96), color, 32);
+            var coins = Row("CoinsButton", "+10,000 coins  +100 gems", new Color(0.95f, 0.65f, 0.15f));
+            var levelUp = Row("LevelUpButton", "Level up (+1)", Blue);
+            var unlockAll = Row("UnlockAllButton", "Unlock everything (level 10)", Blue);
+            var fillBarn = Row("FillBarnButton", "Max barn + 10 of every item", new Color(0.62f, 0.38f, 0.25f));
+            var finish = Row("FinishTimersButton", "Finish all timers + call train", Green);
+            var land = Row("UnlockLandButton", "Unlock all land", Green);
+            var close = Row("CloseButton", "Close", Slate);
+
+            var panel = container.gameObject.AddComponent<DevPanel>();
+            Wire(panel, ("openButton", open), ("panelRoot", root.gameObject), ("closeButton", close), ("coinsButton", coins),
+                ("levelUpButton", levelUp), ("unlockAllButton", unlockAll), ("fillBarnButton", fillBarn),
+                ("finishTimersButton", finish), ("unlockLandButton", land));
             root.gameObject.SetActive(false);
             return panel;
         }

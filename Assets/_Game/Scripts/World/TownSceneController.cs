@@ -174,6 +174,7 @@ namespace TownBuilder
             hud.InitializeTasks(_tasks);
             if (trainController != null) hud.InitializeTrain(trainController, _context.Content, _inventory, _context.Ads);
             if (landController != null) hud.InitializeLand(landController);
+            hud.InitializeDev(this, _context.Content);
         }
 
         private void OnDestroy()

@@ -1,11 +1,11 @@
-# Playtest guide (v0.19.0)
+# Playtest guide (v0.19.1)
 
 One place for testing the game on a real Android phone. The detailed per-feature checklists stay in
 DevelopmentRoadmap.md; this guide is the order to play in and what to write down.
 
 ## 1. Install
 
-APK: `Builds/Android/TownBuilder-0.19.0-19.apk` (37 MB, test build, test ads only).
+APK: `Builds/Android/TownBuilder-0.19.1-20.apk` (37 MB, test build, test ads only, developer mode included).
 
 **Option A: copy the file (no cable needed)**
 1. Upload the APK to Google Drive (or send it to yourself), open it on the phone.
@@ -18,7 +18,7 @@ APK: `Builds/Android/TownBuilder-0.19.0-19.apk` (37 MB, test build, test ads onl
 2. Connect the cable, tap **Allow** on the "Allow USB debugging?" popup.
 3. Tell me, and I'll run the install with Unity's `adb`, or run it yourself:
    ```
-   "C:\Program Files\Unity\Hub\Editor\6000.6.8f1\Editor\Data\PlaybackEngines\AndroidPlayer\SDK\platform-tools\adb.exe" install -r "D:\01-Projects\05-Township\TownBuilder\Builds\Android\TownBuilder-0.19.0-19.apk"
+   "C:\Program Files\Unity\Hub\Editor\6000.6.8f1\Editor\Data\PlaybackEngines\AndroidPlayer\SDK\platform-tools\adb.exe" install -r "D:\01-Projects\05-Township\TownBuilder\Builds\Android\TownBuilder-0.19.1-20.apk"
    ```
 
 ## 2. Session A: a new town (30–45 minutes, sound on)
@@ -47,12 +47,24 @@ Start with **Menu → New Game**. Play normally and follow the Tasks panel; don'
 ## 4. Session C: later features (needs level 4–9)
 
 Reaching the train (level 5) or the outer land ring (level 9) takes **several hours** of normal play.
-Either keep playing over a few days, or ask for **debug shortcuts** (a hidden panel in test builds only to add coins,
-XP, materials and skip time) to test these in minutes:
+Use **developer mode** to get there in a minute: tap the purple **DEV** button (top-right corner, test APKs only).
+
+| Button | What it does |
+|---|---|
+| +10,000 coins +100 gems | Money for buildings, land and speed-ups |
+| Level up (+1) | Exactly one level, with the normal level-up reward and dialog |
+| Unlock everything (level 10) | Levels up to 10: every building, crop, recipe, the train and both land rings unlock (one level-up dialog per level: tap through them) |
+| Max barn + 10 of every item | Barn fully expanded, then 10 of each crop, product and material |
+| Finish all timers + call train | Crops ready, factories done, construction finished, train back now |
+| Unlock all land | Owns every plot for free |
+
+Suggested order: Unlock everything → +coins → Max barn → build the buildings → Finish all timers. Then test:
 
 - Feed Mill, Chicken Coop, Dairy Shed, Sugar Mill, Creamery (levels 4–8)
 - Train Station (by the railway from the start, padlock until level 5): crates, "+1 Planks", Send train bonus, Call now (ad), train back after 30 min
 - Buying land: materials spent, signs move outward; outer ring says "Level 9"
+
+Developer mode changes your real save. To go back to normal play afterwards: Menu → New Game.
 
 ## 5. What to send back
 

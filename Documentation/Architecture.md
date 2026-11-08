@@ -253,6 +253,13 @@ All UI text is TextMeshPro (`TMP_Text` fields, `TextMeshProUGUI` components). Ne
 * Setup imports the TMP resources on the first run. Batch mode imports packages asynchronously, so a fresh clone
   without `Assets/TextMesh Pro/` must import them with `-importPackage` first (see AssetImportGuide.md, section 6).
 
+## 6i. Developer mode (test builds only)
+
+`DevTools` (Scripts/Dev) holds testing shortcuts (currency, level up, unlock all, fill barn, finish timers, unlock land);
+`DevPanel` is the purple DEV button + panel in the HUD. `DevTools.Enabled` is true only in the Editor and when compiled
+with `TOWNBUILDER_DEVTOOLS`, which `BuildTools.BuildApk` passes (`extraScriptingDefines`). `BuildAab` does not, so the
+Google Play bundle has no DEV button. Shortcuts use the normal systems (rewards, events, saving).
+
 ## 7. Save system
 
 * `JsonSaveStore` writes `town.json.tmp`, flushes it to disk, then `File.Replace`s it over `town.json`, keeping the old file as `town.json.bak`.
