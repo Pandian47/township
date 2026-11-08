@@ -201,6 +201,15 @@ Effects are cosmetic only: no state, nothing saved, and gameplay works the same 
 `ProductionController.TryAddSlot` charges the wallet and raises `SlotAdded` (sound + pop via the bridges).
 Saved in `BuildingSaveData.extraQueueSlots` (written by `TownSaveMapper.WriteProduction`, capped to the content maximum on load).
 
+## 6g3. Town tasks
+
+`TaskBoard` (Domain) holds the active tasks (`TaskSpec` + progress), records progress (`Record(kind, targetId, amount)`),
+claims completed tasks and refills slots (guide tasks in order, then random repeatables; `alreadyDone` skips "Build X"
+when X exists). `TaskDefinition` assets are the content (`GameContent.Tasks`, order matters). `TaskService` maps events
+to progress: `FarmingController.Rewarded` → Harvest, `ProductionController.Rewarded` → Collect, `OrderService.Delivered` → Deliver,
+`PlacementSystem.BuildingPlaced` → Build; it pays rewards on `Claim` and refills on level-up. Saved in `SaveData.tasks` and
+`completedTaskIds`. UI: `TasksPanel` + `TaskRowView` (top-left of the HUD).
+
 ## 6h. UI text (TextMeshPro)
 
 All UI text is TextMeshPro (`TMP_Text` fields, `TextMeshProUGUI` components). Never add legacy `UnityEngine.UI.Text`.

@@ -12,6 +12,7 @@ namespace TownBuilder
         [SerializeField] private TopBarView topBar;
         [SerializeField] private BuildingShopPanel shopPanel;
         [SerializeField] private ConfirmDialog confirmDialog;
+        [SerializeField] private TasksPanel tasksPanel;
 
         [Header("Ads")]
         [SerializeField] private RewardedCoinsButton rewardedCoinsButton;
@@ -63,6 +64,7 @@ namespace TownBuilder
         private ProgressionService _progression;
         private StorageService _storage;
         private Wallet _wallet;
+        private TaskService _tasks;
 
         public void Initialize(PlacementSystem placement, FarmingController farming, ProductionController production, ConstructionController construction, OrderService orders,
             ProgressionService progression, StorageService storage, Wallet wallet,
@@ -120,8 +122,18 @@ namespace TownBuilder
             Refresh();
         }
 
+        /// <summary>Town tasks (separate from Initialize so the task system stays optional).</summary>
+        public void InitializeTasks(TaskService tasks)
+        {
+            if (tasks == null || tasksPanel == null) return;
+            _tasks = tasks;
+            tasksPanel.Initialize(tasks);
+            tasks.Notification += toast.Show;
+        }
+
         private void OnDestroy()
         {
+            if (_tasks != null) _tasks.Notification -= toast.Show;
             if (_placement != null) _placement.StateChanged -= Refresh;
             if (_wallet != null) _wallet.Changed -= Refresh;
             if (_farming != null) _farming.Notification -= toast.Show;

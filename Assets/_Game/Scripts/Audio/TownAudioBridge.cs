@@ -14,7 +14,7 @@ namespace TownBuilder
 
         public TownAudioBridge(GameAudio audio, Town town, PlacementSystem placement, FarmingController farming,
             ProductionController production, ConstructionController construction, StorageService storage,
-            OrderService orders, ProgressionService progression)
+            OrderService orders, ProgressionService progression, TaskService tasks = null)
         {
             _audio = audio;
 
@@ -32,6 +32,8 @@ namespace TownBuilder
             Action<int> delivered = _ => Play(SoundId.Coins);
             Action<LevelUpInfo> leveledUp = _ => Play(SoundId.LevelUp);
             Action failed = () => Play(SoundId.Error);
+            Action<int> taskDone = _ => Play(SoundId.Collect);
+            Action<int> taskClaimed = _ => Play(SoundId.Coins);
 
             placement.BuildingPlaced += placed;
             town.BuildingMoved += moved;
@@ -51,6 +53,11 @@ namespace TownBuilder
             orders.Delivered += delivered;
             orders.Failed += failed;
             progression.LeveledUp += leveledUp;
+            if (tasks != null)
+            {
+                tasks.Completed += taskDone;
+                tasks.Claimed += taskClaimed;
+            }
 
             _dispose = () =>
             {
@@ -72,6 +79,11 @@ namespace TownBuilder
                 orders.Delivered -= delivered;
                 orders.Failed -= failed;
                 progression.LeveledUp -= leveledUp;
+                if (tasks != null)
+                {
+                    tasks.Completed -= taskDone;
+                    tasks.Claimed -= taskClaimed;
+                }
             };
         }
 

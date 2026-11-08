@@ -104,6 +104,35 @@ namespace TownBuilder.Tests
             CollectionAssert.AreEquivalent(new[] { "wheat", "egg", "milk", "sugar" }, cake.Ingredients.Select(i => i.item.Id).ToArray());
         }
 
+        [Test]
+        public void Tasks_AreValid_AndAchievableAtTheirLevel()
+        {
+            var itemUnlock = ItemUnlockLevels();
+            var ids = new HashSet<string>();
+            foreach (var task in _content.Tasks)
+            {
+                Assert.NotNull(task, "empty entry in GameContent.Tasks");
+                Assert.IsTrue(ids.Add(task.Id), $"duplicate task id {task.Id}");
+                Assert.Greater(task.RewardCoins + task.RewardXp + task.RewardGems, 0, $"{task.Id} has no reward");
+                switch (task.Kind)
+                {
+                    case TownBuilder.Domain.TaskKind.Build:
+                        Assert.NotNull(task.TargetBuilding, $"{task.Id}: no building");
+                        Assert.GreaterOrEqual(task.UnlockLevel, task.TargetBuilding.UnlockLevel, $"{task.Id} appears before its building unlocks");
+                        break;
+                    case TownBuilder.Domain.TaskKind.Harvest:
+                    case TownBuilder.Domain.TaskKind.Collect:
+                        if (task.TargetItem == null) break;
+                        Assert.IsTrue(itemUnlock.ContainsKey(task.TargetItem.Id), $"{task.Id}: nothing makes {task.TargetItem.Id}");
+                        Assert.GreaterOrEqual(task.UnlockLevel, itemUnlock[task.TargetItem.Id], $"{task.Id} appears before {task.TargetItem.Id} can be made");
+                        break;
+                }
+            }
+
+            int startTasks = _content.Tasks.Count(t => t.UnlockLevel == 1);
+            Assert.GreaterOrEqual(startTasks, _content.TaskSlots, "a new player's task board starts full");
+        }
+
         /// <summary>Earliest level at which each item can be obtained (crops: their unlock; products: their cheapest recipe).</summary>
         private Dictionary<string, int> ItemUnlockLevels()
         {

@@ -186,8 +186,41 @@ close and reopen with nothing lost.
 - [ ] Close and reopen: the extra slots are still there; a new Bakery starts with 3
 - [ ] Level-up rewards are now 75 × level coins (level 2 → +150)
 
-## Milestone 5: Orders and progression
-Train deliveries, quests, land expansion.
+## Milestone 5: Orders and progression (current)
+
+Goal: give players something to aim for beyond the order board, and a reason to keep growing the town.
+The three systems feed each other: **tasks** guide new players, the **train** pays in building materials,
+and **land expansion** spends those materials.
+
+| Step | Feature | Unlock | Status |
+|---|---|---|---|
+| 1 | **Town tasks**: 3 active goals ("Harvest 10 Wheat", "Bake 3 Bread", "Build a Feed Mill"...), progress from game events, coin/XP/gem rewards, a new one replaces each claimed task | Level 1 | **Done** (v0.14.0) |
+| 2 | **Train Station + train**: the train arrives on a timer with 6 crates asking for items; fill crates for coins and XP, a full train adds a bonus; it leaves and returns later | Level 6 | Next |
+| 3 | **Building materials** (Planks, Bricks, Nails): rewards from the train and some tasks, stored in the barn, sellable | with step 2 | Planned |
+| 4 | **Land expansion**: the map starts with a buildable area in the middle; surrounding plots are fenced off and bought with coins + materials | Level 3+ | Planned |
+| 5 | Balance pass (EconomyReport extended with train income and expansion costs) + device checklist | | Planned |
+
+Design notes:
+* **Tasks** are content (ScriptableObject `TaskDefinition`: type, target id, amount, rewards, unlock level), not code.
+  Progress listens to events that already exist (Harvested, Collected, Delivered, BuildingPlaced, LeveledUp, Sold).
+  Saved: active task ids + progress.
+* **Train**: one station (max 1). A visit = arrival time + 6 crates (item, amount, filled?). Crate items are picked from
+  what the player can produce at their level (like orders). Timers are UTC timestamps, so the train works while the app is closed.
+  The station and train get placeholder art plus prompts for the AI set.
+* **Land**: the 36×36 map is split into plots. New towns own the centre; each other plot shows a fence and a "for sale" sign,
+  and costs coins + materials (more for plots further out). Tiles stay the same; locked cells just can't be built on.
+  Existing saves: any plot that already contains a building starts unlocked, so nobody loses buildings.
+* All new numbers live in GameContent / definitions; EconomyReport and BalanceTests are extended in step 5.
+
+### Device checklist (Milestone 5 step 1: town tasks)
+- [ ] New game: a "Tasks" panel top-left with Harvest 4 Wheat, Build a Bakery, Make 2 Bread (progress 0/…)
+- [ ] Harvesting wheat counts up the wheat task; when done a green **Claim** button appears with a chime and a toast
+- [ ] Claim: coins/XP added (the coin pill pops), a new task takes the slot
+- [ ] Building a Bakery completes "Build a Bakery" as soon as it's placed
+- [ ] After the guide tasks, repeatable tasks appear (e.g. Harvest 10 Wheat, Make 3 Bread, Deliver 3 orders)
+- [ ] Level up: new tasks for the new buildings appear (e.g. "Build a Feed Mill" at level 4)
+- [ ] Close and reopen: tasks and their progress are the same; claimed guide tasks don't come back
+- [ ] The tasks panel never covers the bottom panels (field, factory, shop)
 
 ## Milestone 6: Visual polish (months 7–9)
 Building and crop animations, vehicles, UI transitions (switch to TextMeshPro), audio, particles.

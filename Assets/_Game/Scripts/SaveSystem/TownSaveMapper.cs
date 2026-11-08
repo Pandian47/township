@@ -35,6 +35,35 @@ namespace TownBuilder
             }
         }
 
+        /// <summary>Restores active tasks (unknown ids are dropped; the board refills them) and the claimed-task history.</summary>
+        public static void LoadTasks(SaveData save, GameContent content, TaskBoard board, List<string> warnings)
+        {
+            board.RestoreCompleted(save.completedTaskIds);
+            foreach (var t in save.tasks)
+            {
+                if (!content.TryGetTask(t.taskId, out var def))
+                {
+                    warnings.Add($"Unknown task '{t.taskId}' dropped.");
+                    continue;
+                }
+
+                board.Restore(t.slot, def.ToSpec(), t.progress);
+            }
+        }
+
+        public static void WriteTasks(SaveData save, TaskBoard board)
+        {
+            save.tasks.Clear();
+            for (int i = 0; i < board.SlotCount; i++)
+            {
+                var task = board.Get(i);
+                if (task != null) save.tasks.Add(new TaskSaveData { slot = i, taskId = task.Spec.Id, progress = task.Progress });
+            }
+
+            save.completedTaskIds.Clear();
+            save.completedTaskIds.AddRange(board.Completed);
+        }
+
         public static void WriteOrders(SaveData save, OrderBoard board)
         {
             save.orders.Clear();

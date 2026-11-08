@@ -76,5 +76,33 @@ MonoBehaviour:
   maxExtraQueueSlots: 3
   orderSlots: 3
   orderSkipCooldownSeconds: 60
+  tasks:
+  - {fileID: 11400000, guid: 4949c46e77a6ac74798af8e985f6ddd8, type: 2}
+  - {fileID: 11400000, guid: f440ef53efdcd3a49a7ffbcc6f81857c, type: 2}
+  - {fileID: 11400000, guid: 7afc4cd857a7ec2468362266f437392a, type: 2}
+  - {fileID: 11400000, guid: 72b9fc916df1a1840b23c50bc1e1ebc6, type: 2}
+  - {fileID: 11400000, guid: f39e28a780bc19e4f93287655102fc5d, type: 2}
+  - {fileID: 11400000, guid: 50195b4264b3a55409a425602351d239, type: 2}
+  - {fileID: 11400000, guid: 8e2d22e6f0e803e40ae29868aa3624d5, type: 2}
+  - {fileID: 11400000, guid: 31613d813c0108e4f984b5227445b005, type: 2}
+  - {fileID: 11400000, guid: 9d1a44326ecb9584da4f72c79d8be245, type: 2}
+  - {fileID: 11400000, guid: b7389c4199ddcef4eabbe05babb821a9, type: 2}
+  - {fileID: 11400000, guid: 2cf446a4d5cb1ba459d9a5627af69596, type: 2}
+  - {fileID: 11400000, guid: 6b93bd5dbe612ee4f82d7e712ee1ad43, type: 2}
+  - {fileID: 11400000, guid: fe70e37f27e1b3643b9bc1286a7ad908, type: 2}
+  - {fileID: 11400000, guid: b06f60b78e72d9147976d6f1e0d97cc3, type: 2}
+  - {fileID: 11400000, guid: d5bef9735b9f0ad4a87983785fc25b64, type: 2}
+  - {fileID: 11400000, guid: 45f57fd8039e7ae459d08cda9cd9e8fd, type: 2}
+  - {fileID: 11400000, guid: 36fa787170ef1c34d949a0c12f2f33d4, type: 2}
+  - {fileID: 11400000, guid: 614a2508ea7d0164bbe360881347ff42, type: 2}
+  - {fileID: 11400000, guid: 3cc763a46b70d174ab9f9cb693945ccd, type: 2}
+  - {fileID: 11400000, guid: c65155c49cfbb934e9d579d70d04a10c, type: 2}
+  - {fileID: 11400000, guid: 03b5b851ca6afb849839fae1a72668a5, type: 2}
+  - {fileID: 11400000, guid: a39a74c922f109648b541f8cd88cc2df, type: 2}
+  - {fileID: 11400000, guid: 7302ca570319d374194ea313e99b7ca7, type: 2}
+  - {fileID: 11400000, guid: ec650815ac6758845867d96d31367538, type: 2}
+  - {fileID: 11400000, guid: 530fcd5fcbfe19948bc996a4cb52eee9, type: 2}
+  - {fileID: 11400000, guid: f3376847dcbcc394196c50cea2ba3c31, type: 2}
+  taskSlots: 3
   soundLibrary: {fileID: 11400000, guid: 204402b4592b2d64d93691af848458eb, type: 2}
   adsConfig: {fileID: 11400000, guid: 1e5cb2d5aaa6061439417a7434340494, type: 2}

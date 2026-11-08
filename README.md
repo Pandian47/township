@@ -28,7 +28,8 @@ An original 2D isometric farming and town-building game for Android, built AI-fi
 | Sugarcane + Sugar Mill (Milestone 4 step 3) | ✅ (placeholder art) |
 | Sweets and dairy: Cookies, Cake, Creamery (Butter, Cheese) (Milestone 4 step 4) | ✅ (placeholder art) |
 | Factory queue upgrades (+1 slot for coins) and an economy balance model with guard-rail tests (Milestone 4 step 5) | ✅ |
-| Automated tests: 103 EditMode + 37 PlayMode | ✅ |
+| Town tasks: guide + repeatable goals with rewards (Milestone 5 step 1) | ✅ |
+| Automated tests: 111 EditMode + 39 PlayMode | ✅ |
 | First AI art set (buildings, field, crops, items, ground) + `AiArtImporter` tool | ✅ |
 | Android build | ⏳ install the Android Build Support module first |
 

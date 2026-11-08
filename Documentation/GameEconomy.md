@@ -147,6 +147,31 @@ Reward per level-up: 75 × new level coins + 1 gem (`levelUpCoinsPerLevel`, rais
 | Cookie | 2 Wheat + 1 Sugar | 10 min |
 | Cake | 2 Wheat + 2 Sugar + 1 Egg | 20 min |
 
+## Town tasks (Milestone 5 step 1, `Data/Tasks`, 3 on screen)
+
+One-off **guide** tasks appear first, in GameContent order, as soon as their level is reached; after that a random
+unlocked **repeatable** task fills the slot. A one-off "Build X" task is skipped if X is already built.
+
+| Task | Goal | Level | Reward |
+|---|---|---|---|
+| guide_harvest_wheat | Harvest 4 Wheat | 1 | 20 coins, 3 XP |
+| guide_build_bakery | Build a Bakery | 1 | 40 coins, 5 XP |
+| guide_bake_bread | Make 2 Bread | 1 | 30 coins, 4 XP |
+| guide_deliver_orders | Deliver 2 orders | 1 | 40 coins, 5 XP |
+| guide_build_barn | Build a Barn | 1 | 40 coins, 5 XP |
+| guide_harvest_corn | Harvest 6 Corn | 2 | 30 coins, 4 XP |
+| guide_build_silo | Build a Silo | 3 | 40 coins, 5 XP |
+| guide_build_feed_mill / chicken_coop | Build it | 4 / 5 | 60 coins, 8 XP, 1 gem |
+| guide_collect_eggs | Make 3 Egg | 5 | 60 coins, 6 XP |
+| guide_build_dairy_shed / sugar_mill | Build it | 6 / 7 | 80 coins, 10 XP, 1 gem |
+| guide_build_creamery | Build a Creamery | 8 | 100 coins, 12 XP, 1 gem |
+| guide_bake_cake | Make 1 Cake | 10 | 150 coins, 15 XP, 2 gems |
+| Repeatable (12) | Harvest 10 Wheat, Make 3 Bread, Deliver 3 orders, Harvest 9 Corn, Make 3 Chicken Feed, Harvest 6 Soybean, Make 4 Egg, Make 3 Milk, Make 2 Sugar, Make 2 Cookies, Make 2 Butter, Make 1 Cheese | 1–9 | 25–120 coins, 4–10 XP |
+
+Task rewards are extra income on top of the balance model (it ignores them, like orders), so they only make levels
+a little faster and richer. `ContentEconomyTests.Tasks_AreValid_AndAchievableAtTheirLevel` checks every task can be
+done at its level.
+
 ## Factory queue upgrades (Milestone 4 step 5)
 
 Every factory (including animal buildings) starts with 3 queue slots. In its panel, the blue **+1 slot** card buys an

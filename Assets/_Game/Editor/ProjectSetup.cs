@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TownBuilder.Domain;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEngine;
@@ -38,7 +39,7 @@ namespace TownBuilder.EditorTools
             "Art/Environment/Tiles/TileAssets", "Art/Characters", "Art/Vehicles", "Art/Decorations", "Art/UI",
             "Animations", "Audio", "Fonts", "Materials", "Shaders",
             "Prefabs/World", "Prefabs/Buildings", "Prefabs/Crops", "Prefabs/Characters", "Prefabs/UI",
-            "Scenes", "Data/Buildings", "Data/Crops", "Data/Products", "Data/Recipes",
+            "Scenes", "Data/Buildings", "Data/Crops", "Data/Products", "Data/Recipes", "Data/Tasks",
             "ScriptableObjects", "Settings", "Tests/EditMode", "Tests/PlayMode",
         };
 
@@ -186,6 +187,7 @@ namespace TownBuilder.EditorTools
             CreateContent(art);
             CreateCrops();
             CreateProduction();
+            CreateTasks();
             ConfigureAds();
             ConfigureAudio();
             ConfigureEffects();
@@ -419,6 +421,85 @@ namespace TownBuilder.EditorTools
                 factory.EditorConfigureFactory(merged, factory.ProductionSlots);
                 EditorUtility.SetDirty(factory);
             }
+        }
+
+        private struct TaskSeed
+        {
+            public string Id, Target;
+            public TaskKind Kind;
+            public int Amount, Unlock, Coins, Xp, Gems;
+            public bool Repeatable;
+
+            public TaskSeed(string id, TaskKind kind, string target, int amount, int unlock, int coins, int xp, int gems = 0, bool repeatable = false)
+            {
+                Id = id; Kind = kind; Target = target; Amount = amount; Unlock = unlock;
+                Coins = coins; Xp = xp; Gems = gems; Repeatable = repeatable;
+            }
+        }
+
+        // Milestone 5 step 1. One-off guide tasks first (shown in this order), then repeatable ones. Example values.
+        private static readonly TaskSeed[] TaskSeeds =
+        {
+            new TaskSeed("guide_harvest_wheat", TaskKind.Harvest, "wheat", 4, 1, 20, 3),
+            new TaskSeed("guide_build_bakery", TaskKind.Build, "bakery", 1, 1, 40, 5),
+            new TaskSeed("guide_bake_bread", TaskKind.Collect, "bread", 2, 1, 30, 4),
+            new TaskSeed("guide_deliver_orders", TaskKind.Deliver, null, 2, 1, 40, 5),
+            new TaskSeed("guide_build_barn", TaskKind.Build, "barn", 1, 1, 40, 5),
+            new TaskSeed("guide_harvest_corn", TaskKind.Harvest, "corn", 6, 2, 30, 4),
+            new TaskSeed("guide_build_silo", TaskKind.Build, "silo", 1, 3, 40, 5),
+            new TaskSeed("guide_build_feed_mill", TaskKind.Build, "feed_mill", 1, 4, 60, 8, 1),
+            new TaskSeed("guide_build_chicken_coop", TaskKind.Build, "chicken_coop", 1, 5, 60, 8, 1),
+            new TaskSeed("guide_collect_eggs", TaskKind.Collect, "egg", 3, 5, 60, 6),
+            new TaskSeed("guide_build_dairy_shed", TaskKind.Build, "dairy_shed", 1, 6, 80, 10, 1),
+            new TaskSeed("guide_build_sugar_mill", TaskKind.Build, "sugar_mill", 1, 7, 80, 10, 1),
+            new TaskSeed("guide_build_creamery", TaskKind.Build, "creamery", 1, 8, 100, 12, 1),
+            new TaskSeed("guide_bake_cake", TaskKind.Collect, "cake", 1, 10, 150, 15, 2),
+
+            new TaskSeed("harvest_wheat", TaskKind.Harvest, "wheat", 10, 1, 25, 4, repeatable: true),
+            new TaskSeed("bake_bread", TaskKind.Collect, "bread", 3, 1, 35, 5, repeatable: true),
+            new TaskSeed("deliver_orders", TaskKind.Deliver, null, 3, 2, 60, 6, repeatable: true),
+            new TaskSeed("harvest_corn", TaskKind.Harvest, "corn", 9, 2, 35, 5, repeatable: true),
+            new TaskSeed("make_chicken_feed", TaskKind.Collect, "chicken_feed", 3, 4, 45, 6, repeatable: true),
+            new TaskSeed("harvest_soybean", TaskKind.Harvest, "soybean", 6, 4, 40, 5, repeatable: true),
+            new TaskSeed("collect_eggs", TaskKind.Collect, "egg", 4, 5, 70, 8, repeatable: true),
+            new TaskSeed("collect_milk", TaskKind.Collect, "milk", 3, 6, 100, 9, repeatable: true),
+            new TaskSeed("make_sugar", TaskKind.Collect, "sugar", 2, 7, 90, 9, repeatable: true),
+            new TaskSeed("bake_cookies", TaskKind.Collect, "cookies", 2, 8, 120, 10, repeatable: true),
+            new TaskSeed("churn_butter", TaskKind.Collect, "butter", 2, 8, 120, 10, repeatable: true),
+            new TaskSeed("make_cheese", TaskKind.Collect, "cheese", 1, 9, 120, 10, repeatable: true),
+        };
+
+        /// <summary>Creates missing task assets and appends them to GameContent (keeps existing ones and their order).</summary>
+        private static void CreateTasks()
+        {
+            var content = AssetDatabase.LoadAssetAtPath<GameContent>(ContentPath);
+            var tasks = content.Tasks.Where(t => t != null).ToList();
+            foreach (var s in TaskSeeds)
+            {
+                var path = $"{Root}/Data/Tasks/Task_{s.Id}.asset";
+                var task = AssetDatabase.LoadAssetAtPath<TaskDefinition>(path);
+                if (task == null)
+                {
+                    ItemDefinition item = null;
+                    BuildingDefinition building = null;
+                    if (s.Kind == TaskKind.Build) content.TryGetBuilding(s.Target, out building);
+                    else if (s.Target != null) content.TryGetItem(s.Target, out item);
+                    if (s.Target != null && item == null && building == null)
+                    {
+                        Debug.LogError($"[Setup] Task {s.Id}: unknown target '{s.Target}'");
+                        continue;
+                    }
+
+                    task = ScriptableObject.CreateInstance<TaskDefinition>();
+                    task.EditorConfigure(s.Id, s.Kind, item, building, s.Amount, s.Unlock, s.Repeatable, s.Coins, s.Xp, s.Gems);
+                    AssetDatabase.CreateAsset(task, path);
+                }
+
+                if (!tasks.Contains(task)) tasks.Add(task);
+            }
+
+            content.EditorSetTasks(tasks);
+            EditorUtility.SetDirty(content);
         }
 
         private static void CreateCrops()

@@ -49,6 +49,11 @@ namespace TownBuilder
         [Tooltip("After skipping an order, the slot waits this long before a new order appears.")]
         [SerializeField, Min(0)] private int orderSkipCooldownSeconds = 60;
 
+        [Header("Town tasks")]
+        [Tooltip("One-off tasks guide new players in this order; repeatable ones come back at random once unlocked.")]
+        [SerializeField] private List<TaskDefinition> tasks = new List<TaskDefinition>();
+        [SerializeField, Min(1)] private int taskSlots = 3;
+
         [Header("Audio")]
         [SerializeField] private SoundLibrary soundLibrary;
 
@@ -59,6 +64,25 @@ namespace TownBuilder
         private Dictionary<string, CropDefinition> _cropsById;
         private Dictionary<string, ProductDefinition> _productsById;
         private Dictionary<string, RecipeDefinition> _recipesById;
+
+        public IReadOnlyList<TaskDefinition> Tasks => tasks;
+        public int TaskSlots => taskSlots;
+
+        public bool TryGetTask(string id, out TaskDefinition task)
+        {
+            task = null;
+            if (string.IsNullOrEmpty(id) || tasks == null) return false;
+            foreach (var t in tasks)
+            {
+                if (t == null || t.Id != id) continue;
+                task = t;
+                return true;
+            }
+
+            return false;
+        }
+
+        public void EditorSetTasks(List<TaskDefinition> taskDefinitions) => tasks = taskDefinitions;
 
         public IReadOnlyList<ProductDefinition> Products => products;
         public IReadOnlyList<RecipeDefinition> Recipes => recipes;

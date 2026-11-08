@@ -161,6 +161,11 @@ namespace TownBuilder.EditorTools
             var barn = new Inventory(50); barn.TryAdd("wheat", 12); barn.TryAdd("corn", 6);
             UnityEngine.Object.FindAnyObjectByType<TopBarView>().Bind(wallet, progress, barn);
 
+            var taskRows = canvas.GetComponentsInChildren<TaskRowView>(true);
+            taskRows[0].Show("Harvest 6 Wheat", 4, 6, "+20 coins  +3 XP", false);
+            taskRows[1].Show("Build a Bakery", 1, 1, "+40 coins  +5 XP", true);
+            taskRows[2].Show("Make 2 Bread", 0, 2, "+30 coins  +4 XP", false);
+
             Find(canvas, "PlacementActionBar").SetActive(state == HudState.Placing);
             Find(canvas, "SelectionActionBar").SetActive(false);
             Find(canvas, "BottomNavigation").SetActive(state == HudState.Idle);

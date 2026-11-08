@@ -20,6 +20,9 @@ namespace TownBuilder.Domain
         public List<CropPlotSaveData> cropPlots = new List<CropPlotSaveData>();
         public List<ProductionJobSaveData> productionJobs = new List<ProductionJobSaveData>();
         public List<OrderSaveData> orders = new List<OrderSaveData>();
+        public List<TaskSaveData> tasks = new List<TaskSaveData>();
+        /// <summary>Ids of tasks claimed at least once (one-off guide tasks don't come back).</summary>
+        public List<string> completedTaskIds = new List<string>();
     }
 
     /// <summary>One order-board slot. itemIds[i] / amounts[i] form one line.</summary>
@@ -35,6 +38,14 @@ namespace TownBuilder.Domain
     }
 
     /// <summary>One queued/finished product in a factory. Jobs of one factory are saved in queue order.</summary>
+    [Serializable]
+    public sealed class TaskSaveData
+    {
+        public int slot;
+        public string taskId;
+        public int progress;
+    }
+
     [Serializable]
     public sealed class ProductionJobSaveData
     {

@@ -55,6 +55,11 @@ namespace TownBuilder.Domain
             data.cropPlots ??= new List<CropPlotSaveData>();
             data.productionJobs ??= new List<ProductionJobSaveData>();
             data.orders ??= new List<OrderSaveData>();
+            data.tasks ??= new List<TaskSaveData>();
+            data.completedTaskIds ??= new List<string>();
+            data.tasks.RemoveAll(t => t == null || string.IsNullOrEmpty(t.taskId));
+            foreach (var t in data.tasks)
+                if (t.progress < 0) t.progress = 0;
 
             if (data.player.level < 1) { warnings?.Add("Player level < 1, reset to 1."); data.player.level = 1; }
             if (data.player.xp < 0) { warnings?.Add("Negative XP reset to 0."); data.player.xp = 0; }

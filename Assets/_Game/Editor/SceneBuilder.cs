@@ -375,6 +375,9 @@ namespace TownBuilder.EditorTools
             var removeButton = MakeButton(selectionBar, "RemoveButton", "Remove", new Vector2(190, 100), Red);
             var deselectButton = MakeButton(selectionBar, "CloseButton", "Close", new Vector2(170, 100), Slate);
 
+            // --- Town tasks (top-left, under the top bar)
+            var tasksPanel = BuildTasksPanel(safe);
+
             // --- Farming: field panel (above the selection bar) and toast
             var fieldPanel = BuildFieldPanel(safe);
             var factoryPanel = BuildFactoryPanel(safe);
@@ -407,6 +410,7 @@ namespace TownBuilder.EditorTools
                 ("topBar", topBar),
                 ("shopPanel", shop),
                 ("confirmDialog", dialog),
+                ("tasksPanel", tasksPanel),
                 ("bottomNavigation", nav.gameObject),
                 ("buildButton", buildButton),
                 ("rewardedCoinsButton", rewarded),
@@ -753,6 +757,54 @@ namespace TownBuilder.EditorTools
                 ("cropTemplate", cropView), ("growingView", growing.gameObject), ("statusText", status), ("progressFill", fill),
                 ("actionButton", action), ("actionLabel", actionLabel));
             root.gameObject.SetActive(false);
+            return panel;
+        }
+
+        private static TasksPanel BuildTasksPanel(RectTransform safe)
+        {
+            const float width = 470f, rowHeight = 96f;
+            var container = MakeRect("TasksPanel", safe, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(30, -128),
+                new Vector2(width, 52 + 3 * (rowHeight + 8) + 12));
+            var root = Stretch("Root", container);
+            AddImage(root, new Color(PanelColor.r, PanelColor.g, PanelColor.b, 0.94f), raycast: false);
+
+            var titleRect = MakeRect("Title", root, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -6), new Vector2(-28, 44));
+            Label(titleRect, "Text", "Tasks", 30, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
+
+            var rows = new TaskRowView[3];
+            for (int i = 0; i < rows.Length; i++)
+            {
+                var row = MakeRect($"Task{i + 1}", root, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
+                    new Vector2(0, -52 - i * (rowHeight + 8)), new Vector2(-24, rowHeight));
+                AddImage(row, Color.white, raycast: false);
+
+                var title = Label(MakeRect("Title", row, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, 1f), new Vector2(14, -6), new Vector2(-150, 40)),
+                    "Text", "Task", 27, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
+                var progress = Label(MakeRect("Progress", row, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-14, -6), new Vector2(120, 40)),
+                    "Text", "0/1", 26, TextAnchor.MiddleRight, Ink, FontStyle.Bold);
+
+                var barBg = MakeRect("Bar", row, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(14, 38), new Vector2(290, 12));
+                AddImage(barBg, new Color(0.82f, 0.78f, 0.7f), raycast: false);
+                var fill = AddImage(Stretch("Fill", barBg, 2f), Green, raycast: false);
+                fill.type = Image.Type.Filled;
+                fill.fillMethod = Image.FillMethod.Horizontal;
+
+                var reward = Label(MakeRect("Reward", row, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(14, 6), new Vector2(300, 30)),
+                    "Text", "", 21, TextAnchor.MiddleLeft, new Color(0.45f, 0.42f, 0.38f));
+
+                var claim = MakeButton(row, "ClaimButton", "Claim", new Vector2(124, 66), Green, 30);
+                var claimRect = (RectTransform)claim.transform;
+                claimRect.anchorMin = claimRect.anchorMax = claimRect.pivot = new Vector2(1f, 0.5f);
+                claimRect.anchoredPosition = new Vector2(-12, -6);
+
+                var view = row.gameObject.AddComponent<TaskRowView>();
+                Wire(view, ("titleText", title), ("progressText", progress), ("rewardText", reward), ("progressFill", fill), ("claimButton", claim));
+                rows[i] = view;
+            }
+
+            var panel = container.gameObject.AddComponent<TasksPanel>();
+            Wire(panel, ("panelRoot", root.gameObject));
+            WireArray(panel, "rows", rows);
             return panel;
         }
 

@@ -39,6 +39,8 @@ namespace TownBuilder
         private OrderBoard _orderBoard;
         private OrderService _orders;
         private ProgressionService _progression;
+        private TaskBoard _taskBoard;
+        private TaskService _tasks;
         private TownAudioBridge _audioBridge;
         private float _saveDueAt = -1f;
 
@@ -53,6 +55,7 @@ namespace TownBuilder
         public ConstructionController Construction => construction;
         public OrderService Orders => _orders;
         public ProgressionService Progression => _progression;
+        public TaskService Tasks => _tasks;
         public TownEffects Effects => effects;
         public bool IsReady => _town != null;
 
@@ -124,16 +127,22 @@ namespace TownBuilder
             _orders.Modified += ScheduleSave;
             _progress.Changed += ScheduleSave;
 
+            _taskBoard = new TaskBoard(content.TaskSlots);
+            TownSaveMapper.LoadTasks(save, content, _taskBoard, warnings);
+            _tasks = new TaskService(_taskBoard, content, _wallet, _progress, _town, farming, production, _orders, placement);
+            _tasks.Modified += ScheduleSave;
+
             cameraController.SetWorldBounds(grid.WorldBounds());
             cameraController.SnapTo(grid.WorldBounds().center, startOrthographicSize);
 
             _wallet.Changed += ScheduleSave; // e.g. coins from a rewarded ad
 
-            _audioBridge = new TownAudioBridge(_context.Audio, _town, placement, farming, production, construction, _storage, _orders, _progression);
+            _audioBridge = new TownAudioBridge(_context.Audio, _town, placement, farming, production, construction, _storage, _orders, _progression, _tasks);
 
             if (effects != null) effects.Initialize(_town);
 
             hud.Initialize(placement, farming, production, construction, _orders, _progression, _storage, _wallet, _progress, _context.Content, _context.Ads, ReturnToMainMenu);
+            hud.InitializeTasks(_tasks);
         }
 
         private void OnDestroy()
@@ -152,6 +161,11 @@ namespace TownBuilder
             if (_orders != null) _orders.Modified -= ScheduleSave;
             if (_progress != null) _progress.Changed -= ScheduleSave;
             _progression?.Dispose();
+            if (_tasks != null)
+            {
+                _tasks.Modified -= ScheduleSave;
+                _tasks.Dispose();
+            }
             _audioBridge?.Dispose();
             if (_wallet != null) _wallet.Changed -= ScheduleSave;
         }
@@ -179,6 +193,7 @@ namespace TownBuilder
                 _context.ActiveSave.player.storageLevel = _storage.Upgrades.Level;
                 TownSaveMapper.WriteProduction(_context.ActiveSave, _factories);
                 TownSaveMapper.WriteOrders(_context.ActiveSave, _orderBoard);
+                TownSaveMapper.WriteTasks(_context.ActiveSave, _taskBoard);
                 _context.SaveActive();
             }
             catch (Exception e)
