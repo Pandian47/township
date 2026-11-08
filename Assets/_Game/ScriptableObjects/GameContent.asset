@@ -70,8 +70,10 @@ MonoBehaviour:
   storageExpansionMaxLevel: 10
   xpToNextLevel: 0f0000001e000000320000005000000078000000aa000000e60000002c0100007c010000d6010000i
   xpIncreaseAfterTable: 100
-  levelUpCoinsPerLevel: 50
+  levelUpCoinsPerLevel: 75
   levelUpGems: 1
+  queueSlotUpgradeBaseCost: 250
+  maxExtraQueueSlots: 3
   orderSlots: 3
   orderSkipCooldownSeconds: 60
   soundLibrary: {fileID: 11400000, guid: 204402b4592b2d64d93691af848458eb, type: 2}

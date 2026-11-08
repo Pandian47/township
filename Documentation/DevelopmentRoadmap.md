@@ -139,7 +139,7 @@ close and reopen with nothing lost.
 - [ ] No text sticks out of its button or panel; "Finish now / 2 gems" fits on two lines
 - [ ] Floating "+2 Wheat" labels have a dark outline and are readable on grass and on buildings
 
-## Milestone 4: Factories and economy (current)
+## Milestone 4: Factories and economy (done)
 
 | Step | Feature | Status |
 |---|---|---|
@@ -147,7 +147,9 @@ close and reopen with nothing lost.
 | 2 | Animal buildings: **Chicken Coop** (Chicken Feed → Eggs), **Dairy Shed** (Cow Feed → Milk) | **Done** (v0.10.0) |
 | 3 | **Sugarcane** crop + **Sugar Mill** (Sugar) | **Done** (v0.11.0) |
 | 4 | Sweets and dairy: Bakery Cookies + Cake, new **Creamery** (Butter, Cheese); factory recipe lists scroll | **Done** (v0.12.0) |
-| 5 | Production upgrades (extra queue slots for coins/gems) + economy balance pass | Next |
+| 5 | Production upgrades (+1 queue slot for coins, up to 3 per factory) + economy balance pass (EconomyReport, BalanceTests) | **Done** (v0.13.0) |
+
+**Milestone 4 complete** (v0.13.0). Still open from it: AI art for 21 new images (prompts in ArtPrompts.md).
 
 ### Device checklist (Milestone 4 step 1: Feed Mill)
 - [ ] Build shop: swipe left/right to see all buildings; the Feed Mill card shows "Level 4" until you reach it
@@ -176,6 +178,13 @@ close and reopen with nothing lost.
 - [ ] Level 9: Cheese = 2 Milk (15 min); Level 10: Cake = 2 Wheat + 2 Egg + 1 Milk + 1 Sugar (20 min)
 - [ ] Cookies, Cake, Butter and Cheese show in the Barn and in orders, with their icons
 - [ ] Your existing Bakery (built before this update) also has the new recipes
+
+### Device checklist (Milestone 4 step 5: queue upgrades and balance)
+- [ ] Tap a finished factory: a blue "+1 slot / 250" card after the queue slots (greyed out if you can't afford it)
+- [ ] Tap it → "Add a queue slot to Bakery for 250 coins?" → Add slot: coins drop by 250, "Bakery queue: 4 slots!", the bakery bounces
+- [ ] Next costs are 500 and 750; after 3 the card disappears (6 slots)
+- [ ] Close and reopen: the extra slots are still there; a new Bakery starts with 3
+- [ ] Level-up rewards are now 75 × level coins (level 2 → +150)
 
 ## Milestone 5: Orders and progression
 Train deliveries, quests, land expansion.

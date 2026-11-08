@@ -72,6 +72,7 @@ namespace TownBuilder.Domain
                 }
 
                 if (string.IsNullOrEmpty(b.instanceId)) b.instanceId = Guid.NewGuid().ToString("N");
+                if (b.extraQueueSlots < 0) { warnings?.Add("Negative queue upgrades reset to 0."); b.extraQueueSlots = 0; }
                 if (!seenIds.Add(b.instanceId))
                 {
                     warnings?.Add($"Dropped duplicate building instance '{b.instanceId}'.");

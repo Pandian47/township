@@ -111,7 +111,7 @@ namespace TownBuilder
             farming.Initialize(_town, _plots, _inventory, _wallet, _progress, _context.Content, _context.Clock);
             farming.Modified += ScheduleSave;
 
-            production.Initialize(_town, _factories, _inventory, _progress, _context.Content, _context.Clock);
+            production.Initialize(_town, _factories, _inventory, _wallet, _progress, _context.Content, _context.Clock);
             production.SetBuiltCheck(id => !_sites.IsUnderConstruction(id));
             production.Modified += ScheduleSave;
 

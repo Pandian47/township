@@ -255,7 +255,8 @@ namespace TownBuilder.EditorTools
                 slots[0].ShowReady(icon0);
                 slots[1].ShowActive(icon0, 0.4f, "1m 48s");
                 slots[2].ShowWaiting(bakeryDef.Recipes[1].Output.Icon);
-                slots[3].gameObject.SetActive(false);
+                for (int s = 3; s < slots.Length; s++) slots[s].gameObject.SetActive(false);
+                root.transform.Find("Queue/Slots/AddSlotButton/Label").GetComponent<TMPro.TMP_Text>().text = "+1 slot" + System.Environment.NewLine + "250";
                 root.transform.Find("QueueTitle/Text").GetComponent<TMPro.TMP_Text>().text = "Queue 3/3";
                 root.transform.Find("Queue/Actions/CollectButton/Label").GetComponent<TMPro.TMP_Text>().text = "Collect (1)";
                 root.transform.Find("Queue/Actions/FinishNowButton/Label").GetComponent<TMPro.TMP_Text>().text = "Finish now (ad)";

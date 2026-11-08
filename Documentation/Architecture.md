@@ -194,6 +194,13 @@ Pieces (all in `Scripts/Effects`):
 
 Effects are cosmetic only: no state, nothing saved, and gameplay works the same without them.
 
+## 6g2. Factory queue upgrades
+
+`QueueUpgrades` (Domain) prices the next slot; `Factories` keeps the bought extra slots per factory and applies them in
+`GetOrCreate(id, baseSlots)` (base from the definition + extras), so a content change to the base slot count still works.
+`ProductionController.TryAddSlot` charges the wallet and raises `SlotAdded` (sound + pop via the bridges).
+Saved in `BuildingSaveData.extraQueueSlots` (written by `TownSaveMapper.WriteProduction`, capped to the content maximum on load).
+
 ## 6h. UI text (TextMeshPro)
 
 All UI text is TextMeshPro (`TMP_Text` fields, `TextMeshProUGUI` components). Never add legacy `UnityEngine.UI.Text`.

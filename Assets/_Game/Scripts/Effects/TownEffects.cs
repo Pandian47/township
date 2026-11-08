@@ -42,6 +42,7 @@ namespace TownBuilder
             placement.StateChanged += OnPlacementStateChanged;
             farming.Rewarded += OnRewarded;
             production.Rewarded += OnRewarded;
+            production.SlotAdded += OnSlotAdded;
             construction.Rewarded += OnRewarded;
             OnPlacementStateChanged();
         }
@@ -59,7 +60,11 @@ namespace TownBuilder
             }
 
             if (farming != null) farming.Rewarded -= OnRewarded;
-            if (production != null) production.Rewarded -= OnRewarded;
+            if (production != null)
+            {
+                production.Rewarded -= OnRewarded;
+                production.SlotAdded -= OnSlotAdded;
+            }
             if (construction != null) construction.Rewarded -= OnRewarded;
             _town = null;
         }
@@ -97,6 +102,8 @@ namespace TownBuilder
         private void OnBuildingPlaced(PlacedBuilding building) => Pop(building.InstanceId, placePopStrength);
 
         private void OnBuildingMoved(PlacedBuilding building) => Pop(building.InstanceId, placePopStrength);
+
+        private void OnSlotAdded(string factoryId) => Pop(factoryId, placePopStrength);
 
         private void OnRewarded(WorldReward reward)
         {

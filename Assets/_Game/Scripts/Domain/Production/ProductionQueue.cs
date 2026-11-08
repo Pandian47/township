@@ -43,7 +43,7 @@ namespace TownBuilder.Domain
             Slots = Math.Max(1, slots);
         }
 
-        public int Slots { get; }
+        public int Slots { get; private set; }
         public IReadOnlyList<ProductionJob> Jobs => _jobs;
         public bool IsFull => _jobs.Count >= Slots;
         public bool IsEmpty => _jobs.Count == 0;
@@ -119,26 +119,48 @@ namespace TownBuilder.Domain
         }
 
         public void Clear() => _jobs.Clear();
+
+        /// <summary>Changes the capacity (upgrades). Jobs already queued are never dropped.</summary>
+        public void SetSlots(int slots) => Slots = Math.Max(1, slots);
     }
 
     /// <summary>All factory queues in the town, keyed by the factory's building instance id.</summary>
     public sealed class Factories
     {
         private readonly Dictionary<string, ProductionQueue> _queues = new Dictionary<string, ProductionQueue>();
+        private readonly Dictionary<string, int> _extraSlots = new Dictionary<string, int>();
 
         public event Action<string> QueueChanged;
 
         public IReadOnlyDictionary<string, ProductionQueue> Queues => _queues;
 
-        public ProductionQueue GetOrCreate(string factoryId, int slots)
+        /// <summary>The factory's queue with <paramref name="baseSlots"/> (from its definition) plus any bought extra slots.</summary>
+        public ProductionQueue GetOrCreate(string factoryId, int baseSlots)
         {
+            int slots = baseSlots + ExtraSlots(factoryId);
             if (!_queues.TryGetValue(factoryId, out var queue))
             {
                 queue = new ProductionQueue(slots);
                 _queues[factoryId] = queue;
             }
+            else if (queue.Slots != slots)
+            {
+                queue.SetSlots(slots);
+            }
 
             return queue;
+        }
+
+        /// <summary>Extra queue slots bought for this factory (0 if none).</summary>
+        public int ExtraSlots(string factoryId) =>
+            factoryId != null && _extraSlots.TryGetValue(factoryId, out var n) ? n : 0;
+
+        public void SetExtraSlots(string factoryId, int extra)
+        {
+            if (factoryId == null) return;
+            if (extra <= 0) _extraSlots.Remove(factoryId);
+            else _extraSlots[factoryId] = extra;
+            QueueChanged?.Invoke(factoryId);
         }
 
         public bool TryGet(string factoryId, out ProductionQueue queue)
@@ -149,7 +171,9 @@ namespace TownBuilder.Domain
 
         public bool Remove(string factoryId)
         {
-            if (factoryId == null || !_queues.Remove(factoryId)) return false;
+            if (factoryId == null) return false;
+            bool hadUpgrades = _extraSlots.Remove(factoryId);
+            if (!_queues.Remove(factoryId) && !hadUpgrades) return false;
             QueueChanged?.Invoke(factoryId);
             return true;
         }

@@ -63,6 +63,9 @@ namespace TownBuilder.Domain
         public int y;
         /// <summary>UTC ms when construction finishes; 0 = built (also for saves older than v0.4).</summary>
         public long constructionEndsAtUnixMs;
+
+        /// <summary>Extra production queue slots bought for this factory (0 = none).</summary>
+        public int extraQueueSlots;
     }
 
     [Serializable]

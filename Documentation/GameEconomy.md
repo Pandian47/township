@@ -22,9 +22,9 @@ Nothing is hard-coded in C#. The numbers below are **examples to start balancing
 | silo | Silo | 1×1 | 3 | 250 | Yes |
 | feed_mill | Feed Mill | 2×2 | 4 | 600 | Yes |
 | chicken_coop | Chicken Coop | 2×2 | 5 | 800 | Yes |
-| dairy_shed | Dairy Shed | 2×2 | 6 | 1,200 | Yes |
-| sugar_mill | Sugar Mill | 2×2 | 7 | 1,500 | Yes |
-| creamery | Creamery | 2×2 | 8 | 2,000 | Yes |
+| dairy_shed | Dairy Shed | 2×2 | 6 | 1,000 | Yes |
+| sugar_mill | Sugar Mill | 2×2 | 7 | 1,200 | Yes |
+| creamery | Creamery | 2×2 | 8 | 1,600 | Yes |
 
 Removing a building does not refund coins (yet).
 
@@ -117,7 +117,7 @@ its ingredients.
 | 9 → 10 | 380 | 1,375 | Cake |
 | then | 470, then +100 per level | | |
 
-Reward per level-up: 50 × new level coins + 1 gem. The save stores TOTAL XP, so the curve can be rebalanced safely.
+Reward per level-up: 75 × new level coins + 1 gem (`levelUpCoinsPerLevel`, raised from 50 in the v0.13 balance pass). The save stores TOTAL XP, so the curve can be rebalanced safely.
 
 ## Orders (`OrderGenerator`)
 
@@ -146,6 +146,35 @@ Reward per level-up: 50 × new level coins + 1 gem. The save stores TOTAL XP, so
 | Bread | 2 Wheat | 5 min |
 | Cookie | 2 Wheat + 1 Sugar | 10 min |
 | Cake | 2 Wheat + 2 Sugar + 1 Egg | 20 min |
+
+## Factory queue upgrades (Milestone 4 step 5)
+
+Every factory (including animal buildings) starts with 3 queue slots. In its panel, the blue **+1 slot** card buys an
+extra slot for that building: the n-th extra slot costs n × 250 coins (250, 500, 750), up to 3 extra (6 in total).
+Values: `GameContent.queueSlotUpgradeBaseCost`, `maxExtraQueueSlots`. Saved per building (`BuildingSaveData.extraQueueSlots`);
+removing the building loses its upgrades. Coins only: gems stay reserved for speed-ups.
+
+## Balance model (v0.13 balance pass)
+
+`Assets/_Game/Editor/EconomyReport.cs` estimates, level by level, how long a level takes and whether the player can afford
+the new key buildings (factories and storage) when they unlock. **TownBuilder → Debug → Write Economy Report** writes
+the tables to `Documentation/EconomyReport.md`.
+
+Assumptions: 3 fields at level 1 plus one per level (max 12), always growing the best-paying crop; one of each
+unlocked factory, always making its best recipe; players at 50% of perfect efficiency; orders ignored (they pay ~60% more,
+so real play is richer than the model).
+
+What the first report showed, and what changed:
+
+| Problem (before) | Change |
+|---|---|
+| At levels 6, 7 and 8 the new building cost more than the player had (down to −1,442 coins at level 8) | Level-up coins 50 → 75 per level; Dairy Shed 1,200 → 1,000, Sugar Mill 1,500 → 1,200, Creamery 2,000 → 1,600 |
+
+After the pass every level's new building is affordable on arrival (tightest: 333 coins left at level 8), and levels
+take from ~12 minutes (level 1) to ~1.5 hours (level 10) of active play.
+
+`BalanceTests` (EditMode) keep it that way: every new key building affordable on arrival, every level between 5 minutes
+and 2 hours, every crop and recipe earns coins and XP, and no recipe earns more than twice the average per minute.
 
 ## Rules
 

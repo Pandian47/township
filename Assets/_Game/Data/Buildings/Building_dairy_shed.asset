@@ -18,7 +18,7 @@ MonoBehaviour:
   sprite: {fileID: 21300000, guid: 59120b1d5e9e53744ac144e0cda1065f, type: 3}
   footprint: {x: 2, y: 2}
   unlockLevel: 6
-  coinCost: 1200
+  coinCost: 1000
   removable: 1
   maxCount: 0
   isFarmPlot: 0

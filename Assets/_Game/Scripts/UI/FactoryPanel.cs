@@ -26,21 +26,27 @@ namespace TownBuilder
         [SerializeField] private TMP_Text collectLabel;
         [SerializeField] private Button finishNowButton;
         [SerializeField] private TMP_Text finishNowLabel;
+        [Tooltip("'+1 slot' card after the queue slots: buys an extra queue slot for coins.")]
+        [SerializeField] private Button addSlotButton;
+        [SerializeField] private TMP_Text addSlotLabel;
 
         private readonly List<RecipeButtonView> _recipeButtons = new List<RecipeButtonView>();
         private ProductionController _production;
         private GameContent _content;
         private IAdService _ads;
+        private ConfirmDialog _confirm;
         private string _factoryId;
         private float _nextRefresh;
 
         public string FactoryId => _factoryId;
 
-        public void Initialize(ProductionController production, GameContent content, IAdService ads)
+        public void Initialize(ProductionController production, GameContent content, IAdService ads, ConfirmDialog confirm = null)
         {
             _production = production;
             _content = content;
             _ads = ads;
+            _confirm = confirm;
+            if (addSlotButton != null) addSlotButton.onClick.AddListener(OnAddSlot);
             recipeTemplate.gameObject.SetActive(false);
             collectButton.onClick.AddListener(() =>
             {
@@ -118,6 +124,17 @@ namespace TownBuilder
                 else slots[i].ShowWaiting(icon);
             }
 
+            if (addSlotButton != null)
+            {
+                bool canAdd = _production.CanAddSlot(_factoryId);
+                addSlotButton.gameObject.SetActive(canAdd);
+                if (canAdd)
+                {
+                    addSlotLabel.text = $"+1 slot\n{_production.NextSlotCost(_factoryId):N0}";
+                    addSlotButton.interactable = _production.CanAffordNextSlot(_factoryId);
+                }
+            }
+
             int ready = queue.CountDone(now);
             collectButton.gameObject.SetActive(ready > 0);
             collectLabel.text = $"Collect ({ready})";
@@ -133,6 +150,21 @@ namespace TownBuilder
             if (_factoryId == null) return;
             _production.Enqueue(_factoryId, recipe);
             Refresh();
+        }
+
+        private void OnAddSlot()
+        {
+            if (_factoryId == null || !_production.IsFactory(_factoryId, out var def)) return;
+            string id = _factoryId;
+            long cost = _production.NextSlotCost(id);
+            void Buy()
+            {
+                _production.TryAddSlot(id);
+                Refresh();
+            }
+
+            if (_confirm != null) _confirm.Show($"Add a queue slot to {def.DisplayName} for {cost:N0} coins?", "Add slot", Buy);
+            else Buy();
         }
 
         private void OnFinishNow()

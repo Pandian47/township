@@ -82,7 +82,7 @@ namespace TownBuilder
             farming.Notification += toast.Show;
             storage.Notification += toast.Show;
             production.Notification += toast.Show;
-            factoryPanel.Initialize(production, content, ads);
+            factoryPanel.Initialize(production, content, ads, confirmDialog);
             constructionPanel.Initialize(construction, ads);
             construction.Notification += toast.Show;
             construction.Completed += OnConstructionCompleted;

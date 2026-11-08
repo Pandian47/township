@@ -622,13 +622,13 @@ namespace TownBuilder.EditorTools
 
             var titleRect = MakeRect("Title", root, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(24, -10), new Vector2(600, 54));
             var title = Label(titleRect, "Text", "Bakery", 38, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
-            var queueTitleRect = MakeRect("QueueTitle", root, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-24, -10), new Vector2(620, 54));
+            var queueTitleRect = MakeRect("QueueTitle", root, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-24, -10), new Vector2(772, 54));
             var queueTitle = Label(queueTitleRect, "Text", "Queue 0/3", 32, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
 
             // Recipes (left), scrolls sideways when a factory has more than 3
             var recipesViewport = MakeRect("RecipesViewport", root, new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), Vector2.zero, new Vector2(960, 0));
             recipesViewport.offsetMin = new Vector2(24, 16);
-            recipesViewport.offsetMax = new Vector2(984, -70);
+            recipesViewport.offsetMax = new Vector2(824, -70);
             var recipes = HorizontalScrollList(recipesViewport, "Recipes", 16);
 
             var template = MakeRect("RecipeTemplate", recipes, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(300, 240));
@@ -650,22 +650,23 @@ namespace TownBuilder.EditorTools
 
             // Queue (right): slots + buttons
             var queue = MakeRect("Queue", root, new Vector2(1f, 0f), new Vector2(1f, 1f), new Vector2(1f, 0.5f), Vector2.zero, Vector2.zero);
-            queue.offsetMin = new Vector2(-640, 16);
+            queue.offsetMin = new Vector2(-796, 16);
             queue.offsetMax = new Vector2(-24, -70);
             var slotsRow = MakeRect("Slots", queue, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(0, 140));
-            HRow(slotsRow, 12, TextAnchor.UpperLeft);
+            HRow(slotsRow, 8, TextAnchor.UpperLeft);
 
-            var slotViews = new QueueSlotView[4];
+            // Base 3 slots + up to 3 bought ones (GameContent.maxExtraQueueSlots).
+            var slotViews = new QueueSlotView[6];
             for (int i = 0; i < slotViews.Length; i++)
             {
-                var slot = MakeRect($"Slot{i + 1}", slotsRow, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(144, 140));
-                Prefer(slot, 144, 140);
+                var slot = MakeRect($"Slot{i + 1}", slotsRow, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(100, 140));
+                Prefer(slot, 100, 140);
                 var slotBg = AddImage(slot, Color.white, raycast: false);
                 var slotIconRect = MakeRect("Icon", slot, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -4), new Vector2(-16, 78));
                 var slotIcon = slotIconRect.gameObject.AddComponent<Image>();
                 slotIcon.raycastTarget = false;
                 var statusRect = MakeRect("Status", slot, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 22), new Vector2(-8, 34));
-                var status = Label(statusRect, "Text", "Empty", 24, TextAnchor.MiddleCenter, Ink);
+                var status = Label(statusRect, "Text", "Empty", 21, TextAnchor.MiddleCenter, Ink);
                 var barBg = MakeRect("Bar", slot, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 6), new Vector2(-16, 14));
                 AddImage(barBg, new Color(0.82f, 0.78f, 0.7f), raycast: false);
                 var fillRect = Stretch("Fill", barBg, 2f);
@@ -677,6 +678,10 @@ namespace TownBuilder.EditorTools
                 slotViews[i] = view;
             }
 
+            var addSlot = MakeButton(slotsRow, "AddSlotButton", "+1 slot\n250", new Vector2(100, 140), Blue, out var addSlotLabel, 26);
+            addSlotLabel.textWrappingMode = TMPro.TextWrappingModes.NoWrap; // shrink to fit instead of wrapping "+1 slot"
+            addSlotLabel.margin = new Vector4(6f, 4f, 6f, 4f);
+
             var actions = MakeRect("Actions", queue, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), Vector2.zero, new Vector2(0, 90));
             HRow(actions, 12, TextAnchor.MiddleLeft);
             var collect = MakeButton(actions, "CollectButton", "Collect", new Vector2(260, 86), Green, out var collectLabel, 32);
@@ -685,7 +690,8 @@ namespace TownBuilder.EditorTools
             var panel = container.gameObject.AddComponent<FactoryPanel>();
             Wire(panel, ("panelRoot", root.gameObject), ("titleText", title), ("queueTitleText", queueTitle),
                 ("recipesParent", recipes), ("recipeTemplate", recipeView), ("collectButton", collect), ("collectLabel", collectLabel),
-                ("finishNowButton", finish), ("finishNowLabel", finishLabel));
+                ("finishNowButton", finish), ("finishNowLabel", finishLabel),
+                ("addSlotButton", addSlot), ("addSlotLabel", addSlotLabel));
             WireArray(panel, "slots", slotViews);
             root.gameObject.SetActive(false);
             return panel;

@@ -26,6 +26,7 @@ namespace TownBuilder
             Action<string> queued = _ => Play(SoundId.Plant);
             Action<string> collected = _ => Play(SoundId.Collect);
             Action<string> built = _ => Play(SoundId.BuildComplete);
+            Action<string> slotAdded = _ => Play(SoundId.BuildComplete);
             Action<string> sold = _ => Play(SoundId.Coins);
             Action expanded = () => Play(SoundId.BuildComplete);
             Action<int> delivered = _ => Play(SoundId.Coins);
@@ -41,6 +42,7 @@ namespace TownBuilder
             production.Queued += queued;
             production.Collected += collected;
             production.Failed += failed;
+            production.SlotAdded += slotAdded;
             construction.Completed += built;
             construction.Failed += failed;
             storage.Sold += sold;
@@ -61,6 +63,7 @@ namespace TownBuilder
                 production.Queued -= queued;
                 production.Collected -= collected;
                 production.Failed -= failed;
+                production.SlotAdded -= slotAdded;
                 construction.Completed -= built;
                 construction.Failed -= failed;
                 storage.Sold -= sold;

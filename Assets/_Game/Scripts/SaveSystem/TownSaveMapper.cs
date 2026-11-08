@@ -126,10 +126,20 @@ namespace TownBuilder
 
                 factories.GetOrCreate(job.factoryInstanceId, def.ProductionSlots).Restore(recipe.Id, job.startUnixMs, recipe.DurationMs);
             }
+
+            // Bought queue slots (capped by the current content, in case the maximum was lowered).
+            foreach (var b in save.buildings)
+            {
+                if (b.extraQueueSlots <= 0 || !town.TryGet(b.instanceId, out var building)) continue;
+                if (!content.TryGetBuilding(building.DefinitionId, out var def) || !def.IsFactory) continue;
+                factories.SetExtraSlots(b.instanceId, System.Math.Min(b.extraQueueSlots, content.MaxExtraQueueSlots));
+            }
         }
 
+        /// <summary>Writes queues and bought queue slots. Call after <see cref="WriteTo"/> (which rebuilds the building list).</summary>
         public static void WriteProduction(SaveData save, Factories factories)
         {
+            foreach (var b in save.buildings) b.extraQueueSlots = factories.ExtraSlots(b.instanceId);
             save.productionJobs.Clear();
             foreach (var pair in factories.Queues)
             {

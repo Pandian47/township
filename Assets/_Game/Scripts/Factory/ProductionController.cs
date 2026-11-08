@@ -32,6 +32,7 @@ namespace TownBuilder
         private Town _town;
         private Factories _factories;
         private Inventory _inventory;
+        private Wallet _wallet;
         private PlayerProgress _progress;
         private GameContent _content;
         private IClock _clock;
@@ -44,17 +45,21 @@ namespace TownBuilder
         public event Action<string> Queued;
         public event Action<string> Collected;
         public event Action Failed;
+        /// <summary>An extra queue slot was bought for this factory.</summary>
+        public event Action<string> SlotAdded;
         /// <summary>Products were collected: what they earned, for world effects.</summary>
         public event Action<WorldReward> Rewarded;
 
         public Factories Factories => _factories;
         public long NowUnixMs => _clock.UtcNowUnixMs;
 
-        public void Initialize(Town town, Factories factories, Inventory inventory, PlayerProgress progress, GameContent content, IClock clock)
+        public void Initialize(Town town, Factories factories, Inventory inventory, Wallet wallet, PlayerProgress progress,
+            GameContent content, IClock clock)
         {
             _town = town;
             _factories = factories;
             _inventory = inventory;
+            _wallet = wallet;
             _progress = progress;
             _content = content;
             _clock = clock;
@@ -92,6 +97,16 @@ namespace TownBuilder
         }
 
         public bool IsUnlocked(RecipeDefinition recipe) => _progress.IsUnlocked(recipe.UnlockLevel);
+
+        public int ExtraSlots(string factoryId) => _factories.ExtraSlots(factoryId);
+
+        /// <summary>True when this factory can still get another queue slot (regardless of coins).</summary>
+        public bool CanAddSlot(string factoryId) =>
+            IsFactory(factoryId, out _) && QueueUpgrades.CanUpgrade(ExtraSlots(factoryId), _content.MaxExtraQueueSlots);
+
+        public long NextSlotCost(string factoryId) => QueueUpgrades.NextCost(ExtraSlots(factoryId), _content.QueueSlotUpgradeBaseCost);
+
+        public bool CanAffordNextSlot(string factoryId) => _wallet != null && _wallet.CanAffordCoins(NextSlotCost(factoryId));
 
         public int CountReady(string factoryId) => _factories.TryGet(factoryId, out var q) ? q.CountDone(NowUnixMs) : 0;
 
@@ -172,6 +187,26 @@ namespace TownBuilder
             }
 
             return collected;
+        }
+
+        /// <summary>Buys the next extra queue slot for coins. False if maxed out or not enough coins.</summary>
+        public bool TryAddSlot(string factoryId)
+        {
+            if (!IsFactory(factoryId, out var def) || !CanAddSlot(factoryId)) return false;
+            long cost = NextSlotCost(factoryId);
+            if (!_wallet.TrySpendCoins(cost))
+            {
+                Notification?.Invoke($"You need {cost:N0} coins.");
+                Failed?.Invoke();
+                return false;
+            }
+
+            _factories.SetExtraSlots(factoryId, ExtraSlots(factoryId) + 1);
+            var queue = _factories.GetOrCreate(factoryId, def.ProductionSlots);
+            Notification?.Invoke($"{def.DisplayName} queue: {queue.Slots} slots!");
+            SlotAdded?.Invoke(factoryId);
+            Modified?.Invoke();
+            return true;
         }
 
         public bool FinishActiveNow(string factoryId)

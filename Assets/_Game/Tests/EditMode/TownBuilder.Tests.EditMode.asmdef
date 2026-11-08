@@ -4,6 +4,7 @@
     "references": [
         "TownBuilder.Domain",
         "TownBuilder.Runtime",
+        "TownBuilder.Editor",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

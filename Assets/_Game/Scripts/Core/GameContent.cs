@@ -36,10 +36,15 @@ namespace TownBuilder
         [SerializeField] private List<int> xpToNextLevel = new List<int> { 15, 30, 50, 80, 120, 170, 230, 300, 380, 470 };
         [Tooltip("After the table, each level needs this much more XP than the previous one.")]
         [SerializeField, Min(0)] private int xpIncreaseAfterTable = 100;
-        [SerializeField, Min(0)] private int levelUpCoinsPerLevel = 50;
+        [SerializeField, Min(0)] private int levelUpCoinsPerLevel = 75;
         [SerializeField, Min(0)] private int levelUpGems = 1;
 
         [Header("Orders")]
+        [Header("Factory queue upgrades")]
+        [Tooltip("The n-th extra queue slot of a factory costs n × this many coins.")]
+        [SerializeField, Min(0)] private int queueSlotUpgradeBaseCost = 250;
+        [SerializeField, Min(0)] private int maxExtraQueueSlots = 3;
+
         [SerializeField, Min(1)] private int orderSlots = 3;
         [Tooltip("After skipping an order, the slot waits this long before a new order appears.")]
         [SerializeField, Min(0)] private int orderSkipCooldownSeconds = 60;
@@ -88,6 +93,8 @@ namespace TownBuilder
             return names;
         }
         public IReadOnlyList<BuildingDefinition> Buildings => buildings;
+        public int QueueSlotUpgradeBaseCost => queueSlotUpgradeBaseCost;
+        public int MaxExtraQueueSlots => maxExtraQueueSlots;
         public IReadOnlyList<CropDefinition> Crops => crops;
         public IReadOnlyList<StarterBuilding> StarterBuildings => starterBuildings;
         public long StartingCoins => startingCoins < 0 ? 0 : startingCoins;
