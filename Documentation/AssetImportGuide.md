@@ -31,6 +31,28 @@ The height is free (the walls and roof stick up).
 ## 2. Replacing a placeholder
 
 Placeholders are named `PH_*.png`, for example `Art/Buildings/Production/PH_Building_barn.png`.
+The file names keep the `PH_` prefix even after real art is in them; that keeps every reference stable.
+
+### Fastest way: the AI art importer (recommended)
+
+1. Generate images with the prompts in `Documentation/ArtPrompts.md` (flat magenta background, any size).
+2. Save them in one folder with the expected names: `cottage, town_hall, barn, bakery, silo, field, wheat_1..4,
+   corn_1..4, bread, corn_bread, grass, sand, water, road` (`.png` or `.jpg`). Missing files are skipped and keep their current art.
+3. In Unity: **TownBuilder → Art → Import AI Art Folder...** and pick the folder.
+   Command line (Unity closed): `"$UNITY" -batchmode -quit -projectPath . -executeMethod TownBuilder.EditorTools.AiArtImporter.ImportFromCommandLine -artSource "D:\path	oolder"`
+4. Run **TownBuilder → Debug → Capture Town Preview** and check the result.
+
+What it does (`Assets/_Game/Editor/AiArtImporter.cs`):
+* Removes the magenta background (soft edges, magenta fringe cleaned up) and trims the empty space.
+* **Buildings:** measures the footprint width on the lower 40% of the building (walls, not the overhanging roof),
+  scales it to (w + h) × 64 px, and centres the canvas on the footprint so pivot (0.5, 0) is the bottom corner.
+* **Field:** whole object scaled to 128 px. **Crops:** plants scaled to 74% of the field and lifted 14 px so they sit in the soil.
+* **Icons:** fitted into 128 × 128. **Ground textures:** square top-down texture mapped onto a 128 × 64 diamond (1.5 px overlap, no seams).
+* Overwrites the `PH_` PNG and re-applies the standard import settings.
+
+Keep your original images outside the project as a backup; the importer can be re-run any time.
+
+### Manual way
 
 1. Export your new art at the right **width** (table above) with a transparent background.
 2. Optional: rename it without the `PH_` prefix. If you rename it, do it **inside Unity** (Project window) so the `.meta` file follows.

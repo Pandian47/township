@@ -45,6 +45,10 @@ suitable for Unity 2D sprite import; consistent style with the rest of the set.
 
 ## v0.1 asset list (replace the `PH_` placeholders)
 
+**Status: done in v0.8.0.** All 20 images were generated with `Documentation/ArtPrompts.md` and imported with
+**TownBuilder → Art → Import AI Art Folder** (see AssetImportGuide.md section 2). The importer handles background
+removal, trimming and exact sizing, so the "exact width" rule below applies to its output, not to what you generate.
+
 Export each image as a transparent PNG at **exactly** the width shown. Then overwrite the placeholder PNG with the
 same file name, outside Unity, so its pivot and import settings are kept (see AssetImportGuide.md). Height can vary
 for buildings and plants.

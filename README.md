@@ -24,7 +24,7 @@ An original 2D isometric farming and town-building game for Android, built AI-fi
 | Visual feedback: selection outline, building pops, floating "+2 Wheat" rewards, top-bar pops | ✅ |
 | Sharp TextMeshPro UI text (Liberation Sans, OFL) | ✅ |
 | Automated tests: 86 EditMode + 30 PlayMode | ✅ |
-| Placeholder art following the final art conventions | ✅ (replace with AI art) |
+| First AI art set (buildings, field, crops, items, ground) + `AiArtImporter` tool | ✅ |
 | Android build | ⏳ install the Android Build Support module first |
 
 ![Town preview](Documentation/Images/Preview_Town_Placing.png)
@@ -74,7 +74,7 @@ Close the Editor before running batch commands on this project.
 
 ```
 Assets/_Game/
-  Art/            placeholder PNGs (PH_*) and tile assets; replace with AI art
+  Art/            sprites (file names keep the PH_ prefix) and tile assets
   Data/           BuildingDefinition assets (static content)
   Editor/         ProjectSetup, SceneBuilder, PlaceholderArtGenerator, PreviewCapture
   Prefabs/        BuildingView prefab

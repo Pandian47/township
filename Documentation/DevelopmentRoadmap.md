@@ -13,7 +13,7 @@ These are planning windows, not promises. Each milestone ends with an Android bu
 | 5 | Boot scene | Done |
 | 6 | MainMenu scene (Continue, New Game, Settings) | Done |
 | 7 | Town scene hierarchy | Done |
-| 8 | First terrain assets | Placeholders done. **AI art pending** |
+| 8 | First terrain assets | Done (AI art set v0.1, v0.8.0) |
 | 9 | Isometric tilemap (36×36 starter map) | Done |
 | 10 | Camera: drag, inertia, pinch and wheel zoom, bounds | Done. **Verify on device** |
 | 11 | Grid coordinates (cell ↔ world ↔ screen) | Done |
@@ -97,7 +97,7 @@ close and reopen with nothing lost.
 | 2 | Sound effects and music (placement, harvest, collect, level-up, UI taps): original placeholders, see Audio.md | **Done** (v0.5.0) |
 | 3 | Visual feedback: selection outline, harvest/collect pop effects, floating "+2 Wheat" in the world | **Done** (v0.6.0) |
 | 4 | UI text on TextMeshPro (sharper text on high-DPI phones) | **Done** (v0.7.0) |
-| 5 | First AI art set dropped in (see ArtStyleGuide.md asset list) | Waiting on your art |
+| 5 | First AI art set dropped in (see ArtStyleGuide.md asset list) | **Done** (v0.8.0, 20 images via `AiArtImporter`) |
 
 ### Device checklist (Milestone 3 step 1: construction)
 - [ ] Buy a Cottage: "Building Cottage... ready in 30s" toast and a hammer badge above it
@@ -124,6 +124,14 @@ close and reopen with nothing lost.
 - [ ] A building finishing construction bounces and shows "+XP"
 - [ ] Coins / Gems / Level / Barn pills in the top bar briefly grow when the value goes up (sell, deliver, ad reward)
 - [ ] Frame rate stays smooth while harvesting several fields quickly
+
+### Device checklist (Milestone 3 step 5: AI art)
+- [ ] Buildings stand exactly on their footprint (place, move: the green diamond matches the building's base)
+- [ ] Tapping a building selects the building you tapped, also where two buildings overlap
+- [ ] Crops grow inside the field's wooden border at all 4 stages, for wheat and corn
+- [ ] No visible lines or gaps between ground tiles while panning and zooming
+- [ ] No pink/magenta edges around buildings, crops or icons (zoom in close)
+- [ ] Icons in the barn, orders, bakery and floating labels show the new bread / wheat / corn art
 
 ### Device checklist (Milestone 3 step 4: TextMeshPro text)
 - [ ] All text (menu, top bar, panels, buttons, toasts, level-up dialog) is crisp, with no blurry edges, also when you zoom the phone screenshot
