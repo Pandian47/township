@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e191ebff23be4446877666abc2909f9, type: 3}
+  m_Name: Building_feed_mill
+  m_EditorClassIdentifier: TownBuilder.Runtime::TownBuilder.BuildingDefinition
+  id: feed_mill
+  displayName: Feed Mill
+  category: 2
+  sprite: {fileID: 21300000, guid: 5bf661c4d719a1d42a3c73a3a11e9276, type: 3}
+  footprint: {x: 2, y: 2}
+  unlockLevel: 4
+  coinCost: 600
+  removable: 1
+  maxCount: 0
+  isFarmPlot: 0
+  storageCapacityBonus: 0
+  recipes:
+  - {fileID: 11400000, guid: 9f8430ebac540db43a57b7a6d1651aab, type: 2}
+  - {fileID: 11400000, guid: cafda565ee93d904b9b7dd4e202b2a20, type: 2}
+  productionSlots: 3
+  buildSeconds: 150
+  buildXp: 12

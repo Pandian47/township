@@ -19,15 +19,21 @@ MonoBehaviour:
   - {fileID: 11400000, guid: cf71b11da8fd59048827ab1df972c7b8, type: 2}
   - {fileID: 11400000, guid: 9611f7e1e2fc83542ba1b113060c894b, type: 2}
   - {fileID: 11400000, guid: 452c1344385c6ee4d936449de7a0dd15, type: 2}
+  - {fileID: 11400000, guid: d236eb76f9b494745b5228dfcf8d469f, type: 2}
   crops:
   - {fileID: 11400000, guid: a3036535aa3df024daad3d74b88f1f40, type: 2}
   - {fileID: 11400000, guid: 62b818b79b6cf7947af8159c1d81b0fa, type: 2}
+  - {fileID: 11400000, guid: eadecb1c4feada54eb11bf0bbc7dee4e, type: 2}
   products:
   - {fileID: 11400000, guid: 283e0dc43b6fa8848829f17a7b436934, type: 2}
   - {fileID: 11400000, guid: d1dc078b5b939504d8656b5e7eb9fcca, type: 2}
+  - {fileID: 11400000, guid: 2de88c1e8b05d704584ea34026389a35, type: 2}
+  - {fileID: 11400000, guid: 7c47457a77aa2534789764617ea4a69f, type: 2}
   recipes:
   - {fileID: 11400000, guid: 37df8db348431214fb0c6fdc709d0821, type: 2}
   - {fileID: 11400000, guid: 7c6e5a274375a044380944114d8d4e2b, type: 2}
+  - {fileID: 11400000, guid: 9f8430ebac540db43a57b7a6d1651aab, type: 2}
+  - {fileID: 11400000, guid: cafda565ee93d904b9b7dd4e202b2a20, type: 2}
   startingCoins: 1500
   startingGems: 20
   starterBuildings:

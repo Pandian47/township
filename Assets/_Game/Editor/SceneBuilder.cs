@@ -798,10 +798,27 @@ namespace TownBuilder.EditorTools
             closeRect.anchorMin = closeRect.anchorMax = closeRect.pivot = new Vector2(1f, 1f);
             closeRect.anchoredPosition = new Vector2(-20, -16);
 
-            var items = MakeRect("Items", window, new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
-            items.offsetMin = new Vector2(30, 24);
-            items.offsetMax = new Vector2(-30, -100);
+            // Horizontally scrolling list: Viewport (clips) > Items (grows with the number of buildings).
+            var viewport = MakeRect("Viewport", window, new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
+            viewport.offsetMin = new Vector2(30, 24);
+            viewport.offsetMax = new Vector2(-30, -100);
+            viewport.gameObject.AddComponent<RectMask2D>();
+            AddImage(viewport, new Color(1f, 1f, 1f, 0f), rounded: false); // invisible, but catches drags between cards
+
+            var items = MakeRect("Items", viewport, new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), Vector2.zero, Vector2.zero);
             HRow(items, 24, TextAnchor.MiddleLeft);
+            var fitter = items.gameObject.AddComponent<ContentSizeFitter>();
+            fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            var scroll = viewport.gameObject.AddComponent<ScrollRect>();
+            scroll.content = items;
+            scroll.viewport = viewport;
+            scroll.horizontal = true;
+            scroll.vertical = false;
+            scroll.movementType = ScrollRect.MovementType.Elastic;
+            scroll.inertia = true;
+            scroll.decelerationRate = 0.12f;
+            scroll.scrollSensitivity = 30f;
 
             // Item template (cloned per building by BuildingShopPanel)
             var template = MakeRect("ItemTemplate", items, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(260, 330));

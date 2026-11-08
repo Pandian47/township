@@ -120,5 +120,33 @@ Grounds:
 
 ---
 
+## Milestone 4 step 1: Feed Mill, Soybean, feeds
+
+Use the **same chat** as the first set (or upload `cottage.png` and say "match this art style").
+
+### Feed Mill → `feed_mill.png`
+
+```
+Same art style, angle, lighting and outline as the cottage. Create a rustic farm feed mill: a wooden mill building with a green roof, a small grain hopper and a chute, a few grain sacks by the door, on a 2x2 tile footprint (same width as the cottage). No signs or lettering.
+One single building, centered, fully visible, nothing cropped. No ground around it, no shadow outside the base, no text.
+Background: plain solid flat magenta (#FF00FF).
+```
+
+### Soybean, 4 growth stages → `soybean_1.png` … `soybean_4.png`
+
+Same prompt as wheat (section 7–10), replacing "wheat" with "soybean". Stages:
+* `soybean_1`: "1 of 4: tiny green sprouts with two round leaves"
+* `soybean_2`: "2 of 4: small leafy green soybean bushes"
+* `soybean_3`: "3 of 4: full bushy green soybean plants"
+* `soybean_4`: "4 of 4: ripe soybean plants with yellowing leaves and tan bean pods"
+
+### Feed icons → `chicken_feed.png`, `cow_feed.png`
+
+Same icon prompt as bread (section 15–16). Items:
+* `chicken_feed`: "a small burlap sack of chicken feed with a yellow band, a few grains spilling out, no lettering"
+* `cow_feed`: "a burlap sack of cattle feed with a green band, a few pellets spilling out, no lettering"
+
+---
+
 Do a **test set first**: cottage, field, wheat_4, bread and grass. Send those, check them in the game preview, and
 only then make the rest.

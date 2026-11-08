@@ -139,8 +139,23 @@ close and reopen with nothing lost.
 - [ ] No text sticks out of its button or panel; "Finish now / 2 gems" fits on two lines
 - [ ] Floating "+2 Wheat" labels have a dark outline and are readable on grass and on buildings
 
-## Milestone 4: Factories and economy
-More factories and recipes (dairy, sugar, feed mill), production upgrades.
+## Milestone 4: Factories and economy (current)
+
+| Step | Feature | Status |
+|---|---|---|
+| 1 | **Soybean** crop + **Feed Mill** (Chicken Feed, Cow Feed), scrolling Build shop, economy content tests | **Done** (v0.9.0) |
+| 2 | Animal buildings: **Chicken Coop** (Chicken Feed → Eggs), **Dairy Shed** (Cow Feed → Milk) | Next |
+| 3 | **Sugarcane** crop + **Sugar Mill** (Sugar) | Planned |
+| 4 | New recipes from eggs, milk and sugar (for example cookies, cake, cheese) | Planned |
+| 5 | Production upgrades (extra queue slots for coins/gems) + economy balance pass | Planned |
+
+### Device checklist (Milestone 4 step 1: Feed Mill)
+- [ ] Build shop: swipe left/right to see all buildings; the Feed Mill card shows "Level 4" until you reach it
+- [ ] Reaching level 4: the level-up dialog lists Feed Mill, Soybean and Chicken Feed
+- [ ] Field → Soybean (8 min, 4 coins); harvest gives 3 Soybean
+- [ ] Build the Feed Mill (600 coins, 2.5 min); tap it: Chicken Feed (2 Wheat + 1 Corn) and Cow Feed (2 Corn + 2 Soybean, level 5)
+- [ ] Collect: "+1 Chicken Feed" floats up; feeds appear in the Barn and can be sold
+- [ ] Orders can ask for Soybean and feeds after level 4
 
 ## Milestone 5: Orders and progression
 Train deliveries, quests, land expansion.

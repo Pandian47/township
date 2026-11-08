@@ -270,7 +270,7 @@ namespace TownBuilder.EditorTools
         public const string FarmingBuildingsFolder = BuildingsArtFolder + "/Farming";
         private const int PlantHeadroom = 56; // extra pixels above the 1x1 diamond for tall plants
 
-        public enum CropStyle { Wheat, Corn }
+        public enum CropStyle { Wheat, Corn, Soybean }
 
         /// <summary>1x1 field: tilled soil diamond with a slightly raised darker rim. Pivot = bottom corner (0.5, 0).</summary>
         public static Sprite CreateFieldSprite() =>
@@ -331,7 +331,8 @@ namespace TownBuilder.EditorTools
             var tex = NewTexture(w, h);
             var pixels = new Color32[w * h];
 
-            float[] heights = style == CropStyle.Wheat ? new[] { 7f, 16f, 25f, 32f } : new[] { 9f, 22f, 36f, 46f };
+            float[] heights = style == CropStyle.Wheat ? new[] { 7f, 16f, 25f, 32f }
+                : style == CropStyle.Soybean ? new[] { 5f, 10f, 15f, 18f } : new[] { 9f, 22f, 36f, 46f };
             Color32 green = new Color32(70, 150, 50, 255);
             Color32 color = stage switch
             {
@@ -370,6 +371,14 @@ namespace TownBuilder.EditorTools
                 // Wheat ears / corn cobs on the last two stages.
                 if (stage == 3 && style == CropStyle.Wheat)
                     FillEllipse(pixels, w, h, b.x + lean, b.y + hgt - 2, 2.2f, 5f, new Color32(245, 210, 95, 255));
+                if (stage >= 1 && style == CropStyle.Soybean)
+                {
+                    // Low leafy bush; tan pods when ripe.
+                    FillEllipse(pixels, w, h, b.x + lean, b.y + hgt, 3.5f + stage, 2.5f + stage * 0.6f, Scale(color, 0.95f));
+                    if (stage == 3)
+                        FillEllipse(pixels, w, h, b.x + lean + 2, b.y + hgt - 1, 1.6f, 3f, new Color32(214, 192, 120, 255));
+                }
+
                 if (stage >= 2 && style == CropStyle.Corn)
                     FillEllipse(pixels, w, h, b.x + lean * 0.6f + 2, b.y + hgt * 0.6f, 2f, stage == 3 ? 5f : 3f,
                         stage == 3 ? new Color32(250, 210, 60, 255) : new Color32(150, 200, 90, 255));
@@ -437,7 +446,7 @@ namespace TownBuilder.EditorTools
 
         public const string ProductsArtFolder = "Assets/_Game/Art/Products";
 
-        public enum ProductStyle { Bread, CornBread }
+        public enum ProductStyle { Bread, CornBread, ChickenFeed, CowFeed }
 
         /// <summary>128x128 product icon (UI and the "ready" bubble above factories). Pivot centre.</summary>
         public static Sprite CreateProductIcon(string productId, ProductStyle style) =>
@@ -449,7 +458,26 @@ namespace TownBuilder.EditorTools
             var tex = NewTexture(size, size);
             var pixels = new Color32[size * size];
 
-            if (style == ProductStyle.Bread)
+            if (style == ProductStyle.ChickenFeed || style == ProductStyle.CowFeed)
+            {
+                // Burlap feed sack, tied at the top, with a coloured band (yellow = chicken, green = cow).
+                var sack = new Color32(205, 178, 128, 255);
+                var band = style == ProductStyle.ChickenFeed ? new Color32(240, 196, 60, 255) : new Color32(96, 160, 80, 255);
+                for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float px = x + 0.5f - 64f, py = y + 0.5f;
+                    float halfWidth = py < 92f ? 40f + Mathf.Sin(py / 92f * Mathf.PI) * 6f : Mathf.Lerp(30f, 12f, (py - 92f) / 14f);
+                    bool body = py > 12f && py < 106f && Mathf.Abs(px) < halfWidth;
+                    bool tie = py >= 106f && py < 118f && Mathf.Abs(px) < 16f - (py - 106f) * 0.4f;
+                    if (!body && !tie) continue;
+                    var c = Scale(sack, 0.9f + 0.2f * (1f - Mathf.Abs(px) / 46f));
+                    if (body && py > 44f && py < 66f) c = band;
+                    if (tie && py < 110f) c = new Color32(150, 110, 70, 255);
+                    pixels[y * size + x] = c;
+                }
+            }
+            else if (style == ProductStyle.Bread)
             {
                 // Oval loaf: darker crust, lighter top, three diagonal scores.
                 var crust = new Color32(190, 120, 55, 255);

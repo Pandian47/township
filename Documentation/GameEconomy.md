@@ -20,6 +20,7 @@ Nothing is hard-coded in C#. The numbers below are **examples to start balancing
 | barn | Barn | 2×2 | 1 | 300 | Yes |
 | bakery | Bakery | 2×2 | 1 | 450 | Yes |
 | silo | Silo | 1×1 | 3 | 250 | Yes |
+| feed_mill | Feed Mill | 2×2 | 4 | 600 | Yes |
 
 Removing a building does not refund coins (yet).
 
@@ -31,6 +32,7 @@ Removing a building does not refund coins (yet).
 | Barn | 1 min | 8 |
 | Silo | 1.5 min | 6 |
 | Bakery | 2 min | 10 |
+| Feed Mill | 2.5 min | 12 |
 | Town Hall, Field | instant | 0 |
 
 Finish early: a rewarded ad, or 1 gem per started minute left.
@@ -40,7 +42,7 @@ Finish early: a rewarded ad, or 1 gem per started minute left.
 Storage: base barn capacity 50 (`GameContent.baseStorageCapacity`). Barn +50, Silo +30 (`storageCapacityBonus`).
 Paid expansion: +25 per level, level N costs N × 200 coins, up to 10 levels (`storageExpansion*` in GameContent).
 
-Sell prices (`ItemDefinition.sellPrice`): Wheat 2 coins, Corn 4 coins, Bread 12, Corn Bread 22.
+Sell prices (`ItemDefinition.sellPrice`): Wheat 2 coins, Corn 4, Soybean 6, Bread 12, Corn Bread 22, Chicken Feed 16, Cow Feed 34.
 
 ## Bakery (implemented, `Data/Recipes`, 3 queue slots)
 
@@ -51,14 +53,27 @@ Sell prices (`ItemDefinition.sellPrice`): Wheat 2 coins, Corn 4 coins, Bread 12,
 
 Value check: 2 Wheat sells for 4 coins, but as Bread it's worth 12 (+3 XP). Processing should always beat selling raw crops.
 
+## Feed Mill (Milestone 4 step 1, 3 queue slots)
+
+| Recipe | Ingredients (raw value) | Time | XP | Product sells for | Unlock |
+|---|---|---|---|---|---|
+| make_chicken_feed → Chicken Feed | 2 Wheat + 1 Corn (8) | 4 min | 3 | 16 coins | 4 |
+| make_cow_feed → Cow Feed | 2 Corn + 2 Soybean (20) | 7 min | 5 | 34 coins | 5 |
+
+Feeds are the ingredients for animal buildings (Milestone 4 step 2). Until then they can be sold or delivered in orders.
+
+**Automatic checks** (`ContentEconomyTests`, run with the EditMode tests): every recipe's product is worth more than
+its ingredients, every recipe belongs to exactly one factory, and no recipe unlocks before its factory or any of
+its ingredients.
+
 ## Levels (`GameContent` → Levels)
 
 | Level-up | XP needed | Total XP | Unlocks |
 |---|---|---|---|
 | 1 → 2 | 15 | 15 | Corn, Corn Bread |
 | 2 → 3 | 30 | 45 | Silo |
-| 3 → 4 | 50 | 95 | |
-| 4 → 5 | 80 | 175 | |
+| 3 → 4 | 50 | 95 | Feed Mill, Soybean, Chicken Feed |
+| 4 → 5 | 80 | 175 | Cow Feed |
 | then | 120, 170, 230, 300, 380, 470, then +100 per level | | |
 
 Reward per level-up: 50 × new level coins + 1 gem. The save stores TOTAL XP, so the curve can be rebalanced safely.
@@ -75,7 +90,8 @@ Reward per level-up: 50 × new level coins + 1 gem. The save stores TOTAL XP, so
 | Id | Growth | Yield | Seed cost | XP | Unlock |
 |---|---|---|---|---|---|
 | wheat | 2 min | 2 | free | 1 | 1 |
-| corn | 5 min | 3 | 3 coins | 2 | 1 |
+| corn | 5 min | 3 | 3 coins | 2 | 2 |
+| soybean | 8 min | 3 | 4 coins | 2 | 4 |
 
 ## Planned (examples)
 
