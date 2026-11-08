@@ -170,6 +170,28 @@ Same icon prompt as bread (section 15–16). Items:
 * `egg`: "two fresh cream-colored eggs in a little straw nest"
 * `milk`: "a glass bottle of fresh milk with a blue cap, no label text"
 
+## Milestone 4 step 3: Sugar Mill, Sugarcane, sugar
+
+### Sugar Mill → `sugar_mill.png`
+
+```
+Same art style, angle, lighting and outline as the cottage. Create a small brick sugar mill with a plum-red roof, a short chimney, a big wooden press wheel on the side and bundles of sugarcane by the door, on a 2x2 tile footprint (same width as the cottage). No signs or lettering.
+One single building, centered, fully visible, nothing cropped. No ground around it, no shadow outside the base, no text.
+Background: plain solid flat magenta (#FF00FF).
+```
+
+### Sugarcane, 4 growth stages → `sugarcane_1.png` … `sugarcane_4.png`
+
+Same prompt as wheat (section 7–10), replacing "wheat" with "sugarcane". Stages:
+* `sugarcane_1`: "1 of 4: short green shoots"
+* `sugarcane_2`: "2 of 4: knee-high green canes with long leaves"
+* `sugarcane_3`: "3 of 4: tall segmented green canes"
+* `sugarcane_4`: "4 of 4: very tall ripe yellow-green segmented canes with leafy tops"
+
+### Icon → `sugar.png`
+
+Same icon prompt as bread (section 15–16). Item: "a small pile of white sugar cubes with a few loose sugar grains"
+
 ---
 
 Do a **test set first**: cottage, field, wheat_4, bread and grass. Send those, check them in the game preview, and

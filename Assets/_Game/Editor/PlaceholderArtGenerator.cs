@@ -270,7 +270,7 @@ namespace TownBuilder.EditorTools
         public const string FarmingBuildingsFolder = BuildingsArtFolder + "/Farming";
         private const int PlantHeadroom = 56; // extra pixels above the 1x1 diamond for tall plants
 
-        public enum CropStyle { Wheat, Corn, Soybean }
+        public enum CropStyle { Wheat, Corn, Soybean, Sugarcane }
 
         /// <summary>1x1 field: tilled soil diamond with a slightly raised darker rim. Pivot = bottom corner (0.5, 0).</summary>
         public static Sprite CreateFieldSprite() =>
@@ -332,7 +332,8 @@ namespace TownBuilder.EditorTools
             var pixels = new Color32[w * h];
 
             float[] heights = style == CropStyle.Wheat ? new[] { 7f, 16f, 25f, 32f }
-                : style == CropStyle.Soybean ? new[] { 5f, 10f, 15f, 18f } : new[] { 9f, 22f, 36f, 46f };
+                : style == CropStyle.Soybean ? new[] { 5f, 10f, 15f, 18f }
+                : style == CropStyle.Sugarcane ? new[] { 10f, 24f, 40f, 54f } : new[] { 9f, 22f, 36f, 46f };
             Color32 green = new Color32(70, 150, 50, 255);
             Color32 color = stage switch
             {
@@ -377,6 +378,14 @@ namespace TownBuilder.EditorTools
                     FillEllipse(pixels, w, h, b.x + lean, b.y + hgt, 3.5f + stage, 2.5f + stage * 0.6f, Scale(color, 0.95f));
                     if (stage == 3)
                         FillEllipse(pixels, w, h, b.x + lean + 2, b.y + hgt - 1, 1.6f, 3f, new Color32(214, 192, 120, 255));
+                }
+
+                if (stage >= 1 && style == CropStyle.Sugarcane)
+                {
+                    // Darker joints along the cane and a leaf tuft on top.
+                    for (int j = 8; j < hgt; j += 9)
+                        Plot(pixels, w, h, Mathf.RoundToInt(b.x + lean * j / Mathf.Max(1f, hgt)), Mathf.RoundToInt(b.y + j), Scale(color, 0.6f));
+                    FillEllipse(pixels, w, h, b.x + lean, b.y + hgt, 3f + stage, 1.6f, new Color32(110, 180, 70, 255));
                 }
 
                 if (stage >= 2 && style == CropStyle.Corn)
@@ -446,7 +455,7 @@ namespace TownBuilder.EditorTools
 
         public const string ProductsArtFolder = "Assets/_Game/Art/Products";
 
-        public enum ProductStyle { Bread, CornBread, ChickenFeed, CowFeed, Egg, Milk }
+        public enum ProductStyle { Bread, CornBread, ChickenFeed, CowFeed, Egg, Milk, Sugar }
 
         /// <summary>128x128 product icon (UI and the "ready" bubble above factories). Pivot centre.</summary>
         public static Sprite CreateProductIcon(string productId, ProductStyle style) =>
@@ -458,7 +467,23 @@ namespace TownBuilder.EditorTools
             var tex = NewTexture(size, size);
             var pixels = new Color32[size * size];
 
-            if (style == ProductStyle.Egg)
+            if (style == ProductStyle.Sugar)
+            {
+                // Three white sugar cubes: two at the bottom, one on top.
+                var cube = new Color32(250, 250, 252, 255);
+                var cubes = new[] { new Vector2(42f, 34f), new Vector2(86f, 34f), new Vector2(64f, 76f) };
+                for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                foreach (var c0 in cubes)
+                {
+                    float dx = x + 0.5f - c0.x, dy = y + 0.5f - c0.y;
+                    if (Mathf.Abs(dx) > 21f || Mathf.Abs(dy) > 21f) continue;
+                    var c = dy > 12f ? cube : dx > 12f ? Scale(cube, 0.82f) : Scale(cube, 0.92f);
+                    if (((x * 7 + y * 13) % 11) == 0) c = Scale(c, 0.9f);
+                    pixels[y * size + x] = c;
+                }
+            }
+            else if (style == ProductStyle.Egg)
             {
                 // Cream egg, a little wider at the bottom, with a soft highlight.
                 var shell = new Color32(244, 232, 210, 255);

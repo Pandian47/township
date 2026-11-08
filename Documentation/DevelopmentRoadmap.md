@@ -145,8 +145,8 @@ close and reopen with nothing lost.
 |---|---|---|
 | 1 | **Soybean** crop + **Feed Mill** (Chicken Feed, Cow Feed), scrolling Build shop, economy content tests | **Done** (v0.9.0) |
 | 2 | Animal buildings: **Chicken Coop** (Chicken Feed → Eggs), **Dairy Shed** (Cow Feed → Milk) | **Done** (v0.10.0) |
-| 3 | **Sugarcane** crop + **Sugar Mill** (Sugar) | Next |
-| 4 | New recipes from eggs, milk and sugar (for example cookies, cake, cheese) | Planned |
+| 3 | **Sugarcane** crop + **Sugar Mill** (Sugar) | **Done** (v0.11.0) |
+| 4 | New recipes from eggs, milk and sugar (for example cookies, cake, cheese) | Next |
 | 5 | Production upgrades (extra queue slots for coins/gems) + economy balance pass | Planned |
 
 ### Device checklist (Milestone 4 step 1: Feed Mill)
@@ -163,6 +163,12 @@ close and reopen with nothing lost.
 - [ ] Close the app for longer than the timers, reopen: eggs are ready, tap to collect "+1 Egg"
 - [ ] Level 6: Dairy Shed (1,200 coins) turns Cow Feed into Milk (10 min)
 - [ ] Eggs and milk show in the Barn, sell for 26 / 52 coins, and appear in orders
+
+### Device checklist (Milestone 4 step 3: sugar)
+- [ ] Level 7: level-up dialog lists Sugarcane, Sugar Mill and Sugar
+- [ ] Field → Sugarcane (12 min, 5 coins): tall canes at stage 4, harvest gives 3
+- [ ] Sugar Mill (1,500 coins, 5 min build): 3 Sugarcane → 1 Sugar in 8 min
+- [ ] Sugar shows in the Barn (40 coins) and in orders
 
 ## Milestone 5: Orders and progression
 Train deliveries, quests, land expansion.

@@ -68,6 +68,9 @@ namespace TownBuilder.EditorTools
             // Milestone 4 step 1: feed ingredient.
             new CropSeed { Id = "soybean", Name = "Soybean", Style = PlaceholderArtGenerator.CropStyle.Soybean,
                 GrowSeconds = 480, Yield = 3, SeedCost = 4, Xp = 2, Unlock = 4, SellPrice = 6 },
+            // Milestone 4 step 3: sugar ingredient.
+            new CropSeed { Id = "sugarcane", Name = "Sugarcane", Style = PlaceholderArtGenerator.CropStyle.Sugarcane,
+                GrowSeconds = 720, Yield = 3, SeedCost = 5, Xp = 3, Unlock = 7, SellPrice = 8 },
         };
 
         // Fields placed in a new town, next to the Town Hall.
@@ -94,6 +97,9 @@ namespace TownBuilder.EditorTools
             new BuildingSeed { Id = "feed_mill", Name = "Feed Mill", Category = BuildingCategory.Production, Folder = "Production",
                 W = 2, H = 2, HeightPx = 125, Unlock = 4, Cost = 600, Removable = true, BuildSeconds = 150, BuildXp = 12,
                 Wall = new Color32(200, 168, 120, 255), Roof = new Color32(96, 132, 78, 255) },
+            new BuildingSeed { Id = "sugar_mill", Name = "Sugar Mill", Category = BuildingCategory.Production, Folder = "Production",
+                W = 2, H = 2, HeightPx = 130, Unlock = 7, Cost = 1500, Removable = true, BuildSeconds = 300, BuildXp = 20,
+                Wall = new Color32(214, 200, 176, 255), Roof = new Color32(150, 70, 90, 255) },
             // Milestone 4 step 2: animal buildings (factories that turn feed into animal products).
             new BuildingSeed { Id = "chicken_coop", Name = "Chicken Coop", Category = BuildingCategory.Farming, Folder = "Farming",
                 W = 2, H = 2, HeightPx = 70, Unlock = 5, Cost = 800, Removable = true, BuildSeconds = 180, BuildXp = 14,
@@ -307,6 +313,7 @@ namespace TownBuilder.EditorTools
             new ProductSeed { Id = "cow_feed", Name = "Cow Feed", Style = PlaceholderArtGenerator.ProductStyle.CowFeed, SellPrice = 34 },
             new ProductSeed { Id = "egg", Name = "Egg", Style = PlaceholderArtGenerator.ProductStyle.Egg, SellPrice = 26 },
             new ProductSeed { Id = "milk", Name = "Milk", Style = PlaceholderArtGenerator.ProductStyle.Milk, SellPrice = 52 },
+            new ProductSeed { Id = "sugar", Name = "Sugar", Style = PlaceholderArtGenerator.ProductStyle.Sugar, SellPrice = 40 },
         };
 
         private static readonly RecipeSeed[] RecipeSeeds =
@@ -323,6 +330,8 @@ namespace TownBuilder.EditorTools
                 Ingredients = new[] { ("chicken_feed", 1) }, Seconds = 360, Xp = 4, Unlock = 5 },
             new RecipeSeed { Id = "collect_milk", ProductId = "milk", FactoryId = "dairy_shed",
                 Ingredients = new[] { ("cow_feed", 1) }, Seconds = 600, Xp = 6, Unlock = 6 },
+            new RecipeSeed { Id = "make_sugar", ProductId = "sugar", FactoryId = "sugar_mill",
+                Ingredients = new[] { ("sugarcane", 3) }, Seconds = 480, Xp = 5, Unlock = 7 },
         };
 
         private const int DefaultFactorySlots = 3;

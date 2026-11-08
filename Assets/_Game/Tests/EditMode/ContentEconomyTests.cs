@@ -80,6 +80,17 @@ namespace TownBuilder.Tests
             Assert.AreEqual("cow_feed", dairy.Recipes.Single().Ingredients.Single().item.Id);
         }
 
+        [Test]
+        public void SugarMill_MakesSugar_FromSugarcane()
+        {
+            Assert.IsTrue(_content.TryGetBuilding("sugar_mill", out var mill));
+            var recipe = mill.Recipes.Single();
+            Assert.AreEqual("sugar", recipe.Output.Id);
+            Assert.AreEqual("sugarcane", recipe.Ingredients.Single().item.Id);
+            Assert.IsTrue(_content.TryGetCrop("sugarcane", out var cane));
+            Assert.AreEqual(mill.UnlockLevel, cane.UnlockLevel, "Sugarcane arrives together with the Sugar Mill");
+        }
+
         /// <summary>Earliest level at which each item can be obtained (crops: their unlock; products: their cheapest recipe).</summary>
         private Dictionary<string, int> ItemUnlockLevels()
         {

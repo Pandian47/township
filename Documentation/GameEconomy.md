@@ -23,6 +23,7 @@ Nothing is hard-coded in C#. The numbers below are **examples to start balancing
 | feed_mill | Feed Mill | 2×2 | 4 | 600 | Yes |
 | chicken_coop | Chicken Coop | 2×2 | 5 | 800 | Yes |
 | dairy_shed | Dairy Shed | 2×2 | 6 | 1,200 | Yes |
+| sugar_mill | Sugar Mill | 2×2 | 7 | 1,500 | Yes |
 
 Removing a building does not refund coins (yet).
 
@@ -37,6 +38,7 @@ Removing a building does not refund coins (yet).
 | Feed Mill | 2.5 min | 12 |
 | Chicken Coop | 3 min | 14 |
 | Dairy Shed | 4 min | 18 |
+| Sugar Mill | 5 min | 20 |
 | Town Hall, Field | instant | 0 |
 
 Finish early: a rewarded ad, or 1 gem per started minute left.
@@ -46,7 +48,7 @@ Finish early: a rewarded ad, or 1 gem per started minute left.
 Storage: base barn capacity 50 (`GameContent.baseStorageCapacity`). Barn +50, Silo +30 (`storageCapacityBonus`).
 Paid expansion: +25 per level, level N costs N × 200 coins, up to 10 levels (`storageExpansion*` in GameContent).
 
-Sell prices (`ItemDefinition.sellPrice`): Wheat 2 coins, Corn 4, Soybean 6, Bread 12, Corn Bread 22, Chicken Feed 16, Cow Feed 34, Egg 26, Milk 52.
+Sell prices (`ItemDefinition.sellPrice`): Wheat 2 coins, Corn 4, Soybean 6, Bread 12, Corn Bread 22, Chicken Feed 16, Cow Feed 34, Egg 26, Milk 52, Sugarcane 8, Sugar 40.
 
 ## Bakery (implemented, `Data/Recipes`, 3 queue slots)
 
@@ -75,6 +77,14 @@ Animal buildings are factories: queue a feeding, the animals produce while you'r
 
 Full chain value: 2 Wheat + 1 Corn (8 coins raw) → Chicken Feed (16) → Egg (26).
 
+## Sugar Mill (Milestone 4 step 3, 3 queue slots)
+
+| Recipe | Ingredients (raw value) | Time | XP | Product sells for | Unlock |
+|---|---|---|---|---|---|
+| make_sugar → Sugar | 3 Sugarcane (24) | 8 min | 5 | 40 coins | 7 |
+
+Sugar is an ingredient for the sweet recipes in Milestone 4 step 4.
+
 **Automatic checks** (`ContentEconomyTests`, run with the EditMode tests): every recipe's product is worth more than
 its ingredients, every recipe belongs to exactly one factory, and no recipe unlocks before its factory or any of
 its ingredients.
@@ -88,7 +98,8 @@ its ingredients.
 | 3 → 4 | 50 | 95 | Feed Mill, Soybean, Chicken Feed |
 | 4 → 5 | 80 | 175 | Cow Feed, Chicken Coop, Egg |
 | 5 → 6 | 120 | 295 | Dairy Shed, Milk |
-| then | 170, 230, 300, 380, 470, then +100 per level | | |
+| 6 → 7 | 170 | 465 | Sugarcane, Sugar Mill, Sugar |
+| then | 230, 300, 380, 470, then +100 per level | | |
 
 Reward per level-up: 50 × new level coins + 1 gem. The save stores TOTAL XP, so the curve can be rebalanced safely.
 
@@ -106,6 +117,7 @@ Reward per level-up: 50 × new level coins + 1 gem. The save stores TOTAL XP, so
 | wheat | 2 min | 2 | free | 1 | 1 |
 | corn | 5 min | 3 | 3 coins | 2 | 2 |
 | soybean | 8 min | 3 | 4 coins | 2 | 4 |
+| sugarcane | 12 min | 3 | 5 coins | 3 | 7 |
 
 ## Planned (examples)
 
