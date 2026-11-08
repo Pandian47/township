@@ -49,7 +49,7 @@ namespace TownBuilder
             : (targetItem != null ? targetItem.Id : null);
 
         public TaskSpec ToSpec() =>
-            new TaskSpec(id, kind, kind == TaskKind.Deliver || kind == TaskKind.LoadCrates ? null : TargetId, Amount, UnlockLevel, repeatable);
+            new TaskSpec(id, kind, kind == TaskKind.Deliver || kind == TaskKind.LoadCrates || kind == TaskKind.BuyLand ? null : TargetId, Amount, UnlockLevel, repeatable);
 
         /// <summary>Player-facing goal, e.g. "Harvest 6 Wheat".</summary>
         public string Describe()
@@ -60,6 +60,7 @@ namespace TownBuilder
                 case TaskKind.Collect: return $"Make {Amount} {(targetItem != null ? targetItem.DisplayName : "products")}";
                 case TaskKind.Deliver: return Amount == 1 ? "Deliver 1 order" : $"Deliver {Amount} orders";
                 case TaskKind.LoadCrates: return Amount == 1 ? "Load 1 train crate" : $"Load {Amount} train crates";
+                case TaskKind.BuyLand: return Amount == 1 ? "Buy a plot of land" : $"Buy {Amount} plots of land";
                 default:
                     string name = targetBuilding != null ? targetBuilding.DisplayName : "building";
                     return Amount == 1 ? $"Build a {name}" : $"Build {Amount} × {name}";

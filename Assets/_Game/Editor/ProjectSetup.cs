@@ -187,12 +187,15 @@ namespace TownBuilder.EditorTools
             PlaceholderArtGenerator.EnsureFolder(PlaceholderArtGenerator.CropsArtFolder);
             foreach (var s in Seeds.Where(s => s.FarmPlot)) art.Buildings[s.Id] = PlaceholderArtGenerator.CreateFieldSprite();
             PlaceholderArtGenerator.CreateConstructionIcon();
+            PlaceholderArtGenerator.CreateLockedTile();
+            PlaceholderArtGenerator.CreateSaleSign();
             var trainSprite = CreateTrainAtStationSprite();
 
             CreateContent(art);
             CreateCrops();
             CreateProduction();
             CreateMaterials();
+            ConfigureLand();
             CreateTasks();
             ConfigureTrain(trainSprite);
             ConfigureAds();
@@ -486,6 +489,9 @@ namespace TownBuilder.EditorTools
             new TaskSeed("bread_for_nails", TaskKind.Collect, "bread", 4, 3, 30, 4, repeatable: true, material: "nails", materialAmount: 1),
             new TaskSeed("corn_for_bricks", TaskKind.Harvest, "corn", 12, 4, 30, 5, repeatable: true, material: "bricks", materialAmount: 1),
             new TaskSeed("load_crates", TaskKind.LoadCrates, null, 4, 6, 60, 8, repeatable: true, material: "bricks", materialAmount: 1),
+
+            // Milestone 5 step 4.
+            new TaskSeed("guide_buy_land", TaskKind.BuyLand, null, 1, 3, 50, 6, material: "planks", materialAmount: 1),
         };
 
         public const string TrainAtStationSpritePath = Root + "/Art/Buildings/Community/PH_Building_train_station_train.png";
@@ -525,6 +531,32 @@ namespace TownBuilder.EditorTools
             new MaterialSeed { Id = "bricks", Name = "Bricks", Style = PlaceholderArtGenerator.ProductStyle.Bricks, SellPrice = 14 },
             new MaterialSeed { Id = "nails", Name = "Nails", Style = PlaceholderArtGenerator.ProductStyle.Nails, SellPrice = 8 },
         };
+
+        /// <summary>Land prices per ring (only if none are set yet). Example values; tune in GameContent → Land expansion.</summary>
+        private static void ConfigureLand()
+        {
+            var content = AssetDatabase.LoadAssetAtPath<GameContent>(ContentPath);
+            if (content.LandTiers.Count > 0) return;
+            MaterialDefinition M(string id) => content.TryGetItem(id, out var item) ? item as MaterialDefinition : null;
+            content.EditorSetLandTiers(new List<LandTier>
+            {
+                new LandTier
+                {
+                    unlockLevel = 3, coins = 400,
+                    materials = new List<MaterialCost> { new MaterialCost { material = M("planks"), amount = 2 }, new MaterialCost { material = M("nails"), amount = 1 } },
+                },
+                new LandTier
+                {
+                    unlockLevel = 7, coins = 1200,
+                    materials = new List<MaterialCost>
+                    {
+                        new MaterialCost { material = M("planks"), amount = 3 }, new MaterialCost { material = M("bricks"), amount = 2 },
+                        new MaterialCost { material = M("nails"), amount = 2 },
+                    },
+                },
+            });
+            EditorUtility.SetDirty(content);
+        }
 
         private static void CreateMaterials()
         {

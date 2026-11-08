@@ -238,6 +238,15 @@ Same icon prompt as bread (section 15–16). Items:
 * `bricks`: "a small stack of red clay bricks"
 * `nails`: "three shiny steel nails lying crossed"
 
+## Milestone 5 step 4: land for sale
+
+### "For sale" sign → `for_sale_sign.png`
+
+```
+Same art style, lighting and outline as the cottage. Create a small wooden signpost: one post with a rectangular wooden board showing a big golden coin symbol (no letters), seen from the front at a slight isometric angle. Single object, centered, fully visible, no ground, no text.
+Background: plain solid flat magenta (#FF00FF).
+```
+
 ---
 
 Do a **test set first**: cottage, field, wheat_4, bread and grass. Send those, check them in the game preview, and

@@ -130,6 +130,77 @@ namespace TownBuilder.EditorTools
             tex.Apply();
         }
 
+        public const string LockedTileName = "PH_Tile_Locked";
+        public const string SaleSignPath = "Assets/_Game/Art/Environment/PH_Sign_ForSale.png";
+
+        /// <summary>Overlay tile for land the player doesn't own: dark, see-through, with diagonal hatching.</summary>
+        public static Tile CreateLockedTile()
+        {
+            var sprite = CreateSprite($"{TilesArtFolder}/{LockedTileName}.png", RenderLockedTile, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+            var tilePath = TileAssetPath(LockedTileName);
+            var tile = AssetDatabase.LoadAssetAtPath<Tile>(tilePath);
+            if (tile == null)
+            {
+                tile = ScriptableObject.CreateInstance<Tile>();
+                tile.sprite = sprite;
+                tile.colliderType = Tile.ColliderType.None;
+                AssetDatabase.CreateAsset(tile, tilePath);
+            }
+
+            return tile;
+        }
+
+        private static Texture2D RenderLockedTile()
+        {
+            var tex = NewTexture(TileWidth, TileHeight);
+            var pixels = new Color32[TileWidth * TileHeight];
+            for (int y = 0; y < TileHeight; y++)
+            for (int x = 0; x < TileWidth; x++)
+            {
+                float px = x + 0.5f, py = y + 0.5f;
+                float d = Mathf.Abs(px - HalfW) / HalfW + Mathf.Abs(py - HalfH) / HalfH;
+                if (d > 1.02f) continue; // slight overlap so neighbouring tiles leave no gaps
+                bool hatch = ((x + 2 * y) % 16) < 3;
+                pixels[y * TileWidth + x] = hatch ? new Color32(20, 26, 22, 150) : new Color32(16, 22, 20, 105);
+            }
+
+            tex.SetPixels32(pixels);
+            tex.Apply();
+            return tex;
+        }
+
+        /// <summary>Small wooden "for sale" sign (pivot at the bottom of the post) standing on plots that can be bought.</summary>
+        public static Sprite CreateSaleSign() =>
+            CreateSprite(SaleSignPath, RenderSaleSign, new Vector2(0.5f, 0f), SpriteMeshType.FullRect);
+
+        private static Texture2D RenderSaleSign()
+        {
+            const int w = 72, h = 96;
+            var tex = NewTexture(w, h);
+            var pixels = new Color32[w * h];
+            var wood = new Color32(176, 120, 66, 255);
+            var board = new Color32(236, 206, 140, 255);
+            var coin = new Color32(246, 196, 48, 255);
+            for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+            {
+                float px = x + 0.5f, py = y + 0.5f;
+                bool post = Mathf.Abs(px - 36f) < 4f && py < 60f;
+                bool boardArea = px > 6f && px < 66f && py > 48f && py < 90f;
+                if (!post && !boardArea) continue;
+                Color32 c = post && !boardArea ? Scale(wood, px < 36f ? 1.05f : 0.85f) : board;
+                if (boardArea && (px < 10f || px > 62f || py < 52f || py > 86f)) c = wood; // frame
+                float dx = px - 36f, dy = py - 69f;
+                if (boardArea && dx * dx + dy * dy < 120f) c = dx * dx + dy * dy < 50f ? Scale(coin, 1.1f) : coin;
+                pixels[y * w + x] = c;
+            }
+
+            AddOutline(pixels, w, h);
+            tex.SetPixels32(pixels);
+            tex.Apply();
+            return tex;
+        }
+
         // ------------------------------------------------------------------ Tiles
 
         private enum TileStyle { Plain, Grass, Soil, Water, Road }

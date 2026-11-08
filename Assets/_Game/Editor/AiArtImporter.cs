@@ -31,6 +31,8 @@ namespace TownBuilder.EditorTools
             Icon,
             /// <summary>Square top-down texture converted into an isometric diamond tile.</summary>
             Tile,
+            /// <summary>Small standing prop (sign): fitted to <see cref="Spec.Width"/> pixels tall, pivot at the bottom centre.</summary>
+            Prop,
         }
 
         private sealed class Spec
@@ -102,6 +104,7 @@ namespace TownBuilder.EditorTools
             new Spec("planks", Art + "/Materials/PH_Material_planks.png", Kind.Icon, 128),
             new Spec("bricks", Art + "/Materials/PH_Material_bricks.png", Kind.Icon, 128),
             new Spec("nails", Art + "/Materials/PH_Material_nails.png", Kind.Icon, 128),
+            new Spec("for_sale_sign", Art + "/Environment/PH_Sign_ForSale.png", Kind.Prop, 96),
             new Spec("grass", Art + "/Environment/Tiles/PH_Tile_Grass.png", Kind.Tile, 128),
             new Spec("sand", Art + "/Environment/Tiles/PH_Tile_Sand.png", Kind.Tile, 128),
             new Spec("water", Art + "/Environment/Tiles/PH_Tile_Water.png", Kind.Tile, 128),
@@ -202,6 +205,16 @@ namespace TownBuilder.EditorTools
 
             switch (spec.Kind)
             {
+                case Kind.Prop:
+                {
+                    float scale = spec.Width / (float)(maxY - minY + 1);
+                    float cx = (minX + maxX + 1) * 0.5f;
+                    int outW = Mathf.CeilToInt((maxX - minX + 1) * scale) + 2;
+                    float srcW = outW / scale;
+                    spec.Pivot = new Vector2(0.5f, 0f);
+                    return Resample(keyed, cx - srcW * 0.5f, minY, srcW, spec.Width / scale, outW, spec.Width);
+                }
+
                 case Kind.Icon:
                 {
                     int margin = Mathf.RoundToInt(spec.Width * 0.05f);

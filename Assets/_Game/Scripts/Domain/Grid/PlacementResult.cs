@@ -9,5 +9,7 @@ namespace TownBuilder.Domain
         Overlap,
         DuplicateId,
         NotFound,
+        /// <summary>The land isn't owned yet (land expansion).</summary>
+        LockedLand,
     }
 }

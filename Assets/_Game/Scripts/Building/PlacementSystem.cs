@@ -54,6 +54,9 @@ namespace TownBuilder
 
         public event Action StateChanged;
 
+        /// <summary>A tap in Idle/Selected mode that hit no building (the cell under the finger).</summary>
+        public event Action<GridCoord> GroundTapped;
+
         /// <summary>
         /// Optional hook asked when a placed building is tapped in Idle/Selected mode. Return true to consume the tap
         /// (e.g. farming harvests a ready field instead of selecting it).
@@ -261,6 +264,7 @@ namespace TownBuilder
                     else
                     {
                         EnterIdle();
+                        GroundTapped?.Invoke(grid.WorldToCell(world));
                     }
                     break;
                 }

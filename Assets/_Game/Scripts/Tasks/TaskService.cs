@@ -23,7 +23,7 @@ namespace TownBuilder
 
         public TaskService(TaskBoard board, GameContent content, Wallet wallet, Inventory inventory, PlayerProgress progress, Town town,
             FarmingController farming, ProductionController production, OrderService orders, PlacementSystem placement,
-            TrainController train = null, int? randomSeed = null)
+            TrainController train = null, LandPlots land = null, int? randomSeed = null)
         {
             _board = board;
             _content = content;
@@ -40,6 +40,7 @@ namespace TownBuilder
             Action<PlacedBuilding> placed = b => _board.Record(TaskKind.Build, b.DefinitionId, 1);
             Action<int> leveledUp = _ => Refill();
             Action<int> crateLoaded = _ => _board.Record(TaskKind.LoadCrates, null, 1);
+            Action<PlotCoord> landBought = _ => _board.Record(TaskKind.BuyLand, null, 1);
             Action<int> completed = OnTaskCompleted;
             Action<int> changed = _ => Modified?.Invoke();
 
@@ -48,6 +49,7 @@ namespace TownBuilder
             orders.Delivered += delivered;
             placement.BuildingPlaced += placed;
             if (train != null) train.CrateFilled += crateLoaded;
+            if (land != null) land.PlotBought += landBought;
             progress.LeveledUp += leveledUp;
             board.TaskCompleted += completed;
             board.Changed += changed;
@@ -59,6 +61,7 @@ namespace TownBuilder
                 orders.Delivered -= delivered;
                 placement.BuildingPlaced -= placed;
                 if (train != null) train.CrateFilled -= crateLoaded;
+                if (land != null) land.PlotBought -= landBought;
                 progress.LeveledUp -= leveledUp;
                 board.TaskCompleted -= completed;
                 board.Changed -= changed;

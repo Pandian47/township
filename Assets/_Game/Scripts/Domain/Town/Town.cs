@@ -25,8 +25,26 @@ namespace TownBuilder.Domain
         public IReadOnlyCollection<PlacedBuilding> Buildings => _buildings.Values;
         public int BuildingCount => _buildings.Count;
 
+        private Func<GridCoord, bool> _isLandUnlocked;
+
+        /// <summary>
+        /// Land expansion: cells for which this returns false can't be built on (LockedLand). Set after the saved
+        /// buildings are loaded; buildings already standing are never removed.
+        /// </summary>
+        public void SetLandCheck(Func<GridCoord, bool> isLandUnlocked) => _isLandUnlocked = isLandUnlocked;
+
         public PlacementResult CanPlace(GridCoord origin, GridCoord size, string ignoreInstanceId = null) =>
-            Occupancy.Check(origin, size, ignoreInstanceId);
+            Check(origin, size, ignoreInstanceId);
+
+        private PlacementResult Check(GridCoord origin, GridCoord size, string ignoreInstanceId = null)
+        {
+            var result = Occupancy.Check(origin, size, ignoreInstanceId);
+            if (result != PlacementResult.Valid || _isLandUnlocked == null) return result;
+            for (int dx = 0; dx < size.X; dx++)
+            for (int dy = 0; dy < size.Y; dy++)
+                if (!_isLandUnlocked(new GridCoord(origin.X + dx, origin.Y + dy))) return PlacementResult.LockedLand;
+            return PlacementResult.Valid;
+        }
 
         public PlacementResult TryAdd(string instanceId, string definitionId, GridCoord origin, GridCoord size, out PlacedBuilding building)
         {
@@ -35,7 +53,7 @@ namespace TownBuilder.Domain
             if (string.IsNullOrEmpty(definitionId)) throw new ArgumentException("Definition id is required.", nameof(definitionId));
             if (_buildings.ContainsKey(instanceId)) return PlacementResult.DuplicateId;
 
-            var result = Occupancy.Check(origin, size);
+            var result = Check(origin, size);
             if (result != PlacementResult.Valid) return result;
 
             building = new PlacedBuilding(instanceId, definitionId, origin, size);
@@ -50,7 +68,7 @@ namespace TownBuilder.Domain
             if (!_buildings.TryGetValue(instanceId, out var building)) return PlacementResult.NotFound;
             if (building.Origin == newOrigin) return PlacementResult.Valid;
 
-            var result = Occupancy.Check(newOrigin, building.Size, instanceId);
+            var result = Check(newOrigin, building.Size, instanceId);
             if (result != PlacementResult.Valid) return result;
 
             Occupancy.Release(instanceId, building.Origin, building.Size);

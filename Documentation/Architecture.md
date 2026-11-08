@@ -225,6 +225,15 @@ work like any item. `TrainCrate` may carry `MaterialId`/`MaterialAmount` (genera
 `TaskDefinition.rewardMaterial` is paid by `TaskService.Claim`, which refuses to claim into a full barn.
 `TaskKind.LoadCrates` counts `TrainController.CrateFilled`.
 
+## 6g6. Land expansion
+
+`LandPlots` (Domain) splits the map into plots, owns the start area, sells plots next to owned land (`IsForSale`, `Buy`)
+and answers `IsCellUnlocked`. `Town.SetLandCheck` makes `CanPlace/TryAdd/TryMove` return `PlacementResult.LockedLand`
+for unowned cells (set after saved buildings load, so nothing is ever removed). `LandController` paints the
+`LockedLandTilemap` overlay (GroundOverlay layer, order −1) and the "for sale" signs, listens to
+`PlacementSystem.GroundTapped`, and buys plots (prices: `GameContent.landTiers` per ring). `LandPanel` shows the price.
+Saved in `SaveData.land.ownedPlots` ("x_y"); empty = initialise (start area + plots under buildings).
+
 ## 6h. UI text (TextMeshPro)
 
 All UI text is TextMeshPro (`TMP_Text` fields, `TextMeshProUGUI` components). Never add legacy `UnityEngine.UI.Text`.

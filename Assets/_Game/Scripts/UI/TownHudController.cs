@@ -14,6 +14,7 @@ namespace TownBuilder
         [SerializeField] private ConfirmDialog confirmDialog;
         [SerializeField] private TasksPanel tasksPanel;
         [SerializeField] private TrainPanel trainPanel;
+        [SerializeField] private LandPanel landPanel;
 
         [Header("Ads")]
         [SerializeField] private RewardedCoinsButton rewardedCoinsButton;
@@ -67,6 +68,7 @@ namespace TownBuilder
         private Wallet _wallet;
         private TaskService _tasks;
         private TrainController _train;
+        private LandController _land;
 
         public void Initialize(PlacementSystem placement, FarmingController farming, ProductionController production, ConstructionController construction, OrderService orders,
             ProgressionService progression, StorageService storage, Wallet wallet,
@@ -143,8 +145,24 @@ namespace TownBuilder
             Refresh();
         }
 
+        /// <summary>Land expansion: tapping locked land opens the land panel.</summary>
+        public void InitializeLand(LandController land)
+        {
+            if (land == null || landPanel == null) return;
+            _land = land;
+            landPanel.Initialize(land);
+            land.PlotTapped += landPanel.ShowFor;
+            land.Notification += toast.Show;
+        }
+
         private void OnDestroy()
         {
+            if (_land != null)
+            {
+                _land.PlotTapped -= landPanel.ShowFor;
+                _land.Notification -= toast.Show;
+            }
+
             if (_tasks != null) _tasks.Notification -= toast.Show;
             if (_train != null) _train.Notification -= toast.Show;
             if (_placement != null) _placement.StateChanged -= Refresh;
@@ -196,6 +214,7 @@ namespace TownBuilder
             bool selected = mode == PlacementSystem.Mode.Selected;
 
             bottomNavigation.SetActive(!placing && !selected); // also hides the rewarded-ad button inside it
+            if ((placing || selected) && landPanel != null && landPanel.IsOpen) landPanel.Hide();
             placementBar.SetActive(placing);
             selectionBar.SetActive(selected);
 
@@ -240,6 +259,7 @@ namespace TownBuilder
                 PlacementResult.Overlap => "Blocked by another building",
                 PlacementResult.BlockedTerrain => "Can't build here",
                 PlacementResult.OutOfBounds => "Outside the town",
+                PlacementResult.LockedLand => "Buy this land first",
                 _ => _placement.PreviewValidity.ToString(),
             };
 

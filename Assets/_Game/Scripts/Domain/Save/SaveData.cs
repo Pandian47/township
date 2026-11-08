@@ -24,6 +24,7 @@ namespace TownBuilder.Domain
         /// <summary>Ids of tasks claimed at least once (one-off guide tasks don't come back).</summary>
         public List<string> completedTaskIds = new List<string>();
         public TrainSaveData train = new TrainSaveData();
+        public LandSaveData land = new LandSaveData();
     }
 
     /// <summary>One order-board slot. itemIds[i] / amounts[i] form one line.</summary>
@@ -39,6 +40,13 @@ namespace TownBuilder.Domain
     }
 
     /// <summary>One queued/finished product in a factory. Jobs of one factory are saved in queue order.</summary>
+    [Serializable]
+    public sealed class LandSaveData
+    {
+        /// <summary>Owned plot ids ("x_y"). Empty = not initialised yet (start area + plots under buildings).</summary>
+        public List<string> ownedPlots = new List<string>();
+    }
+
     [Serializable]
     public sealed class TrainSaveData
     {

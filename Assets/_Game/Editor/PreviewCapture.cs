@@ -100,6 +100,17 @@ namespace TownBuilder.EditorTools
                 ghost.SetTint(new Color(1f, 1f, 1f, 0.85f));
             }
 
+            // Land: start area + plots under the sample buildings are owned; the rest is darkened with "for sale" signs.
+            if (hud != HudState.None)
+            {
+                var land = new LandPlots(grid.Bounds, content.LandPlotSize, new PlotCoord(content.LandStartMin.x, content.LandStartMin.y),
+                    new PlotCoord(content.LandStartMax.x, content.LandStartMax.y));
+                var occupied = town.Buildings.SelectMany(b => Enumerable.Range(0, b.Size.X * b.Size.Y)
+                    .Select(i => new GridCoord(b.Origin.X + i % b.Size.X, b.Origin.Y + i / b.Size.X)));
+                land.InitializeDefault(occupied);
+                UnityEngine.Object.FindAnyObjectByType<LandController>().PreviewPaint(land);
+            }
+
             var center = grid.FootprintCenterWorld(new GridCoord(17, 18), new GridCoord(3, 3));
             cam.transform.position = new Vector3(center.x, center.y, -10f);
             cam.orthographicSize = 6.5f;
@@ -112,7 +123,7 @@ namespace TownBuilder.EditorTools
             return outputPath;
         }
 
-        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train }
+        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land }
 
         /// <summary>Command line: renders MainMenu + Town (idle, shop, placing) with UI into the folder after -previewOut.</summary>
         public static void CaptureUiFromCommandLine()
@@ -133,6 +144,7 @@ namespace TownBuilder.EditorTools
                 Capture(Path.Combine(folder, "Preview_Town_Construction.png"), HudState.Construction);
                 Capture(Path.Combine(folder, "Preview_Town_Effects.png"), HudState.Effects);
                 Capture(Path.Combine(folder, "Preview_Town_Train.png"), HudState.Train);
+                Capture(Path.Combine(folder, "Preview_Town_Land.png"), HudState.Land);
             }
             catch (Exception e)
             {
@@ -200,6 +212,33 @@ namespace TownBuilder.EditorTools
                 float top = bakeryView.SpriteRenderer.bounds.max.y - bakeryView.transform.position.y;
                 go.transform.localPosition = new Vector3(bakeryView.SpriteRenderer.bounds.center.x - bakeryView.transform.position.x, top + 0.3f, 0f);
                 go.transform.localScale = Vector3.one * 0.5f;
+            }
+
+            if (state == HudState.Land)
+            {
+                var root = Find(canvas, "LandPanel").transform.Find("Root").gameObject;
+                root.SetActive(true);
+                root.transform.Find("Info/Text").GetComponent<TMPro.TMP_Text>().text = "6 × 6 tiles to build on";
+                var tier = content.LandTierForRing(1);
+                var texts = root.transform.Find("Costs").GetComponentsInChildren<TMPro.TMP_Text>(true);
+                var icons = root.transform.Find("Costs").GetComponentsInChildren<UnityEngine.UI.Image>(true).Where(img => img.name == "Icon").ToArray();
+                texts[0].text = $"{tier.coins:N0} coins";
+                texts[0].color = new Color(0.2f, 0.55f, 0.25f);
+                icons[0].enabled = false;
+                int[] have = { 2, 0 };
+                for (int i = 1; i < texts.Length; i++)
+                {
+                    bool used = i - 1 < tier.materials.Count;
+                    icons[i].transform.parent.gameObject.SetActive(used);
+                    if (!used) continue;
+                    var cost = tier.materials[i - 1];
+                    int h = i - 1 < have.Length ? have[i - 1] : 0;
+                    texts[i].text = $"{cost.material.DisplayName}  {h}/{cost.amount}";
+                    texts[i].color = h >= cost.amount ? new Color(0.2f, 0.55f, 0.25f) : new Color(0.8f, 0.25f, 0.2f);
+                    icons[i].sprite = cost.material.Icon;
+                }
+
+                root.transform.Find("BuyButton").GetComponent<UnityEngine.UI.Button>().interactable = false;
             }
 
             if (state == HudState.Train)

@@ -114,6 +114,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 794282ab7e198874093def0ac98ac22c, type: 2}
   - {fileID: 11400000, guid: 6f0b7e8aea1fc0c44a1e44a2b287eb07, type: 2}
   - {fileID: 11400000, guid: 01a3f4a19d826ee489f38ef2c586891d, type: 2}
+  - {fileID: 11400000, guid: e4c9cef0db5cdf74b8f171b7d1d54dd7, type: 2}
   taskSlots: 3
   trainStationId: train_station
   trainAtStationSprite: {fileID: 21300000, guid: 2b433011ae75fb649ab77e768db39584, type: 3}
@@ -123,5 +124,25 @@ MonoBehaviour:
   trainXpDivisor: 4
   trainFullBonusFraction: 0.5
   trainMaterialChance: 0.35
+  landPlotSize: 6
+  landStartMin: {x: 2, y: 2}
+  landStartMax: {x: 3, y: 3}
+  landTiers:
+  - unlockLevel: 3
+    coins: 400
+    materials:
+    - material: {fileID: 11400000, guid: 81887886b2c0bb949828912b3d72f71a, type: 2}
+      amount: 2
+    - material: {fileID: 11400000, guid: c36eae76314fdb544b1bc36ca3afd419, type: 2}
+      amount: 1
+  - unlockLevel: 7
+    coins: 1200
+    materials:
+    - material: {fileID: 11400000, guid: 81887886b2c0bb949828912b3d72f71a, type: 2}
+      amount: 3
+    - material: {fileID: 11400000, guid: de5ccea6c812a25428ccfd6a737ced41, type: 2}
+      amount: 2
+    - material: {fileID: 11400000, guid: c36eae76314fdb544b1bc36ca3afd419, type: 2}
+      amount: 2
   soundLibrary: {fileID: 11400000, guid: 204402b4592b2d64d93691af848458eb, type: 2}
   adsConfig: {fileID: 11400000, guid: 1e5cb2d5aaa6061439417a7434340494, type: 2}

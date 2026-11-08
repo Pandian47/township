@@ -192,6 +192,9 @@ namespace TownBuilder.EditorTools
             Go("Crops", world.transform);
             Go("Decorations", world.transform);
             Go("Characters", world.transform);
+            var lockedLand = CreateTilemap("LockedLandTilemap", gridGo.transform, -1);
+            lockedLand.GetComponent<TilemapRenderer>().sortingLayerName = SortingLayers.GroundOverlay;
+            var landSigns = Go("LandSigns", world.transform);
             var highlightsGo = Go("FootprintHighlights", world.transform);
             var highlighter = highlightsGo.AddComponent<FootprintHighlighter>();
             Wire(highlighter, ("grid", isoGrid), ("cellSprite", art.CellHighlight));
@@ -221,6 +224,10 @@ namespace TownBuilder.EditorTools
             var production = Go("ProductionController", systems.transform).AddComponent<ProductionController>();
             var construction = Go("ConstructionController", systems.transform).AddComponent<ConstructionController>();
             var train = Go("TrainController", systems.transform).AddComponent<TrainController>();
+            var land = Go("LandController", systems.transform).AddComponent<LandController>();
+            Wire(land, ("grid", isoGrid), ("placement", placement), ("lockedTilemap", lockedLand), ("signsRoot", landSigns.transform),
+                ("lockedTile", AssetDatabase.LoadAssetAtPath<TileBase>(PlaceholderArtGenerator.TileAssetPath(PlaceholderArtGenerator.LockedTileName))),
+                ("saleSign", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.SaleSignPath)));
             Wire(train, ("buildings", buildingController));
             Wire(construction, ("buildings", buildingController), ("placement", placement),
                 ("constructionIcon", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.ConstructionIconPath)));
@@ -260,7 +267,8 @@ namespace TownBuilder.EditorTools
                 ("construction", construction),
                 ("hud", hud),
                 ("effects", effects),
-                ("trainController", train));
+                ("trainController", train),
+                ("landController", land));
 
             EditorSceneManager.SaveScene(scene, TownPath);
         }
@@ -386,6 +394,7 @@ namespace TownBuilder.EditorTools
             var fieldPanel = BuildFieldPanel(safe);
             var factoryPanel = BuildFactoryPanel(safe);
             var trainPanel = BuildTrainPanel(safe);
+            var landPanel = BuildLandPanel(safe);
             var constructionPanel = BuildConstructionPanel(safe);
             var toast = BuildToast(safe);
 
@@ -405,6 +414,7 @@ namespace TownBuilder.EditorTools
                 ("fieldPanel", fieldPanel),
                 ("factoryPanel", factoryPanel),
                 ("trainPanel", trainPanel),
+                ("landPanel", landPanel),
                 ("constructionPanel", constructionPanel),
                 ("barnPanel", barnPanel),
                 ("ordersPanel", ordersPanel),
@@ -762,6 +772,52 @@ namespace TownBuilder.EditorTools
             Wire(panel, ("panelRoot", root.gameObject), ("titleText", title), ("cropsView", crops.gameObject), ("cropsParent", crops),
                 ("cropTemplate", cropView), ("growingView", growing.gameObject), ("statusText", status), ("progressFill", fill),
                 ("actionButton", action), ("actionLabel", actionLabel));
+            root.gameObject.SetActive(false);
+            return panel;
+        }
+
+        private static LandPanel BuildLandPanel(RectTransform safe)
+        {
+            var container = Stretch("LandPanel", safe);
+            var root = MakeRect("Root", container, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 30), new Vector2(1320, 300));
+            AddImage(root, PanelColor);
+
+            var title = Label(MakeRect("Title", root, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(28, -12), new Vector2(700, 56)),
+                "Text", "Land for sale", 42, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
+            var info = Label(MakeRect("Info", root, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(28, -68), new Vector2(700, 40)),
+                "Text", "", 28, TextAnchor.MiddleLeft, new Color(0.4f, 0.38f, 0.34f));
+
+            var costs = MakeRect("Costs", root, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(28, 40), new Vector2(880, 110));
+            HRow(costs, 14, TextAnchor.MiddleLeft);
+            var icons = new Image[4];
+            var texts = new TMP_Text[4];
+            for (int i = 0; i < 4; i++)
+            {
+                var chip = MakeRect($"Cost{i + 1}", costs, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(210, 100));
+                Prefer(chip, 210, 100);
+                AddImage(chip, Color.white, raycast: false);
+                var iconRect = MakeRect("Icon", chip, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(10, 0), new Vector2(64, 64));
+                icons[i] = iconRect.gameObject.AddComponent<Image>();
+                icons[i].preserveAspect = true;
+                icons[i].raycastTarget = false;
+                texts[i] = Label(MakeRect("Text", chip, new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(38, 0), new Vector2(-88, -8)),
+                    "Text", "", 26, TextAnchor.MiddleCenter, Ink, FontStyle.Bold);
+            }
+
+            var buy = MakeButton(root, "BuyButton", "Buy land", new Vector2(300, 120), Green, out var buyLabel, 40);
+            var buyRect = (RectTransform)buy.transform;
+            buyRect.anchorMin = buyRect.anchorMax = buyRect.pivot = new Vector2(1f, 0f);
+            buyRect.anchoredPosition = new Vector2(-28, 34);
+            var close = MakeButton(root, "CloseButton", "X", new Vector2(90, 90), Red, 44);
+            var closeRect = (RectTransform)close.transform;
+            closeRect.anchorMin = closeRect.anchorMax = closeRect.pivot = new Vector2(1f, 1f);
+            closeRect.anchoredPosition = new Vector2(-20, -16);
+
+            var panel = container.gameObject.AddComponent<LandPanel>();
+            Wire(panel, ("panelRoot", root.gameObject), ("titleText", title), ("infoText", info), ("buyButton", buy), ("buyLabel", buyLabel),
+                ("closeButton", close));
+            WireArray(panel, "costIcons", icons);
+            WireArray(panel, "costTexts", texts);
             root.gameObject.SetActive(false);
             return panel;
         }

@@ -158,6 +158,24 @@ namespace TownBuilder.Tests
         }
 
         [Test]
+        public void LandTiers_AreConfigured_AndGetPricierFurtherOut()
+        {
+            Assert.Greater(_content.LandTiers.Count, 0, "land prices");
+            int lastLevel = 0, lastCoins = 0;
+            foreach (var tier in _content.LandTiers)
+            {
+                Assert.GreaterOrEqual(tier.unlockLevel, lastLevel);
+                Assert.GreaterOrEqual(tier.coins, lastCoins);
+                Assert.IsTrue(tier.materials.All(m => m.material != null && m.amount > 0), "every material cost is set");
+                lastLevel = tier.unlockLevel;
+                lastCoins = tier.coins;
+            }
+
+            Assert.IsTrue(_content.Tasks.Any(t => t.RewardMaterialAmount > 0 && t.UnlockLevel <= _content.LandTiers[0].unlockLevel),
+                "materials for the first plots can be earned by the time they unlock");
+        }
+
+        [Test]
         public void TrainStation_IsConfigured()
         {
             Assert.IsTrue(_content.TryGetBuilding(_content.TrainStationId, out var station), "train station building");

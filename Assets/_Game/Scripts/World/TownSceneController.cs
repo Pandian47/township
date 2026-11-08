@@ -25,6 +25,7 @@ namespace TownBuilder
         [SerializeField] private TownHudController hud;
         [SerializeField] private TownEffects effects;
         [SerializeField] private TrainController trainController;
+        [SerializeField] private LandController landController;
         [SerializeField] private float startOrthographicSize = 6f;
         [SerializeField] private float autosaveDelaySeconds = 2f;
 
@@ -43,6 +44,7 @@ namespace TownBuilder
         private TaskBoard _taskBoard;
         private TaskService _tasks;
         private Train _train;
+        private LandPlots _land;
         private TownAudioBridge _audioBridge;
         private float _saveDueAt = -1f;
 
@@ -59,6 +61,8 @@ namespace TownBuilder
         public ProgressionService Progression => _progression;
         public TaskService Tasks => _tasks;
         public TrainController Train => trainController;
+        public LandController LandController => landController;
+        public LandPlots Land => _land;
         public TownEffects Effects => effects;
         public bool IsReady => _town != null;
 
@@ -97,6 +101,13 @@ namespace TownBuilder
             _sites = new ConstructionSites();
             TownSaveMapper.LoadConstruction(save, _town, _context.Content, _sites);
 
+            // Land expansion: buildings may only be placed on owned land (existing buildings keep theirs).
+            var c0 = _context.Content;
+            _land = new LandPlots(grid.Bounds, c0.LandPlotSize, new PlotCoord(c0.LandStartMin.x, c0.LandStartMin.y),
+                new PlotCoord(c0.LandStartMax.x, c0.LandStartMax.y));
+            TownSaveMapper.LoadLand(save, _town, _land);
+            _town.SetLandCheck(_land.IsCellUnlocked);
+
             _plots = new FarmPlots();
             _inventory = new Inventory(_context.Content.BaseStorageCapacity);
             TownSaveMapper.LoadFarming(save, _town, _context.Content, _plots, _inventory, warnings);
@@ -112,6 +123,11 @@ namespace TownBuilder
             _storage.Modified += ScheduleSave;
 
             placement.Initialize(_town, _wallet, _progress, _context.Content);
+            if (landController != null)
+            {
+                landController.Initialize(_land, _inventory, _wallet, _progress, content);
+                landController.Modified += ScheduleSave;
+            }
             placement.TownModified += ScheduleSave;
 
             farming.Initialize(_town, _plots, _inventory, _wallet, _progress, _context.Content, _context.Clock);
@@ -132,7 +148,7 @@ namespace TownBuilder
 
             _taskBoard = new TaskBoard(content.TaskSlots);
             TownSaveMapper.LoadTasks(save, content, _taskBoard, warnings);
-            _tasks = new TaskService(_taskBoard, content, _wallet, _inventory, _progress, _town, farming, production, _orders, placement, trainController);
+            _tasks = new TaskService(_taskBoard, content, _wallet, _inventory, _progress, _town, farming, production, _orders, placement, trainController, _land);
             _tasks.Modified += ScheduleSave;
 
             _train = new Train();
@@ -149,13 +165,14 @@ namespace TownBuilder
 
             _wallet.Changed += ScheduleSave; // e.g. coins from a rewarded ad
 
-            _audioBridge = new TownAudioBridge(_context.Audio, _town, placement, farming, production, construction, _storage, _orders, _progression, _tasks, trainController);
+            _audioBridge = new TownAudioBridge(_context.Audio, _town, placement, farming, production, construction, _storage, _orders, _progression, _tasks, trainController, landController);
 
             if (effects != null) effects.Initialize(_town);
 
             hud.Initialize(placement, farming, production, construction, _orders, _progression, _storage, _wallet, _progress, _context.Content, _context.Ads, ReturnToMainMenu);
             hud.InitializeTasks(_tasks);
             if (trainController != null) hud.InitializeTrain(trainController, _context.Content, _inventory, _context.Ads);
+            if (landController != null) hud.InitializeLand(landController);
         }
 
         private void OnDestroy()
@@ -175,6 +192,7 @@ namespace TownBuilder
             if (_progress != null) _progress.Changed -= ScheduleSave;
             _progression?.Dispose();
             if (trainController != null) trainController.Modified -= ScheduleSave;
+            if (landController != null) landController.Modified -= ScheduleSave;
             if (_tasks != null)
             {
                 _tasks.Modified -= ScheduleSave;
@@ -209,6 +227,7 @@ namespace TownBuilder
                 TownSaveMapper.WriteOrders(_context.ActiveSave, _orderBoard);
                 TownSaveMapper.WriteTasks(_context.ActiveSave, _taskBoard);
                 TownSaveMapper.WriteTrain(_context.ActiveSave, _train);
+                TownSaveMapper.WriteLand(_context.ActiveSave, _land);
                 _context.SaveActive();
             }
             catch (Exception e)

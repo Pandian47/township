@@ -158,6 +158,20 @@ Reward per level-up: 75 × new level coins + 1 gem (`levelUpCoinsPerLevel`, rais
   **50 %** of all crate coins; a partly loaded one leaves without bonus. It returns after **30 minutes** with new crates
   (also while the app is closed). "Call now" with a rewarded ad skips the wait.
 
+## Land expansion (Milestone 5 step 4, `GameContent` → Land expansion)
+
+* The 36×36 map is split into **6×6-cell plots** (6×6 plots). A new town owns the **2×2 plots in the middle** (cells 12–23).
+* A plot can be bought when it shares an edge with land you own. Price by ring (distance from the start area):
+
+| Ring | Plots | Unlock level | Price |
+|---|---|---|---|
+| 1 (touching the start area) | 12 | 3 | 400 coins + 2 Planks + 1 Nails |
+| 2 (map edge) | 20 | 7 | 1,200 coins + 3 Planks + 2 Bricks + 2 Nails |
+
+* Buildings can only be placed or moved onto owned land. Saves from before land existed keep the start area plus every
+  plot that has a building on it.
+* Guide task "Buy a plot of land" (level 3): 50 coins, 6 XP, 1 Planks.
+
 ## Building materials (Milestone 5 step 3, `Data/Materials`)
 
 | Material | Sells for | Where from |

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -72,6 +73,15 @@ namespace TownBuilder
         [Tooltip("Chance that a crate also pays 1 building material.")]
         [SerializeField, Range(0f, 1f)] private float trainMaterialChance = 0.35f;
 
+        [Header("Land expansion")]
+        [Tooltip("Plot edge length in cells.")]
+        [SerializeField, Min(1)] private int landPlotSize = 6;
+        [Tooltip("Plots a new town owns (inclusive, plot coordinates).")]
+        [SerializeField] private Vector2Int landStartMin = new Vector2Int(2, 2);
+        [SerializeField] private Vector2Int landStartMax = new Vector2Int(3, 3);
+        [Tooltip("Price per ring around the start area: element 0 = ring 1 (touching it). Outer rings use the last entry.")]
+        [SerializeField] private List<LandTier> landTiers = new List<LandTier>();
+
         [Header("Audio")]
         [SerializeField] private SoundLibrary soundLibrary;
 
@@ -83,6 +93,20 @@ namespace TownBuilder
         private Dictionary<string, ProductDefinition> _productsById;
         private Dictionary<string, RecipeDefinition> _recipesById;
         private Dictionary<string, MaterialDefinition> _materialsById;
+
+        public int LandPlotSize => landPlotSize;
+        public Vector2Int LandStartMin => landStartMin;
+        public Vector2Int LandStartMax => landStartMax;
+        public IReadOnlyList<LandTier> LandTiers => landTiers;
+
+        /// <summary>Price tier for a ring (1 = touching the start area); null for ring 0 or when no tiers exist.</summary>
+        public LandTier LandTierForRing(int ring)
+        {
+            if (ring <= 0 || landTiers == null || landTiers.Count == 0) return null;
+            return landTiers[Math.Min(ring, landTiers.Count) - 1];
+        }
+
+        public void EditorSetLandTiers(List<LandTier> tiers) => landTiers = tiers;
 
         public string TrainStationId => trainStationId;
         public Sprite TrainAtStationSprite => trainAtStationSprite;

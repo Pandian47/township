@@ -96,6 +96,37 @@ namespace TownBuilder
                 });
         }
 
+        /// <summary>
+        /// Restores owned land. Old saves (no land yet) and new towns get the start area plus every plot that has a
+        /// building on it; plots under buildings are always kept owned.
+        /// </summary>
+        public static void LoadLand(SaveData save, Town town, LandPlots land)
+        {
+            var occupied = new List<GridCoord>();
+            foreach (var b in town.Buildings)
+                for (int dx = 0; dx < b.Size.X; dx++)
+                for (int dy = 0; dy < b.Size.Y; dy++)
+                    occupied.Add(new GridCoord(b.Origin.X + dx, b.Origin.Y + dy));
+
+            if (save.land.ownedPlots.Count == 0)
+            {
+                land.InitializeDefault(occupied);
+                return;
+            }
+
+            var owned = new List<PlotCoord>();
+            foreach (var id in save.land.ownedPlots)
+                if (PlotCoord.TryParse(id, out var p)) owned.Add(p);
+            foreach (var cell in occupied) owned.Add(land.PlotOf(cell));
+            land.Restore(owned);
+        }
+
+        public static void WriteLand(SaveData save, LandPlots land)
+        {
+            save.land.ownedPlots.Clear();
+            foreach (var p in land.Owned) save.land.ownedPlots.Add(p.Id);
+        }
+
         public static void WriteOrders(SaveData save, OrderBoard board)
         {
             save.orders.Clear();

@@ -197,8 +197,8 @@ and **land expansion** spends those materials.
 | 1 | **Town tasks**: 3 active goals ("Harvest 10 Wheat", "Bake 3 Bread", "Build a Feed Mill"...), progress from game events, coin/XP/gem rewards, a new one replaces each claimed task | Level 1 | **Done** (v0.14.0) |
 | 2 | **Train Station + train**: the train arrives on a timer with 6 crates asking for items; fill crates for coins and XP, a full train adds a bonus; it leaves and returns later | Level 6 | **Done** (v0.15.0) |
 | 3 | **Building materials** (Planks, Bricks, Nails): rewards from the train and some tasks, stored in the barn, sellable | with step 2 | **Done** (v0.16.0) |
-| 4 | **Land expansion**: the map starts with a buildable area in the middle; surrounding plots are fenced off and bought with coins + materials | Level 3+ | Next |
-| 5 | Balance pass (EconomyReport extended with train income and expansion costs) + device checklist | | Planned |
+| 4 | **Land expansion**: the map starts with a buildable area in the middle; surrounding plots are fenced off and bought with coins + materials | Level 3+ | **Done** (v0.17.0) |
+| 5 | Balance pass (EconomyReport extended with train income and expansion costs) + device checklist | | Next |
 
 Design notes:
 * **Tasks** are content (ScriptableObject `TaskDefinition`: type, target id, amount, rewards, unlock level), not code.
@@ -238,6 +238,15 @@ Design notes:
 - [ ] Level 6: "Load 3 train crates" task (+2 Planks)
 - [ ] Planks, Bricks and Nails show in the Barn with their icons and can be sold (10 / 14 / 8 coins)
 - [ ] With a full barn, claiming a task that pays materials says the barn is full and keeps the task claimable
+
+### Device checklist (Milestone 5 step 4: land expansion)
+- [ ] New game: the middle of the map is bright, the land around it slightly darker, with a small "for sale" sign on each plot next to your land
+- [ ] Building on dark land shows red with "Buy this land first"
+- [ ] Tap dark land next to your town: "Land for sale" panel with 400 coins + 2 Planks + 1 Nails (green = enough, red = missing)
+- [ ] Below level 3 the button says "Level 3"; with everything it says "Buy land" → coins and materials are spent, the plot turns bright, signs move outward
+- [ ] Tapping dark land that isn't next to yours says "Buy the land next to it first"
+- [ ] "Buy a plot of land" task (level 3) completes when you buy one
+- [ ] Close and reopen: bought land stays bought; an old town (from before this update) keeps every building and the land under it
 
 ## Milestone 6: Visual polish (months 7–9)
 Building and crop animations, vehicles, UI transitions (switch to TextMeshPro), audio, particles.
