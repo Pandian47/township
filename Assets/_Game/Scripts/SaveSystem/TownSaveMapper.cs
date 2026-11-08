@@ -76,7 +76,8 @@ namespace TownBuilder
                     continue;
                 }
 
-                crates.Add(new TrainCrate(c.itemId, c.amount, c.rewardCoins, c.rewardXp, c.filled));
+                string material = !string.IsNullOrEmpty(c.materialId) && content.TryGetItem(c.materialId, out _) ? c.materialId : null;
+                crates.Add(new TrainCrate(c.itemId, c.amount, c.rewardCoins, c.rewardXp, c.filled, material, c.materialAmount));
             }
 
             train.Restore((TrainState)save.train.state, save.train.arrivesAtUnixMs, crates);
@@ -91,6 +92,7 @@ namespace TownBuilder
                 save.train.crates.Add(new TrainCrateSaveData
                 {
                     itemId = c.ItemId, amount = c.Amount, rewardCoins = c.RewardCoins, rewardXp = c.RewardXp, filled = c.Filled,
+                    materialId = c.MaterialId, materialAmount = c.MaterialAmount,
                 });
         }
 

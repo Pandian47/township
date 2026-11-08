@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d530bcb82cb41b448a2ef4a77e21a26, type: 3}
+  m_Name: Task_bread_for_nails
+  m_EditorClassIdentifier: TownBuilder.Runtime::TownBuilder.TaskDefinition
+  id: bread_for_nails
+  kind: 1
+  targetItem: {fileID: 11400000, guid: 283e0dc43b6fa8848829f17a7b436934, type: 2}
+  targetBuilding: {fileID: 0}
+  amount: 4
+  unlockLevel: 3
+  repeatable: 1
+  rewardCoins: 30
+  rewardXp: 4
+  rewardGems: 0
+  rewardMaterial: {fileID: 11400000, guid: c36eae76314fdb544b1bc36ca3afd419, type: 2}
+  rewardMaterialAmount: 1

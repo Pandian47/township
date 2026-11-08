@@ -15,6 +15,8 @@ namespace TownBuilder
         [SerializeField] private List<CropDefinition> crops = new List<CropDefinition>();
         [SerializeField] private List<ProductDefinition> products = new List<ProductDefinition>();
         [SerializeField] private List<RecipeDefinition> recipes = new List<RecipeDefinition>();
+        [Tooltip("Building materials (earned from the train and tasks, spent on land).")]
+        [SerializeField] private List<MaterialDefinition> materials = new List<MaterialDefinition>();
 
         [Header("New game")]
         [SerializeField] private long startingCoins = 1500;
@@ -67,6 +69,8 @@ namespace TownBuilder
         [SerializeField, Min(1)] private int trainXpDivisor = 4;
         [Tooltip("Bonus for sending a completely loaded train, as a share of all crate coins.")]
         [SerializeField, Min(0f)] private float trainFullBonusFraction = 0.5f;
+        [Tooltip("Chance that a crate also pays 1 building material.")]
+        [SerializeField, Range(0f, 1f)] private float trainMaterialChance = 0.35f;
 
         [Header("Audio")]
         [SerializeField] private SoundLibrary soundLibrary;
@@ -78,6 +82,7 @@ namespace TownBuilder
         private Dictionary<string, CropDefinition> _cropsById;
         private Dictionary<string, ProductDefinition> _productsById;
         private Dictionary<string, RecipeDefinition> _recipesById;
+        private Dictionary<string, MaterialDefinition> _materialsById;
 
         public string TrainStationId => trainStationId;
         public Sprite TrainAtStationSprite => trainAtStationSprite;
@@ -86,6 +91,13 @@ namespace TownBuilder
         public float TrainCoinMultiplier => trainCoinMultiplier;
         public int TrainXpDivisor => trainXpDivisor;
         public float TrainFullBonusFraction => trainFullBonusFraction;
+        public float TrainMaterialChance => trainMaterialChance;
+        public IReadOnlyList<MaterialDefinition> Materials => materials;
+        public void EditorSetMaterials(List<MaterialDefinition> list)
+        {
+            materials = list;
+            ResetIndex();
+        }
 
         public IReadOnlyList<TaskDefinition> Tasks => tasks;
         public int TaskSlots => taskSlots;
@@ -173,6 +185,7 @@ namespace TownBuilder
             if (TryGetCrop(id, out var crop)) { item = crop; return true; }
             EnsureIndex();
             if (_productsById.TryGetValue(id, out var product)) { item = product; return true; }
+            if (_materialsById.TryGetValue(id, out var material)) { item = material; return true; }
             return false;
         }
 
@@ -223,11 +236,17 @@ namespace TownBuilder
             _cropsById = null;
             _productsById = null;
             _recipesById = null;
+            _materialsById = null;
         }
 
         private void EnsureIndex()
         {
-            if (_buildingsById != null && _cropsById != null && _productsById != null && _recipesById != null) return;
+            if (_buildingsById != null && _cropsById != null && _productsById != null && _recipesById != null && _materialsById != null) return;
+
+            _materialsById = new Dictionary<string, MaterialDefinition>();
+            if (materials != null)
+                foreach (var m in materials)
+                    if (m != null && !string.IsNullOrEmpty(m.Id) && !_materialsById.ContainsKey(m.Id)) _materialsById.Add(m.Id, m);
 
             _productsById = new Dictionary<string, ProductDefinition>();
             foreach (var p in products)

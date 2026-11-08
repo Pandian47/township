@@ -134,6 +134,30 @@ namespace TownBuilder.Tests
         }
 
         [Test]
+        public void Materials_Exist_AreSellable_AndNeverRequested()
+        {
+            var ids = _content.Materials.Select(m => m.Id).ToList();
+            CollectionAssert.AreEquivalent(new[] { "planks", "bricks", "nails" }, ids);
+            foreach (var m in _content.Materials)
+            {
+                Assert.IsTrue(_content.TryGetItem(m.Id, out var item) && item == m, $"{m.Id} findable as an item");
+                Assert.Greater(m.SellPrice, 0);
+                Assert.NotNull(m.Icon, $"{m.Id} icon");
+            }
+
+            Assert.IsFalse(_content.Recipes.Any(r => ids.Contains(r.Output.Id)), "no factory makes materials");
+            Assert.IsTrue(_content.Tasks.Any(t => t.RewardMaterialAmount > 0 && t.UnlockLevel <= 3), "materials obtainable before the train");
+        }
+
+        [Test]
+        public void LoadCrateTasks_AppearOnlyOnceTheStationExists()
+        {
+            _content.TryGetBuilding(_content.TrainStationId, out var station);
+            foreach (var t in _content.Tasks.Where(t => t.Kind == TownBuilder.Domain.TaskKind.LoadCrates))
+                Assert.GreaterOrEqual(t.UnlockLevel, station.UnlockLevel, t.Id);
+        }
+
+        [Test]
         public void TrainStation_IsConfigured()
         {
             Assert.IsTrue(_content.TryGetBuilding(_content.TrainStationId, out var station), "train station building");

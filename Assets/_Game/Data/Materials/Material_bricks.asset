@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85e5c1792749c274daf5178dcb27897a, type: 3}
+  m_Name: Material_bricks
+  m_EditorClassIdentifier: TownBuilder.Runtime::TownBuilder.MaterialDefinition
+  id: bricks
+  displayName: Bricks
+  icon: {fileID: 21300000, guid: ccb2de4025dd08a40b33db7a9ac2dabb, type: 3}
+  sellPrice: 14

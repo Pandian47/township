@@ -158,6 +158,19 @@ Reward per level-up: 75 × new level coins + 1 gem (`levelUpCoinsPerLevel`, rais
   **50 %** of all crate coins; a partly loaded one leaves without bonus. It returns after **30 minutes** with new crates
   (also while the app is closed). "Call now" with a rewarded ad skips the wait.
 
+## Building materials (Milestone 5 step 3, `Data/Materials`)
+
+| Material | Sells for | Where from |
+|---|---|---|
+| Planks | 10 | train crates, tasks (Deliver 2 orders, Load 3 crates) |
+| Bricks | 14 | train crates, tasks (Harvest 12 Corn, Load 4 crates) |
+| Nails | 8 | train crates, task (Make 4 Bread) |
+
+* Each train crate has a **35 %** chance (`trainMaterialChance`) to also pay 1 random material.
+* Materials are never requested by orders or the train and no factory makes them. They use barn space.
+* Selling them is possible but cheap: they're meant for land expansion (step 4).
+* Material tasks start at level 3 (orders, bread) and 4 (corn), so materials exist before the train (level 6).
+
 ## Town tasks (Milestone 5 step 1, `Data/Tasks`, 3 on screen)
 
 One-off **guide** tasks appear first, in GameContent order, as soon as their level is reached; after that a random

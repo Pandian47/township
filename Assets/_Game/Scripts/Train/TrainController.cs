@@ -100,12 +100,23 @@ namespace TownBuilder
             var filled = _train.Crates[index];
             _wallet.AddCoins(filled.RewardCoins);
             if (filled.RewardXp > 0) _progress.AddXp(filled.RewardXp);
+
+            // Loading freed at least one barn slot, so a single material always fits.
+            var gains = new List<ItemGain>();
+            string materialText = "";
+            if (filled.MaterialId != null && _content.TryGetItem(filled.MaterialId, out var material) &&
+                _inventory.TryAdd(filled.MaterialId, filled.MaterialAmount))
+            {
+                gains.Add(new ItemGain(material, filled.MaterialAmount));
+                materialText = $"   +{filled.MaterialAmount} {material.DisplayName}";
+            }
+
             Notification?.Invoke(_train.AllFilled
                 ? $"All crates loaded! Send the train for a bonus of {FullTrainBonus:N0} coins."
-                : $"Crate loaded   +{filled.RewardCoins:N0} coins   +{filled.RewardXp} XP");
+                : $"Crate loaded   +{filled.RewardCoins:N0} coins   +{filled.RewardXp} XP{materialText}");
             CrateFilled?.Invoke(index);
             var station = StationId;
-            if (station != null) Rewarded?.Invoke(new WorldReward(station, null, (int)filled.RewardXp, (int)filled.RewardCoins));
+            if (station != null) Rewarded?.Invoke(new WorldReward(station, gains, (int)filled.RewardXp, (int)filled.RewardCoins));
             Modified?.Invoke();
             return result;
         }
@@ -169,8 +180,14 @@ namespace TownBuilder
             RefreshSprite();
         }
 
-        private IReadOnlyList<TrainCrate> MakeCrates() =>
-            TrainCrateGenerator.Generate(_candidates(), _content.TrainCrates, _content.TrainCoinMultiplier, _content.TrainXpDivisor, _random);
+        private IReadOnlyList<TrainCrate> MakeCrates()
+        {
+            var materials = new List<string>();
+            foreach (var m in _content.Materials)
+                if (m != null && !string.IsNullOrEmpty(m.Id)) materials.Add(m.Id);
+            return TrainCrateGenerator.Generate(_candidates(), _content.TrainCrates, _content.TrainCoinMultiplier, _content.TrainXpDivisor,
+                _random, materials, _content.TrainMaterialChance);
+        }
 
         /// <summary>Station sprite: with the train at the platform while it's here, empty platform otherwise.</summary>
         private void RefreshSprite()

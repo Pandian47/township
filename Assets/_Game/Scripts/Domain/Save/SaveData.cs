@@ -56,6 +56,8 @@ namespace TownBuilder.Domain
         public long rewardCoins;
         public long rewardXp;
         public bool filled;
+        public string materialId;
+        public int materialAmount;
     }
 
     [Serializable]

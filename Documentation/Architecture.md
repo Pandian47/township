@@ -218,6 +218,13 @@ only while a finished Train Station exists, pays rewards, swaps the station spri
 while the train is there, and raises Arrived / CrateFilled / Departed / Rewarded (sound + floating coins via the bridges).
 `TrainPanel` opens when the station is selected. Saved in `SaveData.train`.
 
+## 6g5. Building materials
+
+`MaterialDefinition : ItemDefinition` (`GameContent.Materials`, found by `TryGetItem`), so the barn, selling and saving
+work like any item. `TrainCrate` may carry `MaterialId`/`MaterialAmount` (generator option); `TrainController.Fill` adds it.
+`TaskDefinition.rewardMaterial` is paid by `TaskService.Claim`, which refuses to claim into a full barn.
+`TaskKind.LoadCrates` counts `TrainController.CrateFilled`.
+
 ## 6h. UI text (TextMeshPro)
 
 All UI text is TextMeshPro (`TMP_Text` fields, `TextMeshProUGUI` components). Never add legacy `UnityEngine.UI.Text`.

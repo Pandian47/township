@@ -132,7 +132,7 @@ namespace TownBuilder
 
             _taskBoard = new TaskBoard(content.TaskSlots);
             TownSaveMapper.LoadTasks(save, content, _taskBoard, warnings);
-            _tasks = new TaskService(_taskBoard, content, _wallet, _progress, _town, farming, production, _orders, placement);
+            _tasks = new TaskService(_taskBoard, content, _wallet, _inventory, _progress, _town, farming, production, _orders, placement, trainController);
             _tasks.Modified += ScheduleSave;
 
             _train = new Train();

@@ -39,7 +39,7 @@ namespace TownBuilder.EditorTools
             "Art/Environment/Tiles/TileAssets", "Art/Characters", "Art/Vehicles", "Art/Decorations", "Art/UI",
             "Animations", "Audio", "Fonts", "Materials", "Shaders",
             "Prefabs/World", "Prefabs/Buildings", "Prefabs/Crops", "Prefabs/Characters", "Prefabs/UI",
-            "Scenes", "Data/Buildings", "Data/Crops", "Data/Products", "Data/Recipes", "Data/Tasks",
+            "Scenes", "Data/Buildings", "Data/Crops", "Data/Products", "Data/Recipes", "Data/Tasks", "Data/Materials",
             "ScriptableObjects", "Settings", "Tests/EditMode", "Tests/PlayMode",
         };
 
@@ -192,6 +192,7 @@ namespace TownBuilder.EditorTools
             CreateContent(art);
             CreateCrops();
             CreateProduction();
+            CreateMaterials();
             CreateTasks();
             ConfigureTrain(trainSprite);
             ConfigureAds();
@@ -435,11 +436,15 @@ namespace TownBuilder.EditorTools
             public TaskKind Kind;
             public int Amount, Unlock, Coins, Xp, Gems;
             public bool Repeatable;
+            public string Material;
+            public int MaterialAmount;
 
-            public TaskSeed(string id, TaskKind kind, string target, int amount, int unlock, int coins, int xp, int gems = 0, bool repeatable = false)
+            public TaskSeed(string id, TaskKind kind, string target, int amount, int unlock, int coins, int xp, int gems = 0, bool repeatable = false,
+                string material = null, int materialAmount = 0)
             {
                 Id = id; Kind = kind; Target = target; Amount = amount; Unlock = unlock;
                 Coins = coins; Xp = xp; Gems = gems; Repeatable = repeatable;
+                Material = material; MaterialAmount = materialAmount;
             }
         }
 
@@ -474,6 +479,13 @@ namespace TownBuilder.EditorTools
             new TaskSeed("bake_cookies", TaskKind.Collect, "cookies", 2, 8, 120, 10, repeatable: true),
             new TaskSeed("churn_butter", TaskKind.Collect, "butter", 2, 8, 120, 10, repeatable: true),
             new TaskSeed("make_cheese", TaskKind.Collect, "cheese", 1, 9, 120, 10, repeatable: true),
+
+            // Milestone 5 step 3: tasks that pay building materials.
+            new TaskSeed("guide_load_crates", TaskKind.LoadCrates, null, 3, 6, 60, 8, material: "planks", materialAmount: 2),
+            new TaskSeed("orders_for_planks", TaskKind.Deliver, null, 2, 3, 30, 4, repeatable: true, material: "planks", materialAmount: 1),
+            new TaskSeed("bread_for_nails", TaskKind.Collect, "bread", 4, 3, 30, 4, repeatable: true, material: "nails", materialAmount: 1),
+            new TaskSeed("corn_for_bricks", TaskKind.Harvest, "corn", 12, 4, 30, 5, repeatable: true, material: "bricks", materialAmount: 1),
+            new TaskSeed("load_crates", TaskKind.LoadCrates, null, 4, 6, 60, 8, repeatable: true, material: "bricks", materialAmount: 1),
         };
 
         public const string TrainAtStationSpritePath = Root + "/Art/Buildings/Community/PH_Building_train_station_train.png";
@@ -499,6 +511,44 @@ namespace TownBuilder.EditorTools
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
+        private struct MaterialSeed
+        {
+            public string Id, Name;
+            public PlaceholderArtGenerator.ProductStyle Style;
+            public int SellPrice;
+        }
+
+        // Milestone 5 step 3. Sell prices are low on purpose: materials are worth more when spent on land.
+        private static readonly MaterialSeed[] MaterialSeeds =
+        {
+            new MaterialSeed { Id = "planks", Name = "Planks", Style = PlaceholderArtGenerator.ProductStyle.Planks, SellPrice = 10 },
+            new MaterialSeed { Id = "bricks", Name = "Bricks", Style = PlaceholderArtGenerator.ProductStyle.Bricks, SellPrice = 14 },
+            new MaterialSeed { Id = "nails", Name = "Nails", Style = PlaceholderArtGenerator.ProductStyle.Nails, SellPrice = 8 },
+        };
+
+        private static void CreateMaterials()
+        {
+            PlaceholderArtGenerator.EnsureFolder(PlaceholderArtGenerator.MaterialsArtFolder);
+            var content = AssetDatabase.LoadAssetAtPath<GameContent>(ContentPath);
+            var materials = content.Materials.Where(m => m != null).ToList();
+            foreach (var s in MaterialSeeds)
+            {
+                var path = $"{Root}/Data/Materials/Material_{s.Id}.asset";
+                var material = AssetDatabase.LoadAssetAtPath<MaterialDefinition>(path);
+                if (material == null)
+                {
+                    material = ScriptableObject.CreateInstance<MaterialDefinition>();
+                    material.EditorConfigure(s.Id, s.Name, PlaceholderArtGenerator.CreateMaterialIcon(s.Id, s.Style), s.SellPrice);
+                    AssetDatabase.CreateAsset(material, path);
+                }
+
+                if (!materials.Contains(material)) materials.Add(material);
+            }
+
+            content.EditorSetMaterials(materials);
+            EditorUtility.SetDirty(content);
+        }
+
         /// <summary>Creates missing task assets and appends them to GameContent (keeps existing ones and their order).</summary>
         private static void CreateTasks()
         {
@@ -522,6 +572,8 @@ namespace TownBuilder.EditorTools
 
                     task = ScriptableObject.CreateInstance<TaskDefinition>();
                     task.EditorConfigure(s.Id, s.Kind, item, building, s.Amount, s.Unlock, s.Repeatable, s.Coins, s.Xp, s.Gems);
+                    if (s.Material != null && content.TryGetItem(s.Material, out var reward) && reward is MaterialDefinition material)
+                        task.EditorSetMaterialReward(material, s.MaterialAmount);
                     AssetDatabase.CreateAsset(task, path);
                 }
 

@@ -196,8 +196,8 @@ and **land expansion** spends those materials.
 |---|---|---|---|
 | 1 | **Town tasks**: 3 active goals ("Harvest 10 Wheat", "Bake 3 Bread", "Build a Feed Mill"...), progress from game events, coin/XP/gem rewards, a new one replaces each claimed task | Level 1 | **Done** (v0.14.0) |
 | 2 | **Train Station + train**: the train arrives on a timer with 6 crates asking for items; fill crates for coins and XP, a full train adds a bonus; it leaves and returns later | Level 6 | **Done** (v0.15.0) |
-| 3 | **Building materials** (Planks, Bricks, Nails): rewards from the train and some tasks, stored in the barn, sellable | with step 2 | Next |
-| 4 | **Land expansion**: the map starts with a buildable area in the middle; surrounding plots are fenced off and bought with coins + materials | Level 3+ | Planned |
+| 3 | **Building materials** (Planks, Bricks, Nails): rewards from the train and some tasks, stored in the barn, sellable | with step 2 | **Done** (v0.16.0) |
+| 4 | **Land expansion**: the map starts with a buildable area in the middle; surrounding plots are fenced off and bought with coins + materials | Level 3+ | Next |
 | 5 | Balance pass (EconomyReport extended with train income and expansion costs) + device checklist | | Planned |
 
 Design notes:
@@ -231,6 +231,13 @@ Design notes:
 - [ ] After sending: the platform is empty, the panel shows "Back in 30m 00s" and "Call now (watch ad)"
 - [ ] Close the app for 30+ minutes, reopen: the train is back with new crates
 - [ ] A partly loaded train is still partly loaded after closing and reopening
+
+### Device checklist (Milestone 5 step 3: building materials)
+- [ ] Some train crates show "+1 Planks / Bricks / Nails" on top; loading one adds the material to the barn and it floats up
+- [ ] From level 3, tasks like "Deliver 2 orders" (+1 Planks) and "Make 4 Bread" (+1 Nails) appear
+- [ ] Level 6: "Load 3 train crates" task (+2 Planks)
+- [ ] Planks, Bricks and Nails show in the Barn with their icons and can be sold (10 / 14 / 8 coins)
+- [ ] With a full barn, claiming a task that pays materials says the barn is full and keeps the task claimable
 
 ## Milestone 6: Visual polish (months 7–9)
 Building and crop animations, vehicles, UI transitions (switch to TextMeshPro), audio, particles.

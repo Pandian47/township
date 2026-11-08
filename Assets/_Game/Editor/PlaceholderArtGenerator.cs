@@ -501,7 +501,13 @@ namespace TownBuilder.EditorTools
 
         public const string ProductsArtFolder = "Assets/_Game/Art/Products";
 
-        public enum ProductStyle { Bread, CornBread, ChickenFeed, CowFeed, Egg, Milk, Sugar, Cookies, Cake, Butter, Cheese }
+        public enum ProductStyle { Bread, CornBread, ChickenFeed, CowFeed, Egg, Milk, Sugar, Cookies, Cake, Butter, Cheese, Planks, Bricks, Nails }
+
+        public const string MaterialsArtFolder = "Assets/_Game/Art/Materials";
+
+        /// <summary>128x128 building-material icon (Planks, Bricks, Nails). Pivot centre.</summary>
+        public static Sprite CreateMaterialIcon(string materialId, ProductStyle style) =>
+            CreateSprite($"{MaterialsArtFolder}/PH_Material_{materialId}.png", () => RenderProduct(style), new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
 
         /// <summary>128x128 product icon (UI and the "ready" bubble above factories). Pivot centre.</summary>
         public static Sprite CreateProductIcon(string productId, ProductStyle style) =>
@@ -513,7 +519,59 @@ namespace TownBuilder.EditorTools
             var tex = NewTexture(size, size);
             var pixels = new Color32[size * size];
 
-            if (style == ProductStyle.Cookies)
+            if (style == ProductStyle.Planks)
+            {
+                // Three stacked wooden planks with grain lines.
+                var wood = new Color32(196, 140, 80, 255);
+                for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float px = x + 0.5f, py = y + 0.5f;
+                    int plank = (int)((py - 24f) / 26f);
+                    if (py < 24f || plank > 2 || px < 14f + plank * 6f || px > 114f - plank * 6f) continue;
+                    float inPlank = (py - 24f) % 26f;
+                    if (inPlank > 22f) continue; // gap
+                    var c = Scale(wood, 0.85f + 0.06f * plank + (inPlank > 16f ? -0.12f : 0f));
+                    if (((int)(px * 0.5f + py * 0.2f + plank * 7)) % 9 == 0) c = Scale(c, 0.82f);
+                    pixels[y * size + x] = c;
+                }
+            }
+            else if (style == ProductStyle.Bricks)
+            {
+                // Two rows of red bricks with light mortar.
+                var brick = new Color32(192, 76, 56, 255);
+                for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float px = x + 0.5f, py = y + 0.5f;
+                    if (px < 12f || px > 116f || py < 28f || py > 96f) continue;
+                    int row = (int)((py - 28f) / 34f);
+                    float inRow = (py - 28f) % 34f;
+                    float offset = row % 2 == 0 ? 0f : 26f;
+                    float inBrick = (px - 12f + offset) % 52f;
+                    bool mortar = inRow > 30f || inBrick < 4f;
+                    var c = mortar ? new Color32(228, 214, 190, 255) : Scale(brick, inRow < 8f ? 1.1f : 0.95f);
+                    pixels[y * size + x] = c;
+                }
+            }
+            else if (style == ProductStyle.Nails)
+            {
+                // Three grey nails: flat heads on top, pointed shafts.
+                var steel = new Color32(150, 156, 166, 255);
+                var xs = new[] { 40f, 64f, 88f };
+                for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                foreach (var nx in xs)
+                {
+                    float px = x + 0.5f - nx, py = y + 0.5f;
+                    bool head = py > 98f && py < 108f && Mathf.Abs(px) < 12f;
+                    float shaftHalf = py > 30f ? 4f : Mathf.Lerp(0f, 4f, (py - 16f) / 14f);
+                    bool shaft = py >= 16f && py <= 98f && Mathf.Abs(px) < shaftHalf;
+                    if (!head && !shaft) continue;
+                    pixels[y * size + x] = head ? Scale(steel, 1.12f) : Scale(steel, px < 0 ? 1.05f : 0.85f);
+                }
+            }
+            else if (style == ProductStyle.Cookies)
             {
                 // Two round golden cookies with chocolate chips, overlapping.
                 var dough = new Color32(214, 160, 90, 255);

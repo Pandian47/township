@@ -231,6 +231,13 @@ The exact same train station as the previous image, same size, angle and positio
 Background: plain solid flat magenta (#FF00FF).
 ```
 
+## Milestone 5 step 3: building materials
+
+Same icon prompt as bread (section 15–16). Items:
+* `planks`: "a small stack of three light wooden planks"
+* `bricks`: "a small stack of red clay bricks"
+* `nails`: "three shiny steel nails lying crossed"
+
 ---
 
 Do a **test set first**: cottage, field, wheat_4, bread and grass. Send those, check them in the game preview, and

@@ -27,6 +27,9 @@ namespace TownBuilder
         [SerializeField, Min(0)] private int rewardCoins;
         [SerializeField, Min(0)] private int rewardXp;
         [SerializeField, Min(0)] private int rewardGems;
+        [Tooltip("Optional building material reward.")]
+        [SerializeField] private MaterialDefinition rewardMaterial;
+        [SerializeField, Min(0)] private int rewardMaterialAmount;
 
         public string Id => id;
         public TaskKind Kind => kind;
@@ -38,12 +41,15 @@ namespace TownBuilder
         public int RewardCoins => rewardCoins;
         public int RewardXp => rewardXp;
         public int RewardGems => rewardGems;
+        public MaterialDefinition RewardMaterial => rewardMaterial;
+        public int RewardMaterialAmount => rewardMaterial != null ? rewardMaterialAmount : 0;
 
         public string TargetId => kind == TaskKind.Build
             ? (targetBuilding != null ? targetBuilding.Id : null)
             : (targetItem != null ? targetItem.Id : null);
 
-        public TaskSpec ToSpec() => new TaskSpec(id, kind, kind == TaskKind.Deliver ? null : TargetId, Amount, UnlockLevel, repeatable);
+        public TaskSpec ToSpec() =>
+            new TaskSpec(id, kind, kind == TaskKind.Deliver || kind == TaskKind.LoadCrates ? null : TargetId, Amount, UnlockLevel, repeatable);
 
         /// <summary>Player-facing goal, e.g. "Harvest 6 Wheat".</summary>
         public string Describe()
@@ -53,6 +59,7 @@ namespace TownBuilder
                 case TaskKind.Harvest: return $"Harvest {Amount} {(targetItem != null ? targetItem.DisplayName : "crops")}";
                 case TaskKind.Collect: return $"Make {Amount} {(targetItem != null ? targetItem.DisplayName : "products")}";
                 case TaskKind.Deliver: return Amount == 1 ? "Deliver 1 order" : $"Deliver {Amount} orders";
+                case TaskKind.LoadCrates: return Amount == 1 ? "Load 1 train crate" : $"Load {Amount} train crates";
                 default:
                     string name = targetBuilding != null ? targetBuilding.DisplayName : "building";
                     return Amount == 1 ? $"Build a {name}" : $"Build {Amount} × {name}";
@@ -66,6 +73,7 @@ namespace TownBuilder
             if (rewardCoins > 0) parts.Add($"+{rewardCoins:N0} coins");
             if (rewardXp > 0) parts.Add($"+{rewardXp} XP");
             if (rewardGems > 0) parts.Add(rewardGems == 1 ? "+1 gem" : $"+{rewardGems} gems");
+            if (RewardMaterialAmount > 0) parts.Add($"+{RewardMaterialAmount} {rewardMaterial.DisplayName}");
             return string.Join("  ", parts);
         }
 
@@ -82,6 +90,12 @@ namespace TownBuilder
             rewardCoins = coins;
             rewardXp = xp;
             rewardGems = gems;
+        }
+
+        public void EditorSetMaterialReward(MaterialDefinition material, int amount)
+        {
+            rewardMaterial = material;
+            rewardMaterialAmount = amount;
         }
     }
 }

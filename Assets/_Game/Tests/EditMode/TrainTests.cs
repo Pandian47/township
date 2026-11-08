@@ -87,6 +87,18 @@ namespace TownBuilder.Tests
         }
 
         [Test]
+        public void Generator_AddsMaterialsToSomeCrates()
+        {
+            var candidates = new List<OrderCandidate> { new OrderCandidate("wheat", 2) };
+            var materials = new[] { "planks", "nails" };
+            var crates = TrainCrateGenerator.Generate(candidates, 400, 1.4, 4, new Random(5), materials, 0.35);
+            int withMaterial = crates.Count(c => c.MaterialId != null);
+            Assert.That(withMaterial, Is.InRange(100, 180), "about 35% of crates");
+            Assert.IsTrue(crates.Where(c => c.MaterialId != null).All(c => c.MaterialAmount == 1 && materials.Contains(c.MaterialId)));
+            Assert.IsTrue(TrainCrateGenerator.Generate(candidates, 50, 1.4, 4, new Random(5)).All(c => c.MaterialId == null), "none by default");
+        }
+
+        [Test]
         public void FullTrainBonus_IsAShareOfCrateCoins()
         {
             Assert.AreEqual(15, TrainCrateGenerator.FullTrainBonus(TwoCrates(), 0.5)); // (12 + 17) * 0.5 = 14.5, rounded up

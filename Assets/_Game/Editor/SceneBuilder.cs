@@ -788,22 +788,25 @@ namespace TownBuilder.EditorTools
                 var card = MakeRect($"Crate{i + 1}", row, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(200, 250));
                 Prefer(card, 200, 250);
                 var bg = AddImage(card, Color.white, raycast: false);
-                var iconRect = MakeRect("Icon", card, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -6), new Vector2(-40, 84));
+                var material = Label(MakeRect("Material", card, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -2), new Vector2(-8, 26)),
+                    "Text", "", 19, TextAnchor.MiddleCenter, new Color(0.62f, 0.38f, 0.12f), FontStyle.Bold);
+                var iconRect = MakeRect("Icon", card, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -26), new Vector2(-50, 70));
                 var icon = iconRect.gameObject.AddComponent<Image>();
                 icon.preserveAspect = true;
                 icon.raycastTarget = false;
-                var name = Label(MakeRect("Name", card, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -92), new Vector2(-12, 34)),
+                var name = Label(MakeRect("Name", card, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -98), new Vector2(-12, 32)),
                     "Text", "", 23, TextAnchor.MiddleCenter, Ink, FontStyle.Bold);
-                var have = Label(MakeRect("Have", card, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -126), new Vector2(-12, 30)),
+                var have = Label(MakeRect("Have", card, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -130), new Vector2(-12, 28)),
                     "Text", "", 22, TextAnchor.MiddleCenter, Ink);
-                var reward = Label(MakeRect("Reward", card, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -156), new Vector2(-8, 28)),
+                var reward = Label(MakeRect("Reward", card, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -158), new Vector2(-8, 28)),
                     "Text", "", 19, TextAnchor.MiddleCenter, new Color(0.45f, 0.42f, 0.38f));
                 var load = MakeButton(card, "LoadButton", "Load", new Vector2(170, 52), Green, 28);
                 var loadRect = (RectTransform)load.transform;
                 loadRect.anchorMin = loadRect.anchorMax = loadRect.pivot = new Vector2(0.5f, 0f);
                 loadRect.anchoredPosition = new Vector2(0, 10);
                 var view = card.gameObject.AddComponent<TrainCrateView>();
-                Wire(view, ("background", bg), ("icon", icon), ("nameText", name), ("haveText", have), ("rewardText", reward), ("loadButton", load));
+                Wire(view, ("background", bg), ("icon", icon), ("nameText", name), ("haveText", have), ("rewardText", reward), ("loadButton", load),
+                    ("materialText", material));
                 crates[i] = view;
             }
 

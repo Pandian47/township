@@ -23,14 +23,21 @@ namespace TownBuilder.Domain
     /// <summary>One crate the train asks for: N of an item, paying coins and XP.</summary>
     public sealed class TrainCrate
     {
-        public TrainCrate(string itemId, int amount, long rewardCoins, long rewardXp, bool filled = false)
+        public TrainCrate(string itemId, int amount, long rewardCoins, long rewardXp, bool filled = false,
+            string materialId = null, int materialAmount = 0)
         {
             ItemId = itemId;
             Amount = Math.Max(1, amount);
             RewardCoins = Math.Max(0, rewardCoins);
             RewardXp = Math.Max(0, rewardXp);
             Filled = filled;
+            MaterialId = string.IsNullOrEmpty(materialId) || materialAmount <= 0 ? null : materialId;
+            MaterialAmount = MaterialId == null ? 0 : materialAmount;
         }
+
+        /// <summary>Extra building material paid by this crate (null = none).</summary>
+        public string MaterialId { get; }
+        public int MaterialAmount { get; }
 
         public string ItemId { get; }
         public int Amount { get; }
@@ -121,7 +128,9 @@ namespace TownBuilder.Domain
     /// <summary>Builds a train's crates from what the player can currently make (same candidates as orders).</summary>
     public static class TrainCrateGenerator
     {
-        public static List<TrainCrate> Generate(IReadOnlyList<OrderCandidate> candidates, int count, double coinMultiplier, int xpDivisor, Random random)
+        /// <param name="materialIds">Building materials a crate may also pay (1 unit, with <paramref name="materialChance"/>).</param>
+        public static List<TrainCrate> Generate(IReadOnlyList<OrderCandidate> candidates, int count, double coinMultiplier, int xpDivisor, Random random,
+            IReadOnlyList<string> materialIds = null, double materialChance = 0)
         {
             var crates = new List<TrainCrate>();
             if (candidates == null || candidates.Count == 0) return crates;
@@ -133,7 +142,10 @@ namespace TownBuilder.Domain
                 long value = (long)c.UnitValue * amount;
                 long coins = (long)Math.Ceiling(value * coinMultiplier);
                 long xp = Math.Max(1, value / Math.Max(1, xpDivisor));
-                crates.Add(new TrainCrate(c.ItemId, amount, coins, xp));
+                string material = null;
+                if (materialIds != null && materialIds.Count > 0 && random.NextDouble() < materialChance)
+                    material = materialIds[random.Next(materialIds.Count)];
+                crates.Add(new TrainCrate(c.ItemId, amount, coins, xp, false, material, material != null ? 1 : 0));
             }
 
             return crates;

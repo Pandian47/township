@@ -225,8 +225,9 @@ namespace TownBuilder.EditorTools
                 {
                     var sample = samples[i];
                     content.TryGetItem(sample.id, out var item);
+                    string bonus = i == 2 ? "+1 Planks" : i == 5 ? "+1 Bricks" : null;
                     views[i].Show(item != null ? item.Icon : null, content.ItemName(sample.id), sample.amount, sample.have,
-                        sample.coins, sample.xp, sample.loaded, null);
+                        sample.coins, sample.xp, sample.loaded, null, bonus);
                 }
             }
 
@@ -298,6 +299,9 @@ namespace TownBuilder.EditorTools
 
             if (state == HudState.Barn)
             {
+                barn.TryAdd("planks", 3);
+                barn.TryAdd("bricks", 2);
+                barn.TryAdd("nails", 4);
                 var barnRoot = Find(canvas, "BarnPanel").transform.Find("Root").gameObject;
                 barnRoot.SetActive(true);
                 barnRoot.transform.Find("Window/Title/Text").GetComponent<TMPro.TMP_Text>().text = $"Barn   {barn.Total}/{barn.Capacity}";

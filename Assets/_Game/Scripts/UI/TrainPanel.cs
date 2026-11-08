@@ -87,12 +87,13 @@ namespace TownBuilder
                 var crate = train.Crates[i];
                 _content.TryGetItem(crate.ItemId, out var item);
                 int index = i;
+                string material = crate.MaterialId != null ? $"+{crate.MaterialAmount} {_content.ItemName(crate.MaterialId)}" : null;
                 crates[i].Show(item != null ? item.Icon : null, _content.ItemName(crate.ItemId), crate.Amount,
                     _inventory.Count(crate.ItemId), crate.RewardCoins, crate.RewardXp, crate.Filled, () =>
                     {
                         _train.Fill(index);
                         Refresh();
-                    });
+                    }, material);
             }
 
             sendLabel.text = train.AllFilled ? $"Send train\n+{_train.FullTrainBonus:N0} bonus" : "Send train\n(no bonus)";

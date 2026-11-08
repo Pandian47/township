@@ -14,19 +14,21 @@ namespace TownBuilder
         private readonly TaskBoard _board;
         private readonly GameContent _content;
         private readonly Wallet _wallet;
+        private readonly Inventory _inventory;
         private readonly PlayerProgress _progress;
         private readonly Town _town;
         private readonly List<TaskSpec> _catalog;
         private readonly Random _random;
         private readonly Action _unsubscribe;
 
-        public TaskService(TaskBoard board, GameContent content, Wallet wallet, PlayerProgress progress, Town town,
+        public TaskService(TaskBoard board, GameContent content, Wallet wallet, Inventory inventory, PlayerProgress progress, Town town,
             FarmingController farming, ProductionController production, OrderService orders, PlacementSystem placement,
-            int? randomSeed = null)
+            TrainController train = null, int? randomSeed = null)
         {
             _board = board;
             _content = content;
             _wallet = wallet;
+            _inventory = inventory;
             _progress = progress;
             _town = town;
             _random = randomSeed.HasValue ? new Random(randomSeed.Value) : new Random();
@@ -37,6 +39,7 @@ namespace TownBuilder
             Action<int> delivered = _ => _board.Record(TaskKind.Deliver, null, 1);
             Action<PlacedBuilding> placed = b => _board.Record(TaskKind.Build, b.DefinitionId, 1);
             Action<int> leveledUp = _ => Refill();
+            Action<int> crateLoaded = _ => _board.Record(TaskKind.LoadCrates, null, 1);
             Action<int> completed = OnTaskCompleted;
             Action<int> changed = _ => Modified?.Invoke();
 
@@ -44,6 +47,7 @@ namespace TownBuilder
             production.Rewarded += collected;
             orders.Delivered += delivered;
             placement.BuildingPlaced += placed;
+            if (train != null) train.CrateFilled += crateLoaded;
             progress.LeveledUp += leveledUp;
             board.TaskCompleted += completed;
             board.Changed += changed;
@@ -54,6 +58,7 @@ namespace TownBuilder
                 production.Rewarded -= collected;
                 orders.Delivered -= delivered;
                 placement.BuildingPlaced -= placed;
+                if (train != null) train.CrateFilled -= crateLoaded;
                 progress.LeveledUp -= leveledUp;
                 board.TaskCompleted -= completed;
                 board.Changed -= changed;
@@ -83,12 +88,23 @@ namespace TownBuilder
         public bool Claim(int slot)
         {
             var def = DefinitionAt(slot);
+            var task = _board.Get(slot);
+            if (task == null || !task.IsComplete) return false;
+
+            // Materials go to the barn: don't lose them to a full barn.
+            if (def != null && def.RewardMaterialAmount > 0 && !_inventory.CanAdd(def.RewardMaterialAmount))
+            {
+                Notification?.Invoke($"The barn is full. Make room for {def.RewardMaterialAmount} {def.RewardMaterial.DisplayName} first.");
+                return false;
+            }
+
             if (!_board.TryClaim(slot, out _)) return false;
 
             if (def != null)
             {
                 if (def.RewardCoins > 0) _wallet.AddCoins(def.RewardCoins);
                 if (def.RewardGems > 0) _wallet.AddGems(def.RewardGems);
+                if (def.RewardMaterialAmount > 0) _inventory.TryAdd(def.RewardMaterial.Id, def.RewardMaterialAmount);
                 if (def.RewardXp > 0) _progress.AddXp(def.RewardXp); // may level up, which refills too
                 Notification?.Invoke($"Task complete!   {def.RewardText()}");
             }

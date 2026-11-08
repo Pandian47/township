@@ -14,6 +14,8 @@ namespace TownBuilder.Domain
         Deliver,
         /// <summary>Place N buildings of a type (target = building id).</summary>
         Build,
+        /// <summary>Load N train crates (no target).</summary>
+        LoadCrates,
     }
 
     /// <summary>The rules of one task, independent of Unity (built from a TaskDefinition asset).</summary>

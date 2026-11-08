@@ -17,6 +17,8 @@ namespace TownBuilder
         [SerializeField] private TMP_Text nameText;
         [SerializeField] private TMP_Text haveText;
         [SerializeField] private TMP_Text rewardText;
+        [Tooltip("'+1 Planks' when the crate also pays a building material.")]
+        [SerializeField] private TMP_Text materialText;
         [SerializeField] private Button loadButton;
 
         private Action _onLoad;
@@ -26,8 +28,15 @@ namespace TownBuilder
             if (loadButton != null) loadButton.onClick.AddListener(() => _onLoad?.Invoke());
         }
 
-        public void Show(Sprite sprite, string itemName, int amount, int have, long coins, long xp, bool loaded, Action onLoad)
+        public void Show(Sprite sprite, string itemName, int amount, int have, long coins, long xp, bool loaded, Action onLoad,
+            string materialLabel = null)
         {
+            if (materialText != null)
+            {
+                materialText.gameObject.SetActive(!string.IsNullOrEmpty(materialLabel));
+                materialText.text = materialLabel ?? "";
+            }
+
             gameObject.SetActive(true);
             _onLoad = onLoad;
             icon.sprite = sprite;
