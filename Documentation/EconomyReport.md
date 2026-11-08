@@ -28,15 +28,22 @@ Coins/min for recipes is the value added (product value minus the ingredients' s
 
 ## Level pacing (efficiency 50%, orders ignored)
 
-| Level | New key buildings (cost) | Coins after buying | Fields | XP to next | Coins/min (of which train) | XP/min | Minutes to next | Coins earned | Coins at level end |
-|---|---|---|---|---|---|---|---|---|---|
-| 1 | Barn, Bakery (750) | 750 | 3 | 15 | 4.3 | 1.25 | 12 | 52 | 802 |
-| 2 | - | 952 | 4 | 30 | 5.3 | 1.50 | 20 | 106 | 1,058 |
-| 3 | Silo (250) | 1,033 | 5 | 50 | 6.3 | 1.75 | 29 | 180 | 1,213 |
-| 4 | Feed Mill (600) | 913 | 6 | 80 | 8.3 | 2.38 | 34 | 280 | 1,193 |
-| 5 | Chicken Coop (800) | 768 | 7 | 120 | 10.2 | 2.96 | 41 | 412 | 1,180 |
-| 6 | Dairy Shed, Train Station (1,600) | 30 | 8 | 170 | 15.4 (3.3) | 4.26 | 40 | 613 | 643 |
-| 7 | Sugar Mill (1,000) | 168 | 9 | 230 | 17.7 (3.6) | 4.89 | 47 | 831 | 999 |
-| 8 | Creamery (1,400) | 199 | 10 | 300 | 20.5 (4.2) | 5.65 | 53 | 1,089 | 1,288 |
-| 9 | - | 1,963 | 11 | 380 | 22.3 (5.0) | 6.08 | 62 | 1,394 | 3,357 |
-| 10 | - | 4,107 | 12 | 470 | 24.6 (6.2) | 6.45 | 73 | 1,791 | 5,898 |
+| Level | New key buildings, first land plots (cost) | Coins after buying | Fields | XP to next | Coins/min (of which train) | XP/min | Minutes to next | Coins earned | Coins at level end | Materials earned (Planks / Bricks / Nails) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | Barn, Bakery (750) | 750 | 3 | 15 | 4.3 | 1.25 | 12 | 52 | 802 | 0.0 / 0.0 / 0.0 |
+| 2 | - | 1,002 | 4 | 30 | 5.3 | 1.50 | 20 | 106 | 1,108 | 0.0 / 0.0 / 0.0 |
+| 3 | Silo, Land ring 1 (650) | 758 | 5 | 50 | 6.3 | 1.75 | 29 | 180 | 938 | 2.2 / 0.0 / 1.2 |
+| 4 | Feed Mill (600) | 738 | 6 | 80 | 8.3 | 2.38 | 34 | 280 | 1,018 | 0.9 / 0.9 / 0.9 |
+| 5 | Chicken Coop (800) | 718 | 7 | 120 | 10.2 | 2.96 | 41 | 412 | 1,130 | 1.0 / 1.0 / 1.0 |
+| 6 | Dairy Shed, Train Station (1,600) | 130 | 8 | 170 | 15.4 (3.3) | 4.26 | 40 | 613 | 743 | 3.1 / 2.0 / 1.1 |
+| 7 | Sugar Mill (1,000) | 443 | 9 | 230 | 17.7 (3.6) | 4.89 | 47 | 831 | 1,274 | 1.3 / 2.2 / 1.3 |
+| 8 | Creamery (1,400) | 674 | 10 | 300 | 20.5 (4.2) | 5.65 | 53 | 1,089 | 1,763 | 1.3 / 2.2 / 1.3 |
+| 9 | Land ring 2 (1,200) | 1,463 | 11 | 380 | 22.3 (5.0) | 6.08 | 62 | 1,394 | 2,857 | 1.5 / 2.4 / 1.5 |
+| 10 | - | 3,857 | 12 | 470 | 24.6 (6.2) | 6.45 | 73 | 1,791 | 5,648 | 1.7 / 2.8 / 1.7 |
+
+## Land: when the first plot of each ring is affordable
+
+| Ring | Unlocks at level | Price | Materials earned by level |
+|---|---|---|---|
+| 1 | 3 | 400 coins + 2 Planks + 1 Nails | 3 |
+| 2 | 9 | 1,200 coins + 3 Planks + 2 Bricks + 2 Nails | 9 |

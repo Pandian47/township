@@ -547,7 +547,7 @@ namespace TownBuilder.EditorTools
                 },
                 new LandTier
                 {
-                    unlockLevel = 7, coins = 1200,
+                    unlockLevel = 9, coins = 1200,
                     materials = new List<MaterialCost>
                     {
                         new MaterialCost { material = M("planks"), amount = 3 }, new MaterialCost { material = M("bricks"), amount = 2 },

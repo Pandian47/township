@@ -20,6 +20,9 @@ namespace TownBuilder.EditorTools
     /// * Crops are sold to the barn; orders (which pay ~60% more) are ignored, so the estimate errs on the poor side.
     /// * The player buys one of each new factory/storage building (and the Train Station) when it unlocks.
     ///   Cottages and decorations are optional.
+    /// * Land: the first plot of each ring is bought (coins) the level it unlocks. Materials come from train crates and
+    ///   repeatable tasks: <c>TaskSlots</c> tasks done every <see cref="TaskMinutes"/> minutes, picked evenly from the
+    ///   unlocked repeatable tasks. The report shows when the first plot's materials have been earned.
     /// * Train (once its station is unlocked): one visit per travel time + <see cref="TrainLoadingMinutes"/>, crates of the
     ///   average item the player can make; income counted is the extra over selling those items to the barn.
     ///
@@ -29,6 +32,18 @@ namespace TownBuilder.EditorTools
     {
         public const float Efficiency = 0.5f;
         public const float TrainLoadingMinutes = 15f;
+        public const float TaskMinutes = 12f;
+
+        /// <summary>When the materials for the first plot of a land ring have been earned.</summary>
+        public sealed class LandStatus
+        {
+            public int Ring;
+            public int UnlockLevel;
+            public int Coins;
+            public string Materials;
+            /// <summary>Level during which the materials are complete, or -1 if not within the report levels.</summary>
+            public int MaterialsReadyLevel = -1;
+        }
         public const int ReportLevels = 10;
 
         public sealed class Rate
@@ -52,6 +67,8 @@ namespace TownBuilder.EditorTools
             public float Minutes;
             public float TrainCoinsPerMinute;
             public long Earned;
+            /// <summary>Materials earned during this level, by material id.</summary>
+            public Dictionary<string, float> MaterialsEarned = new Dictionary<string, float>();
             public long LevelUpReward;
             public long BuildingCosts;
             public string NewBuildings;
@@ -91,8 +108,28 @@ namespace TownBuilder.EditorTools
             return rates;
         }
 
-        public static List<LevelRow> Levels(GameContent content)
+        public static List<LevelRow> Levels(GameContent content) => Simulate(content, out _);
+
+        public static List<LandStatus> Land(GameContent content)
         {
+            Simulate(content, out var land);
+            return land;
+        }
+
+        private static List<LevelRow> Simulate(GameContent content, out List<LandStatus> land)
+        {
+            land = new List<LandStatus>();
+            for (int i = 0; i < content.LandTiers.Count; i++)
+            {
+                var tier = content.LandTiers[i];
+                land.Add(new LandStatus
+                {
+                    Ring = i + 1, UnlockLevel = tier.unlockLevel, Coins = tier.coins,
+                    Materials = string.Join(" + ", tier.materials.Where(m => m.material != null).Select(m => $"{m.amount} {m.material.DisplayName}")),
+                });
+            }
+
+            var stock = content.Materials.Where(m => m != null).ToDictionary(m => m.Id, _ => 0f);
             var curve = content.CreateLevelCurve();
             var rows = new List<LevelRow>();
             long coins = content.StartingCoins;
@@ -106,7 +143,14 @@ namespace TownBuilder.EditorTools
 
                 var newOnes = keyBuildings.Where(b => b.UnlockLevel == level).ToList();
                 row.BuildingCosts = newOnes.Sum(b => (long)b.CoinCost);
-                row.NewBuildings = newOnes.Count > 0 ? string.Join(", ", newOnes.Select(b => b.DisplayName)) : "-";
+                var names = newOnes.Select(b => b.DisplayName).ToList();
+                foreach (var l in land.Where(l => l.UnlockLevel == level))
+                {
+                    row.BuildingCosts += l.Coins;
+                    names.Add($"Land ring {l.Ring}");
+                }
+
+                row.NewBuildings = names.Count > 0 ? string.Join(", ", names) : "-";
                 coins -= row.BuildingCosts;
                 row.BalanceAfterBuying = coins;
 
@@ -151,10 +195,57 @@ namespace TownBuilder.EditorTools
                 row.Earned = (long)(row.CoinsPerMinute * row.Minutes);
                 coins += row.Earned;
                 row.BalanceAtEnd = coins;
+
+                // Materials earned this level (repeatable tasks + train), plus one-off guide tasks unlocking now.
+                foreach (var pair in MaterialRates(content, level))
+                {
+                    float earned = pair.Value * row.Minutes;
+                    row.MaterialsEarned[pair.Key] = earned;
+                    stock[pair.Key] += earned;
+                }
+
+                foreach (var t in content.Tasks.Where(t => t != null && !t.Repeatable && t.UnlockLevel == level && t.RewardMaterialAmount > 0))
+                {
+                    stock[t.RewardMaterial.Id] += t.RewardMaterialAmount;
+                    row.MaterialsEarned[t.RewardMaterial.Id] = row.MaterialsEarned.TryGetValue(t.RewardMaterial.Id, out var e) ? e + t.RewardMaterialAmount : t.RewardMaterialAmount;
+                }
+
+                // First plot of each unlocked ring: buy as soon as its materials are there (rings in order).
+                for (int i = 0; i < land.Count; i++)
+                {
+                    var status = land[i];
+                    if (status.MaterialsReadyLevel >= 0 || status.UnlockLevel > level) continue;
+                    var tier = content.LandTiers[i];
+                    if (!tier.materials.All(m => m.material == null || stock[m.material.Id] >= m.amount - 0.001f)) break;
+                    foreach (var m in tier.materials.Where(m => m.material != null)) stock[m.material.Id] -= m.amount;
+                    status.MaterialsReadyLevel = level;
+                }
+
                 rows.Add(row);
             }
 
             return rows;
+        }
+
+        /// <summary>Building materials earned per minute at a level, by material id (repeatable tasks + train crates).</summary>
+        public static Dictionary<string, float> MaterialRates(GameContent content, int level)
+        {
+            var rates = content.Materials.Where(m => m != null).ToDictionary(m => m.Id, _ => 0f);
+            if (rates.Count == 0) return rates;
+
+            var repeatables = content.Tasks.Where(t => t != null && t.Repeatable && t.UnlockLevel <= level).ToList();
+            foreach (var t in repeatables.Where(t => t.RewardMaterialAmount > 0 && rates.ContainsKey(t.RewardMaterial.Id)))
+                rates[t.RewardMaterial.Id] += content.TaskSlots / TaskMinutes * t.RewardMaterialAmount / repeatables.Count;
+
+            var station = content.Buildings.FirstOrDefault(b => b.Id == content.TrainStationId);
+            if (station != null && station.UnlockLevel <= level)
+            {
+                float visitMinutes = content.TrainTravelSeconds / 60f + TrainLoadingMinutes;
+                float perMinute = content.TrainCrates * content.TrainMaterialChance / visitMinutes * Efficiency;
+                foreach (var id in rates.Keys.ToList()) rates[id] += perMinute / rates.Count;
+            }
+
+            return rates;
         }
 
         /// <summary>Train income per minute at a level: extra coins over selling the crate items, and XP.</summary>
@@ -214,17 +305,29 @@ namespace TownBuilder.EditorTools
             sb.AppendLine();
             sb.AppendLine(string.Format(ci, "## Level pacing (efficiency {0:0%}, orders ignored)", Efficiency));
             sb.AppendLine();
-            sb.AppendLine("| Level | New key buildings (cost) | Coins after buying | Fields | XP to next | Coins/min (of which train) | XP/min | Minutes to next | Coins earned | Coins at level end |");
-            sb.AppendLine("|---|---|---|---|---|---|---|---|---|---|");
+            var materialNames = content.Materials.Where(m => m != null).Select(m => m.DisplayName).ToList();
+            sb.AppendLine($"| Level | New key buildings, first land plots (cost) | Coins after buying | Fields | XP to next | Coins/min (of which train) | XP/min | Minutes to next | Coins earned | Coins at level end | Materials earned ({string.Join(" / ", materialNames)}) |");
+            sb.AppendLine("|---|---|---|---|---|---|---|---|---|---|---|");
             foreach (var row in Levels(content))
             {
                 string costs = row.BuildingCosts > 0 ? $"{row.NewBuildings} ({row.BuildingCosts:N0})" : "-";
                 string after = row.BalanceAfterBuying < 0 ? $"**{row.BalanceAfterBuying:N0}**" : row.BalanceAfterBuying.ToString("N0", ci);
                 string cpm = row.TrainCoinsPerMinute > 0 ? string.Format(ci, "{0:0.0} ({1:0.0})", row.CoinsPerMinute, row.TrainCoinsPerMinute)
                     : string.Format(ci, "{0:0.0}", row.CoinsPerMinute);
-                sb.AppendLine(string.Format(ci, "| {0} | {1} | {2} | {3} | {4:N0} | {5} | {6:0.00} | {7:0} | {8:N0} | {9:N0} |",
-                    row.Level, costs, after, row.Fields, row.XpToNext, cpm, row.XpPerMinute, row.Minutes, row.Earned, row.BalanceAtEnd));
+                string mats = string.Join(" / ", content.Materials.Where(m => m != null)
+                    .Select(m => (row.MaterialsEarned.TryGetValue(m.Id, out var v) ? v : 0f).ToString("0.0", ci)));
+                sb.AppendLine(string.Format(ci, "| {0} | {1} | {2} | {3} | {4:N0} | {5} | {6:0.00} | {7:0} | {8:N0} | {9:N0} | {10} |",
+                    row.Level, costs, after, row.Fields, row.XpToNext, cpm, row.XpPerMinute, row.Minutes, row.Earned, row.BalanceAtEnd, mats));
             }
+
+            sb.AppendLine();
+            sb.AppendLine("## Land: when the first plot of each ring is affordable");
+            sb.AppendLine();
+            sb.AppendLine("| Ring | Unlocks at level | Price | Materials earned by level |");
+            sb.AppendLine("|---|---|---|---|");
+            foreach (var l in Land(content))
+                sb.AppendLine(string.Format(ci, "| {0} | {1} | {2:N0} coins + {3} | {4} |", l.Ring, l.UnlockLevel, l.Coins, l.Materials,
+                    l.MaterialsReadyLevel >= 0 ? l.MaterialsReadyLevel.ToString(ci) : $"after {ReportLevels}"));
 
             string path = Path.Combine(Directory.GetCurrentDirectory(), "Documentation", "EconomyReport.md");
             File.WriteAllText(path, sb.ToString().Replace("\r\n", "\n"));

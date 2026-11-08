@@ -75,7 +75,7 @@ MonoBehaviour:
   storageExpansionMaxLevel: 10
   xpToNextLevel: 0f0000001e000000320000005000000078000000aa000000e60000002c0100007c010000d6010000i
   xpIncreaseAfterTable: 100
-  levelUpCoinsPerLevel: 75
+  levelUpCoinsPerLevel: 100
   levelUpGems: 1
   queueSlotUpgradeBaseCost: 250
   maxExtraQueueSlots: 3
@@ -135,7 +135,7 @@ MonoBehaviour:
       amount: 2
     - material: {fileID: 11400000, guid: c36eae76314fdb544b1bc36ca3afd419, type: 2}
       amount: 1
-  - unlockLevel: 7
+  - unlockLevel: 9
     coins: 1200
     materials:
     - material: {fileID: 11400000, guid: 81887886b2c0bb949828912b3d72f71a, type: 2}

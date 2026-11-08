@@ -118,7 +118,7 @@ its ingredients.
 | 9 → 10 | 380 | 1,375 | Cake |
 | then | 470, then +100 per level | | |
 
-Reward per level-up: 75 × new level coins + 1 gem (`levelUpCoinsPerLevel`, raised from 50 in the v0.13 balance pass). The save stores TOTAL XP, so the curve can be rebalanced safely.
+Reward per level-up: 100 × new level coins + 1 gem (`levelUpCoinsPerLevel`: 50 → 75 in v0.13, → 100 in v0.18). The save stores TOTAL XP, so the curve can be rebalanced safely.
 
 ## Orders (`OrderGenerator`)
 
@@ -166,7 +166,7 @@ Reward per level-up: 75 × new level coins + 1 gem (`levelUpCoinsPerLevel`, rais
 | Ring | Plots | Unlock level | Price |
 |---|---|---|---|
 | 1 (touching the start area) | 12 | 3 | 400 coins + 2 Planks + 1 Nails |
-| 2 (map edge) | 20 | 7 | 1,200 coins + 3 Planks + 2 Bricks + 2 Nails |
+| 2 (map edge) | 20 | 9 | 1,200 coins + 3 Planks + 2 Bricks + 2 Nails |
 
 * Buildings can only be placed or moved onto owned land. Saves from before land existed keep the start area plus every
   plot that has a building on it.
@@ -233,13 +233,18 @@ What the reports showed, and what changed:
 |---|---|
 | At levels 6, 7 and 8 the new building cost more than the player had (down to −1,442 coins at level 8) | Level-up coins 50 → 75 per level; Dairy Shed 1,200 → 1,000, Sugar Mill 1,500 → 1,200, Creamery 2,000 → 1,600 |
 | v0.15: the Train Station (600) at level 6 made levels 7–8 short again (−61 / −267); train income (now in the model) makes levels faster, so they earn less per level | Sugar Mill 1,200 → 1,000, Creamery 1,600 → 1,400 |
+| v0.18: with land in the model (first plot of each ring bought when it unlocks), levels 6–8 went negative (down to −1,432): ring 1's 400 coins at level 3 carry through, and ring 2's 1,200 at level 7 competed with the Sugar Mill | Level-up coins 75 → 100 per level; land ring 2 unlocks at level 9 instead of 7 |
 
-Now every level's new key buildings are affordable on arrival (tightest: 30 coins left at level 6 after the Dairy Shed and
-Train Station), and levels take from ~12 minutes (level 1) to ~1.2 hours (level 10) of active play. The model includes
-train income from level 6 (one visit per 30 min travel + 15 min loading).
+Now every level's new key buildings and first land plots are affordable on arrival (tightest: 130 coins left at level 6
+after the Dairy Shed and Train Station), and levels take from ~12 minutes (level 1) to ~1.2 hours (level 10) of active
+play. The model includes train income from level 6 (one visit per 30 min travel + 15 min loading) and building materials
+from the train (35 % of crates) and repeatable tasks (3 slots, one task per ~12 minutes, picked evenly). The materials for
+the first plot of ring 1 are earned during level 3, those for ring 2 during level 9.
 
-`BalanceTests` (EditMode) keep it that way: every new key building affordable on arrival, every level between 5 minutes
-and 2 hours, every crop and recipe earns coins and XP, and no recipe earns more than twice the average per minute.
+`BalanceTests` (EditMode) keep it that way: every new key building and first land plot affordable on arrival, the first
+plot's materials earned within one level of the ring unlocking, every land material obtainable at the first ring's
+level, every level between 5 minutes and 2 hours, every crop and recipe earns coins and XP, and no recipe earns more
+than twice the average per minute.
 
 ## Rules
 

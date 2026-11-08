@@ -39,7 +39,7 @@ namespace TownBuilder
         [SerializeField] private List<int> xpToNextLevel = new List<int> { 15, 30, 50, 80, 120, 170, 230, 300, 380, 470 };
         [Tooltip("After the table, each level needs this much more XP than the previous one.")]
         [SerializeField, Min(0)] private int xpIncreaseAfterTable = 100;
-        [SerializeField, Min(0)] private int levelUpCoinsPerLevel = 75;
+        [SerializeField, Min(0)] private int levelUpCoinsPerLevel = 100;
         [SerializeField, Min(0)] private int levelUpGems = 1;
 
         [Header("Orders")]

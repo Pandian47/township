@@ -186,7 +186,7 @@ close and reopen with nothing lost.
 - [ ] Close and reopen: the extra slots are still there; a new Bakery starts with 3
 - [ ] Level-up rewards are now 75 × level coins (level 2 → +150)
 
-## Milestone 5: Orders and progression (current)
+## Milestone 5: Orders and progression (done)
 
 Goal: give players something to aim for beyond the order board, and a reason to keep growing the town.
 The three systems feed each other: **tasks** guide new players, the **train** pays in building materials,
@@ -198,7 +198,10 @@ and **land expansion** spends those materials.
 | 2 | **Train Station + train**: the train arrives on a timer with 6 crates asking for items; fill crates for coins and XP, a full train adds a bonus; it leaves and returns later | Level 6 | **Done** (v0.15.0) |
 | 3 | **Building materials** (Planks, Bricks, Nails): rewards from the train and some tasks, stored in the barn, sellable | with step 2 | **Done** (v0.16.0) |
 | 4 | **Land expansion**: the map starts with a buildable area in the middle; surrounding plots are fenced off and bought with coins + materials | Level 3+ | **Done** (v0.17.0) |
-| 5 | Balance pass (EconomyReport extended with train income and expansion costs) + device checklist | | Next |
+| 5 | Balance pass (EconomyReport extended with train income, materials and land; BalanceTests guard rails) | | **Done** (v0.18.0) |
+
+**Milestone 5 complete** (v0.18.0). Balance changes: level-up coins 100 × level, land ring 2 at level 9.
+Still open: AI art for the new items (27 images in ArtPrompts.md) and the device checklists below.
 
 Design notes:
 * **Tasks** are content (ScriptableObject `TaskDefinition`: type, target id, amount, rewards, unlock level), not code.
@@ -247,6 +250,11 @@ Design notes:
 - [ ] Tapping dark land that isn't next to yours says "Buy the land next to it first"
 - [ ] "Buy a plot of land" task (level 3) completes when you buy one
 - [ ] Close and reopen: bought land stays bought; an old town (from before this update) keeps every building and the land under it
+
+### Device checklist (Milestone 5 step 5: balance)
+- [ ] Level-up rewards are 100 × level coins (level 2 → +200)
+- [ ] The outer ring of land (map edge) says "Level 9" until level 9
+- [ ] Play from a new game to level 6–7 and note: did you ever wait long for coins to afford a new building or land? Too fast or too slow?
 
 ## Milestone 6: Visual polish (months 7–9)
 Building and crop animations, vehicles, UI transitions (switch to TextMeshPro), audio, particles.

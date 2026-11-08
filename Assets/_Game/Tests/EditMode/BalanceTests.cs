@@ -25,6 +25,26 @@ namespace TownBuilder.Tests
         }
 
         [Test]
+        public void FirstPlotOfEachRing_MaterialsEarned_WithinOneLevelOfUnlocking()
+        {
+            foreach (var l in EconomyReport.Land(_content))
+            {
+                Assert.GreaterOrEqual(l.MaterialsReadyLevel, 0, $"ring {l.Ring}: materials never earned within the report levels");
+                Assert.LessOrEqual(l.MaterialsReadyLevel, l.UnlockLevel + 1,
+                    $"ring {l.Ring} unlocks at level {l.UnlockLevel} but its materials only arrive at level {l.MaterialsReadyLevel}");
+            }
+        }
+
+        [Test]
+        public void EveryMaterial_HasASource_BeforeTheFirstLandRing()
+        {
+            int firstRing = _content.LandTiers.Min(t => t.unlockLevel);
+            var rates = EconomyReport.MaterialRates(_content, firstRing);
+            foreach (var cost in _content.LandTiers.First(t => t.unlockLevel == firstRing).materials)
+                Assert.Greater(rates[cost.material.Id], 0f, $"{cost.material.Id} can't be earned at level {firstRing}");
+        }
+
+        [Test]
         public void Levels_TakeBetween5MinutesAnd2Hours_OfActivePlay()
         {
             foreach (var row in EconomyReport.Levels(_content))
