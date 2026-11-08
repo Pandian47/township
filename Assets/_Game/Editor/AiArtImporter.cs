@@ -39,13 +39,18 @@ namespace TownBuilder.EditorTools
             public string Target;
             public Kind Kind;
             public int Width; // footprint width (Building/Flat), canvas width (Crop), square size (Icon)
+            public int FootprintX = 1, FootprintY = 1;
+            /// <summary>Set by processing: sprite pivot (bottom corner of the footprint for buildings).</summary>
+            public Vector2 Pivot = new Vector2(0.5f, 0f);
 
-            public Spec(string source, string target, Kind kind, int width)
+            public Spec(string source, string target, Kind kind, int width, int footprintX = 1, int footprintY = 1)
             {
                 Source = source;
                 Target = target;
                 Kind = kind;
                 Width = width;
+                FootprintX = footprintX;
+                FootprintY = footprintY;
             }
         }
 
@@ -58,6 +63,8 @@ namespace TownBuilder.EditorTools
             new Spec("town_hall", Art + "/Buildings/Community/PH_Building_town_hall.png", Kind.Building, 384),
             new Spec("barn", Art + "/Buildings/Production/PH_Building_barn.png", Kind.Building, 256),
             new Spec("bakery", Art + "/Buildings/Production/PH_Building_bakery.png", Kind.Building, 256),
+            new Spec("train_station", Art + "/Buildings/Community/PH_Building_train_station.png", Kind.Building, 320, 3, 2),
+            new Spec("train_station_train", Art + "/Buildings/Community/PH_Building_train_station_train.png", Kind.Building, 320, 3, 2),
             new Spec("silo", Art + "/Buildings/Production/PH_Building_silo.png", Kind.Building, 128),
             new Spec("feed_mill", Art + "/Buildings/Production/PH_Building_feed_mill.png", Kind.Building, 256),
             new Spec("sugar_mill", Art + "/Buildings/Production/PH_Building_sugar_mill.png", Kind.Building, 256),
@@ -224,6 +231,9 @@ namespace TownBuilder.EditorTools
                     int outW = 2 * Mathf.CeilToInt(halfSrc * scale);
                     int outH = Mathf.CeilToInt((maxY - minY + 1) * scale);
                     float srcW = outW / scale;
+                    // Bottom corner of a w×h footprint sits h/(w+h) of the way across the base (0.5 for square ones).
+                    float cornerShare = spec.FootprintY / (float)(spec.FootprintX + spec.FootprintY);
+                    spec.Pivot = new Vector2(0.5f + spec.Width * (cornerShare - 0.5f) / outW, 0f);
                     return Resample(keyed, cx - srcW * 0.5f, minY, srcW, outH / scale, outW, outH);
                 }
             }
@@ -465,7 +475,7 @@ namespace TownBuilder.EditorTools
         private static void ConfigureImporter(Spec spec)
         {
             bool centred = spec.Kind == Kind.Tile || spec.Kind == Kind.Icon;
-            var pivot = centred ? new Vector2(0.5f, 0.5f) : new Vector2(0.5f, 0f);
+            var pivot = centred ? new Vector2(0.5f, 0.5f) : spec.Pivot;
             var mesh = spec.Kind == Kind.Building ? SpriteMeshType.Tight : SpriteMeshType.FullRect;
             PlaceholderArtGenerator.ConfigureSpriteImporter(spec.Target, pivot, mesh);
         }

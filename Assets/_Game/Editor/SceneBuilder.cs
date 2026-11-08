@@ -220,6 +220,8 @@ namespace TownBuilder.EditorTools
             var farming = Go("FarmingController", systems.transform).AddComponent<FarmingController>();
             var production = Go("ProductionController", systems.transform).AddComponent<ProductionController>();
             var construction = Go("ConstructionController", systems.transform).AddComponent<ConstructionController>();
+            var train = Go("TrainController", systems.transform).AddComponent<TrainController>();
+            Wire(train, ("buildings", buildingController));
             Wire(construction, ("buildings", buildingController), ("placement", placement),
                 ("constructionIcon", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.ConstructionIconPath)));
             Wire(production, ("buildings", buildingController), ("placement", placement));
@@ -241,6 +243,7 @@ namespace TownBuilder.EditorTools
                 ("farming", farming),
                 ("production", production),
                 ("construction", construction),
+                ("train", train),
                 ("selectionOutline", outline),
                 ("floatingText", floatingText));
 
@@ -256,7 +259,8 @@ namespace TownBuilder.EditorTools
                 ("production", production),
                 ("construction", construction),
                 ("hud", hud),
-                ("effects", effects));
+                ("effects", effects),
+                ("trainController", train));
 
             EditorSceneManager.SaveScene(scene, TownPath);
         }
@@ -381,6 +385,7 @@ namespace TownBuilder.EditorTools
             // --- Farming: field panel (above the selection bar) and toast
             var fieldPanel = BuildFieldPanel(safe);
             var factoryPanel = BuildFactoryPanel(safe);
+            var trainPanel = BuildTrainPanel(safe);
             var constructionPanel = BuildConstructionPanel(safe);
             var toast = BuildToast(safe);
 
@@ -399,6 +404,7 @@ namespace TownBuilder.EditorTools
             Wire(hud,
                 ("fieldPanel", fieldPanel),
                 ("factoryPanel", factoryPanel),
+                ("trainPanel", trainPanel),
                 ("constructionPanel", constructionPanel),
                 ("barnPanel", barnPanel),
                 ("ordersPanel", ordersPanel),
@@ -756,6 +762,64 @@ namespace TownBuilder.EditorTools
             Wire(panel, ("panelRoot", root.gameObject), ("titleText", title), ("cropsView", crops.gameObject), ("cropsParent", crops),
                 ("cropTemplate", cropView), ("growingView", growing.gameObject), ("statusText", status), ("progressFill", fill),
                 ("actionButton", action), ("actionLabel", actionLabel));
+            root.gameObject.SetActive(false);
+            return panel;
+        }
+
+        private static TrainPanel BuildTrainPanel(RectTransform safe)
+        {
+            var container = Stretch("TrainPanel", safe);
+            var root = MakeRect("Root", container, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 196), new Vector2(1640, 340));
+            AddImage(root, PanelColor);
+
+            var titleRect = MakeRect("Title", root, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(24, -10), new Vector2(600, 54));
+            var title = Label(titleRect, "Text", "Train Station", 38, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
+            var statusRect = MakeRect("Status", root, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -10), new Vector2(-700, 54));
+            var status = Label(statusRect, "Text", "", 32, TextAnchor.MiddleCenter, Ink, FontStyle.Bold);
+
+            var row = MakeRect("Crates", root, new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), Vector2.zero, Vector2.zero);
+            row.offsetMin = new Vector2(24, 16);
+            row.offsetMax = new Vector2(24 + 6 * 200 + 5 * 10, -72);
+            HRow(row, 10, TextAnchor.MiddleLeft);
+
+            var crates = new TrainCrateView[6];
+            for (int i = 0; i < crates.Length; i++)
+            {
+                var card = MakeRect($"Crate{i + 1}", row, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(200, 250));
+                Prefer(card, 200, 250);
+                var bg = AddImage(card, Color.white, raycast: false);
+                var iconRect = MakeRect("Icon", card, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -6), new Vector2(-40, 84));
+                var icon = iconRect.gameObject.AddComponent<Image>();
+                icon.preserveAspect = true;
+                icon.raycastTarget = false;
+                var name = Label(MakeRect("Name", card, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -92), new Vector2(-12, 34)),
+                    "Text", "", 23, TextAnchor.MiddleCenter, Ink, FontStyle.Bold);
+                var have = Label(MakeRect("Have", card, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -126), new Vector2(-12, 30)),
+                    "Text", "", 22, TextAnchor.MiddleCenter, Ink);
+                var reward = Label(MakeRect("Reward", card, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -156), new Vector2(-8, 28)),
+                    "Text", "", 19, TextAnchor.MiddleCenter, new Color(0.45f, 0.42f, 0.38f));
+                var load = MakeButton(card, "LoadButton", "Load", new Vector2(170, 52), Green, 28);
+                var loadRect = (RectTransform)load.transform;
+                loadRect.anchorMin = loadRect.anchorMax = loadRect.pivot = new Vector2(0.5f, 0f);
+                loadRect.anchoredPosition = new Vector2(0, 10);
+                var view = card.gameObject.AddComponent<TrainCrateView>();
+                Wire(view, ("background", bg), ("icon", icon), ("nameText", name), ("haveText", have), ("rewardText", reward), ("loadButton", load));
+                crates[i] = view;
+            }
+
+            var send = MakeButton(root, "SendButton", "Send train", new Vector2(300, 130), Blue, out var sendLabel, 32);
+            var sendRect = (RectTransform)send.transform;
+            sendRect.anchorMin = sendRect.anchorMax = sendRect.pivot = new Vector2(1f, 0.5f);
+            sendRect.anchoredPosition = new Vector2(-30, -30);
+            var call = MakeButton(root, "CallButton", "Call now", new Vector2(320, 130), new Color(0.95f, 0.65f, 0.15f), out var callLabel, 30);
+            var callRect = (RectTransform)call.transform;
+            callRect.anchorMin = callRect.anchorMax = callRect.pivot = new Vector2(0.5f, 0.5f);
+            callRect.anchoredPosition = new Vector2(0, -40);
+
+            var panel = container.gameObject.AddComponent<TrainPanel>();
+            Wire(panel, ("panelRoot", root.gameObject), ("titleText", title), ("statusText", status), ("cratesRow", row.gameObject),
+                ("sendButton", send), ("sendLabel", sendLabel), ("callButton", call), ("callLabel", callLabel));
+            WireArray(panel, "crates", crates);
             root.gameObject.SetActive(false);
             return panel;
         }

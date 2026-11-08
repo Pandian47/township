@@ -28,15 +28,15 @@ Coins/min for recipes is the value added (product value minus the ingredients' s
 
 ## Level pacing (efficiency 50%, orders ignored)
 
-| Level | New key buildings (cost) | Coins after buying | Fields | XP to next | Coins/min | XP/min | Minutes to next | Coins earned | Coins at level end |
+| Level | New key buildings (cost) | Coins after buying | Fields | XP to next | Coins/min (of which train) | XP/min | Minutes to next | Coins earned | Coins at level end |
 |---|---|---|---|---|---|---|---|---|---|
 | 1 | Barn, Bakery (750) | 750 | 3 | 15 | 4.3 | 1.25 | 12 | 52 | 802 |
 | 2 | - | 952 | 4 | 30 | 5.3 | 1.50 | 20 | 106 | 1,058 |
 | 3 | Silo (250) | 1,033 | 5 | 50 | 6.3 | 1.75 | 29 | 180 | 1,213 |
 | 4 | Feed Mill (600) | 913 | 6 | 80 | 8.3 | 2.38 | 34 | 280 | 1,193 |
 | 5 | Chicken Coop (800) | 768 | 7 | 120 | 10.2 | 2.96 | 41 | 412 | 1,180 |
-| 6 | Dairy Shed (1,000) | 630 | 8 | 170 | 12.1 | 3.51 | 48 | 584 | 1,214 |
-| 7 | Sugar Mill (1,200) | 539 | 9 | 230 | 14.1 | 4.07 | 56 | 794 | 1,333 |
-| 8 | Creamery (1,600) | 333 | 10 | 300 | 16.3 | 4.70 | 64 | 1,042 | 1,375 |
-| 9 | - | 2,050 | 11 | 380 | 17.3 | 4.95 | 77 | 1,330 | 3,380 |
-| 10 | - | 4,130 | 12 | 470 | 18.4 | 5.05 | 93 | 1,714 | 5,844 |
+| 6 | Dairy Shed, Train Station (1,600) | 30 | 8 | 170 | 15.4 (3.3) | 4.26 | 40 | 613 | 643 |
+| 7 | Sugar Mill (1,000) | 168 | 9 | 230 | 17.7 (3.6) | 4.89 | 47 | 831 | 999 |
+| 8 | Creamery (1,400) | 199 | 10 | 300 | 20.5 (4.2) | 5.65 | 53 | 1,089 | 1,288 |
+| 9 | - | 1,963 | 11 | 380 | 22.3 (5.0) | 6.08 | 62 | 1,394 | 3,357 |
+| 10 | - | 4,107 | 12 | 470 | 24.6 (6.2) | 6.45 | 73 | 1,791 | 5,898 |

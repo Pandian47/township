@@ -13,6 +13,7 @@ namespace TownBuilder
         [SerializeField] private BuildingShopPanel shopPanel;
         [SerializeField] private ConfirmDialog confirmDialog;
         [SerializeField] private TasksPanel tasksPanel;
+        [SerializeField] private TrainPanel trainPanel;
 
         [Header("Ads")]
         [SerializeField] private RewardedCoinsButton rewardedCoinsButton;
@@ -65,6 +66,7 @@ namespace TownBuilder
         private StorageService _storage;
         private Wallet _wallet;
         private TaskService _tasks;
+        private TrainController _train;
 
         public void Initialize(PlacementSystem placement, FarmingController farming, ProductionController production, ConstructionController construction, OrderService orders,
             ProgressionService progression, StorageService storage, Wallet wallet,
@@ -131,9 +133,20 @@ namespace TownBuilder
             tasks.Notification += toast.Show;
         }
 
+        /// <summary>Train Station panel (shown while the finished station is selected).</summary>
+        public void InitializeTrain(TrainController train, GameContent content, Inventory inventory, IAdService ads)
+        {
+            if (train == null || trainPanel == null) return;
+            _train = train;
+            trainPanel.Initialize(train, content, inventory, ads);
+            train.Notification += toast.Show;
+            Refresh();
+        }
+
         private void OnDestroy()
         {
             if (_tasks != null) _tasks.Notification -= toast.Show;
+            if (_train != null) _train.Notification -= toast.Show;
             if (_placement != null) _placement.StateChanged -= Refresh;
             if (_wallet != null) _wallet.Changed -= Refresh;
             if (_farming != null) _farming.Notification -= toast.Show;
@@ -208,6 +221,10 @@ namespace TownBuilder
             bool factorySelected = selected && !building && definition != null && _production.IsFactory(target, out _);
             if (factorySelected && factoryPanel.FactoryId != _placement.TargetInstanceId) factoryPanel.ShowFor(_placement.TargetInstanceId);
             else if (!factorySelected && factoryPanel.FactoryId != null) factoryPanel.Hide();
+
+            bool stationSelected = selected && !building && _train != null && _train.IsStation(target);
+            if (stationSelected) trainPanel.Show();
+            else if (trainPanel != null && trainPanel.IsOpen) trainPanel.Hide();
 
             bool fieldSelected = selected && definition != null && definition.IsFarmPlot;
             if (fieldSelected && fieldPanel.PlotId != _placement.TargetInstanceId) fieldPanel.ShowFor(_placement.TargetInstanceId);

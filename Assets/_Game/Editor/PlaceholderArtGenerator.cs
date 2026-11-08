@@ -84,6 +84,52 @@ namespace TownBuilder.EditorTools
             return result;
         }
 
+        /// <summary>
+        /// The same building with a red train (three cars) along its front-left side: the Train Station sprite while
+        /// the train waits at the platform. Same size and pivot as the plain building.
+        /// </summary>
+        public static Sprite CreateBuildingWithTrain(BuildingArtSpec spec, string path)
+        {
+            var pivot = new Vector2((float)spec.FootprintY / (spec.FootprintX + spec.FootprintY), 0f);
+            return CreateSprite(path, () =>
+            {
+                var tex = RenderBuilding(spec);
+                PaintTrain(tex, spec);
+                return tex;
+            }, pivot, SpriteMeshType.Tight);
+        }
+
+        private static void PaintTrain(Texture2D tex, BuildingArtSpec s)
+        {
+            var pixels = tex.GetPixels32();
+            int w = tex.width, h = tex.height;
+            var B = new Vector2(s.FootprintY * HalfW, 0);
+            var L = B + new Vector2(-s.FootprintY * HalfW, s.FootprintY * HalfH);
+            const float trainHeight = 46f;
+            var body = new Color32(196, 54, 44, 255);
+            var loco = new Color32(60, 66, 80, 255);
+            for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+            {
+                float t = (x + 0.5f - L.x) / (B.x - L.x);
+                if (t < 0.03f || t > 0.97f) continue;
+                float carT = t * 3f % 1f;
+                if (carT < 0.04f) continue; // gap between cars
+                float baseY = L.y + (B.y - L.y) * t;
+                float dy = y + 0.5f - baseY - 3f;
+                if (dy < 0f || dy > trainHeight) continue;
+                bool isLoco = t > 0.66f;
+                Color32 c = dy < 7f ? new Color32(40, 40, 46, 255)
+                    : dy > 22f && dy < 34f && carT > 0.15f && carT < 0.85f && (int)(carT * 10f) % 3 != 0 ? new Color32(250, 236, 170, 255)
+                    : isLoco ? loco : body;
+                if (dy > trainHeight - 4f) c = Scale(c, 0.8f);
+                pixels[y * w + x] = c;
+            }
+
+            tex.SetPixels32(pixels);
+            tex.Apply();
+        }
+
         // ------------------------------------------------------------------ Tiles
 
         private enum TileStyle { Plain, Grass, Soil, Water, Road }

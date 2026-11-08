@@ -195,8 +195,8 @@ and **land expansion** spends those materials.
 | Step | Feature | Unlock | Status |
 |---|---|---|---|
 | 1 | **Town tasks**: 3 active goals ("Harvest 10 Wheat", "Bake 3 Bread", "Build a Feed Mill"...), progress from game events, coin/XP/gem rewards, a new one replaces each claimed task | Level 1 | **Done** (v0.14.0) |
-| 2 | **Train Station + train**: the train arrives on a timer with 6 crates asking for items; fill crates for coins and XP, a full train adds a bonus; it leaves and returns later | Level 6 | Next |
-| 3 | **Building materials** (Planks, Bricks, Nails): rewards from the train and some tasks, stored in the barn, sellable | with step 2 | Planned |
+| 2 | **Train Station + train**: the train arrives on a timer with 6 crates asking for items; fill crates for coins and XP, a full train adds a bonus; it leaves and returns later | Level 6 | **Done** (v0.15.0) |
+| 3 | **Building materials** (Planks, Bricks, Nails): rewards from the train and some tasks, stored in the barn, sellable | with step 2 | Next |
 | 4 | **Land expansion**: the map starts with a buildable area in the middle; surrounding plots are fenced off and bought with coins + materials | Level 3+ | Planned |
 | 5 | Balance pass (EconomyReport extended with train income and expansion costs) + device checklist | | Planned |
 
@@ -221,6 +221,16 @@ Design notes:
 - [ ] Level up: new tasks for the new buildings appear (e.g. "Build a Feed Mill" at level 4)
 - [ ] Close and reopen: tasks and their progress are the same; claimed guide tasks don't come back
 - [ ] The tasks panel never covers the bottom panels (field, factory, shop)
+
+### Device checklist (Milestone 5 step 2: train)
+- [ ] Level 6: Train Station in the shop (600 coins, wide 3×2 building, only one allowed); "Build a Train Station" task
+- [ ] While it's being built there is no train; when finished the train arrives ("The train has arrived!") and the station shows the train
+- [ ] Tap the station: 6 crates (item, Have x/y in green/red, reward); Load is enabled only when you have enough
+- [ ] Loading a crate: items leave the barn, coins + XP, "+coins" floats above the station
+- [ ] All 6 loaded: "Send train / +N bonus" pays the bonus; sending early says "(no bonus)"
+- [ ] After sending: the platform is empty, the panel shows "Back in 30m 00s" and "Call now (watch ad)"
+- [ ] Close the app for 30+ minutes, reopen: the train is back with new crates
+- [ ] A partly loaded train is still partly loaded after closing and reopening
 
 ## Milestone 6: Visual polish (months 7–9)
 Building and crop animations, vehicles, UI transitions (switch to TextMeshPro), audio, particles.

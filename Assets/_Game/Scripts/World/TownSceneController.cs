@@ -24,6 +24,7 @@ namespace TownBuilder
         [SerializeField] private ConstructionController construction;
         [SerializeField] private TownHudController hud;
         [SerializeField] private TownEffects effects;
+        [SerializeField] private TrainController trainController;
         [SerializeField] private float startOrthographicSize = 6f;
         [SerializeField] private float autosaveDelaySeconds = 2f;
 
@@ -41,6 +42,7 @@ namespace TownBuilder
         private ProgressionService _progression;
         private TaskBoard _taskBoard;
         private TaskService _tasks;
+        private Train _train;
         private TownAudioBridge _audioBridge;
         private float _saveDueAt = -1f;
 
@@ -56,6 +58,7 @@ namespace TownBuilder
         public OrderService Orders => _orders;
         public ProgressionService Progression => _progression;
         public TaskService Tasks => _tasks;
+        public TrainController Train => trainController;
         public TownEffects Effects => effects;
         public bool IsReady => _town != null;
 
@@ -132,17 +135,27 @@ namespace TownBuilder
             _tasks = new TaskService(_taskBoard, content, _wallet, _progress, _town, farming, production, _orders, placement);
             _tasks.Modified += ScheduleSave;
 
+            _train = new Train();
+            TownSaveMapper.LoadTrain(save, content, _train, warnings);
+            if (trainController != null)
+            {
+                trainController.Initialize(_town, _train, _inventory, _wallet, _progress, content, _context.Clock,
+                    id => !_sites.IsUnderConstruction(id), _orders.Candidates);
+                trainController.Modified += ScheduleSave;
+            }
+
             cameraController.SetWorldBounds(grid.WorldBounds());
             cameraController.SnapTo(grid.WorldBounds().center, startOrthographicSize);
 
             _wallet.Changed += ScheduleSave; // e.g. coins from a rewarded ad
 
-            _audioBridge = new TownAudioBridge(_context.Audio, _town, placement, farming, production, construction, _storage, _orders, _progression, _tasks);
+            _audioBridge = new TownAudioBridge(_context.Audio, _town, placement, farming, production, construction, _storage, _orders, _progression, _tasks, trainController);
 
             if (effects != null) effects.Initialize(_town);
 
             hud.Initialize(placement, farming, production, construction, _orders, _progression, _storage, _wallet, _progress, _context.Content, _context.Ads, ReturnToMainMenu);
             hud.InitializeTasks(_tasks);
+            if (trainController != null) hud.InitializeTrain(trainController, _context.Content, _inventory, _context.Ads);
         }
 
         private void OnDestroy()
@@ -161,6 +174,7 @@ namespace TownBuilder
             if (_orders != null) _orders.Modified -= ScheduleSave;
             if (_progress != null) _progress.Changed -= ScheduleSave;
             _progression?.Dispose();
+            if (trainController != null) trainController.Modified -= ScheduleSave;
             if (_tasks != null)
             {
                 _tasks.Modified -= ScheduleSave;
@@ -194,6 +208,7 @@ namespace TownBuilder
                 TownSaveMapper.WriteProduction(_context.ActiveSave, _factories);
                 TownSaveMapper.WriteOrders(_context.ActiveSave, _orderBoard);
                 TownSaveMapper.WriteTasks(_context.ActiveSave, _taskBoard);
+                TownSaveMapper.WriteTrain(_context.ActiveSave, _train);
                 _context.SaveActive();
             }
             catch (Exception e)

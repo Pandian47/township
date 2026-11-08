@@ -23,6 +23,7 @@ namespace TownBuilder.Domain
         public List<TaskSaveData> tasks = new List<TaskSaveData>();
         /// <summary>Ids of tasks claimed at least once (one-off guide tasks don't come back).</summary>
         public List<string> completedTaskIds = new List<string>();
+        public TrainSaveData train = new TrainSaveData();
     }
 
     /// <summary>One order-board slot. itemIds[i] / amounts[i] form one line.</summary>
@@ -38,6 +39,25 @@ namespace TownBuilder.Domain
     }
 
     /// <summary>One queued/finished product in a factory. Jobs of one factory are saved in queue order.</summary>
+    [Serializable]
+    public sealed class TrainSaveData
+    {
+        /// <summary>0 = away, 1 = at the station (TrainState).</summary>
+        public int state;
+        public long arrivesAtUnixMs;
+        public List<TrainCrateSaveData> crates = new List<TrainCrateSaveData>();
+    }
+
+    [Serializable]
+    public sealed class TrainCrateSaveData
+    {
+        public string itemId;
+        public int amount;
+        public long rewardCoins;
+        public long rewardXp;
+        public bool filled;
+    }
+
     [Serializable]
     public sealed class TaskSaveData
     {

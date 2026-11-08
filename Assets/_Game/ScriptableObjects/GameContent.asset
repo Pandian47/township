@@ -24,6 +24,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 368b34ee4dacd4443ae114e160cd2bcf, type: 2}
   - {fileID: 11400000, guid: ccfe0a6b9cd0e8b4ca11dc1fea8f3ac8, type: 2}
   - {fileID: 11400000, guid: b7f30a5f0743b4b449a2d10382c1acfe, type: 2}
+  - {fileID: 11400000, guid: b024bc892ccf84444a9f2cf8b5220f6f, type: 2}
   crops:
   - {fileID: 11400000, guid: a3036535aa3df024daad3d74b88f1f40, type: 2}
   - {fileID: 11400000, guid: 62b818b79b6cf7947af8159c1d81b0fa, type: 2}
@@ -103,6 +104,14 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ec650815ac6758845867d96d31367538, type: 2}
   - {fileID: 11400000, guid: 530fcd5fcbfe19948bc996a4cb52eee9, type: 2}
   - {fileID: 11400000, guid: f3376847dcbcc394196c50cea2ba3c31, type: 2}
+  - {fileID: 11400000, guid: 07536d071cf71084a9afc67145fe9113, type: 2}
   taskSlots: 3
+  trainStationId: train_station
+  trainAtStationSprite: {fileID: 21300000, guid: 2b433011ae75fb649ab77e768db39584, type: 3}
+  trainCrates: 6
+  trainTravelSeconds: 1800
+  trainCoinMultiplier: 1.4
+  trainXpDivisor: 4
+  trainFullBonusFraction: 0.5
   soundLibrary: {fileID: 11400000, guid: 204402b4592b2d64d93691af848458eb, type: 2}
   adsConfig: {fileID: 11400000, guid: 1e5cb2d5aaa6061439417a7434340494, type: 2}

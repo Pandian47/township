@@ -23,8 +23,9 @@ Nothing is hard-coded in C#. The numbers below are **examples to start balancing
 | feed_mill | Feed Mill | 2×2 | 4 | 600 | Yes |
 | chicken_coop | Chicken Coop | 2×2 | 5 | 800 | Yes |
 | dairy_shed | Dairy Shed | 2×2 | 6 | 1,000 | Yes |
-| sugar_mill | Sugar Mill | 2×2 | 7 | 1,200 | Yes |
-| creamery | Creamery | 2×2 | 8 | 1,600 | Yes |
+| sugar_mill | Sugar Mill | 2×2 | 7 | 1,000 | Yes |
+| creamery | Creamery | 2×2 | 8 | 1,400 | Yes |
+| train_station | Train Station | 3×2 | 6 | 600 | Yes (max 1) |
 
 Removing a building does not refund coins (yet).
 
@@ -147,6 +148,16 @@ Reward per level-up: 75 × new level coins + 1 gem (`levelUpCoinsPerLevel`, rais
 | Cookie | 2 Wheat + 1 Sugar | 10 min |
 | Cake | 2 Wheat + 2 Sugar + 1 Egg | 20 min |
 
+## Train (Milestone 5 step 2, `GameContent` → Train)
+
+* The Train Station (level 6, 600 coins, 3 min build, 15 XP) gets its first train as soon as it is finished.
+* A train brings **6 crates**. Each asks for an item the player can already make (same pool as orders):
+  cheap items (value ≤ 10) 3–6 per crate, mid (≤ 40) 2–3, valuable 1–2.
+* Crate reward: item value × amount × **1.4** coins and value × amount / **4** XP (selling to the barn = 1×).
+* The train waits at the station with no time limit. **Send train**: a completely loaded train pays a bonus of
+  **50 %** of all crate coins; a partly loaded one leaves without bonus. It returns after **30 minutes** with new crates
+  (also while the app is closed). "Call now" with a rewarded ad skips the wait.
+
 ## Town tasks (Milestone 5 step 1, `Data/Tasks`, 3 on screen)
 
 One-off **guide** tasks appear first, in GameContent order, as soon as their level is reached; after that a random
@@ -189,14 +200,16 @@ Assumptions: 3 fields at level 1 plus one per level (max 12), always growing the
 unlocked factory, always making its best recipe; players at 50% of perfect efficiency; orders ignored (they pay ~60% more,
 so real play is richer than the model).
 
-What the first report showed, and what changed:
+What the reports showed, and what changed:
 
 | Problem (before) | Change |
 |---|---|
 | At levels 6, 7 and 8 the new building cost more than the player had (down to −1,442 coins at level 8) | Level-up coins 50 → 75 per level; Dairy Shed 1,200 → 1,000, Sugar Mill 1,500 → 1,200, Creamery 2,000 → 1,600 |
+| v0.15: the Train Station (600) at level 6 made levels 7–8 short again (−61 / −267); train income (now in the model) makes levels faster, so they earn less per level | Sugar Mill 1,200 → 1,000, Creamery 1,600 → 1,400 |
 
-After the pass every level's new building is affordable on arrival (tightest: 333 coins left at level 8), and levels
-take from ~12 minutes (level 1) to ~1.5 hours (level 10) of active play.
+Now every level's new key buildings are affordable on arrival (tightest: 30 coins left at level 6 after the Dairy Shed and
+Train Station), and levels take from ~12 minutes (level 1) to ~1.2 hours (level 10) of active play. The model includes
+train income from level 6 (one visit per 30 min travel + 15 min loading).
 
 `BalanceTests` (EditMode) keep it that way: every new key building affordable on arrival, every level between 5 minutes
 and 2 hours, every crop and recipe earns coins and XP, and no recipe earns more than twice the average per minute.

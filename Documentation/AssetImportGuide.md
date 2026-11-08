@@ -36,7 +36,7 @@ The file names keep the `PH_` prefix even after real art is in them; that keeps 
 ### Fastest way: the AI art importer (recommended)
 
 1. Generate images with the prompts in `Documentation/ArtPrompts.md` (flat magenta background, any size).
-2. Save them in one folder with the expected names: `cottage, town_hall, barn, bakery, silo, feed_mill, sugar_mill, creamery, chicken_coop, dairy_shed, field, wheat_1..4,
+2. Save them in one folder with the expected names: `cottage, town_hall, barn, bakery, silo, train_station, train_station_train, feed_mill, sugar_mill, creamery, chicken_coop, dairy_shed, field, wheat_1..4,
    corn_1..4, soybean_1..4, sugarcane_1..4, bread, corn_bread, chicken_feed, cow_feed, egg, milk, sugar, cookies, cake, butter, cheese, grass, sand, water, road` (`.png` or `.jpg`). Missing files are skipped and keep their current art.
 3. In Unity: **TownBuilder → Art → Import AI Art Folder...** and pick the folder.
    Command line (Unity closed): `"$UNITY" -batchmode -quit -projectPath . -executeMethod TownBuilder.EditorTools.AiArtImporter.ImportFromCommandLine -artSource "D:\path\to\folder"`
@@ -45,7 +45,8 @@ The file names keep the `PH_` prefix even after real art is in them; that keeps 
 What it does (`Assets/_Game/Editor/AiArtImporter.cs`):
 * Removes the magenta background (soft edges, magenta fringe cleaned up) and trims the empty space.
 * **Buildings:** measures the footprint width on the lower 40% of the building (walls, not the overhanging roof),
-  scales it to (w + h) × 64 px, and centres the canvas on the footprint so pivot (0.5, 0) is the bottom corner.
+  scales it to (w + h) × 64 px, and sets the pivot on the footprint's bottom corner (centre for square footprints,
+  h/(w+h) across for wide ones like the 3×2 Train Station).
 * **Field:** whole object scaled to 128 px. **Crops:** plants scaled to 74% of the field and lifted 14 px so they sit in the soil.
 * **Icons:** fitted into 128 × 128. **Ground textures:** square top-down texture mapped onto a 128 × 64 diamond (1.5 px overlap, no seams).
 * Overwrites the `PH_` PNG and re-applies the standard import settings.

@@ -51,7 +51,7 @@ namespace TownBuilder.EditorTools
             var layout = new (string id, int x, int y)[]
             {
                 ("town_hall", 18, 18), ("cottage", 13, 19), ("cottage", 13, 22), ("barn", 20, 12),
-                ("bakery", 17, 12), ("silo", 24, 19), ("cottage", 18, 22), ("feed_mill", 23, 12), ("chicken_coop", 21, 23), ("dairy_shed", 24, 22), ("sugar_mill", 27, 21), ("creamery", 27, 17),
+                ("bakery", 17, 12), ("silo", 24, 19), ("cottage", 18, 22), ("feed_mill", 23, 12), ("chicken_coop", 21, 23), ("dairy_shed", 24, 22), ("sugar_mill", 27, 21), ("creamery", 27, 17), ("train_station", 16, 25),
                 ("field", 21, 17), ("field", 22, 17), ("field", 23, 17), ("field", 24, 17),
                 ("field", 21, 18), ("field", 22, 18), ("field", 23, 18), ("field", 24, 18),
             };
@@ -112,7 +112,7 @@ namespace TownBuilder.EditorTools
             return outputPath;
         }
 
-        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects }
+        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train }
 
         /// <summary>Command line: renders MainMenu + Town (idle, shop, placing) with UI into the folder after -previewOut.</summary>
         public static void CaptureUiFromCommandLine()
@@ -132,6 +132,7 @@ namespace TownBuilder.EditorTools
                 Capture(Path.Combine(folder, "Preview_Town_Orders.png"), HudState.Orders);
                 Capture(Path.Combine(folder, "Preview_Town_Construction.png"), HudState.Construction);
                 Capture(Path.Combine(folder, "Preview_Town_Effects.png"), HudState.Effects);
+                Capture(Path.Combine(folder, "Preview_Town_Train.png"), HudState.Train);
             }
             catch (Exception e)
             {
@@ -199,6 +200,34 @@ namespace TownBuilder.EditorTools
                 float top = bakeryView.SpriteRenderer.bounds.max.y - bakeryView.transform.position.y;
                 go.transform.localPosition = new Vector3(bakeryView.SpriteRenderer.bounds.center.x - bakeryView.transform.position.x, top + 0.3f, 0f);
                 go.transform.localScale = Vector3.one * 0.5f;
+            }
+
+            if (state == HudState.Train)
+            {
+                // Station with the train at the platform, its panel with sample crates (two loaded).
+                var station = UnityEngine.Object.FindObjectsByType<BuildingView>().First(v => v.Definition != null && v.Definition.Id == "train_station");
+                if (content.TrainAtStationSprite != null) station.SpriteRenderer.sprite = content.TrainAtStationSprite;
+                var selection = Find(canvas, "SelectionActionBar");
+                selection.SetActive(true);
+                selection.transform.Find("Name").GetComponent<TMPro.TMP_Text>().text = "Train Station";
+                var root = Find(canvas, "TrainPanel").transform.Find("Root").gameObject;
+                root.SetActive(true);
+                root.transform.Find("Status/Text").GetComponent<TMPro.TMP_Text>().text = "Loaded 2/6";
+                root.transform.Find("CallButton").gameObject.SetActive(false);
+                root.transform.Find("SendButton/Label").GetComponent<TMPro.TMP_Text>().text = "Send train" + System.Environment.NewLine + "(no bonus)";
+                var samples = new (string id, int amount, int have, long coins, long xp, bool loaded)[]
+                {
+                    ("wheat", 5, 12, 14, 2, true), ("bread", 2, 2, 34, 6, true), ("corn", 4, 1, 23, 4, false),
+                    ("egg", 2, 0, 73, 13, false), ("chicken_feed", 3, 3, 68, 12, false), ("sugar", 2, 0, 112, 20, false),
+                };
+                var views = root.GetComponentsInChildren<TrainCrateView>(true);
+                for (int i = 0; i < views.Length; i++)
+                {
+                    var sample = samples[i];
+                    content.TryGetItem(sample.id, out var item);
+                    views[i].Show(item != null ? item.Icon : null, content.ItemName(sample.id), sample.amount, sample.have,
+                        sample.coins, sample.xp, sample.loaded, null);
+                }
             }
 
             if (state == HudState.Effects)

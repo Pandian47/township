@@ -210,6 +210,14 @@ to progress: `FarmingController.Rewarded` → Harvest, `ProductionController.Rew
 `PlacementSystem.BuildingPlaced` → Build; it pays rewards on `Claim` and refills on level-up. Saved in `SaveData.tasks` and
 `completedTaskIds`. UI: `TasksPanel` + `TaskRowView` (top-left of the HUD).
 
+## 6g4. Train
+
+`Train` (Domain) is the state machine: Away (until `ArrivesAtUnixMs`) → AtStation with crates → `SendOff` → Away.
+`TrainCrateGenerator` builds crates from `OrderService.Candidates()`. `TrainController` (Systems/TrainController) runs it
+only while a finished Train Station exists, pays rewards, swaps the station sprite to `GameContent.trainAtStationSprite`
+while the train is there, and raises Arrived / CrateFilled / Departed / Rewarded (sound + floating coins via the bridges).
+`TrainPanel` opens when the station is selected. Saved in `SaveData.train`.
+
 ## 6h. UI text (TextMeshPro)
 
 All UI text is TextMeshPro (`TMP_Text` fields, `TextMeshProUGUI` components). Never add legacy `UnityEngine.UI.Text`.

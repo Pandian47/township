@@ -16,6 +16,7 @@ namespace TownBuilder
         [SerializeField] private FarmingController farming;
         [SerializeField] private ProductionController production;
         [SerializeField] private ConstructionController construction;
+        [SerializeField] private TrainController train;
         [SerializeField] private SelectionOutline selectionOutline;
         [SerializeField] private FloatingTextLayer floatingText;
 
@@ -44,6 +45,7 @@ namespace TownBuilder
             production.Rewarded += OnRewarded;
             production.SlotAdded += OnSlotAdded;
             construction.Rewarded += OnRewarded;
+            if (train != null) train.Rewarded += OnRewarded;
             OnPlacementStateChanged();
         }
 
@@ -66,6 +68,7 @@ namespace TownBuilder
                 production.SlotAdded -= OnSlotAdded;
             }
             if (construction != null) construction.Rewarded -= OnRewarded;
+            if (train != null) train.Rewarded -= OnRewarded;
             _town = null;
         }
 

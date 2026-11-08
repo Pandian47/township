@@ -29,7 +29,8 @@ An original 2D isometric farming and town-building game for Android, built AI-fi
 | Sweets and dairy: Cookies, Cake, Creamery (Butter, Cheese) (Milestone 4 step 4) | ✅ (placeholder art) |
 | Factory queue upgrades (+1 slot for coins) and an economy balance model with guard-rail tests (Milestone 4 step 5) | ✅ |
 | Town tasks: guide + repeatable goals with rewards (Milestone 5 step 1) | ✅ |
-| Automated tests: 111 EditMode + 39 PlayMode | ✅ |
+| Train Station: train with 6 crates, full-train bonus, travels while the app is closed (Milestone 5 step 2) | ✅ (placeholder art) |
+| Automated tests: 119 EditMode + 41 PlayMode | ✅ |
 | First AI art set (buildings, field, crops, items, ground) + `AiArtImporter` tool | ✅ |
 | Android build | ⏳ install the Android Build Support module first |
 

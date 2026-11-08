@@ -64,6 +64,36 @@ namespace TownBuilder
             save.completedTaskIds.AddRange(board.Completed);
         }
 
+        /// <summary>Restores the train. Crates for items that no longer exist are dropped.</summary>
+        public static void LoadTrain(SaveData save, GameContent content, Train train, List<string> warnings)
+        {
+            var crates = new List<TrainCrate>();
+            foreach (var c in save.train.crates)
+            {
+                if (!content.TryGetItem(c.itemId, out _))
+                {
+                    warnings.Add($"Train crate for unknown item '{c.itemId}' dropped.");
+                    continue;
+                }
+
+                crates.Add(new TrainCrate(c.itemId, c.amount, c.rewardCoins, c.rewardXp, c.filled));
+            }
+
+            train.Restore((TrainState)save.train.state, save.train.arrivesAtUnixMs, crates);
+        }
+
+        public static void WriteTrain(SaveData save, Train train)
+        {
+            save.train.state = (int)train.State;
+            save.train.arrivesAtUnixMs = train.ArrivesAtUnixMs;
+            save.train.crates.Clear();
+            foreach (var c in train.Crates)
+                save.train.crates.Add(new TrainCrateSaveData
+                {
+                    itemId = c.ItemId, amount = c.Amount, rewardCoins = c.RewardCoins, rewardXp = c.RewardXp, filled = c.Filled,
+                });
+        }
+
         public static void WriteOrders(SaveData save, OrderBoard board)
         {
             save.orders.Clear();

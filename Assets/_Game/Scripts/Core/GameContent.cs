@@ -54,6 +54,20 @@ namespace TownBuilder
         [SerializeField] private List<TaskDefinition> tasks = new List<TaskDefinition>();
         [SerializeField, Min(1)] private int taskSlots = 3;
 
+        [Header("Train")]
+        [Tooltip("Building id of the Train Station.")]
+        [SerializeField] private string trainStationId = "train_station";
+        [Tooltip("Station sprite while the train waits at the platform (the building's own sprite = empty platform).")]
+        [SerializeField] private Sprite trainAtStationSprite;
+        [SerializeField, Min(1)] private int trainCrates = 6;
+        [SerializeField, Min(0)] private int trainTravelSeconds = 1800;
+        [Tooltip("Crate reward = item value × amount × this (selling to the barn = 1).")]
+        [SerializeField, Min(1f)] private float trainCoinMultiplier = 1.4f;
+        [Tooltip("Crate XP = item value × amount / this.")]
+        [SerializeField, Min(1)] private int trainXpDivisor = 4;
+        [Tooltip("Bonus for sending a completely loaded train, as a share of all crate coins.")]
+        [SerializeField, Min(0f)] private float trainFullBonusFraction = 0.5f;
+
         [Header("Audio")]
         [SerializeField] private SoundLibrary soundLibrary;
 
@@ -64,6 +78,14 @@ namespace TownBuilder
         private Dictionary<string, CropDefinition> _cropsById;
         private Dictionary<string, ProductDefinition> _productsById;
         private Dictionary<string, RecipeDefinition> _recipesById;
+
+        public string TrainStationId => trainStationId;
+        public Sprite TrainAtStationSprite => trainAtStationSprite;
+        public int TrainCrates => trainCrates;
+        public int TrainTravelSeconds => trainTravelSeconds;
+        public float TrainCoinMultiplier => trainCoinMultiplier;
+        public int TrainXpDivisor => trainXpDivisor;
+        public float TrainFullBonusFraction => trainFullBonusFraction;
 
         public IReadOnlyList<TaskDefinition> Tasks => tasks;
         public int TaskSlots => taskSlots;

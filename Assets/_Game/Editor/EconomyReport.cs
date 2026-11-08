@@ -18,13 +18,17 @@ namespace TownBuilder.EditorTools
     /// * One of each unlocked factory, always making its recipe with the best value added per minute.
     /// * Players are about half as efficient as non-stop perfect play (<see cref="Efficiency"/>).
     /// * Crops are sold to the barn; orders (which pay ~60% more) are ignored, so the estimate errs on the poor side.
-    /// * The player buys one of each new factory/storage building when it unlocks. Cottages and decorations are optional.
+    /// * The player buys one of each new factory/storage building (and the Train Station) when it unlocks.
+    ///   Cottages and decorations are optional.
+    /// * Train (once its station is unlocked): one visit per travel time + <see cref="TrainLoadingMinutes"/>, crates of the
+    ///   average item the player can make; income counted is the extra over selling those items to the barn.
     ///
     /// Menu: TownBuilder > Debug > Write Economy Report (writes Documentation/EconomyReport.md).
     /// </summary>
     public static class EconomyReport
     {
         public const float Efficiency = 0.5f;
+        public const float TrainLoadingMinutes = 15f;
         public const int ReportLevels = 10;
 
         public sealed class Rate
@@ -46,6 +50,7 @@ namespace TownBuilder.EditorTools
             public float CoinsPerMinute;
             public float XpPerMinute;
             public float Minutes;
+            public float TrainCoinsPerMinute;
             public long Earned;
             public long LevelUpReward;
             public long BuildingCosts;
@@ -91,7 +96,7 @@ namespace TownBuilder.EditorTools
             var curve = content.CreateLevelCurve();
             var rows = new List<LevelRow>();
             long coins = content.StartingCoins;
-            var keyBuildings = content.Buildings.Where(b => b.IsFactory || b.StorageCapacityBonus > 0).ToList();
+            var keyBuildings = content.Buildings.Where(b => b.IsFactory || b.StorageCapacityBonus > 0 || b.Id == content.TrainStationId).ToList();
 
             for (int level = 1; level <= ReportLevels; level++)
             {
@@ -131,6 +136,15 @@ namespace TownBuilder.EditorTools
                     xpm += best.XpPerMinute;
                 }
 
+                var station = content.Buildings.FirstOrDefault(b => b.Id == content.TrainStationId);
+                if (station != null && station.UnlockLevel <= level)
+                {
+                    TrainRates(content, level, out float trainCpm, out float trainXpm);
+                    row.TrainCoinsPerMinute = trainCpm * Efficiency;
+                    cpm += trainCpm;
+                    xpm += trainXpm;
+                }
+
                 row.CoinsPerMinute = cpm * Efficiency;
                 row.XpPerMinute = xpm * Efficiency;
                 row.Minutes = row.XpPerMinute > 0 ? row.XpToNext / row.XpPerMinute : float.PositiveInfinity;
@@ -141,6 +155,27 @@ namespace TownBuilder.EditorTools
             }
 
             return rows;
+        }
+
+        /// <summary>Train income per minute at a level: extra coins over selling the crate items, and XP.</summary>
+        public static void TrainRates(GameContent content, int level, out float coinsPerMinute, out float xpPerMinute)
+        {
+            // Same candidates as orders: unlocked crops and products of unlocked recipes in unlocked factories.
+            var values = content.Crops.Where(c => c.UnlockLevel <= level).Select(c => c.SellPrice).ToList();
+            foreach (var factory in content.Buildings.Where(b => b.IsFactory && b.UnlockLevel <= level))
+                values.AddRange(factory.Recipes.Where(r => r.UnlockLevel <= level).Select(r => r.Output.SellPrice));
+
+            coinsPerMinute = 0f;
+            xpPerMinute = 0f;
+            if (values.Count == 0) return;
+
+            // Expected crate value, matching TrainCrateGenerator's amounts (3-6 / 2-3 / 1-2 by item value).
+            float crateValue = (float)values.Average(v => v * (v <= 10 ? 4.5 : v <= 40 ? 2.5 : 1.5));
+            float visitValue = crateValue * content.TrainCrates;
+            float visitMinutes = content.TrainTravelSeconds / 60f + TrainLoadingMinutes;
+            float extraShare = content.TrainCoinMultiplier - 1f + content.TrainCoinMultiplier * content.TrainFullBonusFraction;
+            coinsPerMinute = visitValue * extraShare / visitMinutes;
+            xpPerMinute = visitValue / content.TrainXpDivisor / visitMinutes;
         }
 
         [MenuItem("TownBuilder/Debug/Write Economy Report", priority = 41)]
@@ -179,14 +214,16 @@ namespace TownBuilder.EditorTools
             sb.AppendLine();
             sb.AppendLine(string.Format(ci, "## Level pacing (efficiency {0:0%}, orders ignored)", Efficiency));
             sb.AppendLine();
-            sb.AppendLine("| Level | New key buildings (cost) | Coins after buying | Fields | XP to next | Coins/min | XP/min | Minutes to next | Coins earned | Coins at level end |");
+            sb.AppendLine("| Level | New key buildings (cost) | Coins after buying | Fields | XP to next | Coins/min (of which train) | XP/min | Minutes to next | Coins earned | Coins at level end |");
             sb.AppendLine("|---|---|---|---|---|---|---|---|---|---|");
             foreach (var row in Levels(content))
             {
                 string costs = row.BuildingCosts > 0 ? $"{row.NewBuildings} ({row.BuildingCosts:N0})" : "-";
                 string after = row.BalanceAfterBuying < 0 ? $"**{row.BalanceAfterBuying:N0}**" : row.BalanceAfterBuying.ToString("N0", ci);
-                sb.AppendLine(string.Format(ci, "| {0} | {1} | {2} | {3} | {4:N0} | {5:0.0} | {6:0.00} | {7:0} | {8:N0} | {9:N0} |",
-                    row.Level, costs, after, row.Fields, row.XpToNext, row.CoinsPerMinute, row.XpPerMinute, row.Minutes, row.Earned, row.BalanceAtEnd));
+                string cpm = row.TrainCoinsPerMinute > 0 ? string.Format(ci, "{0:0.0} ({1:0.0})", row.CoinsPerMinute, row.TrainCoinsPerMinute)
+                    : string.Format(ci, "{0:0.0}", row.CoinsPerMinute);
+                sb.AppendLine(string.Format(ci, "| {0} | {1} | {2} | {3} | {4:N0} | {5} | {6:0.00} | {7:0} | {8:N0} | {9:N0} |",
+                    row.Level, costs, after, row.Fields, row.XpToNext, cpm, row.XpPerMinute, row.Minutes, row.Earned, row.BalanceAtEnd));
             }
 
             string path = Path.Combine(Directory.GetCurrentDirectory(), "Documentation", "EconomyReport.md");

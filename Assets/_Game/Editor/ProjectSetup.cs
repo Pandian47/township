@@ -99,11 +99,15 @@ namespace TownBuilder.EditorTools
                 W = 2, H = 2, HeightPx = 125, Unlock = 4, Cost = 600, Removable = true, BuildSeconds = 150, BuildXp = 12,
                 Wall = new Color32(200, 168, 120, 255), Roof = new Color32(96, 132, 78, 255) },
             new BuildingSeed { Id = "sugar_mill", Name = "Sugar Mill", Category = BuildingCategory.Production, Folder = "Production",
-                W = 2, H = 2, HeightPx = 130, Unlock = 7, Cost = 1200, Removable = true, BuildSeconds = 300, BuildXp = 20,
+                W = 2, H = 2, HeightPx = 130, Unlock = 7, Cost = 1000, Removable = true, BuildSeconds = 300, BuildXp = 20,
                 Wall = new Color32(214, 200, 176, 255), Roof = new Color32(150, 70, 90, 255) },
             new BuildingSeed { Id = "creamery", Name = "Creamery", Category = BuildingCategory.Production, Folder = "Production",
-                W = 2, H = 2, HeightPx = 100, Unlock = 8, Cost = 1600, Removable = true, BuildSeconds = 360, BuildXp = 24,
+                W = 2, H = 2, HeightPx = 100, Unlock = 8, Cost = 1400, Removable = true, BuildSeconds = 360, BuildXp = 24,
                 Wall = new Color32(250, 244, 226, 255), Roof = new Color32(90, 150, 200, 255) },
+            // Milestone 5 step 2: the train.
+            new BuildingSeed { Id = "train_station", Name = "Train Station", Category = BuildingCategory.Community, Folder = "Community",
+                W = 3, H = 2, HeightPx = 95, Unlock = 6, Cost = 600, Removable = true, MaxCount = 1, BuildSeconds = 180, BuildXp = 15,
+                Wall = new Color32(220, 196, 150, 255), Roof = new Color32(60, 110, 140, 255) },
             // Milestone 4 step 2: animal buildings (factories that turn feed into animal products).
             new BuildingSeed { Id = "chicken_coop", Name = "Chicken Coop", Category = BuildingCategory.Farming, Folder = "Farming",
                 W = 2, H = 2, HeightPx = 70, Unlock = 5, Cost = 800, Removable = true, BuildSeconds = 180, BuildXp = 14,
@@ -183,11 +187,13 @@ namespace TownBuilder.EditorTools
             PlaceholderArtGenerator.EnsureFolder(PlaceholderArtGenerator.CropsArtFolder);
             foreach (var s in Seeds.Where(s => s.FarmPlot)) art.Buildings[s.Id] = PlaceholderArtGenerator.CreateFieldSprite();
             PlaceholderArtGenerator.CreateConstructionIcon();
+            var trainSprite = CreateTrainAtStationSprite();
 
             CreateContent(art);
             CreateCrops();
             CreateProduction();
             CreateTasks();
+            ConfigureTrain(trainSprite);
             ConfigureAds();
             ConfigureAudio();
             ConfigureEffects();
@@ -451,6 +457,7 @@ namespace TownBuilder.EditorTools
             new TaskSeed("guide_build_chicken_coop", TaskKind.Build, "chicken_coop", 1, 5, 60, 8, 1),
             new TaskSeed("guide_collect_eggs", TaskKind.Collect, "egg", 3, 5, 60, 6),
             new TaskSeed("guide_build_dairy_shed", TaskKind.Build, "dairy_shed", 1, 6, 80, 10, 1),
+            new TaskSeed("guide_build_train_station", TaskKind.Build, "train_station", 1, 6, 80, 10, 1),
             new TaskSeed("guide_build_sugar_mill", TaskKind.Build, "sugar_mill", 1, 7, 80, 10, 1),
             new TaskSeed("guide_build_creamery", TaskKind.Build, "creamery", 1, 8, 100, 12, 1),
             new TaskSeed("guide_bake_cake", TaskKind.Collect, "cake", 1, 10, 150, 15, 2),
@@ -468,6 +475,29 @@ namespace TownBuilder.EditorTools
             new TaskSeed("churn_butter", TaskKind.Collect, "butter", 2, 8, 120, 10, repeatable: true),
             new TaskSeed("make_cheese", TaskKind.Collect, "cheese", 1, 9, 120, 10, repeatable: true),
         };
+
+        public const string TrainAtStationSpritePath = Root + "/Art/Buildings/Community/PH_Building_train_station_train.png";
+
+        private static Sprite CreateTrainAtStationSprite()
+        {
+            var s = Seeds.First(b => b.Id == "train_station");
+            return PlaceholderArtGenerator.CreateBuildingWithTrain(new PlaceholderArtGenerator.BuildingArtSpec
+            {
+                Id = s.Id, Folder = $"{PlaceholderArtGenerator.BuildingsArtFolder}/{s.Folder}", FootprintX = s.W, FootprintY = s.H,
+                HeightPx = s.HeightPx, Wall = s.Wall, Roof = s.Roof,
+            }, TrainAtStationSpritePath);
+        }
+
+        /// <summary>Links the "train at the platform" sprite from GameContent (only if none is set yet).</summary>
+        private static void ConfigureTrain(Sprite trainSprite)
+        {
+            var content = AssetDatabase.LoadAssetAtPath<GameContent>(ContentPath);
+            var so = new SerializedObject(content);
+            var prop = so.FindProperty("trainAtStationSprite");
+            if (prop.objectReferenceValue != null) return;
+            prop.objectReferenceValue = trainSprite != null ? trainSprite : AssetDatabase.LoadAssetAtPath<Sprite>(TrainAtStationSpritePath);
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
 
         /// <summary>Creates missing task assets and appends them to GameContent (keeps existing ones and their order).</summary>
         private static void CreateTasks()

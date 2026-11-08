@@ -133,6 +133,16 @@ namespace TownBuilder.Tests
             Assert.GreaterOrEqual(startTasks, _content.TaskSlots, "a new player's task board starts full");
         }
 
+        [Test]
+        public void TrainStation_IsConfigured()
+        {
+            Assert.IsTrue(_content.TryGetBuilding(_content.TrainStationId, out var station), "train station building");
+            Assert.AreEqual(1, station.MaxCount, "only one station");
+            Assert.NotNull(_content.TrainAtStationSprite, "station sprite with the train");
+            Assert.Greater(_content.TrainCrates, 0);
+            Assert.Greater(_content.TrainCoinMultiplier, 1f, "train crates must pay more than the barn");
+        }
+
         /// <summary>Earliest level at which each item can be obtained (crops: their unlock; products: their cheapest recipe).</summary>
         private Dictionary<string, int> ItemUnlockLevels()
         {

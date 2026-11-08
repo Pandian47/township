@@ -210,6 +210,27 @@ Same icon prompt as bread (section 15–16). Items:
 * `butter`: "a block of yellow butter on a small blue dish"
 * `cheese`: "a wedge of yellow cheese with round holes"
 
+## Milestone 5 step 2: Train Station
+
+The station is wider than other buildings: a **3x2** footprint (1.25× the cottage width). Make **two images of the same
+station**, one with an empty platform and one with the train waiting. Generate the second right after the first, in the
+same chat, and say "the same station as before".
+
+### Train Station, empty → `train_station.png`
+
+```
+Same art style, angle, lighting and outline as the cottage. Create a small countryside train station: a cosy station building with a blue roof and a clock, a wooden platform with a bench and a lamp, and a short straight railway track along the front-left side, on a wide 3x2 tile footprint (about 1.25 times the cottage width). The platform is empty, no train. No signs or lettering.
+One single object, centered, fully visible, nothing cropped. No ground around it, no shadow outside the base, no text.
+Background: plain solid flat magenta (#FF00FF).
+```
+
+### Train Station with the train → `train_station_train.png`
+
+```
+The exact same train station as the previous image, same size, angle and position, but now a short colorful cartoon freight train (a red locomotive and two wagons with wooden crates) is waiting on the track along the platform. No signs or lettering.
+Background: plain solid flat magenta (#FF00FF).
+```
+
 ---
 
 Do a **test set first**: cottage, field, wheat_4, bread and grass. Send those, check them in the game preview, and
