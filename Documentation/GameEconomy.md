@@ -24,6 +24,7 @@ Nothing is hard-coded in C#. The numbers below are **examples to start balancing
 | chicken_coop | Chicken Coop | 2×2 | 5 | 800 | Yes |
 | dairy_shed | Dairy Shed | 2×2 | 6 | 1,200 | Yes |
 | sugar_mill | Sugar Mill | 2×2 | 7 | 1,500 | Yes |
+| creamery | Creamery | 2×2 | 8 | 2,000 | Yes |
 
 Removing a building does not refund coins (yet).
 
@@ -39,6 +40,7 @@ Removing a building does not refund coins (yet).
 | Chicken Coop | 3 min | 14 |
 | Dairy Shed | 4 min | 18 |
 | Sugar Mill | 5 min | 20 |
+| Creamery | 6 min | 24 |
 | Town Hall, Field | instant | 0 |
 
 Finish early: a rewarded ad, or 1 gem per started minute left.
@@ -48,7 +50,7 @@ Finish early: a rewarded ad, or 1 gem per started minute left.
 Storage: base barn capacity 50 (`GameContent.baseStorageCapacity`). Barn +50, Silo +30 (`storageCapacityBonus`).
 Paid expansion: +25 per level, level N costs N × 200 coins, up to 10 levels (`storageExpansion*` in GameContent).
 
-Sell prices (`ItemDefinition.sellPrice`): Wheat 2 coins, Corn 4, Soybean 6, Bread 12, Corn Bread 22, Chicken Feed 16, Cow Feed 34, Egg 26, Milk 52, Sugarcane 8, Sugar 40.
+Sell prices (`ItemDefinition.sellPrice`): Wheat 2 coins, Corn 4, Soybean 6, Bread 12, Corn Bread 22, Chicken Feed 16, Cow Feed 34, Egg 26, Milk 52, Sugarcane 8, Sugar 40, Cookies 62, Butter 72, Cheese 140, Cake 205.
 
 ## Bakery (implemented, `Data/Recipes`, 3 queue slots)
 
@@ -83,7 +85,18 @@ Full chain value: 2 Wheat + 1 Corn (8 coins raw) → Chicken Feed (16) → Egg (
 |---|---|---|---|---|---|
 | make_sugar → Sugar | 3 Sugarcane (24) | 8 min | 5 | 40 coins | 7 |
 
-Sugar is an ingredient for the sweet recipes in Milestone 4 step 4.
+## Sweets and dairy (Milestone 4 step 4)
+
+| Factory | Recipe | Ingredients (raw value) | Time | XP | Sells for | Unlock |
+|---|---|---|---|---|---|---|
+| Bakery | bake_cookies → Cookies | 2 Wheat + 1 Sugar (44) | 10 min | 7 | 62 | 8 |
+| Bakery | bake_cake → Cake | 2 Wheat + 2 Egg + 1 Milk + 1 Sugar (148) | 20 min | 14 | 205 | 10 |
+| Creamery | churn_butter → Butter | 1 Milk (52) | 8 min | 6 | 72 | 8 |
+| Creamery | make_cheese → Cheese | 2 Milk (104) | 15 min | 10 | 140 | 9 |
+
+Cake is the first product that needs three production chains (eggs, milk, sugar), so it pays the most.
+Setup adds new seed recipes to existing factories (the Bakery got cookies and cake) without touching recipes
+already there or their slot count.
 
 **Automatic checks** (`ContentEconomyTests`, run with the EditMode tests): every recipe's product is worth more than
 its ingredients, every recipe belongs to exactly one factory, and no recipe unlocks before its factory or any of
@@ -99,7 +112,10 @@ its ingredients.
 | 4 → 5 | 80 | 175 | Cow Feed, Chicken Coop, Egg |
 | 5 → 6 | 120 | 295 | Dairy Shed, Milk |
 | 6 → 7 | 170 | 465 | Sugarcane, Sugar Mill, Sugar |
-| then | 230, 300, 380, 470, then +100 per level | | |
+| 7 → 8 | 230 | 695 | Creamery, Butter, Cookies |
+| 8 → 9 | 300 | 995 | Cheese |
+| 9 → 10 | 380 | 1,375 | Cake |
+| then | 470, then +100 per level | | |
 
 Reward per level-up: 50 × new level coins + 1 gem. The save stores TOTAL XP, so the curve can be rebalanced safely.
 

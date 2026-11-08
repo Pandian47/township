@@ -23,6 +23,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: edc2b62cd362a8a44b4d979111eb10fa, type: 2}
   - {fileID: 11400000, guid: 368b34ee4dacd4443ae114e160cd2bcf, type: 2}
   - {fileID: 11400000, guid: ccfe0a6b9cd0e8b4ca11dc1fea8f3ac8, type: 2}
+  - {fileID: 11400000, guid: b7f30a5f0743b4b449a2d10382c1acfe, type: 2}
   crops:
   - {fileID: 11400000, guid: a3036535aa3df024daad3d74b88f1f40, type: 2}
   - {fileID: 11400000, guid: 62b818b79b6cf7947af8159c1d81b0fa, type: 2}
@@ -36,6 +37,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 4f22a5a36fcba6d4db86917f718305ae, type: 2}
   - {fileID: 11400000, guid: 10f77aa7263264b4db40137a74963243, type: 2}
   - {fileID: 11400000, guid: 7426d59914b884e41be213c1efe7e1fa, type: 2}
+  - {fileID: 11400000, guid: 44c4ccc0dcb40354b8435c8a72df536b, type: 2}
+  - {fileID: 11400000, guid: f83afbb1768fbcf49bcebcb13aa1e58b, type: 2}
+  - {fileID: 11400000, guid: b2d6faa1db4c7e54e8f32a740424cf16, type: 2}
+  - {fileID: 11400000, guid: 98fc354c5e7d7ef4580e0aa77319d69f, type: 2}
   recipes:
   - {fileID: 11400000, guid: 37df8db348431214fb0c6fdc709d0821, type: 2}
   - {fileID: 11400000, guid: 7c6e5a274375a044380944114d8d4e2b, type: 2}
@@ -44,6 +49,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 28e623f36f7dbf047a0f1f21aab4c27b, type: 2}
   - {fileID: 11400000, guid: b9a0979085befd24499f076acd3afaac, type: 2}
   - {fileID: 11400000, guid: bdf70691cd970bb4897dad9f6e11d71a, type: 2}
+  - {fileID: 11400000, guid: bc8a28a45743def4e8360c966858e515, type: 2}
+  - {fileID: 11400000, guid: b9f4220e326ee22428a7f9526bd660d8, type: 2}
+  - {fileID: 11400000, guid: 6971416e93e0f754f8a1680fd9120599, type: 2}
+  - {fileID: 11400000, guid: c166eea1a9b0be74daad81afa186fb4a, type: 2}
   startingCoins: 1500
   startingGems: 20
   starterBuildings:

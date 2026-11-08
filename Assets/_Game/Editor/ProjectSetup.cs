@@ -100,6 +100,9 @@ namespace TownBuilder.EditorTools
             new BuildingSeed { Id = "sugar_mill", Name = "Sugar Mill", Category = BuildingCategory.Production, Folder = "Production",
                 W = 2, H = 2, HeightPx = 130, Unlock = 7, Cost = 1500, Removable = true, BuildSeconds = 300, BuildXp = 20,
                 Wall = new Color32(214, 200, 176, 255), Roof = new Color32(150, 70, 90, 255) },
+            new BuildingSeed { Id = "creamery", Name = "Creamery", Category = BuildingCategory.Production, Folder = "Production",
+                W = 2, H = 2, HeightPx = 100, Unlock = 8, Cost = 2000, Removable = true, BuildSeconds = 360, BuildXp = 24,
+                Wall = new Color32(250, 244, 226, 255), Roof = new Color32(90, 150, 200, 255) },
             // Milestone 4 step 2: animal buildings (factories that turn feed into animal products).
             new BuildingSeed { Id = "chicken_coop", Name = "Chicken Coop", Category = BuildingCategory.Farming, Folder = "Farming",
                 W = 2, H = 2, HeightPx = 70, Unlock = 5, Cost = 800, Removable = true, BuildSeconds = 180, BuildXp = 14,
@@ -314,6 +317,11 @@ namespace TownBuilder.EditorTools
             new ProductSeed { Id = "egg", Name = "Egg", Style = PlaceholderArtGenerator.ProductStyle.Egg, SellPrice = 26 },
             new ProductSeed { Id = "milk", Name = "Milk", Style = PlaceholderArtGenerator.ProductStyle.Milk, SellPrice = 52 },
             new ProductSeed { Id = "sugar", Name = "Sugar", Style = PlaceholderArtGenerator.ProductStyle.Sugar, SellPrice = 40 },
+            // Milestone 4 step 4: sweets and dairy.
+            new ProductSeed { Id = "cookies", Name = "Cookies", Style = PlaceholderArtGenerator.ProductStyle.Cookies, SellPrice = 62 },
+            new ProductSeed { Id = "cake", Name = "Cake", Style = PlaceholderArtGenerator.ProductStyle.Cake, SellPrice = 205 },
+            new ProductSeed { Id = "butter", Name = "Butter", Style = PlaceholderArtGenerator.ProductStyle.Butter, SellPrice = 72 },
+            new ProductSeed { Id = "cheese", Name = "Cheese", Style = PlaceholderArtGenerator.ProductStyle.Cheese, SellPrice = 140 },
         };
 
         private static readonly RecipeSeed[] RecipeSeeds =
@@ -332,6 +340,14 @@ namespace TownBuilder.EditorTools
                 Ingredients = new[] { ("cow_feed", 1) }, Seconds = 600, Xp = 6, Unlock = 6 },
             new RecipeSeed { Id = "make_sugar", ProductId = "sugar", FactoryId = "sugar_mill",
                 Ingredients = new[] { ("sugarcane", 3) }, Seconds = 480, Xp = 5, Unlock = 7 },
+            new RecipeSeed { Id = "bake_cookies", ProductId = "cookies", FactoryId = "bakery",
+                Ingredients = new[] { ("wheat", 2), ("sugar", 1) }, Seconds = 600, Xp = 7, Unlock = 8 },
+            new RecipeSeed { Id = "bake_cake", ProductId = "cake", FactoryId = "bakery",
+                Ingredients = new[] { ("wheat", 2), ("egg", 2), ("milk", 1), ("sugar", 1) }, Seconds = 1200, Xp = 14, Unlock = 10 },
+            new RecipeSeed { Id = "churn_butter", ProductId = "butter", FactoryId = "creamery",
+                Ingredients = new[] { ("milk", 1) }, Seconds = 480, Xp = 6, Unlock = 8 },
+            new RecipeSeed { Id = "make_cheese", ProductId = "cheese", FactoryId = "creamery",
+                Ingredients = new[] { ("milk", 2) }, Seconds = 900, Xp = 10, Unlock = 9 },
         };
 
         private const int DefaultFactorySlots = 3;
@@ -384,11 +400,23 @@ namespace TownBuilder.EditorTools
             content.EditorSetProduction(products, recipes);
             EditorUtility.SetDirty(content);
 
-            // Turn the seeded buildings into factories (only if a designer hasn't configured recipes already).
+            // Give each seeded factory its seed recipes. Existing factories keep their recipes, order and slot count;
+            // seed recipes they don't have yet (added in a later milestone) are appended.
             foreach (var pair in byFactory)
             {
-                if (!content.TryGetBuilding(pair.Key, out var factory) || factory.IsFactory) continue;
-                factory.EditorConfigureFactory(pair.Value, DefaultFactorySlots);
+                if (!content.TryGetBuilding(pair.Key, out var factory)) continue;
+                if (!factory.IsFactory)
+                {
+                    factory.EditorConfigureFactory(pair.Value, DefaultFactorySlots);
+                    EditorUtility.SetDirty(factory);
+                    continue;
+                }
+
+                var merged = factory.Recipes.Where(r => r != null).ToList();
+                var missing = pair.Value.Where(r => !merged.Contains(r)).ToList();
+                if (missing.Count == 0) continue;
+                merged.AddRange(missing);
+                factory.EditorConfigureFactory(merged, factory.ProductionSlots);
                 EditorUtility.SetDirty(factory);
             }
         }

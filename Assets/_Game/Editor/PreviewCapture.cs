@@ -51,7 +51,7 @@ namespace TownBuilder.EditorTools
             var layout = new (string id, int x, int y)[]
             {
                 ("town_hall", 18, 18), ("cottage", 13, 19), ("cottage", 13, 22), ("barn", 20, 12),
-                ("bakery", 17, 12), ("silo", 24, 19), ("cottage", 18, 22), ("feed_mill", 23, 12), ("chicken_coop", 21, 23), ("dairy_shed", 24, 22), ("sugar_mill", 27, 21),
+                ("bakery", 17, 12), ("silo", 24, 19), ("cottage", 18, 22), ("feed_mill", 23, 12), ("chicken_coop", 21, 23), ("dairy_shed", 24, 22), ("sugar_mill", 27, 21), ("creamery", 27, 17),
                 ("field", 21, 17), ("field", 22, 17), ("field", 23, 17), ("field", 24, 17),
                 ("field", 21, 18), ("field", 22, 18), ("field", 23, 18), ("field", 24, 18),
             };

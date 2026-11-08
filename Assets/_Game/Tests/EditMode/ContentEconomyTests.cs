@@ -91,6 +91,19 @@ namespace TownBuilder.Tests
             Assert.AreEqual(mill.UnlockLevel, cane.UnlockLevel, "Sugarcane arrives together with the Sugar Mill");
         }
 
+        [Test]
+        public void Sweets_And_Dairy_UseEggsMilkAndSugar()
+        {
+            Assert.IsTrue(_content.TryGetBuilding("bakery", out var bakery));
+            Assert.IsTrue(_content.TryGetBuilding("creamery", out var creamery));
+            CollectionAssert.IsSubsetOf(new[] { "bread", "corn_bread", "cookies", "cake" }, bakery.Recipes.Select(r => r.Output.Id).ToArray(),
+                "the Bakery keeps its first recipes and gains cookies and cake");
+            CollectionAssert.AreEquivalent(new[] { "butter", "cheese" }, creamery.Recipes.Select(r => r.Output.Id).ToArray());
+
+            _content.TryGetRecipe("bake_cake", out var cake);
+            CollectionAssert.AreEquivalent(new[] { "wheat", "egg", "milk", "sugar" }, cake.Ingredients.Select(i => i.item.Id).ToArray());
+        }
+
         /// <summary>Earliest level at which each item can be obtained (crops: their unlock; products: their cheapest recipe).</summary>
         private Dictionary<string, int> ItemUnlockLevels()
         {

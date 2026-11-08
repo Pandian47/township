@@ -455,7 +455,7 @@ namespace TownBuilder.EditorTools
 
         public const string ProductsArtFolder = "Assets/_Game/Art/Products";
 
-        public enum ProductStyle { Bread, CornBread, ChickenFeed, CowFeed, Egg, Milk, Sugar }
+        public enum ProductStyle { Bread, CornBread, ChickenFeed, CowFeed, Egg, Milk, Sugar, Cookies, Cake, Butter, Cheese }
 
         /// <summary>128x128 product icon (UI and the "ready" bubble above factories). Pivot centre.</summary>
         public static Sprite CreateProductIcon(string productId, ProductStyle style) =>
@@ -467,7 +467,72 @@ namespace TownBuilder.EditorTools
             var tex = NewTexture(size, size);
             var pixels = new Color32[size * size];
 
-            if (style == ProductStyle.Sugar)
+            if (style == ProductStyle.Cookies)
+            {
+                // Two round golden cookies with chocolate chips, overlapping.
+                var dough = new Color32(214, 160, 90, 255);
+                var centres = new[] { new Vector2(50f, 54f), new Vector2(80f, 74f) };
+                for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                foreach (var c0 in centres)
+                {
+                    float dx = x + 0.5f - c0.x, dy = y + 0.5f - c0.y;
+                    float d = (dx * dx + dy * dy) / (34f * 34f);
+                    if (d > 1f) continue;
+                    var c = Scale(dough, 0.9f + 0.15f * (1f - d));
+                    if (Hash(x / 6, y / 6) > 0.86f && d < 0.8f) c = new Color32(90, 55, 35, 255);
+                    pixels[y * size + x] = c;
+                }
+            }
+            else if (style == ProductStyle.Cake)
+            {
+                // Round two-layer cake: sponge, cream band, pink icing on top, a red cherry.
+                for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float px = Mathf.Abs(x + 0.5f - 64f), py = y + 0.5f;
+                    bool body = px < 48f && py > 18f && py < 88f;
+                    float topDy = (py - 88f) / 12f, topDx = px / 48f;
+                    bool top = topDx * topDx + topDy * topDy <= 1f;
+                    bool cherry = (x + 0.5f - 64f) * (x + 0.5f - 64f) + (py - 106f) * (py - 106f) < 64f;
+                    if (!body && !top && !cherry) continue;
+                    Color32 c = cherry ? new Color32(210, 40, 50, 255)
+                        : top || py > 76f ? new Color32(246, 170, 196, 255)
+                        : py > 48f && py < 56f ? new Color32(255, 246, 230, 255)
+                        : new Color32(226, 180, 110, 255);
+                    pixels[y * size + x] = c;
+                }
+            }
+            else if (style == ProductStyle.Butter)
+            {
+                // Yellow block of butter on a small blue dish.
+                for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float px = Mathf.Abs(x + 0.5f - 64f), py = y + 0.5f;
+                    bool dish = px < 54f && py > 22f && py < 34f;
+                    bool block = px < 38f && py >= 34f && py < 78f;
+                    if (!dish && !block) continue;
+                    pixels[y * size + x] = dish ? new Color32(100, 150, 210, 255)
+                        : py > 70f ? new Color32(255, 236, 140, 255) : new Color32(246, 214, 100, 255);
+                }
+            }
+            else if (style == ProductStyle.Cheese)
+            {
+                // Wedge of cheese with holes.
+                for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float px = x + 0.5f, py = y + 0.5f;
+                    bool wedge = py > 26f && py < 90f && px > 18f && px < 110f && py - 26f < (110f - px) * 0.75f;
+                    if (!wedge) continue;
+                    var c = new Color32(250, 200, 70, 255);
+                    if (Hash(x / 12, y / 12) > 0.75f && ((x % 12) - 6) * ((x % 12) - 6) + ((y % 12) - 6) * ((y % 12) - 6) < 14)
+                        c = new Color32(214, 160, 50, 255);
+                    pixels[y * size + x] = c;
+                }
+            }
+            else if (style == ProductStyle.Sugar)
             {
                 // Three white sugar cubes: two at the bottom, one on top.
                 var cube = new Color32(250, 250, 252, 255);

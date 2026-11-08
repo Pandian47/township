@@ -625,11 +625,11 @@ namespace TownBuilder.EditorTools
             var queueTitleRect = MakeRect("QueueTitle", root, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-24, -10), new Vector2(620, 54));
             var queueTitle = Label(queueTitleRect, "Text", "Queue 0/3", 32, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
 
-            // Recipes (left)
-            var recipes = MakeRect("Recipes", root, new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), Vector2.zero, new Vector2(960, 0));
-            recipes.offsetMin = new Vector2(24, 16);
-            recipes.offsetMax = new Vector2(984, -70);
-            HRow(recipes, 16, TextAnchor.MiddleLeft);
+            // Recipes (left), scrolls sideways when a factory has more than 3
+            var recipesViewport = MakeRect("RecipesViewport", root, new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), Vector2.zero, new Vector2(960, 0));
+            recipesViewport.offsetMin = new Vector2(24, 16);
+            recipesViewport.offsetMax = new Vector2(984, -70);
+            var recipes = HorizontalScrollList(recipesViewport, "Recipes", 16);
 
             var template = MakeRect("RecipeTemplate", recipes, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(300, 240));
             var bg = AddImage(template, Color.white);
@@ -750,6 +750,32 @@ namespace TownBuilder.EditorTools
             return panel;
         }
 
+        /// <summary>
+        /// Turns <paramref name="viewport"/> into a sideways-scrolling list (clipped, drag/fling with elastic edges) and
+        /// returns the content row that cards are added to. The content grows with the number of cards.
+        /// </summary>
+        private static RectTransform HorizontalScrollList(RectTransform viewport, string contentName, float spacing)
+        {
+            viewport.gameObject.AddComponent<RectMask2D>();
+            AddImage(viewport, new Color(1f, 1f, 1f, 0f), rounded: false); // invisible, but catches drags between cards
+
+            var content = MakeRect(contentName, viewport, new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), Vector2.zero, Vector2.zero);
+            HRow(content, spacing, TextAnchor.MiddleLeft);
+            var fitter = content.gameObject.AddComponent<ContentSizeFitter>();
+            fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            var scroll = viewport.gameObject.AddComponent<ScrollRect>();
+            scroll.content = content;
+            scroll.viewport = viewport;
+            scroll.horizontal = true;
+            scroll.vertical = false;
+            scroll.movementType = ScrollRect.MovementType.Elastic;
+            scroll.inertia = true;
+            scroll.decelerationRate = 0.12f;
+            scroll.scrollSensitivity = 30f;
+            return content;
+        }
+
         /// <summary>Full-screen layer behind the rest of the HUD for "+2 Wheat" labels (first child = drawn first).</summary>
         private static FloatingTextLayer BuildFloatingTextLayer(Canvas canvas, Camera cam)
         {
@@ -798,27 +824,10 @@ namespace TownBuilder.EditorTools
             closeRect.anchorMin = closeRect.anchorMax = closeRect.pivot = new Vector2(1f, 1f);
             closeRect.anchoredPosition = new Vector2(-20, -16);
 
-            // Horizontally scrolling list: Viewport (clips) > Items (grows with the number of buildings).
             var viewport = MakeRect("Viewport", window, new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
             viewport.offsetMin = new Vector2(30, 24);
             viewport.offsetMax = new Vector2(-30, -100);
-            viewport.gameObject.AddComponent<RectMask2D>();
-            AddImage(viewport, new Color(1f, 1f, 1f, 0f), rounded: false); // invisible, but catches drags between cards
-
-            var items = MakeRect("Items", viewport, new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), Vector2.zero, Vector2.zero);
-            HRow(items, 24, TextAnchor.MiddleLeft);
-            var fitter = items.gameObject.AddComponent<ContentSizeFitter>();
-            fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-            var scroll = viewport.gameObject.AddComponent<ScrollRect>();
-            scroll.content = items;
-            scroll.viewport = viewport;
-            scroll.horizontal = true;
-            scroll.vertical = false;
-            scroll.movementType = ScrollRect.MovementType.Elastic;
-            scroll.inertia = true;
-            scroll.decelerationRate = 0.12f;
-            scroll.scrollSensitivity = 30f;
+            var items = HorizontalScrollList(viewport, "Items", 24);
 
             // Item template (cloned per building by BuildingShopPanel)
             var template = MakeRect("ItemTemplate", items, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(260, 330));

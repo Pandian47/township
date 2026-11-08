@@ -26,7 +26,8 @@ An original 2D isometric farming and town-building game for Android, built AI-fi
 | Feed Mill + Soybean: Chicken Feed and Cow Feed (Milestone 4 step 1) | ✅ (placeholder art) |
 | Animal buildings: Chicken Coop (eggs), Dairy Shed (milk) (Milestone 4 step 2) | ✅ (placeholder art) |
 | Sugarcane + Sugar Mill (Milestone 4 step 3) | ✅ (placeholder art) |
-| Automated tests: 92 EditMode + 34 PlayMode | ✅ |
+| Sweets and dairy: Cookies, Cake, Creamery (Butter, Cheese) (Milestone 4 step 4) | ✅ (placeholder art) |
+| Automated tests: 93 EditMode + 35 PlayMode | ✅ |
 | First AI art set (buildings, field, crops, items, ground) + `AiArtImporter` tool | ✅ |
 | Android build | ⏳ install the Android Build Support module first |
 

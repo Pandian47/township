@@ -47,7 +47,7 @@ The script asks for the passwords and passes them to Unity only for that build.
 
 * Package name is **`com.pandian47.townbuilder`**. It is permanent once uploaded, so never change it.
 * Raise **Bundle Version Code** (Player Settings → Android) by 1 for every upload, and the Version (e.g. 0.2.0).
-  Version history: 0.1.0 (1) = foundation + test ads · 0.2.0 (2) = farming, barn, bakery · 0.3.0 (3) = orders and levels (v0.1 prototype) · 0.4.0 (4) = construction timers · 0.5.0 (5) = sound and music · 0.6.0 (6) = visual feedback effects · 0.7.0 (7) = TextMeshPro UI text · 0.8.0 (8) = first AI art set · 0.9.0 (9) = Feed Mill, Soybean, feeds · 0.10.0 (10) = Chicken Coop, Dairy Shed, eggs and milk · 0.11.0 (11) = Sugarcane, Sugar Mill.
+  Version history: 0.1.0 (1) = foundation + test ads · 0.2.0 (2) = farming, barn, bakery · 0.3.0 (3) = orders and levels (v0.1 prototype) · 0.4.0 (4) = construction timers · 0.5.0 (5) = sound and music · 0.6.0 (6) = visual feedback effects · 0.7.0 (7) = TextMeshPro UI text · 0.8.0 (8) = first AI art set · 0.9.0 (9) = Feed Mill, Soybean, feeds · 0.10.0 (10) = Chicken Coop, Dairy Shed, eggs and milk · 0.11.0 (11) = Sugarcane, Sugar Mill · 0.12.0 (12) = Creamery, cookies, cake, butter, cheese.
 * Play Console needs: a developer account ($25 one-time), an app listing, a privacy policy URL, the content-rating
   questionnaire, a data-safety form, screenshots, and a 512×512 icon. Start with an **Internal testing** track.
 * New personal developer accounts must run a closed test (12+ testers for 14 days) before production access.

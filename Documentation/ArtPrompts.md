@@ -192,6 +192,24 @@ Same prompt as wheat (section 7–10), replacing "wheat" with "sugarcane". Stage
 
 Same icon prompt as bread (section 15–16). Item: "a small pile of white sugar cubes with a few loose sugar grains"
 
+## Milestone 4 step 4: Creamery, cookies, cake, butter, cheese
+
+### Creamery → `creamery.png`
+
+```
+Same art style, angle, lighting and outline as the cottage. Create a small cream-white village creamery with a light blue roof, a big wooden butter churn by the door, milk cans and a round cheese wheel on a bench, on a 2x2 tile footprint (same width as the cottage). No signs or lettering.
+One single building, centered, fully visible, nothing cropped. No ground around it, no shadow outside the base, no text.
+Background: plain solid flat magenta (#FF00FF).
+```
+
+### Icons → `cookies.png`, `cake.png`, `butter.png`, `cheese.png`
+
+Same icon prompt as bread (section 15–16). Items:
+* `cookies`: "two round golden chocolate-chip cookies, slightly overlapping"
+* `cake`: "a round two-layer strawberry cream cake with pink icing and a cherry on top"
+* `butter`: "a block of yellow butter on a small blue dish"
+* `cheese`: "a wedge of yellow cheese with round holes"
+
 ---
 
 Do a **test set first**: cottage, field, wheat_4, bread and grass. Send those, check them in the game preview, and

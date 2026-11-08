@@ -146,8 +146,8 @@ close and reopen with nothing lost.
 | 1 | **Soybean** crop + **Feed Mill** (Chicken Feed, Cow Feed), scrolling Build shop, economy content tests | **Done** (v0.9.0) |
 | 2 | Animal buildings: **Chicken Coop** (Chicken Feed → Eggs), **Dairy Shed** (Cow Feed → Milk) | **Done** (v0.10.0) |
 | 3 | **Sugarcane** crop + **Sugar Mill** (Sugar) | **Done** (v0.11.0) |
-| 4 | New recipes from eggs, milk and sugar (for example cookies, cake, cheese) | Next |
-| 5 | Production upgrades (extra queue slots for coins/gems) + economy balance pass | Planned |
+| 4 | Sweets and dairy: Bakery Cookies + Cake, new **Creamery** (Butter, Cheese); factory recipe lists scroll | **Done** (v0.12.0) |
+| 5 | Production upgrades (extra queue slots for coins/gems) + economy balance pass | Next |
 
 ### Device checklist (Milestone 4 step 1: Feed Mill)
 - [ ] Build shop: swipe left/right to see all buildings; the Feed Mill card shows "Level 4" until you reach it
@@ -169,6 +169,13 @@ close and reopen with nothing lost.
 - [ ] Field → Sugarcane (12 min, 5 coins): tall canes at stage 4, harvest gives 3
 - [ ] Sugar Mill (1,500 coins, 5 min build): 3 Sugarcane → 1 Sugar in 8 min
 - [ ] Sugar shows in the Barn (40 coins) and in orders
+
+### Device checklist (Milestone 4 step 4: sweets and dairy)
+- [ ] Tap the Bakery: 4 recipe cards; swipe the cards sideways to see Cake; locked ones show their level
+- [ ] Level 8: Creamery (2,000 coins) appears in the shop; Butter = 1 Milk (8 min)
+- [ ] Level 9: Cheese = 2 Milk (15 min); Level 10: Cake = 2 Wheat + 2 Egg + 1 Milk + 1 Sugar (20 min)
+- [ ] Cookies, Cake, Butter and Cheese show in the Barn and in orders, with their icons
+- [ ] Your existing Bakery (built before this update) also has the new recipes
 
 ## Milestone 5: Orders and progression
 Train deliveries, quests, land expansion.
