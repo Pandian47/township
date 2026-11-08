@@ -33,6 +33,8 @@ namespace TownBuilder
         /// <summary>Raised when a building finishes construction (storage, production... become active).</summary>
         public event Action<string> Completed;
         public event Action Failed;
+        /// <summary>Construction finished: the XP it earned, for world effects.</summary>
+        public event Action<WorldReward> Rewarded;
 
         public ConstructionSites Sites => _sites;
         public long NowUnixMs => _clock.UtcNowUnixMs;
@@ -125,6 +127,7 @@ namespace TownBuilder
                 if (def.BuildXp > 0) _progress.AddXp(def.BuildXp);
                 Notification?.Invoke(def.BuildXp > 0 ? $"{def.DisplayName} is ready!   +{def.BuildXp} XP" : $"{def.DisplayName} is ready!");
                 Completed?.Invoke(id);
+                Rewarded?.Invoke(new WorldReward(id, null, def.BuildXp));
             }
 
             Modified?.Invoke();

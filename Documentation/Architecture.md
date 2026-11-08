@@ -171,6 +171,29 @@ Validation always goes through `Town.CanPlace(origin, size, ignoreId)`, which re
 `GameAudio` (persistent, on GameRoot) plays the music loop and sound effects by `SoundId` from `SoundLibrary`.
 `TownAudioBridge` maps Town events to sounds, and `ButtonSounds` adds the tap sound to every button. See Audio.md.
 
+## 6g. Visual feedback (effects)
+
+`TownEffects` (on the `Systems/TownEffects` object) is the one place that turns Town events into effects,
+like `TownAudioBridge` does for sound. Gameplay controllers only raise events:
+
+* `Rewarded(WorldReward)` on Farming (harvest), Production (collect) and Construction (finished): building id,
+  items gained, XP. `TownEffects` pops the building and shows "+2 Wheat / +1 XP" via `FloatingTextLayer`.
+* `PlacementSystem.BuildingPlaced` and `Town.BuildingMoved` → pop. `PlacementSystem.StateChanged` → `SelectionOutline`
+  is shown while a building is in the Selected state.
+
+Pieces (all in `Scripts/Effects`):
+
+* `PopAnimator`: short squash-and-stretch (buildings, scaled around the footprint pivot) or uniform pop (UI pills).
+  Added to a transform on demand; always returns it to its original scale.
+* `SelectionOutline`: 8 offset copies of the building's sprites drawn as a flat colour by
+  `Shaders/SpriteSilhouette.shader` (material `Materials/SpriteSilhouette.mat`, created by setup), hidden inside the
+  building by a `SpriteMask`, on the **Effects** sorting layer. Works with any final art, with no extra textures.
+* `FloatingTextLayer`: full-screen layer at the back of the HUD canvas (panels draw over it). Labels follow their
+  world point every frame, rise and fade over 1.5 s, pooled.
+* `TopBarView` pops a pill when its value goes up (coins, gems, XP, barn).
+
+Effects are cosmetic only: no state, nothing saved, and gameplay works the same without them.
+
 ## 7. Save system
 
 * `JsonSaveStore` writes `town.json.tmp`, flushes it to disk, then `File.Replace`s it over `town.json`, keeping the old file as `town.json.bak`.

@@ -95,8 +95,8 @@ close and reopen with nothing lost.
 |---|---|---|
 | 1 | Construction timers: build time per building, hammer badge, buildings work only when finished, build XP, finish early with an ad or gems | **Done** (v0.4.0) |
 | 2 | Sound effects and music (placement, harvest, collect, level-up, UI taps): original placeholders, see Audio.md | **Done** (v0.5.0) |
-| 3 | Visual feedback: selection outline, harvest/collect pop effects, floating "+2 Wheat" in the world | Next |
-| 4 | UI text on TextMeshPro (sharper text on high-DPI phones) | Planned |
+| 3 | Visual feedback: selection outline, harvest/collect pop effects, floating "+2 Wheat" in the world | **Done** (v0.6.0) |
+| 4 | UI text on TextMeshPro (sharper text on high-DPI phones) | Next |
 | 5 | First AI art set dropped in (see ArtStyleGuide.md asset list) | Waiting on your art |
 
 ### Device checklist (Milestone 3 step 1: construction)
@@ -113,6 +113,17 @@ close and reopen with nothing lost.
 - [ ] Level-up plays a fanfare; "Barn is full" / missing ingredients buzz
 - [ ] Settings → Music / Sound effects sliders change the volume immediately and are remembered
 - [ ] Sound stops when the app is in the background (phone home button)
+
+### Device checklist (Milestone 3 step 3: visual feedback)
+- [ ] Tap a building: a pulsing yellow outline appears around it; Close or tapping grass removes it
+- [ ] Move: the outline disappears while dragging and comes back after Place
+- [ ] Place a new building or move one: it does a quick squash-and-bounce
+- [ ] Harvest a ready field: the field bounces, "+2 Wheat" (with icon) and "+1 XP" rise above it and fade in about 1.5 s
+- [ ] The label stays on the field while you pan or zoom during those 1.5 s
+- [ ] Collect bread: the Bakery bounces, "+1 Bread +3 XP" rises; collecting 2 shows "+2 Bread"
+- [ ] A building finishing construction bounces and shows "+XP"
+- [ ] Coins / Gems / Level / Barn pills in the top bar briefly grow when the value goes up (sell, deliver, ad reward)
+- [ ] Frame rate stays smooth while harvesting several fields quickly
 
 ## Milestone 4: Factories and economy
 More factories and recipes (dairy, sugar, feed mill), production upgrades.

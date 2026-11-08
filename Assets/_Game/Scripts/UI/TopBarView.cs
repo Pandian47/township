@@ -15,12 +15,18 @@ namespace TownBuilder
         private PlayerProgress _progress;
         private Inventory _inventory;
 
+        // Last shown values: a counter "pops" when its value goes up.
+        private bool _hasShown;
+        private long _lastCoins, _lastGems, _lastXp;
+        private int _lastBarn;
+
         public void Bind(Wallet wallet, PlayerProgress progress, Inventory inventory = null)
         {
             Unbind();
             _wallet = wallet;
             _progress = progress;
             _inventory = inventory;
+            _hasShown = false;
             _wallet.Changed += Refresh;
             _progress.Changed += Refresh;
             if (_inventory != null) _inventory.Changed += Refresh;
@@ -41,6 +47,26 @@ namespace TownBuilder
                 barnText.text = $"Barn  {_inventory.Total}/{_inventory.Capacity}";
                 barnText.color = _inventory.FreeSpace == 0 ? new Color(1f, 0.55f, 0.5f) : Color.white;
             }
+
+            if (_hasShown && Application.isPlaying)
+            {
+                if (_wallet.Coins > _lastCoins) PopPill(coinsText);
+                if (_wallet.Gems > _lastGems) PopPill(gemsText);
+                if (_progress.Xp > _lastXp) PopPill(levelText);
+                if (_inventory != null && _inventory.Total > _lastBarn) PopPill(barnText);
+            }
+
+            _hasShown = true;
+            _lastCoins = _wallet.Coins;
+            _lastGems = _wallet.Gems;
+            _lastXp = _progress.Xp;
+            _lastBarn = _inventory != null ? _inventory.Total : 0;
+        }
+
+        private static void PopPill(Text text)
+        {
+            if (text != null && text.transform.parent != null)
+                PopAnimator.Play(text.transform.parent, PopAnimator.Style.Uniform, 0.08f, 0.3f);
         }
 
         private void Unbind()

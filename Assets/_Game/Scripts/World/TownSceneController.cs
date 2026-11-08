@@ -23,6 +23,7 @@ namespace TownBuilder
         [SerializeField] private ProductionController production;
         [SerializeField] private ConstructionController construction;
         [SerializeField] private TownHudController hud;
+        [SerializeField] private TownEffects effects;
         [SerializeField] private float startOrthographicSize = 6f;
         [SerializeField] private float autosaveDelaySeconds = 2f;
 
@@ -52,6 +53,7 @@ namespace TownBuilder
         public ConstructionController Construction => construction;
         public OrderService Orders => _orders;
         public ProgressionService Progression => _progression;
+        public TownEffects Effects => effects;
         public bool IsReady => _town != null;
 
         private void Start()
@@ -128,6 +130,8 @@ namespace TownBuilder
             _wallet.Changed += ScheduleSave; // e.g. coins from a rewarded ad
 
             _audioBridge = new TownAudioBridge(_context.Audio, _town, placement, farming, production, construction, _storage, _orders, _progression);
+
+            if (effects != null) effects.Initialize(_town);
 
             hud.Initialize(placement, farming, production, construction, _orders, _progression, _storage, _wallet, _progress, _context.Content, _context.Ads, ReturnToMainMenu);
         }

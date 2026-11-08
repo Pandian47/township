@@ -21,7 +21,8 @@ An original 2D isometric farming and town-building game for Android, built AI-fi
 | Orders and levels: order board, level curve, level-up rewards and unlocks | ✅ |
 | Construction timers with ad / gem speed-up | ✅ |
 | Sound effects and music (original placeholders, [Audio.md](Documentation/Audio.md)) | ✅ |
-| Automated tests: 86 EditMode + 25 PlayMode | ✅ |
+| Visual feedback: selection outline, building pops, floating "+2 Wheat" rewards, top-bar pops | ✅ |
+| Automated tests: 86 EditMode + 30 PlayMode | ✅ |
 | Placeholder art following the final art conventions | ✅ (replace with AI art) |
 | Android build | ⏳ install the Android Build Support module first |
 

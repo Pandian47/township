@@ -25,12 +25,14 @@ namespace TownBuilder.EditorTools
         public const string ProductName = "TownBuilder";
         public const string ContentPath = Root + "/ScriptableObjects/GameContent.asset";
         public const string BuildingPrefabPath = Root + "/Prefabs/Buildings/BuildingView.prefab";
+        public const string SilhouetteShaderPath = Root + "/Shaders/SpriteSilhouette.shader";
+        public const string SilhouetteMaterialPath = Root + "/Materials/SpriteSilhouette.mat";
 
         private static readonly string[] Folders =
         {
             "Art/Buildings/Residential", "Art/Buildings/Production", "Art/Buildings/Community", "Art/Crops",
             "Art/Environment/Tiles/TileAssets", "Art/Characters", "Art/Vehicles", "Art/Decorations", "Art/UI",
-            "Animations", "Audio", "Fonts", "Materials",
+            "Animations", "Audio", "Fonts", "Materials", "Shaders",
             "Prefabs/World", "Prefabs/Buildings", "Prefabs/Crops", "Prefabs/Characters", "Prefabs/UI",
             "Scenes", "Data/Buildings", "Data/Crops", "Data/Products", "Data/Recipes",
             "ScriptableObjects", "Settings", "Tests/EditMode", "Tests/PlayMode",
@@ -159,6 +161,7 @@ namespace TownBuilder.EditorTools
             CreateProduction();
             ConfigureAds();
             ConfigureAudio();
+            ConfigureEffects();
             CreateBuildingPrefab();
             AssetDatabase.SaveAssets();
 
@@ -380,6 +383,20 @@ namespace TownBuilder.EditorTools
         public const string AdsConfigPath = Root + "/ScriptableObjects/AdsConfig.asset";
 
         /// <summary>Generates placeholder sounds + music (if missing) and links the SoundLibrary from GameContent.</summary>
+        /// <summary>Material for the selection outline (flat-colour sprite silhouette), created once.</summary>
+        private static void ConfigureEffects()
+        {
+            if (AssetDatabase.LoadAssetAtPath<Material>(SilhouetteMaterialPath) != null) return;
+            var shader = AssetDatabase.LoadAssetAtPath<Shader>(SilhouetteShaderPath);
+            if (shader == null)
+            {
+                Debug.LogError($"[Setup] Missing shader {SilhouetteShaderPath}");
+                return;
+            }
+
+            AssetDatabase.CreateAsset(new Material(shader) { name = "SpriteSilhouette" }, SilhouetteMaterialPath);
+        }
+
         private static void ConfigureAudio()
         {
             var library = PlaceholderAudioGenerator.CreateLibrary();

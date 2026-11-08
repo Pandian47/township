@@ -223,12 +223,25 @@ namespace TownBuilder.EditorTools
                 ("constructionIcon", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.ConstructionIconPath)));
             Wire(production, ("buildings", buildingController), ("placement", placement));
             Wire(farming, ("buildings", buildingController), ("placement", placement));
+            var effectsGo = Go("TownEffects", systems.transform);
+            var effects = effectsGo.AddComponent<TownEffects>();
+            var outline = effectsGo.AddComponent<SelectionOutline>();
+            Wire(outline, ("silhouetteMaterial", AssetDatabase.LoadAssetAtPath<Material>(ProjectSetup.SilhouetteMaterialPath)));
 
             // --- UI
             var uiRoot = Go("UI");
             var canvas = CreateCanvas(uiRoot.transform);
             CreateEventSystem(uiRoot.transform);
+            var floatingText = BuildFloatingTextLayer(canvas, cam);
             var hud = BuildTownHud(canvas);
+            Wire(effects,
+                ("buildings", buildingController),
+                ("placement", placement),
+                ("farming", farming),
+                ("production", production),
+                ("construction", construction),
+                ("selectionOutline", outline),
+                ("floatingText", floatingText));
 
             // Audio: music and sound effects are played by the persistent GameAudio on GameRoot (see GameAudio.cs).
 
@@ -241,7 +254,8 @@ namespace TownBuilder.EditorTools
                 ("farming", farming),
                 ("production", production),
                 ("construction", construction),
-                ("hud", hud));
+                ("hud", hud),
+                ("effects", effects));
 
             EditorSceneManager.SaveScene(scene, TownPath);
         }
@@ -739,6 +753,15 @@ namespace TownBuilder.EditorTools
                 ("actionButton", action), ("actionLabel", actionLabel));
             root.gameObject.SetActive(false);
             return panel;
+        }
+
+        /// <summary>Full-screen layer behind the rest of the HUD for "+2 Wheat" labels (first child = drawn first).</summary>
+        private static FloatingTextLayer BuildFloatingTextLayer(Canvas canvas, Camera cam)
+        {
+            var rect = Stretch("FloatingTextLayer", canvas.transform);
+            var layer = rect.gameObject.AddComponent<FloatingTextLayer>();
+            Wire(layer, ("worldCamera", cam), ("font", UIFont));
+            return layer;
         }
 
         private static ToastView BuildToast(RectTransform safe)

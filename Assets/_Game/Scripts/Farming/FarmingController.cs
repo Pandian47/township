@@ -48,6 +48,8 @@ namespace TownBuilder
         public event Action<string> Harvested;
         /// <summary>A harvest or plant attempt failed (barn full, not enough coins...).</summary>
         public event Action Failed;
+        /// <summary>A harvest succeeded: what it earned, for world effects.</summary>
+        public event Action<WorldReward> Rewarded;
 
         public FarmPlots Plots => _plots;
         public Inventory Inventory => _inventory;
@@ -134,6 +136,7 @@ namespace TownBuilder
             if (crop.HarvestXp > 0) _progress.AddXp(crop.HarvestXp);
             Notification?.Invoke($"+{crop.HarvestYield} {crop.DisplayName}   +{crop.HarvestXp} XP");
             Harvested?.Invoke(plotId);
+            Rewarded?.Invoke(new WorldReward(plotId, new[] { new ItemGain(crop, crop.HarvestYield) }, crop.HarvestXp));
             Modified?.Invoke();
             return true;
         }

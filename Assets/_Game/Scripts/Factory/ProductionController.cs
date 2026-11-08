@@ -44,6 +44,8 @@ namespace TownBuilder
         public event Action<string> Queued;
         public event Action<string> Collected;
         public event Action Failed;
+        /// <summary>Products were collected: what they earned, for world effects.</summary>
+        public event Action<WorldReward> Rewarded;
 
         public Factories Factories => _factories;
         public long NowUnixMs => _clock.UtcNowUnixMs;
@@ -132,6 +134,7 @@ namespace TownBuilder
             int xp = 0;
             string lastName = null;
             int lastAmount = 0;
+            var gains = new List<ItemGain>();
 
             while (queue.CountDone(NowUnixMs) > 0)
             {
@@ -155,6 +158,7 @@ namespace TownBuilder
                 collected++;
                 lastName = recipe.Output.DisplayName;
                 lastAmount += recipe.OutputAmount;
+                AddGain(gains, recipe.Output, recipe.OutputAmount);
             }
 
             if (collected > 0)
@@ -162,6 +166,7 @@ namespace TownBuilder
                 if (xp > 0) _progress.AddXp(xp);
                 Notification?.Invoke(collected == 1 ? $"+{lastAmount} {lastName}   +{xp} XP" : $"Collected {collected} products   +{xp} XP");
                 Collected?.Invoke(factoryId);
+                Rewarded?.Invoke(new WorldReward(factoryId, gains, xp));
                 _factories.NotifyChanged(factoryId);
                 Modified?.Invoke();
             }
@@ -185,6 +190,18 @@ namespace TownBuilder
             if (!IsFactory(building.InstanceId, out _) || CountReady(building.InstanceId) == 0) return false;
             Collect(building.InstanceId);
             return true;
+        }
+
+        private static void AddGain(List<ItemGain> gains, ItemDefinition item, int amount)
+        {
+            for (int i = 0; i < gains.Count; i++)
+            {
+                if (gains[i].Item != item) continue;
+                gains[i] = new ItemGain(item, gains[i].Amount + amount);
+                return;
+            }
+
+            gains.Add(new ItemGain(item, amount));
         }
 
         private static bool ContainsRecipe(BuildingDefinition def, RecipeDefinition recipe)

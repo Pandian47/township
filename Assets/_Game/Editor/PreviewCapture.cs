@@ -112,7 +112,7 @@ namespace TownBuilder.EditorTools
             return outputPath;
         }
 
-        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction }
+        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects }
 
         /// <summary>Command line: renders MainMenu + Town (idle, shop, placing) with UI into the folder after -previewOut.</summary>
         public static void CaptureUiFromCommandLine()
@@ -131,6 +131,7 @@ namespace TownBuilder.EditorTools
                 Capture(Path.Combine(folder, "Preview_Town_Factory.png"), HudState.Factory);
                 Capture(Path.Combine(folder, "Preview_Town_Orders.png"), HudState.Orders);
                 Capture(Path.Combine(folder, "Preview_Town_Construction.png"), HudState.Construction);
+                Capture(Path.Combine(folder, "Preview_Town_Effects.png"), HudState.Effects);
             }
             catch (Exception e)
             {
@@ -193,6 +194,27 @@ namespace TownBuilder.EditorTools
                 float top = bakeryView.SpriteRenderer.bounds.max.y - bakeryView.transform.position.y;
                 go.transform.localPosition = new Vector3(bakeryView.SpriteRenderer.bounds.center.x - bakeryView.transform.position.x, top + 0.3f, 0f);
                 go.transform.localScale = Vector3.one * 0.5f;
+            }
+
+            if (state == HudState.Effects)
+            {
+                // Selected cottage with its outline, plus reward labels as they appear right after a harvest / collect.
+                var views = UnityEngine.Object.FindObjectsByType<BuildingView>();
+                var cottage = views.First(v => v.Definition != null && v.Definition.Id == "cottage");
+                var selection = Find(canvas, "SelectionActionBar");
+                selection.SetActive(true);
+                selection.transform.Find("Name").GetComponent<UnityEngine.UI.Text>().text = cottage.Definition.DisplayName;
+                UnityEngine.Object.FindAnyObjectByType<SelectionOutline>().Show(cottage);
+
+                var layer = UnityEngine.Object.FindAnyObjectByType<FloatingTextLayer>(FindObjectsInactive.Include);
+                var xpColor = new Color(0.6f, 0.88f, 1f);
+                content.TryGetCrop("wheat", out var wheat);
+                content.TryGetItem("bread", out var bread);
+                var field = views.Where(v => v.Definition != null && v.Definition.IsFarmPlot).OrderByDescending(v => v.transform.position.x).First();
+                var bakeryView = views.First(v => v.Definition != null && v.Definition.Id == "bakery");
+                layer.Spawn(TopOf(field), new[] { new FloatingLine("+2 Wheat", Color.white, wheat.Icon), new FloatingLine("+1 XP", xpColor) });
+                layer.Spawn(TopOf(bakeryView), new[] { new FloatingLine("+1 Bread", Color.white, bread.Icon), new FloatingLine("+3 XP", xpColor) });
+                layer.Advance(0.35f); // past the pop-in
             }
 
             if (state == HudState.Orders)
@@ -288,6 +310,12 @@ namespace TownBuilder.EditorTools
             }
         }
 
+        private static Vector3 TopOf(BuildingView view)
+        {
+            var b = view.SpriteRenderer.bounds;
+            return new Vector3(b.center.x, b.max.y + 0.15f, 0f);
+        }
+
         private static GameObject Find(Canvas canvas, string name) =>
             canvas.GetComponentsInChildren<Transform>(true).First(t => t.name == name).gameObject;
 
@@ -308,6 +336,13 @@ namespace TownBuilder.EditorTools
             cam.targetTexture = rt;
             cam.aspect = (float)width / height;
             Canvas.ForceUpdateCanvases();
+            var floating = UnityEngine.Object.FindAnyObjectByType<FloatingTextLayer>();
+            if (floating != null)
+            {
+                floating.RefreshPositions(); // labels follow world points: re-project for the render size
+                Canvas.ForceUpdateCanvases();
+            }
+
             cam.Render();
 
             RenderTexture.active = rt;
