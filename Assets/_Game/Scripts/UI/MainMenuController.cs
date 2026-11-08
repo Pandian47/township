@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using TMPro;
 
 namespace TownBuilder
 {
@@ -12,7 +13,7 @@ namespace TownBuilder
         [SerializeField] private Button continueButton;
         [SerializeField] private Button newGameButton;
         [SerializeField] private Button settingsButton;
-        [SerializeField] private Text statusText;
+        [SerializeField] private TMP_Text statusText;
         [SerializeField] private ConfirmDialog confirmDialog;
 
         [Header("Settings panel")]

@@ -61,3 +61,19 @@ Placeholders are named `PH_*.png`, for example `Art/Buildings/Production/PH_Buil
 - [ ] No text, logos or watermarks; nothing copied from existing games
 - [ ] Import settings match section 1 (PPU 128, pivot, Android ASTC)
 - [ ] Preview capture shows the building sitting exactly on its footprint and sorting correctly against neighbours
+
+## 6. Fonts (TextMeshPro)
+
+The UI uses TextMeshPro with **Liberation Sans SDF** (free, SIL Open Font License). To use your own game font later:
+
+1. Pick a font with a licence that allows embedding in a commercial app (for example any SIL OFL font). Put the `.ttf` in `Assets/_Game/Fonts`.
+2. In Unity: right-click the `.ttf` → **Create → TextMeshPro → Font Asset → SDF**. This creates `<Font> SDF.asset` next to it.
+3. Select the new font asset. In the Inspector set **Atlas Population Mode** to *Dynamic* (any character works) and keep **Sampling Point Size** at 90.
+4. Change `UIFontAssetPath` in `Assets/_Game/Editor/ProjectSetup.cs` to the new asset's path and delete `Assets/_Game/Materials/UIFont Outline.mat`.
+5. Close Unity and run setup with `-rebuildScenes` so every label and the outline preset are rebuilt with the new font. Then run the preview capture to check sizes.
+
+If `Assets/TextMesh Pro/` is missing (fresh clone without it), import TMP's resources once before running setup:
+
+```bash
+"$UNITY" -batchmode -quit -projectPath . -importPackage "<project>\Library\PackageCache\com.unity.ugui@<hash>\Package Resources\TMP Essential Resources.unitypackage"
+```

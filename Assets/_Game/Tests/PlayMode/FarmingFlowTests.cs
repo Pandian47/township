@@ -181,7 +181,7 @@ namespace TownBuilder.Tests
 
             var item = panel.GetComponentsInChildren<BarnItemView>(includeInactive: false).FirstOrDefault();
             Assert.NotNull(item, "Barn should show a card for corn");
-            var texts = string.Join(" | ", item.GetComponentsInChildren<UnityEngine.UI.Text>().Select(t => t.text));
+            var texts = string.Join(" | ", item.GetComponentsInChildren<TMPro.TMP_Text>().Select(t => t.text));
             StringAssert.Contains("Corn", texts);
             StringAssert.Contains("x5", texts);
         }

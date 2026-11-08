@@ -2,6 +2,7 @@ using System;
 using TownBuilder.Domain;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace TownBuilder
 {
@@ -9,7 +10,7 @@ namespace TownBuilder
     public sealed class RewardedCoinsButton : MonoBehaviour
     {
         [SerializeField] private Button button;
-        [SerializeField] private Text label;
+        [SerializeField] private TMP_Text label;
 
         private IAdService _ads;
         private Wallet _wallet;

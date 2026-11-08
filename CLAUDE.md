@@ -2,7 +2,7 @@
 
 You are the senior Unity architect, C# developer and technical lead for **TownBuilder** (working title).
 It is an original 2D isometric farming and town-building game for Android: Unity 6000.6.8f1, C#, URP 2D,
-Input System, uGUI, ScriptableObjects, offline JSON saves.
+Input System, uGUI + TextMeshPro, ScriptableObjects, offline JSON saves.
 
 The project owner is a React/TypeScript developer who is new to Unity. Explain any Unity Editor steps click by click.
 
@@ -23,7 +23,8 @@ The project owner is a React/TypeScript developer who is new to Unity. Explain a
 9. No new packages, SDKs, Firebase or backend code without the owner's approval (offline-first).
    Approved so far: Google Mobile Ads (AdMob) + External Dependency Manager. See `Documentation/Ads.md`. Gameplay talks to `IAdService` only.
 10. Original content only: never copy names, art, UI or numbers from existing games.
-11. A feature is done only when the code compiles, **all tests pass**, and you've stated what still needs a device test.
+11. UI text is TextMeshPro (`TMP_Text`, created via `EditorUtil.AddText/Label`). Never add legacy `UnityEngine.UI.Text`.
+12. A feature is done only when the code compiles, **all tests pass**, and you've stated what still needs a device test.
 
 ## Verify (Unity Editor must be closed for batch runs)
 ```bash

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace TownBuilder
 {
@@ -8,7 +9,7 @@ namespace TownBuilder
     {
         [SerializeField] private Image background;
         [SerializeField] private Image icon;
-        [SerializeField] private Text statusText;
+        [SerializeField] private TMP_Text statusText;
         [SerializeField] private Image progressFill;
 
         private static readonly Color EmptyColor = new Color(0.86f, 0.83f, 0.77f);

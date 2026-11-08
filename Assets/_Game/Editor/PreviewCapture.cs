@@ -167,7 +167,7 @@ namespace TownBuilder.EditorTools
 
             if (state == HudState.Placing)
             {
-                Find(canvas, "PlacementActionBar").transform.Find("Info").GetComponent<UnityEngine.UI.Text>().text =
+                Find(canvas, "PlacementActionBar").transform.Find("Info").GetComponent<TMPro.TMP_Text>().text =
                     $"{placing.DisplayName}  -  {placing.CoinCost:N0} coins\nDrag or tap to position";
             }
 
@@ -175,13 +175,13 @@ namespace TownBuilder.EditorTools
             {
                 var selection = Find(canvas, "SelectionActionBar");
                 selection.SetActive(true);
-                selection.transform.Find("Name").GetComponent<UnityEngine.UI.Text>().text = "Bakery";
+                selection.transform.Find("Name").GetComponent<TMPro.TMP_Text>().text = "Bakery";
                 var root = Find(canvas, "ConstructionPanel").transform.Find("Root").gameObject;
                 root.SetActive(true);
-                root.transform.Find("Title/Text").GetComponent<UnityEngine.UI.Text>().text = "Bakery: under construction";
-                root.transform.Find("Status/Text").GetComponent<UnityEngine.UI.Text>().text = "Ready in 1m 12s";
-                root.transform.Find("Buttons/AdButton/Label").GetComponent<UnityEngine.UI.Text>().text = "Finish now (ad)";
-                root.transform.Find("Buttons/GemsButton/Label").GetComponent<UnityEngine.UI.Text>().text = "Finish now  2 gems";
+                root.transform.Find("Title/Text").GetComponent<TMPro.TMP_Text>().text = "Bakery: under construction";
+                root.transform.Find("Status/Text").GetComponent<TMPro.TMP_Text>().text = "Ready in 1m 12s";
+                root.transform.Find("Buttons/AdButton/Label").GetComponent<TMPro.TMP_Text>().text = "Finish now\n(watch ad)";
+                root.transform.Find("Buttons/GemsButton/Label").GetComponent<TMPro.TMP_Text>().text = "Finish now\n2 gems"; // same format as ConstructionPanel
 
                 // Hammer badge above the bakery, like ConstructionController does.
                 var icon = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.ConstructionIconPath);
@@ -203,7 +203,7 @@ namespace TownBuilder.EditorTools
                 var cottage = views.First(v => v.Definition != null && v.Definition.Id == "cottage");
                 var selection = Find(canvas, "SelectionActionBar");
                 selection.SetActive(true);
-                selection.transform.Find("Name").GetComponent<UnityEngine.UI.Text>().text = cottage.Definition.DisplayName;
+                selection.transform.Find("Name").GetComponent<TMPro.TMP_Text>().text = cottage.Definition.DisplayName;
                 UnityEngine.Object.FindAnyObjectByType<SelectionOutline>().Show(cottage);
 
                 var layer = UnityEngine.Object.FindAnyObjectByType<FloatingTextLayer>(FindObjectsInactive.Include);
@@ -237,7 +237,7 @@ namespace TownBuilder.EditorTools
             {
                 var selection = Find(canvas, "SelectionActionBar");
                 selection.SetActive(true);
-                selection.transform.Find("Name").GetComponent<UnityEngine.UI.Text>().text = "Bakery";
+                selection.transform.Find("Name").GetComponent<TMPro.TMP_Text>().text = "Bakery";
                 var root = Find(canvas, "FactoryPanel").transform.Find("Root").gameObject;
                 root.SetActive(true);
                 content.TryGetBuilding("bakery", out var bakeryDef);
@@ -256,18 +256,18 @@ namespace TownBuilder.EditorTools
                 slots[1].ShowActive(icon0, 0.4f, "1m 48s");
                 slots[2].ShowWaiting(bakeryDef.Recipes[1].Output.Icon);
                 slots[3].gameObject.SetActive(false);
-                root.transform.Find("QueueTitle/Text").GetComponent<UnityEngine.UI.Text>().text = "Queue 3/3";
-                root.transform.Find("Queue/Actions/CollectButton/Label").GetComponent<UnityEngine.UI.Text>().text = "Collect (1)";
-                root.transform.Find("Queue/Actions/FinishNowButton/Label").GetComponent<UnityEngine.UI.Text>().text = "Finish now (ad)";
+                root.transform.Find("QueueTitle/Text").GetComponent<TMPro.TMP_Text>().text = "Queue 3/3";
+                root.transform.Find("Queue/Actions/CollectButton/Label").GetComponent<TMPro.TMP_Text>().text = "Collect (1)";
+                root.transform.Find("Queue/Actions/FinishNowButton/Label").GetComponent<TMPro.TMP_Text>().text = "Finish now (ad)";
             }
 
             if (state == HudState.Barn)
             {
                 var barnRoot = Find(canvas, "BarnPanel").transform.Find("Root").gameObject;
                 barnRoot.SetActive(true);
-                barnRoot.transform.Find("Window/Title/Text").GetComponent<UnityEngine.UI.Text>().text = $"Barn   {barn.Total}/{barn.Capacity}";
+                barnRoot.transform.Find("Window/Title/Text").GetComponent<TMPro.TMP_Text>().text = $"Barn   {barn.Total}/{barn.Capacity}";
                 barnRoot.transform.Find("Window/Empty").gameObject.SetActive(false);
-                barnRoot.transform.Find("Window/ExpandButton/Label").GetComponent<UnityEngine.UI.Text>().text = "Expand +25\n200 coins";
+                barnRoot.transform.Find("Window/ExpandButton/Label").GetComponent<TMPro.TMP_Text>().text = "Expand +25\n200 coins";
                 var template = barnRoot.GetComponentsInChildren<BarnItemView>(true).First();
                 foreach (var pair in barn.Items)
                 {
@@ -282,7 +282,7 @@ namespace TownBuilder.EditorTools
             {
                 var selection = Find(canvas, "SelectionActionBar");
                 selection.SetActive(true);
-                selection.transform.Find("Name").GetComponent<UnityEngine.UI.Text>().text = "Field";
+                selection.transform.Find("Name").GetComponent<TMPro.TMP_Text>().text = "Field";
                 var fieldRoot = Find(canvas, "FieldPanel").transform.Find("Root").gameObject;
                 fieldRoot.SetActive(true);
                 var template = fieldRoot.GetComponentsInChildren<CropButtonView>(true).First();

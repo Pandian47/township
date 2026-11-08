@@ -2,6 +2,7 @@ using System;
 using TownBuilder.Domain;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace TownBuilder
 {
@@ -9,9 +10,9 @@ namespace TownBuilder
     public sealed class OrderCardView : MonoBehaviour
     {
         [SerializeField] private Image[] rowIcons = new Image[0];
-        [SerializeField] private Text[] rowTexts = new Text[0];
-        [SerializeField] private Text rewardText;
-        [SerializeField] private Text waitingText;
+        [SerializeField] private TMP_Text[] rowTexts = new TMP_Text[0];
+        [SerializeField] private TMP_Text rewardText;
+        [SerializeField] private TMP_Text waitingText;
         [SerializeField] private Button deliverButton;
         [SerializeField] private Button skipButton;
 

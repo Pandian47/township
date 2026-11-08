@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace TownBuilder
 {
@@ -8,8 +9,8 @@ namespace TownBuilder
     {
         [SerializeField] private Button button;
         [SerializeField] private Image icon;
-        [SerializeField] private Text nameText;
-        [SerializeField] private Text ingredientsText;
+        [SerializeField] private TMP_Text nameText;
+        [SerializeField] private TMP_Text ingredientsText;
 
         private static readonly Color Ok = new Color(0.2f, 0.2f, 0.2f);
         private static readonly Color Missing = new Color(0.85f, 0.2f, 0.2f);

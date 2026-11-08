@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace TownBuilder
 {
@@ -7,13 +8,13 @@ namespace TownBuilder
     public sealed class ConstructionPanel : MonoBehaviour
     {
         [SerializeField] private GameObject panelRoot;
-        [SerializeField] private Text titleText;
-        [SerializeField] private Text statusText;
+        [SerializeField] private TMP_Text titleText;
+        [SerializeField] private TMP_Text statusText;
         [SerializeField] private Image progressFill;
         [SerializeField] private Button adButton;
-        [SerializeField] private Text adLabel;
+        [SerializeField] private TMP_Text adLabel;
         [SerializeField] private Button gemsButton;
-        [SerializeField] private Text gemsLabel;
+        [SerializeField] private TMP_Text gemsLabel;
 
         private ConstructionController _construction;
         private IAdService _ads;

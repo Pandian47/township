@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace TownBuilder
 {
@@ -8,9 +9,9 @@ namespace TownBuilder
     public sealed class ConfirmDialog : MonoBehaviour
     {
         [SerializeField] private GameObject dialogRoot;
-        [SerializeField] private Text messageText;
+        [SerializeField] private TMP_Text messageText;
         [SerializeField] private Button confirmButton;
-        [SerializeField] private Text confirmLabel;
+        [SerializeField] private TMP_Text confirmLabel;
         [SerializeField] private Button cancelButton;
 
         private Action _onConfirm;

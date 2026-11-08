@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TownBuilder.Domain;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace TownBuilder
 {
@@ -15,7 +16,7 @@ namespace TownBuilder
     public sealed class FieldPanel : MonoBehaviour
     {
         [SerializeField] private GameObject panelRoot;
-        [SerializeField] private Text titleText;
+        [SerializeField] private TMP_Text titleText;
 
         [Header("Empty field: crop picker")]
         [SerializeField] private GameObject cropsView;
@@ -24,10 +25,10 @@ namespace TownBuilder
 
         [Header("Growing / ready field")]
         [SerializeField] private GameObject growingView;
-        [SerializeField] private Text statusText;
+        [SerializeField] private TMP_Text statusText;
         [SerializeField] private Image progressFill;
         [SerializeField] private Button actionButton;
-        [SerializeField] private Text actionLabel;
+        [SerializeField] private TMP_Text actionLabel;
 
         private readonly List<CropButtonView> _cropButtons = new List<CropButtonView>();
         private FarmingController _farming;

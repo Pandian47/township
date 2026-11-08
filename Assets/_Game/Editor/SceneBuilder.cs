@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using TMPro;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -454,7 +455,7 @@ namespace TownBuilder.EditorTools
                 Prefer(card, 500, 620);
 
                 var icons = new Image[3];
-                var texts = new Text[3];
+                var texts = new TMP_Text[3];
                 for (int r = 0; r < 3; r++)
                 {
                     var line = MakeRect($"Line{r + 1}", card, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -24 - r * 108), new Vector2(-40, 96));
@@ -462,13 +463,7 @@ namespace TownBuilder.EditorTools
                     icons[r] = iconRect.gameObject.AddComponent<Image>();
                     icons[r].raycastTarget = false;
                     var textRect = MakeRect("Text", line, new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(0f, 0.5f), new Vector2(112, 0), new Vector2(-112, 0));
-                    texts[r] = textRect.gameObject.AddComponent<Text>();
-                    texts[r].font = UIFont;
-                    texts[r].fontSize = 34;
-                    texts[r].fontStyle = FontStyle.Bold;
-                    texts[r].alignment = TextAnchor.MiddleLeft;
-                    texts[r].raycastTarget = false;
-                    texts[r].horizontalOverflow = HorizontalWrapMode.Wrap;
+                    texts[r] = AddText(textRect.gameObject, "", 34, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
                 }
 
                 var rewardRect = MakeRect("Reward", card, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 140), new Vector2(-40, 60));
@@ -760,7 +755,8 @@ namespace TownBuilder.EditorTools
         {
             var rect = Stretch("FloatingTextLayer", canvas.transform);
             var layer = rect.gameObject.AddComponent<FloatingTextLayer>();
-            Wire(layer, ("worldCamera", cam), ("font", UIFont));
+            Wire(layer, ("worldCamera", cam), ("font", UIFontAsset),
+                ("fontMaterial", AssetDatabase.LoadAssetAtPath<Material>(ProjectSetup.UIFontOutlineMaterialPath)));
             return layer;
         }
 
@@ -777,7 +773,7 @@ namespace TownBuilder.EditorTools
             return toast;
         }
 
-        private static Text Pill(RectTransform parent, string name, float width)
+        private static TMP_Text Pill(RectTransform parent, string name, float width)
         {
             var rt = MakeRect(name, parent, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(width, 76));
             AddImage(rt, PillColor);

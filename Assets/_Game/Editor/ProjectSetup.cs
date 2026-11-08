@@ -25,6 +25,10 @@ namespace TownBuilder.EditorTools
         public const string ProductName = "TownBuilder";
         public const string ContentPath = Root + "/ScriptableObjects/GameContent.asset";
         public const string BuildingPrefabPath = Root + "/Prefabs/Buildings/BuildingView.prefab";
+        /// <summary>TextMeshPro's bundled font (Liberation Sans, SIL Open Font License). Swap for the final game font later.</summary>
+        public const string UIFontAssetPath = "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset";
+        private const string TmpEssentialsPackage = "Packages/com.unity.ugui/Package Resources/TMP Essential Resources.unitypackage";
+        public const string UIFontOutlineMaterialPath = Root + "/Materials/UIFont Outline.mat";
         public const string SilhouetteShaderPath = Root + "/Shaders/SpriteSilhouette.shader";
         public const string SilhouetteMaterialPath = Root + "/Materials/SpriteSilhouette.mat";
 
@@ -144,6 +148,7 @@ namespace TownBuilder.EditorTools
         public static void Run(bool overwriteScenes)
         {
             CreateFolders();
+            EnsureTextMeshPro();
             ConfigurePlayerSettings();
 
             var art = PlaceholderArtGenerator.Generate(Seeds.Where(s => !s.FarmPlot).Select(s => new PlaceholderArtGenerator.BuildingArtSpec
@@ -383,9 +388,25 @@ namespace TownBuilder.EditorTools
         public const string AdsConfigPath = Root + "/ScriptableObjects/AdsConfig.asset";
 
         /// <summary>Generates placeholder sounds + music (if missing) and links the SoundLibrary from GameContent.</summary>
+        /// <summary>
+        /// Imports TextMeshPro's essential resources (settings, shaders, default font) once. They ship inside the
+        /// UI package (com.unity.ugui) already in the project, so no new package is added.
+        /// </summary>
+        private static void EnsureTextMeshPro()
+        {
+            if (AssetDatabase.LoadAssetAtPath<TMPro.TMP_FontAsset>(UIFontAssetPath) != null) return;
+            string package = System.IO.Path.GetFullPath(TmpEssentialsPackage);
+            if (!System.IO.File.Exists(package)) throw new InvalidOperationException($"TMP essentials not found at {package}");
+            // Package import finishes after this method returns, so setup has to run again afterwards.
+            // Command line alternative: Unity.exe -batchmode -quit -projectPath . -importPackage "<that package>"
+            AssetDatabase.ImportPackage(package, false);
+            throw new InvalidOperationException("Importing TextMeshPro essential resources now. Run setup again once the import has finished.");
+        }
+
         /// <summary>Material for the selection outline (flat-colour sprite silhouette), created once.</summary>
         private static void ConfigureEffects()
         {
+            CreateFontOutlineMaterial();
             if (AssetDatabase.LoadAssetAtPath<Material>(SilhouetteMaterialPath) != null) return;
             var shader = AssetDatabase.LoadAssetAtPath<Shader>(SilhouetteShaderPath);
             if (shader == null)
@@ -395,6 +416,29 @@ namespace TownBuilder.EditorTools
             }
 
             AssetDatabase.CreateAsset(new Material(shader) { name = "SpriteSilhouette" }, SilhouetteMaterialPath);
+        }
+
+        /// <summary>
+        /// Outline + soft shadow variant of the UI font material, for text drawn over the world ("+2 Wheat").
+        /// The mobile TMP shader only draws outlines/underlays when their keywords are on, so it's a separate preset.
+        /// </summary>
+        private static void CreateFontOutlineMaterial()
+        {
+            if (AssetDatabase.LoadAssetAtPath<Material>(UIFontOutlineMaterialPath) != null) return;
+            var font = AssetDatabase.LoadAssetAtPath<TMPro.TMP_FontAsset>(UIFontAssetPath);
+            if (font == null || font.material == null) return;
+
+            var mat = new Material(font.material) { name = "UIFont Outline" };
+            mat.EnableKeyword("OUTLINE_ON");
+            mat.EnableKeyword("UNDERLAY_ON");
+            mat.SetFloat("_FaceDilate", 0.2f);
+            mat.SetFloat("_OutlineWidth", 0.25f);
+            mat.SetColor("_OutlineColor", new Color(0.12f, 0.1f, 0.08f, 1f));
+            mat.SetColor("_UnderlayColor", new Color(0f, 0f, 0f, 0.45f));
+            mat.SetFloat("_UnderlayOffsetX", 0.3f);
+            mat.SetFloat("_UnderlayOffsetY", -0.6f);
+            mat.SetFloat("_UnderlaySoftness", 0.15f);
+            AssetDatabase.CreateAsset(mat, UIFontOutlineMaterialPath);
         }
 
         private static void ConfigureAudio()

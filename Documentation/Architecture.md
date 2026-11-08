@@ -1,7 +1,7 @@
 # Architecture
 
 TownBuilder (working title) is an offline-first 2D isometric farming and town-building game for Android.
-It is built with Unity 6 (6000.6), C#, URP 2D, the Input System, uGUI and JSON saves.
+It is built with Unity 6 (6000.6), C#, URP 2D, the Input System, uGUI + TextMeshPro and JSON saves.
 
 This document is the source of truth for how the code is organised. Update it whenever a system is added.
 
@@ -194,6 +194,19 @@ Pieces (all in `Scripts/Effects`):
 
 Effects are cosmetic only: no state, nothing saved, and gameplay works the same without them.
 
+## 6h. UI text (TextMeshPro)
+
+All UI text is TextMeshPro (`TMP_Text` fields, `TextMeshProUGUI` components). Never add legacy `UnityEngine.UI.Text`.
+
+* TMP is part of the UI package (`com.unity.ugui`) that the project already uses, so no extra package was added.
+  Its essential resources (settings, SDF shaders, default font) live in `Assets/TextMesh Pro/` and are committed.
+* Font: **Liberation Sans SDF** (SIL Open Font License, bundled with TMP), path in `ProjectSetup.UIFontAssetPath`.
+  `Materials/UIFont Outline.mat` is an outline + soft shadow preset of it, used by the floating reward labels.
+* Scene text is created by `EditorUtil.AddText/Label`. Button labels auto-size down to 60% so long labels fit.
+  Bold uses `characterSpacing -4` because TMP's synthetic bold is wide.
+* Setup imports the TMP resources on the first run. Batch mode imports packages asynchronously, so a fresh clone
+  without `Assets/TextMesh Pro/` must import them with `-importPackage` first (see AssetImportGuide.md, section 6).
+
 ## 7. Save system
 
 * `JsonSaveStore` writes `town.json.tmp`, flushes it to disk, then `File.Replace`s it over `town.json`, keeping the old file as `town.json.bak`.
@@ -225,5 +238,5 @@ Effects are cosmetic only: no state, nothing saved, and gameplay works the same 
 | Characters on their own sorting layer | Characters share the **Objects** layer | Characters must sort in depth against buildings. A separate layer would always draw them on top. |
 | Sorting order per object | Sort by pivot Y | No manual order numbers to maintain. |
 | Manual project setup | `ProjectSetup` editor script (menu + command line) | The setup is reproducible and reviewable, with no forgotten clicks. |
-| TextMeshPro UI | Legacy uGUI `Text` for now | No TMP essentials import is needed in batch mode. Migrate to TMP during the visual-polish milestone. |
+| TextMeshPro UI | **TextMeshPro** since v0.7.0 (Milestone 3 step 4) | Started on legacy `Text` to keep batch setup simple; switched once the core loop worked. See section 6h. |
 | "Don't use placeholder art" | Generated placeholder sprites (`PH_*`) that follow the final conventions | Lets the code and pipeline be verified before AI art exists. Replace PNGs one by one (see AssetImportGuide.md). |

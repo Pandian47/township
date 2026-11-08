@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
@@ -47,7 +48,70 @@ namespace TownBuilder.EditorTools
         private static Font _font;
         private static Sprite _rounded;
 
+        private static TMP_FontAsset _fontAsset;
+
         public static Font UIFont => _font != null ? _font : _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+
+        /// <summary>TextMeshPro font used by all UI text (imported by ProjectSetup.EnsureTextMeshPro).</summary>
+        public static TMP_FontAsset UIFontAsset
+        {
+            get
+            {
+                if (_fontAsset != null) return _fontAsset;
+                _fontAsset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(ProjectSetup.UIFontAssetPath);
+                if (_fontAsset == null) throw new InvalidOperationException($"Missing UI font {ProjectSetup.UIFontAssetPath}. Run TownBuilder > Setup.");
+                return _fontAsset;
+            }
+        }
+
+        public const float BoldCharacterSpacing = -4f;
+
+        public static TextAlignmentOptions ToTmp(TextAnchor anchor)
+        {
+            switch (anchor)
+            {
+                case TextAnchor.UpperLeft: return TextAlignmentOptions.TopLeft;
+                case TextAnchor.UpperCenter: return TextAlignmentOptions.Top;
+                case TextAnchor.UpperRight: return TextAlignmentOptions.TopRight;
+                case TextAnchor.MiddleLeft: return TextAlignmentOptions.Left;
+                case TextAnchor.MiddleRight: return TextAlignmentOptions.Right;
+                case TextAnchor.LowerLeft: return TextAlignmentOptions.BottomLeft;
+                case TextAnchor.LowerCenter: return TextAlignmentOptions.Bottom;
+                case TextAnchor.LowerRight: return TextAlignmentOptions.BottomRight;
+                default: return TextAlignmentOptions.Center;
+            }
+        }
+
+        public static FontStyles ToTmp(FontStyle style)
+        {
+            switch (style)
+            {
+                case FontStyle.Bold: return FontStyles.Bold;
+                case FontStyle.Italic: return FontStyles.Italic;
+                case FontStyle.BoldAndItalic: return FontStyles.Bold | FontStyles.Italic;
+                default: return FontStyles.Normal;
+            }
+        }
+
+        /// <summary>A TextMeshPro UI text with the project font, no raycasts, wrapping on.</summary>
+        public static TextMeshProUGUI AddText(GameObject go, string text, int fontSize, TextAnchor alignment, Color color,
+            FontStyle style = FontStyle.Normal)
+        {
+            var t = go.AddComponent<TextMeshProUGUI>();
+            t.font = UIFontAsset;
+            t.text = text;
+            t.fontSize = fontSize;
+            t.alignment = ToTmp(alignment);
+            t.color = color;
+            t.fontStyle = ToTmp(style);
+            // TMP's synthetic bold adds letter spacing; pull it back so bold reads like a normal bold weight.
+            if ((style & FontStyle.Bold) != 0) t.characterSpacing = BoldCharacterSpacing;
+            t.raycastTarget = false;
+            t.textWrappingMode = TextWrappingModes.Normal;
+            t.overflowMode = TextOverflowModes.Overflow;
+            t.richText = false;
+            return t;
+        }
         public static Sprite RoundedSprite => _rounded != null ? _rounded : _rounded = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
 
         public static RectTransform MakeRect(string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot,
@@ -87,24 +151,14 @@ namespace TownBuilder.EditorTools
             return img;
         }
 
-        public static Text Label(Transform parent, string name, string text, int fontSize, TextAnchor alignment, Color color,
+        public static TMP_Text Label(Transform parent, string name, string text, int fontSize, TextAnchor alignment, Color color,
             FontStyle style = FontStyle.Normal)
         {
             var rt = Stretch(name, parent);
-            var t = rt.gameObject.AddComponent<Text>();
-            t.font = UIFont;
-            t.text = text;
-            t.fontSize = fontSize;
-            t.alignment = alignment;
-            t.color = color;
-            t.fontStyle = style;
-            t.raycastTarget = false;
-            t.horizontalOverflow = HorizontalWrapMode.Wrap;
-            t.verticalOverflow = VerticalWrapMode.Truncate;
-            return t;
+            return AddText(rt.gameObject, text, fontSize, alignment, color, style);
         }
 
-        public static Button MakeButton(Transform parent, string name, string label, Vector2 size, Color color, out Text labelText, int fontSize = 40)
+        public static Button MakeButton(Transform parent, string name, string label, Vector2 size, Color color, out TMP_Text labelText, int fontSize = 40)
         {
             var rt = MakeRect(name, parent, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, size);
             var img = AddImage(rt, color);
@@ -117,6 +171,11 @@ namespace TownBuilder.EditorTools
             le.preferredWidth = size.x;
             le.preferredHeight = size.y;
             labelText = Label(rt, "Label", label, fontSize, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+            // Long labels ("Finish now 2 gems") shrink to fit the button instead of touching its edges.
+            labelText.enableAutoSizing = true;
+            labelText.fontSizeMax = fontSize;
+            labelText.fontSizeMin = Mathf.Round(fontSize * 0.6f);
+            labelText.margin = new Vector4(10f, 4f, 10f, 4f);
             return button;
         }
 

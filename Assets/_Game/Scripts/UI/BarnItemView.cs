@@ -1,17 +1,18 @@
 using System;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace TownBuilder
 {
     public sealed class BarnItemView : MonoBehaviour
     {
         [SerializeField] private Image icon;
-        [SerializeField] private Text nameText;
-        [SerializeField] private Text priceText;
+        [SerializeField] private TMP_Text nameText;
+        [SerializeField] private TMP_Text priceText;
         [SerializeField] private Button sellOneButton;
         [SerializeField] private Button sellAllButton;
-        [SerializeField] private Text sellAllLabel;
+        [SerializeField] private TMP_Text sellAllLabel;
 
         private string _itemId;
         private Action<string> _sellOne;

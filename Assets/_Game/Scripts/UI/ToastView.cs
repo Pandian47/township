@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace TownBuilder
 {
@@ -7,7 +8,7 @@ namespace TownBuilder
     [RequireComponent(typeof(CanvasGroup))]
     public sealed class ToastView : MonoBehaviour
     {
-        [SerializeField] private Text messageText;
+        [SerializeField] private TMP_Text messageText;
         [SerializeField] private float holdSeconds = 1.6f;
         [SerializeField] private float fadeSeconds = 0.4f;
 

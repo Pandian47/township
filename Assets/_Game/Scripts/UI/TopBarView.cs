@@ -1,15 +1,16 @@
 using TownBuilder.Domain;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace TownBuilder
 {
     public sealed class TopBarView : MonoBehaviour
     {
-        [SerializeField] private Text levelText;
-        [SerializeField] private Text coinsText;
-        [SerializeField] private Text gemsText;
-        [SerializeField] private Text barnText;
+        [SerializeField] private TMP_Text levelText;
+        [SerializeField] private TMP_Text coinsText;
+        [SerializeField] private TMP_Text gemsText;
+        [SerializeField] private TMP_Text barnText;
 
         private Wallet _wallet;
         private PlayerProgress _progress;
@@ -63,7 +64,7 @@ namespace TownBuilder
             _lastBarn = _inventory != null ? _inventory.Total : 0;
         }
 
-        private static void PopPill(Text text)
+        private static void PopPill(TMP_Text text)
         {
             if (text != null && text.transform.parent != null)
                 PopAnimator.Play(text.transform.parent, PopAnimator.Style.Uniform, 0.08f, 0.3f);

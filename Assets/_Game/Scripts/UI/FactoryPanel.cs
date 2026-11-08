@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using TownBuilder.Domain;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace TownBuilder
 {
@@ -12,8 +13,8 @@ namespace TownBuilder
     public sealed class FactoryPanel : MonoBehaviour
     {
         [SerializeField] private GameObject panelRoot;
-        [SerializeField] private Text titleText;
-        [SerializeField] private Text queueTitleText;
+        [SerializeField] private TMP_Text titleText;
+        [SerializeField] private TMP_Text queueTitleText;
 
         [Header("Recipes")]
         [SerializeField] private Transform recipesParent;
@@ -22,9 +23,9 @@ namespace TownBuilder
         [Header("Queue")]
         [SerializeField] private QueueSlotView[] slots = new QueueSlotView[0];
         [SerializeField] private Button collectButton;
-        [SerializeField] private Text collectLabel;
+        [SerializeField] private TMP_Text collectLabel;
         [SerializeField] private Button finishNowButton;
-        [SerializeField] private Text finishNowLabel;
+        [SerializeField] private TMP_Text finishNowLabel;
 
         private readonly List<RecipeButtonView> _recipeButtons = new List<RecipeButtonView>();
         private ProductionController _production;

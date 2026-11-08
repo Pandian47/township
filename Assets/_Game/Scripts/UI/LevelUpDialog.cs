@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace TownBuilder
 {
@@ -8,9 +9,9 @@ namespace TownBuilder
     public sealed class LevelUpDialog : MonoBehaviour
     {
         [SerializeField] private GameObject dialogRoot;
-        [SerializeField] private Text titleText;
-        [SerializeField] private Text rewardsText;
-        [SerializeField] private Text unlocksText;
+        [SerializeField] private TMP_Text titleText;
+        [SerializeField] private TMP_Text rewardsText;
+        [SerializeField] private TMP_Text unlocksText;
         [SerializeField] private Button okButton;
 
         private readonly Queue<LevelUpInfo> _pending = new Queue<LevelUpInfo>();

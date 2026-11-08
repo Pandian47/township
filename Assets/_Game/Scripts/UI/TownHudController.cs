@@ -2,6 +2,7 @@ using System;
 using TownBuilder.Domain;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace TownBuilder
 {
@@ -43,13 +44,13 @@ namespace TownBuilder
 
         [Header("Placement bar (placing / moving)")]
         [SerializeField] private GameObject placementBar;
-        [SerializeField] private Text placementInfoText;
+        [SerializeField] private TMP_Text placementInfoText;
         [SerializeField] private Button confirmPlacementButton;
         [SerializeField] private Button cancelPlacementButton;
 
         [Header("Selection bar")]
         [SerializeField] private GameObject selectionBar;
-        [SerializeField] private Text selectionNameText;
+        [SerializeField] private TMP_Text selectionNameText;
         [SerializeField] private Button moveButton;
         [SerializeField] private Button removeButton;
         [SerializeField] private Button deselectButton;

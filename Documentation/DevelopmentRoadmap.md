@@ -96,7 +96,7 @@ close and reopen with nothing lost.
 | 1 | Construction timers: build time per building, hammer badge, buildings work only when finished, build XP, finish early with an ad or gems | **Done** (v0.4.0) |
 | 2 | Sound effects and music (placement, harvest, collect, level-up, UI taps): original placeholders, see Audio.md | **Done** (v0.5.0) |
 | 3 | Visual feedback: selection outline, harvest/collect pop effects, floating "+2 Wheat" in the world | **Done** (v0.6.0) |
-| 4 | UI text on TextMeshPro (sharper text on high-DPI phones) | Next |
+| 4 | UI text on TextMeshPro (sharper text on high-DPI phones) | **Done** (v0.7.0) |
 | 5 | First AI art set dropped in (see ArtStyleGuide.md asset list) | Waiting on your art |
 
 ### Device checklist (Milestone 3 step 1: construction)
@@ -124,6 +124,12 @@ close and reopen with nothing lost.
 - [ ] A building finishing construction bounces and shows "+XP"
 - [ ] Coins / Gems / Level / Barn pills in the top bar briefly grow when the value goes up (sell, deliver, ad reward)
 - [ ] Frame rate stays smooth while harvesting several fields quickly
+
+### Device checklist (Milestone 3 step 4: TextMeshPro text)
+- [ ] All text (menu, top bar, panels, buttons, toasts, level-up dialog) is crisp, with no blurry edges, also when you zoom the phone screenshot
+- [ ] No empty boxes instead of letters (check the "·" in "Lv 1 · 0 XP" and "x12 · 2 coins each")
+- [ ] No text sticks out of its button or panel; "Finish now / 2 gems" fits on two lines
+- [ ] Floating "+2 Wheat" labels have a dark outline and are readable on grass and on buildings
 
 ## Milestone 4: Factories and economy
 More factories and recipes (dairy, sugar, feed mill), production upgrades.

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -26,20 +27,21 @@ namespace TownBuilder
     public sealed class FloatingTextLayer : MonoBehaviour
     {
         [SerializeField] private Camera worldCamera;
-        [SerializeField] private Font font;
+        [SerializeField] private TMP_FontAsset font;
         [SerializeField] private int fontSize = 46;
         [SerializeField] private float lineHeight = 58f;
         [SerializeField] private float iconSize = 54f;
         [SerializeField] private float duration = 1.5f;
         [Tooltip("How far a label rises over its lifetime (canvas units, 1080p reference).")]
         [SerializeField] private float rise = 120f;
-        [SerializeField] private Color outlineColor = new Color(0.12f, 0.1f, 0.08f, 0.9f);
+        [Tooltip("Font material with outline + shadow (Materials/UIFont Outline.mat), so labels read over any background.")]
+        [SerializeField] private Material fontMaterial;
 
         private sealed class Popup
         {
             public RectTransform Root;
             public CanvasGroup Group;
-            public readonly List<(RectTransform row, Image icon, Text text)> Rows = new List<(RectTransform, Image, Text)>();
+            public readonly List<(RectTransform row, Image icon, TMP_Text text)> Rows = new List<(RectTransform, Image, TMP_Text)>();
             public Vector3 World;
             public float Age;
             public int LineCount;
@@ -168,7 +170,7 @@ namespace TownBuilder
                 _canvas = c != null ? c.rootCanvas : null;
             }
 
-            if (font == null) font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            if (font == null) font = TMP_Settings.defaultFontAsset;
         }
 
         private Popup CreatePopup()
@@ -186,7 +188,7 @@ namespace TownBuilder
             return new Popup { Root = rt, Group = group };
         }
 
-        private (RectTransform, Image, Text) CreateRow(RectTransform parent)
+        private (RectTransform, Image, TMP_Text) CreateRow(RectTransform parent)
         {
             var row = new GameObject("Line", typeof(RectTransform));
             row.layer = gameObject.layer;
@@ -211,20 +213,17 @@ namespace TownBuilder
             var textRect = (RectTransform)textGo.transform;
             textRect.SetParent(rowRect, false);
             textRect.anchorMin = textRect.anchorMax = new Vector2(0.5f, 0.5f);
-            var text = textGo.AddComponent<Text>();
+            var text = textGo.AddComponent<TextMeshProUGUI>();
             text.font = font;
             text.fontSize = fontSize;
-            text.fontStyle = FontStyle.Bold;
-            text.alignment = TextAnchor.MiddleCenter;
-            text.horizontalOverflow = HorizontalWrapMode.Overflow;
-            text.verticalOverflow = VerticalWrapMode.Overflow;
+            text.fontStyle = FontStyles.Bold;
+            text.characterSpacing = -4f; // TMP's synthetic bold is wide
+            text.alignment = TextAlignmentOptions.Center;
+            text.textWrappingMode = TextWrappingModes.NoWrap;
+            text.overflowMode = TextOverflowModes.Overflow;
+            text.richText = false;
             text.raycastTarget = false;
-            var outline = textGo.AddComponent<Outline>();
-            outline.effectColor = outlineColor;
-            outline.effectDistance = new Vector2(2.5f, -2.5f);
-            var shadow = textGo.AddComponent<Shadow>();
-            shadow.effectColor = new Color(0f, 0f, 0f, 0.35f);
-            shadow.effectDistance = new Vector2(0f, -4f);
+            if (fontMaterial != null) text.fontSharedMaterial = fontMaterial;
 
             return (rowRect, icon, text);
         }

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace TownBuilder
 {
@@ -12,12 +13,12 @@ namespace TownBuilder
     public sealed class BarnPanel : MonoBehaviour
     {
         [SerializeField] private GameObject panelRoot;
-        [SerializeField] private Text titleText;
+        [SerializeField] private TMP_Text titleText;
         [SerializeField] private Transform itemsParent;
         [SerializeField] private BarnItemView itemTemplate;
-        [SerializeField] private Text emptyText;
+        [SerializeField] private TMP_Text emptyText;
         [SerializeField] private Button expandButton;
-        [SerializeField] private Text expandLabel;
+        [SerializeField] private TMP_Text expandLabel;
         [SerializeField] private Button closeButton;
 
         private readonly List<BarnItemView> _items = new List<BarnItemView>();

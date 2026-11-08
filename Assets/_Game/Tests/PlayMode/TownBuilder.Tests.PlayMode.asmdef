@@ -4,6 +4,7 @@
     "references": [
         "TownBuilder.Domain",
         "TownBuilder.Runtime",
+        "Unity.TextMeshPro",
         "UnityEngine.TestRunner"
     ],
     "includePlatforms": [],

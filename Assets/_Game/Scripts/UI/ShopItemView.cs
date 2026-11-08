@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace TownBuilder
 {
@@ -8,8 +9,8 @@ namespace TownBuilder
     {
         [SerializeField] private Button button;
         [SerializeField] private Image icon;
-        [SerializeField] private Text nameText;
-        [SerializeField] private Text priceText;
+        [SerializeField] private TMP_Text nameText;
+        [SerializeField] private TMP_Text priceText;
 
         public BuildingDefinition Definition { get; private set; }
 
