@@ -1,11 +1,11 @@
-# Playtest guide (v0.24.0)
+# Playtest guide (v0.24.1)
 
 One place for testing the game on a real Android phone. The detailed per-feature checklists stay in
 DevelopmentRoadmap.md; this guide is the order to play in and what to write down.
 
 ## 1. Install
 
-APK: `Builds/Android/TownBuilder-0.24.0-25.apk` (37 MB, test build, test ads only, developer mode included).
+APK: `Builds/Android/TownBuilder-0.24.1-26.apk` (37 MB, test build, test ads only, developer mode included).
 
 **Option A: copy the file (no cable needed)**
 1. Upload the APK to Google Drive (or send it to yourself), open it on the phone.
@@ -18,7 +18,7 @@ APK: `Builds/Android/TownBuilder-0.24.0-25.apk` (37 MB, test build, test ads onl
 2. Connect the cable, tap **Allow** on the "Allow USB debugging?" popup.
 3. Tell me, and I'll run the install with Unity's `adb`, or run it yourself:
    ```
-   "C:\Program Files\Unity\Hub\Editor\6000.6.8f1\Editor\Data\PlaybackEngines\AndroidPlayer\SDK\platform-tools\adb.exe" install -r "D:\01-Projects\05-Township\TownBuilder\Builds\Android\TownBuilder-0.24.0-25.apk"
+   "C:\Program Files\Unity\Hub\Editor\6000.6.8f1\Editor\Data\PlaybackEngines\AndroidPlayer\SDK\platform-tools\adb.exe" install -r "D:\01-Projects\05-Township\TownBuilder\Builds\Android\TownBuilder-0.24.1-26.apk"
    ```
 
 ## 2. Session A: a new town (30–45 minutes, sound on)
@@ -99,7 +99,7 @@ And three quick feelings after Session A:
 2. **Clarity:** was anything confusing (what to do next, what a button does)?
 3. **Comfort:** anything too small to tap, hidden behind a panel, or hard to read?
 
-## 7. Art still to generate (all optional, prompts in ArtPrompts.md)
+## 7. Replacing art later (prompts in ArtPrompts.md)
 
 Put the files in `D:\01-Projects\05-Township\Sources` with exactly these names, then tell me (or use
 TownBuilder → Art → Import AI Art Folder). Missing files simply keep their placeholder.

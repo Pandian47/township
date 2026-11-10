@@ -16,6 +16,8 @@ namespace TownBuilder
         [SerializeField] private Tilemap roadTilemap;
         [Tooltip("Townsfolk sprites (front view, pivot at the feet). One is picked per person; flipped for direction.")]
         [SerializeField] private Sprite[] peopleSprites = new Sprite[0];
+        [Tooltip("True when the townsfolk art faces/walks to the left (it's mirrored when they walk right).")]
+        [SerializeField] private bool peopleFaceLeft = true;
         [Tooltip("Car seen from the front / back, along the grid X axis (pivot at the bottom corner).")]
         [SerializeField] private Sprite carFront;
         [SerializeField] private Sprite carBack;
@@ -187,7 +189,7 @@ namespace TownBuilder
             {
                 // Face the direction of travel: screen-left (−X or +Y moves left on screen) flips the sprite.
                 float screenDx = (to - from).x;
-                if (Mathf.Abs(screenDx) > 0.001f) a.Renderer.flipX = screenDx < 0f;
+                if (Mathf.Abs(screenDx) > 0.001f) a.Renderer.flipX = peopleFaceLeft ? screenDx > 0f : screenDx < 0f;
             }
         }
 

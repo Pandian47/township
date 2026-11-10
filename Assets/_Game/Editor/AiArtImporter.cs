@@ -33,6 +33,11 @@ namespace TownBuilder.EditorTools
             Tile,
             /// <summary>Small standing prop (sign): fitted to <see cref="Spec.Width"/> pixels tall, pivot at the bottom centre.</summary>
             Prop,
+            /// <summary>
+            /// A straight isometric railway drawn diagonally (any length): a one-cell segment is cut along the track
+            /// (a whole number of sleepers, so tiles join without seams) into a 128x64 tile along the grid Y axis.
+            /// </summary>
+            IsoRail,
         }
 
         private sealed class Spec
@@ -67,7 +72,8 @@ namespace TownBuilder.EditorTools
             new Spec("bakery", Art + "/Buildings/Production/PH_Building_bakery.png", Kind.Building, 256),
             new Spec("train_station", Art + "/Buildings/Community/PH_Building_train_station.png", Kind.Building, 320, 2, 3),
             new Spec("train_station_train", Art + "/Buildings/Community/PH_Building_train_station_train.png", Kind.Building, 320, 2, 3),
-            new Spec("train", Art + "/Vehicles/PH_Vehicle_train.png", Kind.Building, 384, 1, 5),
+            // Vehicles are long diagonal shapes: measure the whole object (Flat), not the lower 40% (Building).
+            new Spec("train", Art + "/Vehicles/PH_Vehicle_train.png", Kind.Flat, 384, 1, 5),
             new Spec("silo", Art + "/Buildings/Production/PH_Building_silo.png", Kind.Building, 128),
             new Spec("feed_mill", Art + "/Buildings/Production/PH_Building_feed_mill.png", Kind.Building, 256),
             new Spec("sugar_mill", Art + "/Buildings/Production/PH_Building_sugar_mill.png", Kind.Building, 256),
@@ -115,13 +121,13 @@ namespace TownBuilder.EditorTools
             new Spec("person_3", Art + "/Characters/PH_Person_3.png", Kind.Prop, 64),
             new Spec("person_4", Art + "/Characters/PH_Person_4.png", Kind.Prop, 64),
             // Car: 1.3 x 0.7 cells along X; footprint 13x7 only sets the pivot ratio (bottom corner at 7/20 across).
-            new Spec("car_front", Art + "/Vehicles/PH_Vehicle_car_front.png", Kind.Building, 128, 13, 7),
-            new Spec("car_back", Art + "/Vehicles/PH_Vehicle_car_back.png", Kind.Building, 128, 13, 7),
+            new Spec("car_front", Art + "/Vehicles/PH_Vehicle_car_front.png", Kind.Flat, 128, 13, 7),
+            new Spec("car_back", Art + "/Vehicles/PH_Vehicle_car_back.png", Kind.Flat, 128, 13, 7),
             new Spec("coin", Art + "/UI/PH_Icon_Coin.png", Kind.Icon, 64),
             new Spec("gem", Art + "/UI/PH_Icon_Gem.png", Kind.Icon, 64),
             new Spec("xp_star", Art + "/UI/PH_Icon_Xp.png", Kind.Icon, 64),
             new Spec("for_sale_sign", Art + "/Environment/PH_Sign_ForSale.png", Kind.Prop, 96),
-            new Spec("rail", Art + "/Environment/Tiles/PH_Tile_Rail.png", Kind.Tile, 128),
+            new Spec("rail", Art + "/Environment/Tiles/PH_Tile_Rail.png", Kind.IsoRail, 128),
             new Spec("grass", Art + "/Environment/Tiles/PH_Tile_Grass.png", Kind.Tile, 128),
             new Spec("sand", Art + "/Environment/Tiles/PH_Tile_Sand.png", Kind.Tile, 128),
             new Spec("water", Art + "/Environment/Tiles/PH_Tile_Water.png", Kind.Tile, 128),
@@ -215,6 +221,7 @@ namespace TownBuilder.EditorTools
         private static Img Process(Img src, Spec spec)
         {
             if (spec.Kind == Kind.Tile) return MakeIsoTile(src, spec.Width);
+            if (spec.Kind == Kind.IsoRail) return MakeRailTile(KeyBackground(src), spec.Width);
 
             var keyed = KeyBackground(src);
             if (!FindBounds(keyed, out int minX, out int maxX, out int minY, out int maxY))
@@ -426,6 +433,123 @@ namespace TownBuilder.EditorTools
         }
 
         /// <summary>Square, tileable top-down texture -> isometric diamond (width x width/2), slightly oversized to avoid seams.</summary>
+        /// <summary>Fraction of a cell's width the railway bed (gravel + sleepers) should cover.</summary>
+        private const float RailBandShare = 0.62f;
+
+        private static Img MakeRailTile(Img src, int width)
+        {
+            // 1) Track direction = principal axis of the opaque pixels.
+            double sx = 0, sy = 0, n = 0;
+            for (int y = 0; y < src.H; y += 2)
+            for (int x = 0; x < src.W; x += 2)
+                if (src[x, y].a > 0.5f) { sx += x; sy += y; n++; }
+            if (n < 10) throw new InvalidOperationException("rail: no track found on the background");
+            double mx = sx / n, my = sy / n, cxx = 0, cyy = 0, cxy = 0;
+            for (int y = 0; y < src.H; y += 2)
+            for (int x = 0; x < src.W; x += 2)
+            {
+                if (src[x, y].a <= 0.5f) continue;
+                double dx = x - mx, dy = y - my;
+                cxx += dx * dx; cyy += dy * dy; cxy += dx * dy;
+            }
+
+            double angle = 0.5 * Math.Atan2(2 * cxy, cxx - cyy);
+            var along = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
+            if (along.x > 0f) along = -along; // grid +Y on screen = up-left (texture rows go up)
+            var across = new Vector2(-along.x, along.y); // the other isometric axis (mirror image)
+            var centre = new Vector2((float)mx, (float)my);
+
+            // 2) Width of the track bed along the "across" axis, measured at the centre.
+            float Extent(Vector2 dir)
+            {
+                int gap = 0;
+                float last = 0f;
+                for (float t = 0; t < src.W; t += 1f)
+                {
+                    var p = centre + dir * t;
+                    int x = Mathf.RoundToInt(p.x), y = Mathf.RoundToInt(p.y);
+                    if (x < 0 || y < 0 || x >= src.W || y >= src.H) break;
+                    if (src[x, y].a > 0.5f) { last = t; gap = 0; }
+                    else if (++gap > 6) break;
+                }
+
+                return last;
+            }
+
+            float plus = Extent(across), minus = Extent(-across);
+            centre += across * ((plus - minus) * 0.5f);
+            float cell = (plus + minus) / RailBandShare;
+
+            // 3) Sleeper period along the track (autocorrelation of brightness on a line off the centre), so one tile
+            //    holds a whole number of sleepers and neighbouring tiles join seamlessly.
+            var offset = across * ((plus + minus) * 0.12f);
+            float span = cell * 2.5f;
+            int samples = Mathf.Max(64, (int)span);
+            var lum = new float[samples];
+            for (int i = 0; i < samples; i++)
+            {
+                var p = centre + offset + along * (i - samples * 0.5f);
+                int x = Mathf.Clamp(Mathf.RoundToInt(p.x), 0, src.W - 1), y = Mathf.Clamp(Mathf.RoundToInt(p.y), 0, src.H - 1);
+                var c = src[x, y];
+                lum[i] = c.a > 0.5f ? c.r * 0.3f + c.g * 0.59f + c.b * 0.11f : 0f;
+            }
+
+            float mean = 0f;
+            foreach (var v in lum) mean += v;
+            mean /= samples;
+            int bestLag = 0;
+            float best = float.MinValue;
+            for (int lag = Mathf.Max(8, (int)(cell * 0.1f)); lag < cell * 0.6f && lag < samples / 2; lag++)
+            {
+                float s = 0f;
+                for (int i = 0; i + lag < samples; i++) s += (lum[i] - mean) * (lum[i + lag] - mean);
+                s /= samples - lag;
+                if (s > best) { best = s; bestLag = lag; }
+            }
+
+            float alongLength = bestLag > 0 ? Mathf.Max(1, Mathf.Round(cell / bestLag)) * bestLag : cell;
+
+            // 4) Sample the diamond: tile pixel → grid (gx across, gy along) → source point.
+            int height = width / 2;
+            var tile = new Img(width, height);
+            const int ss = 3;
+            float halfW = width * 0.5f, halfH = height * 0.5f;
+            for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++)
+            {
+                var sum = Color.clear;
+                int inside = 0;
+                for (int sy2 = 0; sy2 < ss; sy2++)
+                for (int sx2 = 0; sx2 < ss; sx2++)
+                {
+                    float dx = (x + (sx2 + 0.5f) / ss - halfW) / halfW, dy = (y + (sy2 + 0.5f) / ss - halfH) / halfH;
+                    if (Mathf.Abs(dx) + Mathf.Abs(dy) > 1f + 1.5f / halfW) continue;
+                    float gx = (dx + dy) * 0.5f, gy = (dy - dx) * 0.5f;
+                    var p = centre + across * (gx * cell) + along * (gy * alongLength);
+                    sum += Bilinear(src, p.x, p.y);
+                    inside++;
+                }
+
+                if (inside == 0) continue;
+                var c = sum / (ss * ss);
+                tile[x, y] = c.a > 0.001f ? new Color(c.r / c.a, c.g / c.a, c.b / c.a, c.a) : Color.clear;
+            }
+
+            Debug.Log($"[AiArt] rail: direction {along}, bed {plus + minus:0} px, cell {cell:0} px, sleeper period {bestLag} px, segment {alongLength:0} px");
+            return tile;
+        }
+
+        /// <summary>Premultiplied bilinear sample (transparent outside the image).</summary>
+        private static Color Bilinear(Img img, float fx, float fy)
+        {
+            fx -= 0.5f;
+            fy -= 0.5f;
+            int x0 = Mathf.FloorToInt(fx), y0 = Mathf.FloorToInt(fy);
+            float tx = fx - x0, ty = fy - y0;
+            Color P(int x, int y) => Premul(img, x, Mathf.Clamp(y, 0, img.H - 1)) * (y < 0 || y >= img.H ? 0f : 1f);
+            return Color.Lerp(Color.Lerp(P(x0, y0), P(x0 + 1, y0), tx), Color.Lerp(P(x0, y0 + 1), P(x0 + 1, y0 + 1), tx), ty);
+        }
+
         private static Img MakeIsoTile(Img src, int width)
         {
             int height = width / 2;

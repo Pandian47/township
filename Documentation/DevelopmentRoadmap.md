@@ -270,8 +270,8 @@ Owner's phone test of v0.19.1 passed. TextMeshPro and sound were already done in
 | 4 | UI polish: panels fade/slide or pop in, coins/gems/XP fly to the top bar, buttons squash when pressed | **Done** (v0.23.0) |
 | 5 | Decorations (Tree, Flower Bed, Bench, Fence, Fountain) in a new Decorations tab of the Build shop | **Done** (v0.24.0) |
 
-**Milestone 6 complete** (v0.24.0). Still open: AI art for the new visuals (17 optional images in ArtPrompts.md:
-train, rail, 4 townsfolk, car front/back, coin, gem, XP star, 5 decorations).
+**Milestone 6 complete** (v0.24.0). **v0.24.1:** all 17 AI images for the new visuals imported (train, rail, townsfolk,
+car, reward icons, decorations); every placeholder in the game is now replaced by AI art.
 
 ### Device checklist (Milestone 6 step 1: ambient life)
 - [ ] Growing and ripe crops gently sway; the soil and wooden border of the field stay still

@@ -48,6 +48,9 @@ What it does (`Assets/_Game/Editor/AiArtImporter.cs`):
   scales it to (w + h) × 64 px, and sets the pivot on the footprint's bottom corner (centre for square footprints,
   h/(w+h) across for wide ones like the 3×2 Train Station).
 * **Field:** whole object scaled to 128 px. **Crops:** plants scaled to 74% of the field and lifted 14 px so they sit in the soil.
+* **Rail (`rail.png`):** a straight diagonal track is accepted: the importer finds the track direction and sleeper
+  spacing and cuts a one-cell segment (a whole number of sleepers) into the 128 × 64 rail tile, so tiles join seamlessly.
+* **Vehicles (train, car):** sized by the whole object's width (they're long diagonal shapes).
 * **Icons:** fitted into 128 × 128. **Ground textures:** square top-down texture mapped onto a 128 × 64 diamond (1.5 px overlap, no seams).
 * Overwrites the `PH_` PNG and re-applies the standard import settings.
 
