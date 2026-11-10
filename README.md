@@ -38,7 +38,8 @@ An original 2D isometric farming and town-building game for Android, built AI-fi
 | Ambient life: swaying crops, chimney smoke from working factories, floating badges (Milestone 6 step 1) | ✅ |
 | The train drives along the railway: arrives, stops at the station, leaves (Milestone 6 step 2) | ✅ (placeholder train) |
 | Townsfolk and cars on the roads (Milestone 6 step 3) | ✅ (placeholder sprites) |
-| Automated tests: 133 EditMode + 52 PlayMode | ✅ |
+| UI polish: panel transitions, rewards fly to the top bar, button press squash (Milestone 6 step 4) | ✅ |
+| Automated tests: 133 EditMode + 55 PlayMode | ✅ |
 | First AI art set (buildings, field, crops, items, ground) + `AiArtImporter` tool | ✅ |
 | Android build | ⏳ install the Android Build Support module first |
 

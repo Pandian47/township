@@ -214,6 +214,7 @@ namespace TownBuilder.EditorTools
             PlaceholderArtGenerator.CreateSmokePuff();
             PlaceholderArtGenerator.CreateTrainSprite();
             PlaceholderArtGenerator.CreatePeopleSprites();
+            PlaceholderArtGenerator.CreateRewardIcons();
             PlaceholderArtGenerator.CreateCarSprite(true);
             PlaceholderArtGenerator.CreateCarSprite(false);
             PlaceholderArtGenerator.CreateSaleSign();

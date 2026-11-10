@@ -260,6 +260,15 @@ Saved in `SaveData.land.ownedPlots` ("x_y"); empty = initialise (start area + pl
   grid X axis and mirrored for the Y axis; front sprite when driving towards the viewer (−X/−Y), back sprite otherwise.
   Objects layer with pivot sorting. No colliders, so taps go straight through.
 
+## 6g8. UI polish (Milestone 6 step 4)
+
+* `PanelTransition`: added by the scene builder to every panel `Root` and the action bars. On `OnEnable` (play mode only)
+  it fades a CanvasGroup in and either pops the `Window` child (0.9 → 1.03 → 1) or slides the panel up 60 px. Closing is instant.
+* `RewardFlyer` (canvas layer `RewardFlyLayer`, above the panels): watches `Wallet.Changed` / `PlayerProgress.Changed` and
+  flies 1–8 pooled icons on a curved path from the last tap (Input System `Pointer`, last 1.2 s) or the screen centre to
+  the Coins / Gems / Level pill. Increases only.
+* `PressScale`: added by `ButtonSounds` to every button (except top-bar pills): squash to 0.93 while pressed.
+
 ## 6h. UI text (TextMeshPro)
 
 All UI text is TextMeshPro (`TMP_Text` fields, `TextMeshProUGUI` components). Never add legacy `UnityEngine.UI.Text`.

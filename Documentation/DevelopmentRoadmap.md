@@ -267,8 +267,8 @@ Owner's phone test of v0.19.1 passed. TextMeshPro and sound were already done in
 | 1 | **Ambient life**: crops sway in the wind (shader), smoke from the chimneys of working factories, "ready"/hammer/padlock badges float | **Done** (v0.20.0) |
 | 2 | **The train drives**: arrives along the railway, stops at the station, leaves (placeholder train sprite + art prompt) | **Done** (v0.21.0) |
 | 3 | Townspeople and vehicles moving along the roads (placeholder sprites + art prompts) | **Done** (v0.22.0) |
-| 4 | UI polish: panels slide/fade in, coins fly to the top bar on rewards | Next |
-| 5 | Decorations (trees, flowers, benches, fences) in a new shop tab | Planned |
+| 4 | UI polish: panels fade/slide or pop in, coins/gems/XP fly to the top bar, buttons squash when pressed | **Done** (v0.23.0) |
+| 5 | Decorations (trees, flowers, benches, fences) in a new shop tab | Next |
 
 ### Device checklist (Milestone 6 step 1: ambient life)
 - [ ] Growing and ripe crops gently sway; the soil and wooden border of the field stay still
@@ -290,6 +290,13 @@ Owner's phone test of v0.19.1 passed. TextMeshPro and sound were already done in
 - [ ] Building a Cottage adds one more walker (after a couple of seconds), up to 10
 - [ ] Walkers never block taps on buildings or fields
 - [ ] Frame rate stays smooth
+
+### Device checklist (Milestone 6 step 4: UI polish)
+- [ ] Barn, Orders, Shop, dialogs: fade in with the window popping slightly; bottom panels and action bars slide up
+- [ ] Sell, deliver, load a crate, claim a task: coin icons fly from your finger to the Coins pill; XP stars fly to the level pill; gems to Gems
+- [ ] Spending coins (building, buying land) flies nothing
+- [ ] Every button squashes a little while you hold it and springs back
+- [ ] Opening panels quickly one after another never leaves a panel half-transparent
 
 ## Milestone 7: Backend (months 10–12)
 Accounts, cloud saves with conflict resolution, server time (`IClock`), server-validated economy, analytics.

@@ -6,7 +6,7 @@ namespace TownBuilder
 {
     /// <summary>
     /// Put on a Canvas: every Button under it (including ones cloned at runtime, like shop and recipe cards)
-    /// plays the UI tap sound when clicked. New buttons are picked up by a cheap periodic scan.
+    /// plays the UI tap sound when clicked and squashes slightly while pressed. New buttons are picked up by a cheap periodic scan.
     /// </summary>
     public sealed class ButtonSounds : MonoBehaviour
     {
@@ -24,6 +24,8 @@ namespace TownBuilder
             {
                 if (!_hooked.Add(button)) continue;
                 button.onClick.AddListener(PlayTap);
+                // Squash on press (not on top-bar pills, which pop when their value changes).
+                if (!button.name.Contains("Pill") && button.GetComponent<PressScale>() == null) button.gameObject.AddComponent<PressScale>();
             }
         }
 

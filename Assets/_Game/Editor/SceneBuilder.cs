@@ -466,7 +466,19 @@ namespace TownBuilder.EditorTools
             // --- Confirm dialog (last = drawn on top)
             var dialog = CreateConfirmDialog(canvas.transform);
             var levelUp = BuildLevelUpDialog(canvas.transform);
+            var rewardLayer = Stretch("RewardFlyLayer", canvas.transform);
+            var rewardFlyer = rewardLayer.gameObject.AddComponent<RewardFlyer>();
+            Wire(rewardFlyer, ("coinsTarget", (RectTransform)coinsText.transform.parent), ("gemsTarget", (RectTransform)gemsText.transform.parent),
+                ("xpTarget", (RectTransform)levelText.transform.parent),
+                ("coinSprite", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CoinIconPath)),
+                ("gemSprite", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.GemIconPath)),
+                ("xpSprite", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.XpIconPath)));
             var devPanel = BuildDevPanel(canvas.transform);
+
+            // Every panel and action bar fades/slides in when shown.
+            foreach (var t in canvas.GetComponentsInChildren<Transform>(true))
+                if (t.name == "Root" || t.name == "SelectionActionBar" || t.name == "PlacementActionBar")
+                    t.gameObject.AddComponent<PanelTransition>();
 
             var hud = canvas.gameObject.AddComponent<TownHudController>();
             Wire(hud,
@@ -487,6 +499,7 @@ namespace TownBuilder.EditorTools
                 ("confirmDialog", dialog),
                 ("tasksPanel", tasksPanel),
                 ("devPanel", devPanel),
+                ("rewardFlyer", rewardFlyer),
                 ("bottomNavigation", nav.gameObject),
                 ("buildButton", buildButton),
                 ("rewardedCoinsButton", rewarded),

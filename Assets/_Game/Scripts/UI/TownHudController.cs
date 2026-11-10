@@ -16,6 +16,7 @@ namespace TownBuilder
         [SerializeField] private TrainPanel trainPanel;
         [SerializeField] private LandPanel landPanel;
         [SerializeField] private DevPanel devPanel;
+        [SerializeField] private RewardFlyer rewardFlyer;
 
         [Header("Ads")]
         [SerializeField] private RewardedCoinsButton rewardedCoinsButton;
@@ -85,6 +86,7 @@ namespace TownBuilder
             _wallet = wallet;
 
             topBar.Bind(wallet, progress, storage.Inventory);
+            if (rewardFlyer != null) rewardFlyer.Initialize(wallet, progress);
             fieldPanel.Initialize(farming, content, wallet, ads, onPlanted: () => _placement.Cancel());
             farming.Notification += toast.Show;
             storage.Notification += toast.Show;

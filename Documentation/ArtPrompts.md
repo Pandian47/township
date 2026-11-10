@@ -290,6 +290,13 @@ Background: plain solid flat magenta (#FF00FF).
 
 Then: "The exact same car, same angle and size, but now driving away towards the upper right, so its back with red tail lights is visible."
 
+## Milestone 6 step 4: reward icons → `coin.png`, `gem.png`, `xp_star.png`
+
+Same icon prompt as bread (section 15–16). Items:
+* `coin`: "a shiny gold coin with a simple embossed wheat symbol, front view"
+* `gem`: "a sparkling blue cut gemstone, front view"
+* `xp_star`: "a glowing light-blue five-pointed star"
+
 ---
 
 Do a **test set first**: cottage, field, wheat_4, bread and grass. Send those, check them in the game preview, and

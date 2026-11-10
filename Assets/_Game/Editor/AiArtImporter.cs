@@ -112,6 +112,9 @@ namespace TownBuilder.EditorTools
             // Car: 1.3 x 0.7 cells along X; footprint 13x7 only sets the pivot ratio (bottom corner at 7/20 across).
             new Spec("car_front", Art + "/Vehicles/PH_Vehicle_car_front.png", Kind.Building, 128, 13, 7),
             new Spec("car_back", Art + "/Vehicles/PH_Vehicle_car_back.png", Kind.Building, 128, 13, 7),
+            new Spec("coin", Art + "/UI/PH_Icon_Coin.png", Kind.Icon, 64),
+            new Spec("gem", Art + "/UI/PH_Icon_Gem.png", Kind.Icon, 64),
+            new Spec("xp_star", Art + "/UI/PH_Icon_Xp.png", Kind.Icon, 64),
             new Spec("for_sale_sign", Art + "/Environment/PH_Sign_ForSale.png", Kind.Prop, 96),
             new Spec("rail", Art + "/Environment/Tiles/PH_Tile_Rail.png", Kind.Tile, 128),
             new Spec("grass", Art + "/Environment/Tiles/PH_Tile_Grass.png", Kind.Tile, 128),

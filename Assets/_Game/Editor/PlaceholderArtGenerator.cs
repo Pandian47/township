@@ -611,6 +611,61 @@ namespace TownBuilder.EditorTools
         public const string ConstructionIconPath = UiArtFolder + "/PH_Icon_Construction.png";
 
         /// <summary>Hammer in a round badge, floated above buildings under construction. 128x128, pivot centre.</summary>
+        public const string CoinIconPath = UiArtFolder + "/PH_Icon_Coin.png";
+        public const string GemIconPath = UiArtFolder + "/PH_Icon_Gem.png";
+        public const string XpIconPath = UiArtFolder + "/PH_Icon_Xp.png";
+
+        /// <summary>Coin, gem and XP-star icons (rewards flying to the top bar).</summary>
+        public static void CreateRewardIcons()
+        {
+            CreateSprite(CoinIconPath, () => RenderRewardIcon(0), new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+            CreateSprite(GemIconPath, () => RenderRewardIcon(1), new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+            CreateSprite(XpIconPath, () => RenderRewardIcon(2), new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+        }
+
+        private static Texture2D RenderRewardIcon(int kind)
+        {
+            const int size = 64;
+            var tex = NewTexture(size, size);
+            var pixels = new Color32[size * size];
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float px = x + 0.5f - 32f, py = y + 0.5f - 32f;
+                Color32? c = null;
+                if (kind == 0)
+                {
+                    float r = Mathf.Sqrt(px * px + py * py);
+                    if (r < 27f) c = r > 20f ? new Color32(222, 160, 30, 255) : Scale(new Color32(250, 204, 60, 255), py > 0 ? 1.08f : 0.95f);
+                    if (r < 12f && Mathf.Abs(px) < 3f) c = new Color32(222, 160, 30, 255); // stamp
+                }
+                else if (kind == 1)
+                {
+                    // Gem: diamond with a lighter top facet.
+                    if (Mathf.Abs(px) / 26f + Mathf.Abs(py - 2f) / 28f < 1f)
+                        c = py > 8f ? new Color32(150, 230, 250, 255) : px < 0 ? new Color32(60, 170, 230, 255) : new Color32(40, 130, 200, 255);
+                }
+                else
+                {
+                    // XP: five-pointed star, one point straight up. Radius goes from the outer point to the inner notch
+                    // within each 72-degree sector.
+                    float angle = Mathf.Atan2(px, py + 2f);
+                    float sector = 2f * Mathf.PI / 5f;
+                    float phi = Mathf.Repeat(angle + sector * 0.5f, sector) - sector * 0.5f;
+                    float star = Mathf.Lerp(29f, 12f, Mathf.Abs(phi) / (sector * 0.5f));
+                    float rr = Mathf.Sqrt(px * px + (py + 2f) * (py + 2f));
+                    if (rr < star) c = Scale(new Color32(110, 200, 255, 255), py > 0 ? 1.1f : 0.92f);
+                }
+
+                if (c.HasValue) pixels[y * size + x] = c.Value;
+            }
+
+            AddOutline(pixels, size, size);
+            tex.SetPixels32(pixels);
+            tex.Apply();
+            return tex;
+        }
+
         public const string CharactersArtFolder = "Assets/_Game/Art/Characters";
         public const string VehiclesArtFolder = "Assets/_Game/Art/Vehicles";
         public static string PersonSpritePath(int i) => $"{CharactersArtFolder}/PH_Person_{i}.png";
