@@ -193,7 +193,7 @@ namespace TownBuilder.EditorTools
             Find(canvas, "PlacementActionBar").SetActive(state == HudState.Placing);
             Find(canvas, "SelectionActionBar").SetActive(false);
             Find(canvas, "BottomNavigation").SetActive(state == HudState.Idle);
-            if (state == HudState.Idle) UnityEngine.Object.FindAnyObjectByType<TrainMover>()?.PreviewAt(9f); // train rolling in
+            if (state == HudState.Idle) { var m = UnityEngine.Object.FindAnyObjectByType<TrainMover>(); m?.PreviewAt(m.StopY); } // train standing at the platform
             if (state == HudState.Idle) UnityEngine.Object.FindAnyObjectByType<StreetLife>()?.PreviewPopulate(8, 2);
 
             if (state == HudState.Placing)
@@ -256,9 +256,9 @@ namespace TownBuilder.EditorTools
 
             if (state == HudState.Train)
             {
-                // Station with the train at the platform, its panel with sample crates (two loaded).
-                var station = UnityEngine.Object.FindObjectsByType<BuildingView>().First(v => v.Definition != null && v.Definition.Id == "train_station");
-                if (content.TrainAtStationSprite != null) station.SpriteRenderer.sprite = content.TrainAtStationSprite;
+                // The train standing at the platform, the station panel with sample crates (two loaded).
+                var mover = UnityEngine.Object.FindAnyObjectByType<TrainMover>();
+                if (mover != null) mover.PreviewAt(mover.StopY);
                 var selection = Find(canvas, "SelectionActionBar");
                 selection.SetActive(true);
                 selection.transform.Find("Name").GetComponent<TMPro.TMP_Text>().text = "Train Station";

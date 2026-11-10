@@ -74,11 +74,12 @@ namespace TownBuilder.Tests
             Assert.IsTrue(train.Train.IsAtStation, "the first train arrives when the station opens");
             Assert.AreEqual(content.TrainCrates, train.Train.Crates.Count);
             Assert.IsTrue(mover.IsArriving, "it rolls in along the railway");
-            Assert.AreEqual(stationDef.Sprite, view.SpriteRenderer.sprite, "empty platform until the train has stopped");
 
             yield return new WaitForSecondsRealtime(0.8f);
             Assert.IsFalse(mover.IsMoving, "stopped");
-            Assert.AreEqual(content.TrainAtStationSprite, view.SpriteRenderer.sprite, "station shows the train");
+            Assert.IsTrue(mover.IsStandingAtPlatform, "the same train stays standing at the platform");
+            Assert.AreEqual(mover.StopY, mover.CurrentY, 0.001f);
+            Assert.AreEqual(stationDef.Sprite, view.SpriteRenderer.sprite, "the station keeps its own picture (no second train)");
 
             // Load every crate, then send the full train for the bonus.
             foreach (var crate in train.Train.Crates) scene.Inventory.TryAdd(crate.ItemId, crate.Amount);
@@ -94,12 +95,13 @@ namespace TownBuilder.Tests
             Assert.IsTrue(train.SendOff());
             Assert.AreEqual(coins + crateCoins + bonus, scene.Wallet.Coins);
             Assert.IsFalse(train.Train.IsAtStation);
-            Assert.AreEqual(stationDef.Sprite, view.SpriteRenderer.sprite, "empty platform while the train is away");
+            Assert.AreEqual(stationDef.Sprite, view.SpriteRenderer.sprite, "the station picture never changes");
             Assert.IsTrue(mover.IsDeparting, "the train pulls away along the railway");
             yield return new WaitForSecondsRealtime(0.3f);
             Assert.Greater(mover.CurrentY, 17f, "moving towards the far end of the map");
             yield return new WaitForSecondsRealtime(0.6f);
             Assert.IsFalse(mover.IsMoving, "gone");
+            Assert.IsFalse(mover.IsVisible, "no train at the station while it's away");
             Assert.AreEqual(content.TrainTravelSeconds * 1000L, train.RemainingMs);
 
             // Close the app while it travels; it is back on reopening.
@@ -115,6 +117,8 @@ namespace TownBuilder.Tests
             scene = Object.FindAnyObjectByType<TownSceneController>();
 
             Assert.IsTrue(scene.Train.Train.IsAtStation, "train came back while the app was closed");
+            yield return null;
+            Assert.IsTrue(Object.FindAnyObjectByType<TrainMover>().IsStandingAtPlatform, "and it stands at the platform on load");
             Assert.AreEqual(0, scene.Train.Train.FilledCount, "with fresh crates");
         }
 

@@ -71,7 +71,6 @@ namespace TownBuilder.EditorTools
             new Spec("barn", Art + "/Buildings/Production/PH_Building_barn.png", Kind.Building, 256),
             new Spec("bakery", Art + "/Buildings/Production/PH_Building_bakery.png", Kind.Building, 256),
             new Spec("train_station", Art + "/Buildings/Community/PH_Building_train_station.png", Kind.Building, 320, 2, 3),
-            new Spec("train_station_train", Art + "/Buildings/Community/PH_Building_train_station_train.png", Kind.Building, 320, 2, 3),
             // Vehicles are long diagonal shapes: measure the whole object (Flat), not the lower 40% (Building).
             new Spec("train", Art + "/Vehicles/PH_Vehicle_train.png", Kind.Flat, 384, 1, 5),
             new Spec("silo", Art + "/Buildings/Production/PH_Building_silo.png", Kind.Building, 128),

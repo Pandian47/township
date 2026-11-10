@@ -60,8 +60,6 @@ namespace TownBuilder
         [Header("Train")]
         [Tooltip("Building id of the Train Station.")]
         [SerializeField] private string trainStationId = "train_station";
-        [Tooltip("Station sprite while the train waits at the platform (the building's own sprite = empty platform).")]
-        [SerializeField] private Sprite trainAtStationSprite;
         [SerializeField, Min(1)] private int trainCrates = 6;
         [SerializeField, Min(0)] private int trainTravelSeconds = 1800;
         [Tooltip("Crate reward = item value × amount × this (selling to the barn = 1).")]
@@ -109,7 +107,6 @@ namespace TownBuilder
         public void EditorSetLandTiers(List<LandTier> tiers) => landTiers = tiers;
 
         public string TrainStationId => trainStationId;
-        public Sprite TrainAtStationSprite => trainAtStationSprite;
         public int TrainCrates => trainCrates;
         public int TrainTravelSeconds => trainTravelSeconds;
         public float TrainCoinMultiplier => trainCoinMultiplier;

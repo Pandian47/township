@@ -212,9 +212,8 @@ Same icon prompt as bread (section 15–16). Items:
 
 ## Milestone 5 step 2: Train Station
 
-The station is wider than other buildings: a **3x2** footprint (1.25× the cottage width). Make **two images of the same
-station**, one with an empty platform and one with the train waiting. Generate the second right after the first, in the
-same chat, and say "the same station as before".
+The station is wider than other buildings (1.25× the cottage width). Only the **empty-platform** station is needed:
+the train is a separate image (`train.png`, Milestone 6 step 2) that drives in and stands at the platform.
 
 ### Train Station, empty → `train_station.png`
 
@@ -224,12 +223,10 @@ One single object, centered, fully visible, nothing cropped. No ground around it
 Background: plain solid flat magenta (#FF00FF).
 ```
 
-### Train Station with the train → `train_station_train.png`
+### ~~Train Station with the train~~ (no longer used)
 
-```
-The exact same train station as the previous image, same size, angle and position, but now a short colorful cartoon freight train (a red locomotive and two wagons with wooden crates) is waiting on the track along the platform. No signs or lettering.
-Background: plain solid flat magenta (#FF00FF).
-```
+Since v0.24.2 the station always shows its empty-platform picture and the separate moving train (`train.png`) stands
+at the platform, so `train_station_train.png` is not needed any more.
 
 ## Milestone 5 step 3: building materials
 

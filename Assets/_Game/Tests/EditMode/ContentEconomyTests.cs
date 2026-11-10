@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using UnityEditor;
+using UnityEngine;
 
 namespace TownBuilder.Tests
 {
@@ -189,6 +190,17 @@ namespace TownBuilder.Tests
         }
 
         [Test]
+        public void DepthSorting_IsCustomAxis_AlongY()
+        {
+            var renderer = AssetDatabase.LoadMainAssetAtPath("Assets/_Game/Settings/Renderer2D.asset");
+            Assert.NotNull(renderer, "2D renderer asset");
+            var so = new SerializedObject(renderer);
+            Assert.AreEqual(3, so.FindProperty("m_TransparencySortMode").intValue,
+                "Transparency Sort Mode must be Custom Axis, or buildings, trains and people overlap in random order");
+            Assert.AreEqual(new Vector3(0f, 1f, 0f), so.FindProperty("m_TransparencySortAxis").vector3Value);
+        }
+
+        [Test]
         public void TrainStation_IsConfigured()
         {
             Assert.IsTrue(_content.TryGetBuilding(_content.TrainStationId, out var station), "train station building");
@@ -198,7 +210,6 @@ namespace TownBuilder.Tests
             Assert.IsFalse(station.Removable);
             Assert.AreEqual(5, station.UnlockLevel, "opens at level 5");
             Assert.IsTrue(_content.StarterBuildings.Any(s => s.building == station), "every town starts with it");
-            Assert.NotNull(_content.TrainAtStationSprite, "station sprite with the train");
             Assert.Greater(_content.TrainCrates, 0);
             Assert.Greater(_content.TrainCoinMultiplier, 1f, "train crates must pay more than the barn");
         }

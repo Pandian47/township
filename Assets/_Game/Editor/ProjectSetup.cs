@@ -212,6 +212,7 @@ namespace TownBuilder.EditorTools
             CreateFolders();
             EnsureTextMeshPro();
             ConfigurePlayerSettings();
+            ConfigureDepthSorting();
 
             var art = PlaceholderArtGenerator.Generate(Seeds.Where(s => !s.FarmPlot && s.Deco == null).Select(s => new PlaceholderArtGenerator.BuildingArtSpec
             {
@@ -234,7 +235,6 @@ namespace TownBuilder.EditorTools
             PlaceholderArtGenerator.CreateCarSprite(true);
             PlaceholderArtGenerator.CreateCarSprite(false);
             PlaceholderArtGenerator.CreateSaleSign();
-            var trainSprite = CreateTrainAtStationSprite();
 
             CreateContent(art);
             CreateCrops();
@@ -242,7 +242,6 @@ namespace TownBuilder.EditorTools
             CreateMaterials();
             ConfigureLand();
             CreateTasks();
-            ConfigureTrain(trainSprite);
             ConfigureAds();
             ConfigureAudio();
             ConfigureEffects();
@@ -258,6 +257,33 @@ namespace TownBuilder.EditorTools
         private static void CreateFolders()
         {
             foreach (var f in Folders) PlaceholderArtGenerator.EnsureFolder($"{Root}/{f}");
+        }
+
+        public const string Renderer2DPath = Root + "/Settings/Renderer2D.asset";
+
+        /// <summary>
+        /// Isometric depth sorting: sprites lower on screen draw in front (Transparency Sort Mode = Custom Axis, axis 0,1,0),
+        /// on the 2D renderer and as the project-wide fallback. Every Objects-layer sprite sorts by its pivot.
+        /// </summary>
+        private static void ConfigureDepthSorting()
+        {
+            const int customAxis = 3; // TransparencySortMode.CustomAxis
+            var renderer = AssetDatabase.LoadMainAssetAtPath(Renderer2DPath);
+            if (renderer != null)
+            {
+                var so = new SerializedObject(renderer);
+                so.FindProperty("m_TransparencySortMode").intValue = customAxis;
+                so.FindProperty("m_TransparencySortAxis").vector3Value = new Vector3(0f, 1f, 0f);
+                so.ApplyModifiedPropertiesWithoutUndo();
+                EditorUtility.SetDirty(renderer);
+            }
+            else
+            {
+                Debug.LogError($"[Setup] 2D renderer not found at {Renderer2DPath}: depth sorting not configured.");
+            }
+
+            GraphicsSettings.transparencySortMode = TransparencySortMode.CustomAxis;
+            GraphicsSettings.transparencySortAxis = new Vector3(0f, 1f, 0f);
         }
 
         private static void ConfigurePlayerSettings()
@@ -549,29 +575,6 @@ namespace TownBuilder.EditorTools
             // Milestone 5 step 4.
             new TaskSeed("guide_buy_land", TaskKind.BuyLand, null, 1, 3, 50, 6, material: "planks", materialAmount: 1),
         };
-
-        public const string TrainAtStationSpritePath = Root + "/Art/Buildings/Community/PH_Building_train_station_train.png";
-
-        private static Sprite CreateTrainAtStationSprite()
-        {
-            var s = Seeds.First(b => b.Id == "train_station");
-            return PlaceholderArtGenerator.CreateBuildingWithTrain(new PlaceholderArtGenerator.BuildingArtSpec
-            {
-                Id = s.Id, Folder = $"{PlaceholderArtGenerator.BuildingsArtFolder}/{s.Folder}", FootprintX = s.W, FootprintY = s.H,
-                HeightPx = s.HeightPx, Wall = s.Wall, Roof = s.Roof,
-            }, TrainAtStationSpritePath);
-        }
-
-        /// <summary>Links the "train at the platform" sprite from GameContent (only if none is set yet).</summary>
-        private static void ConfigureTrain(Sprite trainSprite)
-        {
-            var content = AssetDatabase.LoadAssetAtPath<GameContent>(ContentPath);
-            var so = new SerializedObject(content);
-            var prop = so.FindProperty("trainAtStationSprite");
-            if (prop.objectReferenceValue != null) return;
-            prop.objectReferenceValue = trainSprite != null ? trainSprite : AssetDatabase.LoadAssetAtPath<Sprite>(TrainAtStationSpritePath);
-            so.ApplyModifiedPropertiesWithoutUndo();
-        }
 
         private struct MaterialSeed
         {

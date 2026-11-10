@@ -87,6 +87,13 @@ Rules:
 
 Sorting layers (back to front): `Background`, `Ground`, `GroundOverlay`, `Default`, `Objects`, `Effects`, `WorldUI`.
 
+### Depth sorting (important)
+
+The 2D renderer (`Settings/Renderer2D.asset`) must use **Transparency Sort Mode = Custom Axis** with axis (0, 1, 0), so
+sprites lower on screen draw in front. Until v0.24.2 the mode was left at Default by the project template: sorting was
+then decided by creation order and only looked right by luck. `ProjectSetup.ConfigureDepthSorting` now enforces it and
+`ContentEconomyTests.DepthSorting_IsCustomAxis_AlongY` guards it.
+
 ## 5. Input
 
 `PointerInput` turns Enhanced Touch (device) and Mouse (Editor) into gestures:
@@ -214,8 +221,8 @@ to progress: `FarmingController.Rewarded` → Harvest, `ProductionController.Rew
 
 `Train` (Domain) is the state machine: Away (until `ArrivesAtUnixMs`) → AtStation with crates → `SendOff` → Away.
 `TrainCrateGenerator` builds crates from `OrderService.Candidates()`. `TrainController` (Systems/TrainController) runs it
-only while a finished Train Station exists, pays rewards, swaps the station sprite to `GameContent.trainAtStationSprite`
-while the train is there, and raises Arrived / CrateFilled / Departed / Rewarded (sound + floating coins via the bridges).
+only while a finished Train Station exists, pays rewards, keeps the station's own picture (the train is drawn
+separately by `TrainMover`), and raises Arrived / CrateFilled / Departed / Rewarded (sound + floating coins via the bridges).
 `TrainPanel` opens when the station is selected. Saved in `SaveData.train`.
 
 The station is a **landmark** (`BuildingDefinition.movable = false`, `showInShop = false`, a non-movable starter building).
@@ -252,8 +259,10 @@ Saved in `SaveData.land.ownedPlots` ("x_y"); empty = initialise (start area + pl
 * **Moving train (step 2):** `TrainMover` (World/TrainMover) listens to `TrainController.Arrived/Departed` (subscribed after
   initialisation, so a train already waiting on load doesn't drive in). It moves one sprite (1×5-cell footprint, Objects
   layer, pivot sorting) along the rail column towards +Y: arrive from `enterFromY` to `stopY` (ease-out), depart to
-  `exitToY` (ease-in). While arriving it sets `TrainController.HoldEmptyPlatform`, so the station shows its "train at the
-  platform" sprite only once the moving train has stopped. Visual only; crates can be loaded meanwhile.
+  `exitToY` (ease-in). There is only **one** train picture: after arriving it stays standing at `stopY` beside the
+  platform for as long as the train is at the station (also right after loading a save), and the station building
+  always keeps its own empty-platform picture (v0.24.2: the combined "station with train" image was removed).
+  Visual only; crates can be loaded while it is still rolling in.
 * **Street life (step 3):** `StreetLife` (World/StreetLife) builds a graph from the `RoadTilemap` cells and moves pooled
   agents cell to cell (no U-turns except at dead ends). People: `3 + Residential buildings` (max 10), sidewalk offset,
   random short stops, sprite flipped to face the way they walk. Cars (2): right-hand lane; car sprites are drawn along the

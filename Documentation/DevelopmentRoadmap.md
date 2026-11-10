@@ -282,10 +282,13 @@ car, reward icons, decorations); every placeholder in the game is now replaced b
 
 ### Device checklist (Milestone 6 step 2: moving train)
 - [ ] When the train arrives (timer, "Call now", or the station opening at level 5) it rolls in from the lower right along
-      the railway and slows down at the station; only then does the station picture show the train
-- [ ] "Send train": the platform empties and the train pulls away slowly, speeds up and leaves over the upper-left edge
+      the railway, slows down and stays standing at the platform, on the rails and in front of the station (v0.24.2: one
+      train only; the station never shows a second, painted-in train)
+- [ ] "Send train": the same train pulls away slowly, speeds up and leaves over the upper-left edge
 - [ ] The train passes in front of the station and behind nothing it shouldn't (check while zoomed in)
-- [ ] Opening the app with the train already waiting: it just stands at the station (no drive-in)
+- [ ] Opening the app with the train already waiting: it just stands at the platform (no drive-in)
+- [ ] (v0.24.2) Overlapping things are drawn in the right order: whatever is lower on screen is in front (buildings,
+      trees, train, people, cars)
 
 ### Device checklist (Milestone 6 step 3: street life)
 - [ ] A few townsfolk walk along the edges of the roads, turn at crossings and sometimes stop for a moment

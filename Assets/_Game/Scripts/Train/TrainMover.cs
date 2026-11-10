@@ -4,10 +4,11 @@ using TownBuilder.Domain;
 namespace TownBuilder
 {
     /// <summary>
-    /// Drives the train along the railway: when a train arrives during play it rolls in from the map edge and slows down
-    /// at the station (the station keeps its empty platform until then), and when it is sent off it pulls away and leaves
-    /// over the far edge. Purely visual: the train's state lives in <see cref="Train"/> / <see cref="TrainController"/>.
-    /// The railway is one grid column; the train travels towards +Y (screen up-left), locomotive first.
+    /// The visible train on the railway. The station building always shows its own (empty-platform) picture; this one
+    /// train sprite rolls in from the map edge, stands at the platform for as long as the train is at the station,
+    /// and pulls away over the far edge when it's sent off. Visual only: the train's state lives in
+    /// <see cref="Train"/> / <see cref="TrainController"/>. The railway is one grid column; the train travels towards +Y
+    /// (screen up-left), locomotive first.
     /// </summary>
     public sealed class TrainMover : MonoBehaviour
     {
@@ -21,6 +22,8 @@ namespace TownBuilder
         [SerializeField] private float enterFromY = -7f;
         [SerializeField] private float exitToY = 42f;
         [SerializeField] private float travelSeconds = 5f;
+        [Tooltip("Sideways shift in cells: the sprite's lowest point (its wheels) sits on the track's centre line.")]
+        [SerializeField] private float acrossOffset = 1.0f;
 
         private enum Motion { None, Arriving, Departing }
 
@@ -39,8 +42,15 @@ namespace TownBuilder
         public bool IsArriving => _motion == Motion.Arriving;
         public bool IsDeparting => _motion == Motion.Departing;
         public float CurrentY => _y;
+        public float StopY => stopY;
 
-        /// <summary>Call after <see cref="TrainController.Initialize"/>: a train already at the station on load just stands there.</summary>
+        /// <summary>The train is drawn (moving, or standing at the platform).</summary>
+        public bool IsVisible => _renderer != null && _renderer.enabled;
+
+        /// <summary>The train stands still at the platform.</summary>
+        public bool IsStandingAtPlatform => IsVisible && _motion == Motion.None;
+
+        /// <summary>Call after <see cref="TrainController.Initialize"/>. A train already waiting just stands there.</summary>
         public void Initialize()
         {
             if (train == null) return;
@@ -48,6 +58,7 @@ namespace TownBuilder
             train.Departed -= OnDeparted;
             train.Arrived += OnArrived;
             train.Departed += OnDeparted;
+            SyncStanding();
         }
 
         private void OnDestroy()
@@ -60,14 +71,12 @@ namespace TownBuilder
         private void OnArrived()
         {
             if (trainSprite == null) return;
-            train.HoldEmptyPlatform = true; // the station shows its train only once ours has stopped
             Begin(Motion.Arriving, enterFromY, stopY);
         }
 
         private void OnDeparted(bool full)
         {
             if (trainSprite == null) return;
-            train.HoldEmptyPlatform = false;
             Begin(Motion.Departing, _motion == Motion.Arriving ? _y : stopY, exitToY);
         }
 
@@ -84,7 +93,12 @@ namespace TownBuilder
 
         private void Update()
         {
-            if (_motion == Motion.None) return;
+            if (_motion == Motion.None)
+            {
+                SyncStanding();
+                return;
+            }
+
             _elapsed += Time.unscaledDeltaTime;
             float k = Mathf.Clamp01(_elapsed / travelSeconds);
             // Arriving: slow down into the station. Departing: pull away slowly, then speed up.
@@ -92,9 +106,26 @@ namespace TownBuilder
             Place(Mathf.Lerp(_fromY, _toY, eased));
             if (k < 1f) return;
 
-            if (_motion == Motion.Arriving) train.HoldEmptyPlatform = false;
+            // Arrived: keep standing at the platform. Departed: gone.
+            if (_motion == Motion.Departing) _renderer.enabled = false;
             _motion = Motion.None;
-            _renderer.enabled = false;
+        }
+
+        /// <summary>When not moving: shown at the platform exactly while the (open) station has its train.</summary>
+        private void SyncStanding()
+        {
+            if (trainSprite == null || train == null || train.Train == null) return;
+            bool shouldStand = train.HasStation && train.Train.IsAtStation;
+            if (shouldStand)
+            {
+                EnsureRenderer();
+                if (!_renderer.enabled || !Mathf.Approximately(_y, stopY)) Place(stopY);
+                _renderer.enabled = true;
+            }
+            else if (_renderer != null)
+            {
+                _renderer.enabled = false;
+            }
         }
 
         /// <summary>Editor previews: shows the train standing on the rails at grid Y <paramref name="y"/>.</summary>
@@ -110,14 +141,14 @@ namespace TownBuilder
         {
             _y = y;
             var origin = grid.FootprintAnchorWorld(new GridCoord(railColumn, 0));
-            var world = (Vector2)origin + grid.AxisY * y;
+            var world = (Vector2)origin + grid.AxisY * y + grid.AxisX * acrossOffset;
             _renderer.transform.position = new Vector3(world.x, world.y, 0f);
         }
 
         private void EnsureRenderer()
         {
             if (_renderer != null) return;
-            var go = new GameObject("MovingTrain");
+            var go = new GameObject("Train");
             go.transform.SetParent(transform, false);
             _renderer = go.AddComponent<SpriteRenderer>();
             _renderer.sprite = trainSprite;

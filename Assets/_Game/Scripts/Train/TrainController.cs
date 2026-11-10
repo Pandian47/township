@@ -29,25 +29,7 @@ namespace TownBuilder
         private Func<List<OrderCandidate>> _candidates;
         private readonly System.Random _random = new System.Random();
         private float _nextRefresh;
-        private string _spriteStationId;
-        private bool _spriteShowsTrain;
         private SpriteRenderer _lockBadge;
-        private bool _holdEmptyPlatform;
-
-        /// <summary>
-        /// Set by <see cref="TrainMover"/> while the train is still rolling in: the station keeps its empty platform
-        /// until the moving train has stopped. Crates can be loaded meanwhile.
-        /// </summary>
-        public bool HoldEmptyPlatform
-        {
-            get => _holdEmptyPlatform;
-            set
-            {
-                if (_holdEmptyPlatform == value) return;
-                _holdEmptyPlatform = value;
-                RefreshSprite();
-            }
-        }
         private bool _wasOpen;
 
         public event Action<string> Notification;
@@ -235,18 +217,11 @@ namespace TownBuilder
                 _random, materials, _content.TrainMaterialChance);
         }
 
-        /// <summary>Station sprite: with the train at the platform while it's here, empty platform otherwise.</summary>
-        private void RefreshSprite()
-        {
-            RefreshLockBadge();
-            string station = StationId;
-            bool showTrain = station != null && _train.IsAtStation && !_holdEmptyPlatform && _content.TrainAtStationSprite != null;
-            if (station == _spriteStationId && showTrain == _spriteShowsTrain) return;
-            _spriteStationId = station;
-            _spriteShowsTrain = showTrain;
-            if (station == null || !buildings.TryGetView(station, out var view) || view.Definition == null) return;
-            view.SpriteRenderer.sprite = showTrain ? _content.TrainAtStationSprite : view.Definition.Sprite;
-        }
+        /// <summary>
+        /// The station always keeps its own (empty-platform) picture; the train itself is drawn by <see cref="TrainMover"/>.
+        /// Only the padlock badge depends on the station's state.
+        /// </summary>
+        private void RefreshSprite() => RefreshLockBadge();
 
         /// <summary>Lock badge above the station while it's closed.</summary>
         private void RefreshLockBadge()
