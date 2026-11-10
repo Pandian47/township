@@ -42,6 +42,7 @@ namespace TownBuilder.EditorTools
             { "feed_mill", new Vector2(0.447f, 0.965f) },
             { "sugar_mill", new Vector2(0.637f, 0.965f) },
             { "creamery", new Vector2(0.655f, 0.97f) },
+            { "juice_press", new Vector2(0.81f, 0.965f) },
         };
 
         private static readonly string[] Folders =

@@ -23,7 +23,7 @@ MonoBehaviour:
   maxCount: 0
   movable: 1
   showInShop: 1
-  chimney: {x: 0, y: 0}
+  chimney: {x: 0.81, y: 0.965}
   isFarmPlot: 0
   fruit: {fileID: 0}
   storageCapacityBonus: 0
