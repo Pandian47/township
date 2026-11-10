@@ -62,6 +62,8 @@ namespace TownBuilder.EditorTools
             public bool Removable, FarmPlot;
             /// <summary>Landmark: fixed place in every town, not movable, not sold in the shop.</summary>
             public bool Fixed;
+            /// <summary>Decoration: drawn by PlaceholderArtGenerator.CreateDecoration (not as a box building).</summary>
+            public PlaceholderArtGenerator.DecorationStyle? Deco;
             public Color32 Wall, Roof;
         }
 
@@ -138,6 +140,18 @@ namespace TownBuilder.EditorTools
                 Wall = new Color32(246, 246, 240, 255), Roof = new Color32(70, 70, 76, 255) },
             new BuildingSeed { Id = "field", Name = "Field", Category = BuildingCategory.Farming, Folder = "Farming",
                 W = 1, H = 1, Unlock = 1, Cost = 20, Removable = true, MaxCount = 12, FarmPlot = true },
+
+            // Milestone 6 step 5: decorations (instant, no limit, purely for looks). Example prices.
+            new BuildingSeed { Id = "tree", Name = "Tree", Category = BuildingCategory.Decoration, Folder = "Decorations",
+                W = 1, H = 1, Unlock = 1, Cost = 30, Removable = true, Deco = PlaceholderArtGenerator.DecorationStyle.Tree },
+            new BuildingSeed { Id = "flower_bed", Name = "Flower Bed", Category = BuildingCategory.Decoration, Folder = "Decorations",
+                W = 1, H = 1, Unlock = 2, Cost = 40, Removable = true, Deco = PlaceholderArtGenerator.DecorationStyle.FlowerBed },
+            new BuildingSeed { Id = "bench", Name = "Bench", Category = BuildingCategory.Decoration, Folder = "Decorations",
+                W = 1, H = 1, Unlock = 3, Cost = 60, Removable = true, Deco = PlaceholderArtGenerator.DecorationStyle.Bench },
+            new BuildingSeed { Id = "fence", Name = "Fence", Category = BuildingCategory.Decoration, Folder = "Decorations",
+                W = 1, H = 1, Unlock = 4, Cost = 15, Removable = true, Deco = PlaceholderArtGenerator.DecorationStyle.Fence },
+            new BuildingSeed { Id = "fountain", Name = "Fountain", Category = BuildingCategory.Decoration, Folder = "Decorations",
+                W = 2, H = 2, Unlock = 6, Cost = 400, Removable = true, Deco = PlaceholderArtGenerator.DecorationStyle.Fountain },
         };
 
         [MenuItem("TownBuilder/Setup/Run Full Setup", priority = 0)]
@@ -199,7 +213,7 @@ namespace TownBuilder.EditorTools
             EnsureTextMeshPro();
             ConfigurePlayerSettings();
 
-            var art = PlaceholderArtGenerator.Generate(Seeds.Where(s => !s.FarmPlot).Select(s => new PlaceholderArtGenerator.BuildingArtSpec
+            var art = PlaceholderArtGenerator.Generate(Seeds.Where(s => !s.FarmPlot && s.Deco == null).Select(s => new PlaceholderArtGenerator.BuildingArtSpec
             {
                 Id = s.Id, Folder = $"{PlaceholderArtGenerator.BuildingsArtFolder}/{s.Folder}", FootprintX = s.W, FootprintY = s.H,
                 HeightPx = s.HeightPx, Wall = s.Wall, Roof = s.Roof,
@@ -207,6 +221,8 @@ namespace TownBuilder.EditorTools
             PlaceholderArtGenerator.EnsureFolder(PlaceholderArtGenerator.FarmingBuildingsFolder);
             PlaceholderArtGenerator.EnsureFolder(PlaceholderArtGenerator.CropsArtFolder);
             foreach (var s in Seeds.Where(s => s.FarmPlot)) art.Buildings[s.Id] = PlaceholderArtGenerator.CreateFieldSprite();
+            foreach (var s in Seeds.Where(s => s.Deco != null))
+                art.Buildings[s.Id] = PlaceholderArtGenerator.CreateDecoration(s.Id, s.Deco.Value, s.W, s.H);
             PlaceholderArtGenerator.CreateConstructionIcon();
             PlaceholderArtGenerator.CreateLockedTile();
             PlaceholderArtGenerator.CreateRailTile();
@@ -499,6 +515,7 @@ namespace TownBuilder.EditorTools
             new TaskSeed("guide_deliver_orders", TaskKind.Deliver, null, 2, 1, 40, 5),
             new TaskSeed("guide_build_barn", TaskKind.Build, "barn", 1, 1, 40, 5),
             new TaskSeed("guide_harvest_corn", TaskKind.Harvest, "corn", 6, 2, 30, 4),
+            new TaskSeed("guide_build_flower_bed", TaskKind.Build, "flower_bed", 1, 2, 30, 4),
             new TaskSeed("guide_build_silo", TaskKind.Build, "silo", 1, 3, 40, 5),
             new TaskSeed("guide_build_feed_mill", TaskKind.Build, "feed_mill", 1, 4, 60, 8, 1),
             new TaskSeed("guide_build_chicken_coop", TaskKind.Build, "chicken_coop", 1, 5, 60, 8, 1),

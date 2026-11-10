@@ -258,7 +258,7 @@ Design notes:
 - [ ] The outer ring of land (map edge) says "Level 9" until level 9
 - [ ] Play from a new game to level 6–7 and note: did you ever wait long for coins to afford a new building or land? Too fast or too slow?
 
-## Milestone 6: Visual polish (current)
+## Milestone 6: Visual polish (done)
 
 Owner's phone test of v0.19.1 passed. TextMeshPro and sound were already done in Milestone 3.
 
@@ -268,7 +268,10 @@ Owner's phone test of v0.19.1 passed. TextMeshPro and sound were already done in
 | 2 | **The train drives**: arrives along the railway, stops at the station, leaves (placeholder train sprite + art prompt) | **Done** (v0.21.0) |
 | 3 | Townspeople and vehicles moving along the roads (placeholder sprites + art prompts) | **Done** (v0.22.0) |
 | 4 | UI polish: panels fade/slide or pop in, coins/gems/XP fly to the top bar, buttons squash when pressed | **Done** (v0.23.0) |
-| 5 | Decorations (trees, flowers, benches, fences) in a new shop tab | Next |
+| 5 | Decorations (Tree, Flower Bed, Bench, Fence, Fountain) in a new Decorations tab of the Build shop | **Done** (v0.24.0) |
+
+**Milestone 6 complete** (v0.24.0). Still open: AI art for the new visuals (17 optional images in ArtPrompts.md:
+train, rail, 4 townsfolk, car front/back, coin, gem, XP star, 5 decorations).
 
 ### Device checklist (Milestone 6 step 1: ambient life)
 - [ ] Growing and ripe crops gently sway; the soil and wooden border of the field stay still
@@ -297,6 +300,12 @@ Owner's phone test of v0.19.1 passed. TextMeshPro and sound were already done in
 - [ ] Spending coins (building, buying land) flies nothing
 - [ ] Every button squashes a little while you hold it and springs back
 - [ ] Opening panels quickly one after another never leaves a panel half-transparent
+
+### Device checklist (Milestone 6 step 5: decorations)
+- [ ] Build → two tabs: Buildings (green when active) and Decorations; switching shows only that kind
+- [ ] Tree (30 coins, level 1): placed instantly (no hammer), as many as you like, movable and removable
+- [ ] Flower Bed (level 2, also a guide task), Bench (3), Fence (4), Fountain 2×2 (6) unlock by level
+- [ ] Decorations are kept after closing and reopening the app
 
 ## Milestone 7: Backend (months 10–12)
 Accounts, cloud saves with conflict resolution, server time (`IClock`), server-validated economy, analytics.

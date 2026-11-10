@@ -1107,6 +1107,12 @@ namespace TownBuilder.EditorTools
             var titleRect = MakeRect("Title", window, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -16), new Vector2(-80, 70));
             Label(titleRect, "Text", "Build", 52, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
 
+            // Tabs next to the title.
+            var tabs = MakeRect("Tabs", window, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(220, -16), new Vector2(600, 74));
+            HRow(tabs, 14, TextAnchor.MiddleLeft);
+            var buildingsTab = MakeButton(tabs, "BuildingsTab", "Buildings", new Vector2(260, 70), Green, 32);
+            var decorationsTab = MakeButton(tabs, "DecorationsTab", "Decorations", new Vector2(280, 70), Slate, 32);
+
             var close = MakeButton(window, "CloseButton", "X", new Vector2(90, 90), Red, 44);
             var closeRect = (RectTransform)close.transform;
             closeRect.anchorMin = closeRect.anchorMax = closeRect.pivot = new Vector2(1f, 1f);
@@ -1139,7 +1145,10 @@ namespace TownBuilder.EditorTools
             template.gameObject.SetActive(false);
 
             var panel = container.gameObject.AddComponent<BuildingShopPanel>();
-            Wire(panel, ("panelRoot", root.gameObject), ("itemsParent", items), ("itemTemplate", itemView), ("closeButton", close));
+            Wire(panel, ("panelRoot", root.gameObject), ("itemsParent", items), ("itemTemplate", itemView), ("closeButton", close),
+                ("buildingsTab", buildingsTab), ("decorationsTab", decorationsTab),
+                ("buildingsTabImage", buildingsTab.GetComponent<Image>()), ("decorationsTabImage", decorationsTab.GetComponent<Image>()),
+                ("scroll", viewport.GetComponent<ScrollRect>()));
             root.gameObject.SetActive(false);
             return panel;
         }

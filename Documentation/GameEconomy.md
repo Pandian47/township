@@ -187,6 +187,20 @@ Reward per level-up: 100 × new level coins + 1 gem (`levelUpCoinsPerLevel`: 50 
 * Selling them is possible but cheap: they're meant for land expansion (step 4).
 * Material tasks start at level 3 (orders, bread) and 4 (corn), so materials exist before the train (level 6).
 
+## Decorations (Milestone 6 step 5, Build shop → Decorations)
+
+Purely for looks: instant (no construction), no limit, movable and removable, no XP. Example prices:
+
+| Decoration | Footprint | Level | Coins |
+|---|---|---|---|
+| Tree | 1×1 | 1 | 30 |
+| Flower Bed | 1×1 | 2 | 40 |
+| Bench | 1×1 | 3 | 60 |
+| Fence | 1×1 | 4 | 15 |
+| Fountain | 2×2 | 6 | 400 |
+
+Guide task "Build a Flower Bed" (level 2): 30 coins, 4 XP. The balance model ignores decorations (optional spending).
+
 ## Town tasks (Milestone 5 step 1, `Data/Tasks`, 3 on screen)
 
 One-off **guide** tasks appear first, in GameContent order, as soon as their level is reached; after that a random

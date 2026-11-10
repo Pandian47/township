@@ -297,6 +297,15 @@ Same icon prompt as bread (section 15–16). Items:
 * `gem`: "a sparkling blue cut gemstone, front view"
 * `xp_star`: "a glowing light-blue five-pointed star"
 
+## Milestone 6 step 5: decorations
+
+Same building prompt style as the cottage, one object per image, plain magenta background, no ground around it:
+* `tree.png`: "a round leafy cartoon tree with a short brown trunk, on a 1x1 tile footprint (half the cottage width)"
+* `flower_bed.png`: "a low square flower bed with a wooden edge and colourful flowers, flat, on a 1x1 tile footprint"
+* `bench.png`: "a small wooden park bench with dark iron legs, on a 1x1 tile footprint"
+* `fence.png`: "a short white wooden picket fence section running from lower left to upper right, on a 1x1 tile footprint"
+* `fountain.png`: "a round stone fountain with a small water jet and blue water, on a 2x2 tile footprint (same width as the cottage)"
+
 ---
 
 Do a **test set first**: cottage, field, wheat_4, bread and grass. Send those, check them in the game preview, and

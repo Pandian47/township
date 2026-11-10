@@ -269,6 +269,12 @@ Saved in `SaveData.land.ownedPlots` ("x_y"); empty = initialise (start area + pl
   the Coins / Gems / Level pill. Increases only.
 * `PressScale`: added by `ButtonSounds` to every button (except top-bar pills): squash to 0.93 while pressed.
 
+## 6g9. Decorations (Milestone 6 step 5)
+
+Decorations are ordinary `BuildingDefinition`s with `category = Decoration` (no recipes, no build time, `maxCount` 0), so
+placement, moving, saving and land rules all apply unchanged. `BuildingShopPanel` has two tabs and shows cards whose
+category is (or isn't) Decoration. Placeholder art: `PlaceholderArtGenerator.CreateDecoration` (setup seeds with `Deco`).
+
 ## 6h. UI text (TextMeshPro)
 
 All UI text is TextMeshPro (`TMP_Text` fields, `TextMeshProUGUI` components). Never add legacy `UnityEngine.UI.Text`.

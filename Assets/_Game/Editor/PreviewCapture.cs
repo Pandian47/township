@@ -51,7 +51,7 @@ namespace TownBuilder.EditorTools
             var layout = new (string id, int x, int y)[]
             {
                 ("town_hall", 18, 18), ("cottage", 13, 19), ("cottage", 13, 22), ("barn", 20, 12),
-                ("bakery", 17, 12), ("silo", 24, 19), ("cottage", 18, 22), ("feed_mill", 23, 12), ("chicken_coop", 21, 23), ("dairy_shed", 24, 22), ("sugar_mill", 27, 21), ("creamery", 27, 17), ("train_station", 10, 18),
+                ("bakery", 17, 12), ("silo", 24, 19), ("cottage", 18, 22), ("feed_mill", 23, 12), ("chicken_coop", 21, 23), ("dairy_shed", 24, 22), ("sugar_mill", 27, 21), ("creamery", 27, 17), ("train_station", 10, 18), ("tree", 15, 17), ("tree", 15, 19), ("flower_bed", 17, 21), ("bench", 21, 21), ("fountain", 13, 13),
                 ("field", 21, 17), ("field", 22, 17), ("field", 23, 17), ("field", 24, 17),
                 ("field", 21, 18), ("field", 22, 18), ("field", 23, 18), ("field", 24, 18),
             };
@@ -133,7 +133,7 @@ namespace TownBuilder.EditorTools
             return outputPath;
         }
 
-        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land }
+        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations }
 
         /// <summary>Command line: renders MainMenu + Town (idle, shop, placing) with UI into the folder after -previewOut.</summary>
         public static void CaptureUiFromCommandLine()
@@ -146,6 +146,7 @@ namespace TownBuilder.EditorTools
                 CaptureMainMenu(Path.Combine(folder, "Preview_MainMenu.png"));
                 Capture(Path.Combine(folder, "Preview_Town_Idle.png"), HudState.Idle);
                 Capture(Path.Combine(folder, "Preview_Town_Shop.png"), HudState.Shop);
+                Capture(Path.Combine(folder, "Preview_Town_Decorations.png"), HudState.ShopDecorations);
                 Capture(Path.Combine(folder, "Preview_Town_Placing.png"), HudState.Placing);
                 Capture(Path.Combine(folder, "Preview_Town_Field.png"), HudState.Field);
                 Capture(Path.Combine(folder, "Preview_Town_Barn.png"), HudState.Barn);
@@ -385,12 +386,16 @@ namespace TownBuilder.EditorTools
                 }
             }
 
-            if (state == HudState.Shop)
+            if (state == HudState.Shop || state == HudState.ShopDecorations)
             {
+                bool decorations = state == HudState.ShopDecorations;
                 var shopRoot = Find(canvas, "BuildingShopPanel").transform.Find("Root").gameObject;
                 shopRoot.SetActive(true);
+                var tabs = shopRoot.transform.Find("Window/Tabs");
+                tabs.Find("BuildingsTab").GetComponent<UnityEngine.UI.Image>().color = decorations ? new Color(0.62f, 0.62f, 0.6f) : new Color(0.3f, 0.66f, 0.3f);
+                tabs.Find("DecorationsTab").GetComponent<UnityEngine.UI.Image>().color = decorations ? new Color(0.3f, 0.66f, 0.3f) : new Color(0.62f, 0.62f, 0.6f);
                 var template = shopRoot.GetComponentsInChildren<ShopItemView>(true).First();
-                foreach (var def in content.Buildings)
+                foreach (var def in content.Buildings.Where(d => d.ShowInShop && (d.Category == BuildingCategory.Decoration) == decorations))
                 {
                     var item = UnityEngine.Object.Instantiate(template, template.transform.parent);
                     item.gameObject.SetActive(true);

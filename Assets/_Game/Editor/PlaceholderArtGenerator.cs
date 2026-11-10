@@ -611,6 +611,127 @@ namespace TownBuilder.EditorTools
         public const string ConstructionIconPath = UiArtFolder + "/PH_Icon_Construction.png";
 
         /// <summary>Hammer in a round badge, floated above buildings under construction. 128x128, pivot centre.</summary>
+        public enum DecorationStyle { Tree, FlowerBed, Bench, Fence, Fountain }
+
+        public const string DecorationsArtFolder = BuildingsArtFolder + "/Decorations";
+
+        /// <summary>Decoration sprite on a w×h footprint (canvas width (w+h)×64, pivot at the bottom corner, like buildings).</summary>
+        public static Sprite CreateDecoration(string id, DecorationStyle style, int w, int h)
+        {
+            var pivot = new Vector2((float)h / (w + h), 0f);
+            return CreateSprite($"{DecorationsArtFolder}/PH_Building_{id}.png", () => RenderDecoration(style, w, h), pivot, SpriteMeshType.Tight);
+        }
+
+        private static Texture2D RenderDecoration(DecorationStyle style, int w, int h)
+        {
+            int texW = (w + h) * HalfW, texH = (w + h) * HalfH + 150;
+            var tex = NewTexture(texW, texH);
+            var pixels = new Color32[texW * texH];
+            var B = new Vector2(h * HalfW, 0f);
+            Vector2 P(float gx, float gy) => B + new Vector2(gx * HalfW - gy * HalfW, gx * HalfH + gy * HalfH);
+            var centre = P(w * 0.5f, h * 0.5f);
+
+            void Ellipse(Vector2 c, float rx, float ry, Color32 col, bool shade = true)
+            {
+                for (int y = Mathf.Max(0, (int)(c.y - ry)); y <= Mathf.Min(texH - 1, (int)(c.y + ry)); y++)
+                for (int x = Mathf.Max(0, (int)(c.x - rx)); x <= Mathf.Min(texW - 1, (int)(c.x + rx)); x++)
+                {
+                    float dx = (x + 0.5f - c.x) / rx, dy = (y + 0.5f - c.y) / ry;
+                    if (dx * dx + dy * dy > 1f) continue;
+                    pixels[y * texW + x] = shade ? Scale(col, 0.9f + 0.2f * Mathf.Clamp01(dy * 0.5f + 0.5f - dx * 0.3f)) : col;
+                }
+            }
+
+            void Rect(float x0, float y0, float x1, float y1, Color32 col)
+            {
+                for (int y = Mathf.Max(0, (int)y0); y < Mathf.Min(texH, (int)y1); y++)
+                for (int x = Mathf.Max(0, (int)x0); x < Mathf.Min(texW, (int)x1); x++)
+                    pixels[y * texW + x] = col;
+            }
+
+            switch (style)
+            {
+                case DecorationStyle.Tree:
+                    Ellipse(centre + new Vector2(0, 2), 26, 10, new Color32(70, 120, 50, 255), false);            // shadow-ish base
+                    Rect(centre.x - 5, centre.y, centre.x + 5, centre.y + 40, new Color32(130, 86, 52, 255));   // trunk
+                    Ellipse(centre + new Vector2(0, 62), 36, 32, new Color32(70, 160, 70, 255));
+                    Ellipse(centre + new Vector2(-14, 80), 24, 22, new Color32(84, 178, 78, 255));
+                    Ellipse(centre + new Vector2(14, 84), 22, 20, new Color32(96, 190, 86, 255));
+                    break;
+                case DecorationStyle.FlowerBed:
+                    for (int y = 0; y < texH; y++)
+                    for (int x = 0; x < texW; x++)
+                    {
+                        var p = new Vector2(x + 0.5f, y + 0.5f);
+                        if (Inside(new[] { P(0.1f, 0.9f), P(0.1f, 0.1f), P(0.9f, 0.1f), P(0.9f, 0.9f) }, p) ||
+                            Inside(new[] { P(0.1f, 0.1f), P(0.9f, 0.1f), P(0.9f, 0.1f) + new Vector2(0, 8), P(0.1f, 0.1f) + new Vector2(0, 8) }, p))
+                            pixels[y * texW + x] = new Color32(150, 104, 66, 255);
+                    }
+
+                    var flowerColours = new[] { new Color32(240, 80, 110, 255), new Color32(255, 210, 60, 255), new Color32(170, 110, 230, 255), new Color32(255, 140, 60, 255) };
+                    for (int i = 0; i < 4; i++)
+                    for (int j = 0; j < 4; j++)
+                    {
+                        var c = P(0.2f + i * 0.2f, 0.2f + j * 0.2f) + new Vector2(0, 12);
+                        Ellipse(c + new Vector2(0, -4), 3, 6, new Color32(60, 140, 60, 255), false);
+                        Ellipse(c + new Vector2(0, 4), 6, 5, flowerColours[(i + j) % 4]);
+                    }
+
+                    break;
+                case DecorationStyle.Bench:
+                {
+                    var wood = new Color32(176, 120, 66, 255);
+                    var a = P(0.2f, 0.5f); var b = P(0.8f, 0.5f);
+                    for (float t = 0; t <= 1f; t += 0.01f)
+                    {
+                        var p = Vector2.Lerp(a, b, t);
+                        Rect(p.x - 2, p.y + 14, p.x + 2, p.y + 22, wood);                                    // seat
+                        Rect(p.x - 2, p.y + 26, p.x + 2, p.y + 40, Scale(wood, 0.85f));                     // back
+                    }
+
+                    foreach (var leg in new[] { 0.25f, 0.75f })
+                    {
+                        var p = Vector2.Lerp(a, b, leg);
+                        Rect(p.x - 3, p.y, p.x + 3, p.y + 16, new Color32(60, 60, 66, 255));
+                    }
+
+                    break;
+                }
+                case DecorationStyle.Fence:
+                {
+                    var wood = new Color32(236, 226, 206, 255);
+                    var a = P(0.05f, 0.5f); var b = P(0.95f, 0.5f);
+                    for (float t = 0; t <= 1f; t += 0.01f)
+                    {
+                        var p = Vector2.Lerp(a, b, t);
+                        Rect(p.x - 2, p.y + 12, p.x + 2, p.y + 16, Scale(wood, 0.85f));
+                        Rect(p.x - 2, p.y + 26, p.x + 2, p.y + 30, Scale(wood, 0.85f));
+                    }
+
+                    foreach (var post in new[] { 0.05f, 0.35f, 0.65f, 0.95f })
+                    {
+                        var p = Vector2.Lerp(a, b, post);
+                        Rect(p.x - 4, p.y, p.x + 4, p.y + 38, wood);
+                    }
+
+                    break;
+                }
+                case DecorationStyle.Fountain:
+                    Ellipse(centre, 100, 50, new Color32(170, 170, 176, 255), false);                       // rim
+                    Ellipse(centre + new Vector2(0, 6), 100, 50, new Color32(190, 190, 196, 255), false);
+                    Ellipse(centre + new Vector2(0, 8), 84, 40, new Color32(80, 160, 220, 255));             // water
+                    Rect(centre.x - 9, centre.y + 8, centre.x + 9, centre.y + 70, new Color32(186, 186, 192, 255)); // column
+                    Ellipse(centre + new Vector2(0, 72), 26, 10, new Color32(176, 176, 182, 255), false);   // top bowl
+                    Ellipse(centre + new Vector2(0, 92), 8, 18, new Color32(160, 215, 250, 220));            // water jet
+                    break;
+            }
+
+            AddOutline(pixels, texW, texH);
+            tex.SetPixels32(pixels);
+            tex.Apply();
+            return tex;
+        }
+
         public const string CoinIconPath = UiArtFolder + "/PH_Icon_Coin.png";
         public const string GemIconPath = UiArtFolder + "/PH_Icon_Gem.png";
         public const string XpIconPath = UiArtFolder + "/PH_Icon_Xp.png";
