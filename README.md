@@ -36,6 +36,7 @@ An original 2D isometric farming and town-building game for Android, built AI-fi
 | Fixed railway + Train Station landmark (opens at level 5); full AI art set | ✅ |
 | Developer mode (DEV button) in test APKs: unlock everything, fill barn, finish timers, unlock land | ✅ |
 | Ambient life: swaying crops, chimney smoke from working factories, floating badges (Milestone 6 step 1) | ✅ |
+| The train drives along the railway: arrives, stops at the station, leaves (Milestone 6 step 2) | ✅ (placeholder train) |
 | Automated tests: 133 EditMode + 50 PlayMode | ✅ |
 | First AI art set (buildings, field, crops, items, ground) + `AiArtImporter` tool | ✅ |
 | Android build | ⏳ install the Android Build Support module first |

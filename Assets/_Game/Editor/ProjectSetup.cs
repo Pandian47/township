@@ -212,6 +212,7 @@ namespace TownBuilder.EditorTools
             PlaceholderArtGenerator.CreateRailTile();
             PlaceholderArtGenerator.CreateLockIcon();
             PlaceholderArtGenerator.CreateSmokePuff();
+            PlaceholderArtGenerator.CreateTrainSprite();
             PlaceholderArtGenerator.CreateSaleSign();
             var trainSprite = CreateTrainAtStationSprite();
 

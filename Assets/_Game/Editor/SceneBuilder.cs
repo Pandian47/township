@@ -226,6 +226,11 @@ namespace TownBuilder.EditorTools
             var production = Go("ProductionController", systems.transform).AddComponent<ProductionController>();
             var construction = Go("ConstructionController", systems.transform).AddComponent<ConstructionController>();
             var train = Go("TrainController", systems.transform).AddComponent<TrainController>();
+            var mover = Go("TrainMover", world.transform).AddComponent<TrainMover>();
+            Wire(mover, ("grid", isoGrid), ("train", train),
+                ("trainSprite", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.TrainSpritePath)));
+            SetInt(mover, "railColumn", ProjectSetup.RailColumn);
+            SetFloat(mover, "stopY", ProjectSetup.TrainStationOrigin.y + (ProjectSetup.TrainStationHeight - PlaceholderArtGenerator.TrainLengthCells) * 0.5f);
             var land = Go("LandController", systems.transform).AddComponent<LandController>();
             Wire(land, ("grid", isoGrid), ("placement", placement), ("lockedTilemap", lockedLand), ("signsRoot", landSigns.transform),
                 ("lockedTile", AssetDatabase.LoadAssetAtPath<TileBase>(PlaceholderArtGenerator.TileAssetPath(PlaceholderArtGenerator.LockedTileName))),
@@ -275,7 +280,8 @@ namespace TownBuilder.EditorTools
                 ("hud", hud),
                 ("effects", effects),
                 ("trainController", train),
-                ("landController", land));
+                ("landController", land),
+                ("trainMover", mover));
 
             EditorSceneManager.SaveScene(scene, TownPath);
         }
@@ -284,6 +290,20 @@ namespace TownBuilder.EditorTools
         /// The fixed railway: one grid column across the whole map, along the Train Station's front-left side. Skips road
         /// crossings, water and the station itself. Rail cells block building.
         /// </summary>
+        private static void SetInt(Object target, string field, int value)
+        {
+            var so = new SerializedObject(target);
+            so.FindProperty(field).intValue = value;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void SetFloat(Object target, string field, float value)
+        {
+            var so = new SerializedObject(target);
+            so.FindProperty(field).floatValue = value;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
         private static void PaintRailway(Tilemap rail, Tilemap road, Tilemap water)
         {
             var tile = AssetDatabase.LoadAssetAtPath<TileBase>(PlaceholderArtGenerator.TileAssetPath(PlaceholderArtGenerator.RailTileName));

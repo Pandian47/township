@@ -611,6 +611,80 @@ namespace TownBuilder.EditorTools
         public const string ConstructionIconPath = UiArtFolder + "/PH_Icon_Construction.png";
 
         /// <summary>Hammer in a round badge, floated above buildings under construction. 128x128, pivot centre.</summary>
+        public const string TrainSpritePath = "Assets/_Game/Art/Vehicles/PH_Vehicle_train.png";
+        public const int TrainLengthCells = 5;
+
+        /// <summary>
+        /// Placeholder train on a 1×5-cell footprint along the grid's Y axis (screen up-left = the direction it drives):
+        /// green and blue wagons, red locomotive in front. Pivot = bottom corner of the footprint.
+        /// </summary>
+        public static Sprite CreateTrainSprite() =>
+            CreateSprite(TrainSpritePath, RenderTrain, new Vector2(TrainLengthCells / (float)(1 + TrainLengthCells), 0f), SpriteMeshType.Tight);
+
+        private static Texture2D RenderTrain()
+        {
+            int len = TrainLengthCells;
+            int texW = (1 + len) * HalfW, texH = (1 + len) * HalfH + 80;
+            var tex = NewTexture(texW, texH);
+            var pixels = new Color32[texW * texH];
+            var B = new Vector2(len * HalfW, 0f);
+            Vector2 P(float gx, float gy) => B + new Vector2(gx * HalfW - gy * HalfW, gx * HalfH + gy * HalfH);
+
+            // (start y, end y, height, colour) from the rear; drawn back (high y) to front so nearer cars overlap.
+            var cars = new[]
+            {
+                (y0: 3.3f, y1: 4.85f, h: 44f, c: new Color32(206, 56, 46, 255)),  // locomotive (front)
+                (y0: 1.7f, y1: 3.1f, h: 34f, c: new Color32(70, 120, 200, 255)),   // wagon
+                (y0: 0.15f, y1: 1.5f, h: 34f, c: new Color32(86, 168, 72, 255)),   // wagon (rear)
+            };
+
+            foreach (var car in cars)
+            {
+                float x0 = 0.18f, x1 = 0.82f;
+                var b = P(x0, car.y0); var r = P(x1, car.y0); var l = P(x0, car.y1); var t = P(x1, car.y1);
+                var wheels = new Vector2(0, 8f);
+                var up = new Vector2(0, car.h);
+                var leftFace = new[] { l + wheels, b + wheels, b + up, l + up };
+                var rightFace = new[] { b + wheels, r + wheels, r + up, b + up };
+                var top = new[] { l + up, b + up, r + up, t + up };
+                var under = new[] { l, b, b + wheels, l + wheels };
+                var underR = new[] { b, r, r + wheels, b + wheels };
+                for (int y = 0; y < texH; y++)
+                for (int x = 0; x < texW; x++)
+                {
+                    var p = new Vector2(x + 0.5f, y + 0.5f);
+                    Color32? col = null;
+                    if (Inside(top, p)) col = Scale(car.c, car.h > 40f ? 0.55f : 1.15f); // loco: dark roof; wagons: open load
+                    else if (Inside(leftFace, p)) col = car.c;
+                    else if (Inside(rightFace, p)) col = Scale(car.c, 0.72f);
+                    else if (Inside(under, p) || Inside(underR, p)) col = new Color32(48, 48, 54, 255); // wheels
+                    if (col.HasValue) pixels[y * texW + x] = col.Value;
+                }
+
+                if (car.h > 40f)
+                {
+                    // Chimney near the front of the locomotive.
+                    var c0 = P(0.5f, car.y1 - 0.35f) + up;
+                    for (int y = (int)c0.y; y < (int)c0.y + 22 && y < texH; y++)
+                    for (int x = (int)c0.x - 6; x <= (int)c0.x + 6; x++)
+                        if (x >= 0 && x < texW) pixels[y * texW + x] = Scale(new Color32(60, 60, 66, 255), x < c0.x ? 1.15f : 0.85f);
+                }
+                else
+                {
+                    // Wooden crates on the wagon.
+                    var c0 = P(0.5f, (car.y0 + car.y1) * 0.5f) + up;
+                    for (int y = (int)c0.y; y < (int)c0.y + 16 && y < texH; y++)
+                    for (int x = (int)c0.x - 14; x <= (int)c0.x + 14; x++)
+                        if (x >= 0 && x < texW) pixels[y * texW + x] = Scale(new Color32(196, 140, 80, 255), (x - (int)c0.x) % 14 == 0 ? 0.7f : 1f);
+                }
+            }
+
+            AddOutline(pixels, texW, texH);
+            tex.SetPixels32(pixels);
+            tex.Apply();
+            return tex;
+        }
+
         public const string SmokePuffPath = "Assets/_Game/Art/Effects/PH_Fx_Smoke.png";
 
         /// <summary>Soft round white puff (tinted and faded by ChimneySmoke).</summary>

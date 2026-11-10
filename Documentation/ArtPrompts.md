@@ -255,6 +255,17 @@ Background: plain solid flat magenta (#FF00FF).
 Create a seamless tileable square texture seen straight from above (top-down, flat, no perspective): a single railway track running exactly vertically through the middle, two steel rails on dark wooden sleepers on a light gravel bed, with short green grass on both sides. Cartoon game style matching the cottage, no text. Top and bottom edges must tile seamlessly.
 ```
 
+## Milestone 6 step 2: the moving train → `train.png`
+
+The train drives along the railway towards the **upper left**. It must be one straight line of cars seen from the
+same 2:1 isometric angle, with the locomotive at the **upper-left** end.
+
+```
+Same art style, angle, lighting and outline as the cottage. Create a short cartoon freight train seen from the same 2:1 isometric angle: a red steam locomotive at the upper-left end, followed by a blue wagon and a green wagon loaded with wooden crates, all in one straight line running diagonally from the lower right to the upper left. Wheels visible, no rails, no ground, no smoke, no text or lettering.
+Single object, fully visible, nothing cropped.
+Background: plain solid flat magenta (#FF00FF).
+```
+
 ---
 
 Do a **test set first**: cottage, field, wheat_4, bread and grass. Send those, check them in the game preview, and

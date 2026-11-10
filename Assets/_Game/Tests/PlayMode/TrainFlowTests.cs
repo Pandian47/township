@@ -60,16 +60,24 @@ namespace TownBuilder.Tests
             scene.Placement.Cancel();
             Assert.IsFalse(scene.Placement.BeginPlacement(stationDef), "and there is no second one to buy");
 
-            // Reaching its level opens it; the first train arrives right away.
+            // Reaching its level opens it; the first train rolls in along the railway.
+            var mover = Object.FindAnyObjectByType<TrainMover>();
+            Assert.NotNull(mover, "train mover in the scene");
+            mover.TravelSeconds = 0.6f;
+            var view = Object.FindObjectsByType<BuildingView>().First(v => v.InstanceId == station);
+
             scene.Progress.AddXp(10_000);
             Assert.GreaterOrEqual(scene.Progress.Level, train.UnlockLevel);
-            yield return new WaitForSecondsRealtime(0.3f);
+            yield return new WaitForSecondsRealtime(0.15f);
             Assert.IsTrue(train.IsOpen);
             Assert.IsFalse(train.LockBadgeVisible);
             Assert.IsTrue(train.Train.IsAtStation, "the first train arrives when the station opens");
             Assert.AreEqual(content.TrainCrates, train.Train.Crates.Count);
+            Assert.IsTrue(mover.IsArriving, "it rolls in along the railway");
+            Assert.AreEqual(stationDef.Sprite, view.SpriteRenderer.sprite, "empty platform until the train has stopped");
 
-            var view = Object.FindObjectsByType<BuildingView>().First(v => v.InstanceId == station);
+            yield return new WaitForSecondsRealtime(0.8f);
+            Assert.IsFalse(mover.IsMoving, "stopped");
             Assert.AreEqual(content.TrainAtStationSprite, view.SpriteRenderer.sprite, "station shows the train");
 
             // Load every crate, then send the full train for the bonus.
@@ -87,6 +95,11 @@ namespace TownBuilder.Tests
             Assert.AreEqual(coins + crateCoins + bonus, scene.Wallet.Coins);
             Assert.IsFalse(train.Train.IsAtStation);
             Assert.AreEqual(stationDef.Sprite, view.SpriteRenderer.sprite, "empty platform while the train is away");
+            Assert.IsTrue(mover.IsDeparting, "the train pulls away along the railway");
+            yield return new WaitForSecondsRealtime(0.3f);
+            Assert.Greater(mover.CurrentY, 17f, "moving towards the far end of the map");
+            yield return new WaitForSecondsRealtime(0.6f);
+            Assert.IsFalse(mover.IsMoving, "gone");
             Assert.AreEqual(content.TrainTravelSeconds * 1000L, train.RemainingMs);
 
             // Close the app while it travels; it is back on reopening.

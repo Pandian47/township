@@ -36,7 +36,7 @@ The file names keep the `PH_` prefix even after real art is in them; that keeps 
 ### Fastest way: the AI art importer (recommended)
 
 1. Generate images with the prompts in `Documentation/ArtPrompts.md` (flat magenta background, any size).
-2. Save them in one folder with the expected names: `cottage, town_hall, barn, bakery, silo, train_station, train_station_train, feed_mill, sugar_mill, creamery, chicken_coop, dairy_shed, field, wheat_1..4,
+2. Save them in one folder with the expected names: `cottage, town_hall, barn, bakery, silo, train_station, train_station_train, train, feed_mill, sugar_mill, creamery, chicken_coop, dairy_shed, field, wheat_1..4,
    corn_1..4, soybean_1..4, sugarcane_1..4, bread, corn_bread, chicken_feed, cow_feed, egg, milk, sugar, cookies, cake, butter, cheese, planks, bricks, nails, for_sale_sign, grass, sand, water, road` (`.png` or `.jpg`). Missing files are skipped and keep their current art.
 3. In Unity: **TownBuilder → Art → Import AI Art Folder...** and pick the folder.
    Command line (Unity closed): `"$UNITY" -batchmode -quit -projectPath . -executeMethod TownBuilder.EditorTools.AiArtImporter.ImportFromCommandLine -artSource "D:\path\to\folder"`

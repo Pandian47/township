@@ -249,6 +249,11 @@ Saved in `SaveData.land.ownedPlots` ("x_y"); empty = initialise (start area + pl
   setup from measurements of the AI art (`ProjectSetup.ChimneyPoints`) and editable in the Inspector. `ChimneySmoke`
   (World/ChimneySmoke) scans for factories with an active job twice a second and emits pooled puff sprites on the Effects layer.
 * **Floating badges:** `FloatBob.Place(transform, pos)` replaces direct `localPosition` writes for the ready, hammer and padlock badges.
+* **Moving train (step 2):** `TrainMover` (World/TrainMover) listens to `TrainController.Arrived/Departed` (subscribed after
+  initialisation, so a train already waiting on load doesn't drive in). It moves one sprite (1×5-cell footprint, Objects
+  layer, pivot sorting) along the rail column towards +Y: arrive from `enterFromY` to `stopY` (ease-out), depart to
+  `exitToY` (ease-in). While arriving it sets `TrainController.HoldEmptyPlatform`, so the station shows its "train at the
+  platform" sprite only once the moving train has stopped. Visual only; crates can be loaded meanwhile.
 
 ## 6h. UI text (TextMeshPro)
 

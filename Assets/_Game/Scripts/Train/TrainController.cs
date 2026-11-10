@@ -32,6 +32,22 @@ namespace TownBuilder
         private string _spriteStationId;
         private bool _spriteShowsTrain;
         private SpriteRenderer _lockBadge;
+        private bool _holdEmptyPlatform;
+
+        /// <summary>
+        /// Set by <see cref="TrainMover"/> while the train is still rolling in: the station keeps its empty platform
+        /// until the moving train has stopped. Crates can be loaded meanwhile.
+        /// </summary>
+        public bool HoldEmptyPlatform
+        {
+            get => _holdEmptyPlatform;
+            set
+            {
+                if (_holdEmptyPlatform == value) return;
+                _holdEmptyPlatform = value;
+                RefreshSprite();
+            }
+        }
         private bool _wasOpen;
 
         public event Action<string> Notification;
@@ -224,7 +240,7 @@ namespace TownBuilder
         {
             RefreshLockBadge();
             string station = StationId;
-            bool showTrain = station != null && _train.IsAtStation && _content.TrainAtStationSprite != null;
+            bool showTrain = station != null && _train.IsAtStation && !_holdEmptyPlatform && _content.TrainAtStationSprite != null;
             if (station == _spriteStationId && showTrain == _spriteShowsTrain) return;
             _spriteStationId = station;
             _spriteShowsTrain = showTrain;

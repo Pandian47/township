@@ -26,6 +26,7 @@ namespace TownBuilder
         [SerializeField] private TownEffects effects;
         [SerializeField] private TrainController trainController;
         [SerializeField] private LandController landController;
+        [SerializeField] private TrainMover trainMover;
         [SerializeField] private float startOrthographicSize = 6f;
         [SerializeField] private float autosaveDelaySeconds = 2f;
 
@@ -159,6 +160,7 @@ namespace TownBuilder
                 trainController.Initialize(_town, _train, _inventory, _wallet, _progress, content, _context.Clock,
                     id => !_sites.IsUnderConstruction(id), _orders.Candidates);
                 trainController.Modified += ScheduleSave;
+                if (trainMover != null) trainMover.Initialize();
             }
 
             cameraController.SetWorldBounds(grid.WorldBounds());
