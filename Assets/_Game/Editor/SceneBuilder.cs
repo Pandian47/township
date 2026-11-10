@@ -226,6 +226,12 @@ namespace TownBuilder.EditorTools
             var production = Go("ProductionController", systems.transform).AddComponent<ProductionController>();
             var construction = Go("ConstructionController", systems.transform).AddComponent<ConstructionController>();
             var train = Go("TrainController", systems.transform).AddComponent<TrainController>();
+            var streetLife = Go("StreetLife", world.transform).AddComponent<StreetLife>();
+            Wire(streetLife, ("grid", isoGrid), ("roadTilemap", road),
+                ("carFront", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CarFrontPath)),
+                ("carBack", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CarBackPath)));
+            WireArray(streetLife, "peopleSprites", Enumerable.Range(1, PlaceholderArtGenerator.PersonVariants)
+                .Select(i => AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.PersonSpritePath(i))).ToArray());
             var mover = Go("TrainMover", world.transform).AddComponent<TrainMover>();
             Wire(mover, ("grid", isoGrid), ("train", train),
                 ("trainSprite", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.TrainSpritePath)));
@@ -281,7 +287,8 @@ namespace TownBuilder.EditorTools
                 ("effects", effects),
                 ("trainController", train),
                 ("landController", land),
-                ("trainMover", mover));
+                ("trainMover", mover),
+                ("streetLife", streetLife));
 
             EditorSceneManager.SaveScene(scene, TownPath);
         }

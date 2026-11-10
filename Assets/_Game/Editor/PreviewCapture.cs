@@ -193,6 +193,7 @@ namespace TownBuilder.EditorTools
             Find(canvas, "SelectionActionBar").SetActive(false);
             Find(canvas, "BottomNavigation").SetActive(state == HudState.Idle);
             if (state == HudState.Idle) UnityEngine.Object.FindAnyObjectByType<TrainMover>()?.PreviewAt(9f); // train rolling in
+            if (state == HudState.Idle) UnityEngine.Object.FindAnyObjectByType<StreetLife>()?.PreviewPopulate(8, 2);
 
             if (state == HudState.Placing)
             {

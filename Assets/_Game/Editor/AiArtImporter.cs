@@ -105,6 +105,13 @@ namespace TownBuilder.EditorTools
             new Spec("planks", Art + "/Materials/PH_Material_planks.png", Kind.Icon, 128),
             new Spec("bricks", Art + "/Materials/PH_Material_bricks.png", Kind.Icon, 128),
             new Spec("nails", Art + "/Materials/PH_Material_nails.png", Kind.Icon, 128),
+            new Spec("person_1", Art + "/Characters/PH_Person_1.png", Kind.Prop, 64),
+            new Spec("person_2", Art + "/Characters/PH_Person_2.png", Kind.Prop, 64),
+            new Spec("person_3", Art + "/Characters/PH_Person_3.png", Kind.Prop, 64),
+            new Spec("person_4", Art + "/Characters/PH_Person_4.png", Kind.Prop, 64),
+            // Car: 1.3 x 0.7 cells along X; footprint 13x7 only sets the pivot ratio (bottom corner at 7/20 across).
+            new Spec("car_front", Art + "/Vehicles/PH_Vehicle_car_front.png", Kind.Building, 128, 13, 7),
+            new Spec("car_back", Art + "/Vehicles/PH_Vehicle_car_back.png", Kind.Building, 128, 13, 7),
             new Spec("for_sale_sign", Art + "/Environment/PH_Sign_ForSale.png", Kind.Prop, 96),
             new Spec("rail", Art + "/Environment/Tiles/PH_Tile_Rail.png", Kind.Tile, 128),
             new Spec("grass", Art + "/Environment/Tiles/PH_Tile_Grass.png", Kind.Tile, 128),

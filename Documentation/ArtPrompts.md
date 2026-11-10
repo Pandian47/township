@@ -266,6 +266,30 @@ Single object, fully visible, nothing cropped.
 Background: plain solid flat magenta (#FF00FF).
 ```
 
+## Milestone 6 step 3: townsfolk and a car
+
+### Townsfolk → `person_1.png` … `person_4.png`
+
+```
+Same cartoon art style, lighting and outline as the cottage. Create one small cheerful townsperson walking, full body, seen from the front at a slight angle from above, [PERSON]. Simple shapes that stay readable when very small. No ground, no shadow, no text.
+Background: plain solid flat magenta (#FF00FF).
+```
+
+People:
+* `person_1`: "a farmer in a red shirt and blue overalls with a straw hat"
+* `person_2`: "a woman in a blue dress carrying a basket of bread"
+* `person_3`: "a boy in a yellow t-shirt and shorts"
+* `person_4`: "an older man in a green jumper with a walking stick"
+
+### Car → `car_front.png`, then `car_back.png` (same chat)
+
+```
+Same art style, angle, lighting and outline as the cottage. Create a small cute rounded cartoon car (light blue) seen from the same 2:1 isometric angle, driving towards the lower left, so its front with headlights is visible. Wheels visible, no road, no shadow, no text or number plate.
+Background: plain solid flat magenta (#FF00FF).
+```
+
+Then: "The exact same car, same angle and size, but now driving away towards the upper right, so its back with red tail lights is visible."
+
 ---
 
 Do a **test set first**: cottage, field, wheat_4, bread and grass. Send those, check them in the game preview, and

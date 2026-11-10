@@ -266,8 +266,8 @@ Owner's phone test of v0.19.1 passed. TextMeshPro and sound were already done in
 |---|---|---|
 | 1 | **Ambient life**: crops sway in the wind (shader), smoke from the chimneys of working factories, "ready"/hammer/padlock badges float | **Done** (v0.20.0) |
 | 2 | **The train drives**: arrives along the railway, stops at the station, leaves (placeholder train sprite + art prompt) | **Done** (v0.21.0) |
-| 3 | Townspeople and vehicles moving along the roads | Next |
-| 4 | UI polish: panels slide/fade in, coins fly to the top bar on rewards | Planned |
+| 3 | Townspeople and vehicles moving along the roads (placeholder sprites + art prompts) | **Done** (v0.22.0) |
+| 4 | UI polish: panels slide/fade in, coins fly to the top bar on rewards | Next |
 | 5 | Decorations (trees, flowers, benches, fences) in a new shop tab | Planned |
 
 ### Device checklist (Milestone 6 step 1: ambient life)
@@ -283,6 +283,13 @@ Owner's phone test of v0.19.1 passed. TextMeshPro and sound were already done in
 - [ ] "Send train": the platform empties and the train pulls away slowly, speeds up and leaves over the upper-left edge
 - [ ] The train passes in front of the station and behind nothing it shouldn't (check while zoomed in)
 - [ ] Opening the app with the train already waiting: it just stands at the station (no drive-in)
+
+### Device checklist (Milestone 6 step 3: street life)
+- [ ] A few townsfolk walk along the edges of the roads, turn at crossings and sometimes stop for a moment
+- [ ] Two cars drive in the right-hand lane, facing the way they drive (front lights towards you, tail lights away)
+- [ ] Building a Cottage adds one more walker (after a couple of seconds), up to 10
+- [ ] Walkers never block taps on buildings or fields
+- [ ] Frame rate stays smooth
 
 ## Milestone 7: Backend (months 10–12)
 Accounts, cloud saves with conflict resolution, server time (`IClock`), server-validated economy, analytics.

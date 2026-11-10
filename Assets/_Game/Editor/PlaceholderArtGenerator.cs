@@ -611,6 +611,107 @@ namespace TownBuilder.EditorTools
         public const string ConstructionIconPath = UiArtFolder + "/PH_Icon_Construction.png";
 
         /// <summary>Hammer in a round badge, floated above buildings under construction. 128x128, pivot centre.</summary>
+        public const string CharactersArtFolder = "Assets/_Game/Art/Characters";
+        public const string VehiclesArtFolder = "Assets/_Game/Art/Vehicles";
+        public static string PersonSpritePath(int i) => $"{CharactersArtFolder}/PH_Person_{i}.png";
+        public static readonly string CarFrontPath = VehiclesArtFolder + "/PH_Vehicle_car_front.png";
+        public static readonly string CarBackPath = VehiclesArtFolder + "/PH_Vehicle_car_back.png";
+        public const int PersonVariants = 4;
+
+        /// <summary>Four simple townsfolk (front view, pivot at the feet).</summary>
+        public static Sprite[] CreatePeopleSprites()
+        {
+            var shirts = new[] { new Color32(220, 80, 70, 255), new Color32(70, 130, 210, 255), new Color32(240, 190, 60, 255), new Color32(90, 170, 90, 255) };
+            var hair = new[] { new Color32(90, 60, 40, 255), new Color32(40, 36, 34, 255), new Color32(200, 150, 70, 255), new Color32(120, 70, 40, 255) };
+            var sprites = new Sprite[PersonVariants];
+            for (int i = 0; i < PersonVariants; i++)
+            {
+                int v = i;
+                sprites[i] = CreateSprite(PersonSpritePath(i + 1), () => RenderPerson(shirts[v], hair[v], v % 2 == 1), new Vector2(0.5f, 0f), SpriteMeshType.FullRect);
+            }
+
+            return sprites;
+        }
+
+        private static Texture2D RenderPerson(Color32 shirt, Color32 hairColor, bool skirt)
+        {
+            const int w = 30, h = 62;
+            var tex = NewTexture(w, h);
+            var pixels = new Color32[w * h];
+            var skin = new Color32(244, 200, 160, 255);
+            var trousers = new Color32(70, 80, 110, 255);
+            for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+            {
+                float px = x + 0.5f - 15f, py = y + 0.5f;
+                Color32? c = null;
+                if (py < 20f && (Mathf.Abs(px + 4f) < 3f || Mathf.Abs(px - 4f) < 3f)) c = py < 4f ? new Color32(60, 46, 40, 255) : trousers; // legs + shoes
+                if (skirt && py >= 12f && py < 22f && Mathf.Abs(px) < 8f + (22f - py) * 0.35f) c = Scale(shirt, 0.8f);
+                if (py >= 18f && py < 40f && Mathf.Abs(px) < 8.5f) c = Scale(shirt, px < 0 ? 1.08f : 0.9f);                  // body
+                if (py >= 20f && py < 36f && Mathf.Abs(Mathf.Abs(px) - 10.5f) < 2.2f) c = Scale(shirt, 0.85f);               // arms
+                float hx = px, hy = py - 48f;
+                if (hx * hx + hy * hy < 64f) c = skin;                                                                        // head
+                if (hx * hx + hy * hy < 72f && hy > 2f) c = hairColor;                                                       // hair
+                if (c.HasValue) pixels[y * w + x] = c.Value;
+            }
+
+            AddOutline(pixels, w, h);
+            tex.SetPixels32(pixels);
+            tex.Apply();
+            return tex;
+        }
+
+        /// <summary>Small car along the grid X axis (1.3 × 0.7 cells), seen from the front (driving towards the viewer) or the back.</summary>
+        public static Sprite CreateCarSprite(bool front) =>
+            CreateSprite(front ? CarFrontPath : CarBackPath, () => RenderCar(front), new Vector2(0.35f, 0f), SpriteMeshType.Tight);
+
+        private static Texture2D RenderCar(bool front)
+        {
+            const int texW = 128, texH = 100;
+            var tex = NewTexture(texW, texH);
+            var pixels = new Color32[texW * texH];
+            var B = new Vector2(0.7f * HalfW, 0f);
+            Vector2 P(float gx, float gy) => B + new Vector2(gx * HalfW - gy * HalfW, gx * HalfH + gy * HalfH);
+            var body = new Color32(60, 150, 220, 255);
+
+            void Box(float x0, float x1, float y0, float y1, float z0, float z1, Color32 col, bool glassSides)
+            {
+                var b = P(x0, y0); var r = P(x1, y0); var l = P(x0, y1); var t = P(x1, y1);
+                var lo = new Vector2(0, z0); var hi = new Vector2(0, z1);
+                var leftFace = new[] { l + lo, b + lo, b + hi, l + hi };
+                var rightFace = new[] { b + lo, r + lo, r + hi, b + hi };
+                var top = new[] { l + hi, b + hi, r + hi, t + hi };
+                var glass = new Color32(170, 215, 240, 255);
+                for (int y = 0; y < texH; y++)
+                for (int x = 0; x < texW; x++)
+                {
+                    var p = new Vector2(x + 0.5f, y + 0.5f);
+                    if (Inside(top, p)) pixels[y * texW + x] = Scale(col, 1.15f);
+                    else if (Inside(leftFace, p)) pixels[y * texW + x] = glassSides ? glass : col;
+                    else if (Inside(rightFace, p)) pixels[y * texW + x] = glassSides ? Scale(glass, 0.85f) : Scale(col, 0.75f);
+                }
+            }
+
+            Box(0.05f, 1.25f, 0.06f, 0.64f, 0f, 6f, new Color32(40, 40, 46, 255), false); // wheels / underside
+            Box(0f, 1.3f, 0f, 0.7f, 5f, 22f, body, false);                                  // body
+            Box(0.3f, 1.0f, 0.1f, 0.6f, 22f, 34f, body, true);                              // cabin with windows
+
+            // Lights on the visible end (the face at x = 0): headlights at the front, tail lights at the back.
+            var lights = front ? new Color32(255, 236, 140, 255) : new Color32(220, 40, 40, 255);
+            foreach (float gy in new[] { 0.15f, 0.55f })
+            {
+                var c = P(0f, gy) + new Vector2(0, 14f);
+                for (int y = (int)c.y - 2; y <= (int)c.y + 2; y++)
+                for (int x = (int)c.x - 2; x <= (int)c.x + 2; x++)
+                    if (x >= 0 && y >= 0 && x < texW && y < texH) pixels[y * texW + x] = lights;
+            }
+
+            AddOutline(pixels, texW, texH);
+            tex.SetPixels32(pixels);
+            tex.Apply();
+            return tex;
+        }
+
         public const string TrainSpritePath = "Assets/_Game/Art/Vehicles/PH_Vehicle_train.png";
         public const int TrainLengthCells = 5;
 

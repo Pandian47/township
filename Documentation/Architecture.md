@@ -254,6 +254,11 @@ Saved in `SaveData.land.ownedPlots` ("x_y"); empty = initialise (start area + pl
   layer, pivot sorting) along the rail column towards +Y: arrive from `enterFromY` to `stopY` (ease-out), depart to
   `exitToY` (ease-in). While arriving it sets `TrainController.HoldEmptyPlatform`, so the station shows its "train at the
   platform" sprite only once the moving train has stopped. Visual only; crates can be loaded meanwhile.
+* **Street life (step 3):** `StreetLife` (World/StreetLife) builds a graph from the `RoadTilemap` cells and moves pooled
+  agents cell to cell (no U-turns except at dead ends). People: `3 + Residential buildings` (max 10), sidewalk offset,
+  random short stops, sprite flipped to face the way they walk. Cars (2): right-hand lane; car sprites are drawn along the
+  grid X axis and mirrored for the Y axis; front sprite when driving towards the viewer (−X/−Y), back sprite otherwise.
+  Objects layer with pivot sorting. No colliders, so taps go straight through.
 
 ## 6h. UI text (TextMeshPro)
 
