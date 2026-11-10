@@ -466,6 +466,7 @@ namespace TownBuilder.EditorTools
             // --- Confirm dialog (last = drawn on top)
             var dialog = CreateConfirmDialog(canvas.transform);
             var levelUp = BuildLevelUpDialog(canvas.transform);
+            var daily = BuildDailyRewardDialog(canvas.transform);
             var rewardLayer = Stretch("RewardFlyLayer", canvas.transform);
             var rewardFlyer = rewardLayer.gameObject.AddComponent<RewardFlyer>();
             Wire(rewardFlyer, ("coinsTarget", (RectTransform)coinsText.transform.parent), ("gemsTarget", (RectTransform)gemsText.transform.parent),
@@ -499,6 +500,7 @@ namespace TownBuilder.EditorTools
                 ("confirmDialog", dialog),
                 ("tasksPanel", tasksPanel),
                 ("devPanel", devPanel),
+                ("dailyDialog", daily),
                 ("rewardFlyer", rewardFlyer),
                 ("bottomNavigation", nav.gameObject),
                 ("buildButton", buildButton),
@@ -582,6 +584,61 @@ namespace TownBuilder.EditorTools
             WireArray(panel, "cards", cards);
             root.gameObject.SetActive(false);
             return panel;
+        }
+
+        private static DailyRewardDialog BuildDailyRewardDialog(Transform canvas)
+        {
+            var container = Stretch("DailyRewardDialog", canvas);
+            var root = Stretch("Root", container);
+            AddImage(root, Dim, rounded: false);
+            var window = MakeRect("Window", root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1560, 720));
+            AddImage(window, new Color(1f, 0.95f, 0.75f));
+
+            Label(MakeRect("Title", window, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -24), new Vector2(-60, 90)),
+                "Text", "Daily reward", 70, TextAnchor.MiddleCenter, new Color(0.85f, 0.45f, 0.1f), FontStyle.Bold);
+            Label(MakeRect("Subtitle", window, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -114), new Vector2(-60, 50)),
+                "Text", "Come back every day for a bigger reward. Missing a day starts over at day 1.", 32, TextAnchor.MiddleCenter, Ink);
+
+            var row = MakeRect("Days", window, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -180), new Vector2(1460, 300));
+            HRow(row, 14, TextAnchor.MiddleCenter);
+            var backs = new Image[7];
+            var days = new TMP_Text[7];
+            var icons = new Image[7];
+            var amounts = new TMP_Text[7];
+            for (int i = 0; i < 7; i++)
+            {
+                var card = MakeRect($"Day{i + 1}", row, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(196, 300));
+                Prefer(card, 196, 300);
+                backs[i] = AddImage(card, Color.white, raycast: false);
+                days[i] = Label(MakeRect("Day", card, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -8), new Vector2(-10, 44)),
+                    "Text", $"Day {i + 1}", 28, TextAnchor.MiddleCenter, Ink, FontStyle.Bold);
+                var iconRect = MakeRect("Icon", card, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -60), new Vector2(110, 110));
+                icons[i] = iconRect.gameObject.AddComponent<Image>();
+                icons[i].preserveAspect = true;
+                icons[i].raycastTarget = false;
+                amounts[i] = Label(MakeRect("Amount", card, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 12), new Vector2(-10, 110)),
+                    "Text", "", 25, TextAnchor.MiddleCenter, Ink, FontStyle.Bold);
+            }
+
+            var claim = MakeButton(window, "ClaimButton", "Claim", new Vector2(460, 120), Green, out var claimLabel, 44);
+            var claimRect = (RectTransform)claim.transform;
+            claimRect.anchorMin = claimRect.anchorMax = claimRect.pivot = new Vector2(0.5f, 0f);
+            claimRect.anchoredPosition = new Vector2(0, 50);
+            var close = MakeButton(window, "CloseButton", "X", new Vector2(90, 90), Red, 44);
+            var closeRect = (RectTransform)close.transform;
+            closeRect.anchorMin = closeRect.anchorMax = closeRect.pivot = new Vector2(1f, 1f);
+            closeRect.anchoredPosition = new Vector2(-20, -20);
+
+            var dialog = container.gameObject.AddComponent<DailyRewardDialog>();
+            Wire(dialog, ("dialogRoot", root.gameObject), ("claimButton", claim), ("claimLabel", claimLabel), ("closeButton", close),
+                ("coinSprite", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CoinIconPath)),
+                ("gemSprite", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.GemIconPath)));
+            WireArray(dialog, "cardBackgrounds", backs);
+            WireArray(dialog, "dayTexts", days);
+            WireArray(dialog, "icons", icons);
+            WireArray(dialog, "amountTexts", amounts);
+            root.gameObject.SetActive(false);
+            return dialog;
         }
 
         private static LevelUpDialog BuildLevelUpDialog(Transform canvas)
@@ -860,9 +917,9 @@ namespace TownBuilder.EditorTools
 
             var root = Stretch("Root", container);
             AddImage(root, Dim, rounded: false);
-            var window = MakeRect("Window", root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(640, 900));
+            var window = MakeRect("Window", root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(640, 1010));
             AddImage(window, PanelColor);
-            VColumn(window, 18, TextAnchor.UpperCenter, 30);
+            VColumn(window, 16, TextAnchor.UpperCenter, 26);
             var title = Label(window, "Title", "Developer mode (test builds only)", 34, TextAnchor.MiddleCenter, Ink, FontStyle.Bold);
             Prefer(title, 560, 60);
 
@@ -873,12 +930,13 @@ namespace TownBuilder.EditorTools
             var fillBarn = Row("FillBarnButton", "Max barn + 10 of every item", new Color(0.62f, 0.38f, 0.25f));
             var finish = Row("FinishTimersButton", "Finish all timers + call train", Green);
             var land = Row("UnlockLandButton", "Unlock all land", Green);
+            var dailyAgain = Row("DailyAgainButton", "Daily reward again", new Color(0.55f, 0.35f, 0.7f));
             var close = Row("CloseButton", "Close", Slate);
 
             var panel = container.gameObject.AddComponent<DevPanel>();
             Wire(panel, ("openButton", open), ("panelRoot", root.gameObject), ("closeButton", close), ("coinsButton", coins),
                 ("levelUpButton", levelUp), ("unlockAllButton", unlockAll), ("fillBarnButton", fillBarn),
-                ("finishTimersButton", finish), ("unlockLandButton", land));
+                ("finishTimersButton", finish), ("unlockLandButton", land), ("dailyAgainButton", dailyAgain));
             root.gameObject.SetActive(false);
             return panel;
         }

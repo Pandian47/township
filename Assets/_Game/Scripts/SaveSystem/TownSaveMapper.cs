@@ -126,6 +126,15 @@ namespace TownBuilder
             land.Restore(owned);
         }
 
+        public static DailyRewardTrack LoadDaily(SaveData save, int calendarLength) =>
+            new DailyRewardTrack(calendarLength, save.daily.lastClaimDay, save.daily.streak);
+
+        public static void WriteDaily(SaveData save, DailyRewardTrack track)
+        {
+            save.daily.lastClaimDay = track.LastClaimDay;
+            save.daily.streak = track.Streak;
+        }
+
         public static void WriteLand(SaveData save, LandPlots land)
         {
             save.land.ownedPlots.Clear();

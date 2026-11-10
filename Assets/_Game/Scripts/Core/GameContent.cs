@@ -71,6 +71,10 @@ namespace TownBuilder
         [Tooltip("Chance that a crate also pays 1 building material.")]
         [SerializeField, Range(0f, 1f)] private float trainMaterialChance = 0.35f;
 
+        [Header("Daily reward")]
+        [Tooltip("The calendar, day 1 first. Claiming on consecutive days walks through it; missing a day restarts at day 1.")]
+        [SerializeField] private List<DailyRewardEntry> dailyRewards = new List<DailyRewardEntry>();
+
         [Header("Land expansion")]
         [Tooltip("Plot edge length in cells.")]
         [SerializeField, Min(1)] private int landPlotSize = 6;
@@ -91,6 +95,9 @@ namespace TownBuilder
         private Dictionary<string, ProductDefinition> _productsById;
         private Dictionary<string, RecipeDefinition> _recipesById;
         private Dictionary<string, MaterialDefinition> _materialsById;
+
+        public IReadOnlyList<DailyRewardEntry> DailyRewards => dailyRewards;
+        public void EditorSetDailyRewards(List<DailyRewardEntry> list) => dailyRewards = list;
 
         public int LandPlotSize => landPlotSize;
         public Vector2Int LandStartMin => landStartMin;

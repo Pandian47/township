@@ -241,6 +241,7 @@ namespace TownBuilder.EditorTools
             CreateProduction();
             CreateMaterials();
             ConfigureLand();
+            ConfigureDailyRewards();
             CreateTasks();
             ConfigureAds();
             ConfigureAudio();
@@ -590,6 +591,25 @@ namespace TownBuilder.EditorTools
             new MaterialSeed { Id = "bricks", Name = "Bricks", Style = PlaceholderArtGenerator.ProductStyle.Bricks, SellPrice = 14 },
             new MaterialSeed { Id = "nails", Name = "Nails", Style = PlaceholderArtGenerator.ProductStyle.Nails, SellPrice = 8 },
         };
+
+        /// <summary>Daily reward calendar (only if none is set). Example values; edit in GameContent → Daily reward.</summary>
+        private static void ConfigureDailyRewards()
+        {
+            var content = AssetDatabase.LoadAssetAtPath<GameContent>(ContentPath);
+            if (content.DailyRewards.Count > 0) return;
+            MaterialDefinition M(string id) => content.TryGetItem(id, out var item) ? item as MaterialDefinition : null;
+            content.EditorSetDailyRewards(new List<DailyRewardEntry>
+            {
+                new DailyRewardEntry { coins = 50 },
+                new DailyRewardEntry { coins = 80 },
+                new DailyRewardEntry { coins = 60, material = M("planks"), materialAmount = 1 },
+                new DailyRewardEntry { coins = 120 },
+                new DailyRewardEntry { material = M("nails"), materialAmount = 2 },
+                new DailyRewardEntry { coins = 200, material = M("bricks"), materialAmount = 1 },
+                new DailyRewardEntry { coins = 300, gems = 2 },
+            });
+            EditorUtility.SetDirty(content);
+        }
 
         /// <summary>Land prices per ring (only if none are set yet). Example values; tune in GameContent → Land expansion.</summary>
         private static void ConfigureLand()

@@ -174,6 +174,24 @@ Reward per level-up: 100 × new level coins + 1 gem (`levelUpCoinsPerLevel`: 50 
   plot that has a building on it.
 * Guide task "Buy a plot of land" (level 3): 50 coins, 6 XP, 1 Planks.
 
+## Daily reward (Milestone 7 step 1, `GameContent` → Daily reward)
+
+One claim per day (phone's local calendar day). Claiming on consecutive days walks through the calendar; after day 7
+it starts again at day 1; **missing a day restarts at day 1**. The calendar opens by itself when a reward is waiting.
+
+| Day | Reward |
+|---|---|
+| 1 | 50 coins |
+| 2 | 80 coins |
+| 3 | 60 coins + 1 Planks |
+| 4 | 120 coins |
+| 5 | 2 Nails |
+| 6 | 200 coins + 1 Bricks |
+| 7 | 300 coins + 2 gems |
+
+* A full week pays **810 coins, 2 gems and 4 materials** (about 115 coins a day, small next to orders and the train).
+* If the barn is full, a material is paid as coins instead (2× its sell price).
+
 ## Building materials (Milestone 5 step 3, `Data/Materials`)
 
 | Material | Sells for | Where from |

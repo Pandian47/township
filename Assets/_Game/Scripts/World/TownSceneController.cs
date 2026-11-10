@@ -47,6 +47,7 @@ namespace TownBuilder
         private TaskService _tasks;
         private Train _train;
         private LandPlots _land;
+        private DailyRewardService _daily;
         private TownAudioBridge _audioBridge;
         private float _saveDueAt = -1f;
 
@@ -65,6 +66,7 @@ namespace TownBuilder
         public TrainController Train => trainController;
         public LandController LandController => landController;
         public LandPlots Land => _land;
+        public DailyRewardService Daily => _daily;
         public StreetLife StreetLife => streetLife;
         public TownEffects Effects => effects;
         public bool IsReady => _town != null;
@@ -174,6 +176,11 @@ namespace TownBuilder
 
             _audioBridge = new TownAudioBridge(_context.Audio, _town, placement, farming, production, construction, _storage, _orders, _progression, _tasks, trainController, landController);
 
+            _daily = new DailyRewardService(TownSaveMapper.LoadDaily(save, content.DailyRewards.Count), content, _wallet, _inventory,
+                _context.Clock, () => (long)System.TimeZoneInfo.Local.GetUtcOffset(System.DateTime.UtcNow).TotalMilliseconds);
+            _daily.Modified += ScheduleSave;
+            _audioBridge.AddDaily(_daily);
+
             if (effects != null) effects.Initialize(_town);
 
             hud.Initialize(placement, farming, production, construction, _orders, _progression, _storage, _wallet, _progress, _context.Content, _context.Ads, ReturnToMainMenu);
@@ -181,6 +188,7 @@ namespace TownBuilder
             if (trainController != null) hud.InitializeTrain(trainController, _context.Content, _inventory, _context.Ads);
             if (landController != null) hud.InitializeLand(landController);
             hud.InitializeDev(this, _context.Content);
+            hud.InitializeDaily(_daily);
         }
 
         private void OnDestroy()
@@ -236,6 +244,7 @@ namespace TownBuilder
                 TownSaveMapper.WriteTasks(_context.ActiveSave, _taskBoard);
                 TownSaveMapper.WriteTrain(_context.ActiveSave, _train);
                 TownSaveMapper.WriteLand(_context.ActiveSave, _land);
+                TownSaveMapper.WriteDaily(_context.ActiveSave, _daily.Track);
                 _context.SaveActive();
             }
             catch (Exception e)

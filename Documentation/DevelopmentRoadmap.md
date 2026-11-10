@@ -2,7 +2,7 @@
 
 These are planning windows, not promises. Each milestone ends with an Android build on a real device and a git tag.
 
-## Milestone 1: Foundation (current)
+## Milestone 1: Foundation (done)
 
 | # | Task | Status |
 |---|---|---|
@@ -38,7 +38,7 @@ Automated coverage today: 29 EditMode tests (grid rules, wallet, save store, mig
 - [ ] Press Home, swipe the app away, reopen → Continue → identical town and coins
 - [ ] Frame rate stays smooth (target 60 FPS) while panning and zooming
 
-## Milestone 2: Core loop, v0.1 playable prototype (current)
+## Milestone 2: Core loop, v0.1 playable prototype (done)
 
 Reordered from the original plan: farming and production make the game playable, so they come before polish.
 
@@ -89,7 +89,7 @@ close and reopen with nothing lost.
 - [ ] Level 3 unlocks the Silo in the shop
 - [ ] Close and reopen: level, XP and orders (including skip timers) are kept
 
-## Milestone 3: Town building polish (current)
+## Milestone 3: Town building polish (done)
 
 | Step | Feature | Status |
 |---|---|---|
@@ -310,8 +310,35 @@ car, reward icons, decorations); every placeholder in the game is now replaced b
 - [ ] Flower Bed (level 2, also a guide task), Bench (3), Fence (4), Fountain 2×2 (6) unlock by level
 - [ ] Decorations are kept after closing and reopening the app
 
-## Milestone 7: Backend (months 10–12)
-Accounts, cloud saves with conflict resolution, server time (`IClock`), server-validated economy, analytics.
+## Milestone 7: More content, offline (current)
 
-## Milestone 8: Expansion (months 13–24+)
-Ship, helicopter, more content, friends and co-op, events, achievements, monetisation, Google Play launch.
+Owner's decision (v0.24.3): grow the game with content first and stay offline (no new services, packages or costs).
+The backend moves to Milestone 9.
+
+| Step | Feature | Status |
+|---|---|---|
+| 1 | **Daily reward**: a 7-day calendar with growing rewards (coins, materials, gems on day 7); missing a day restarts at day 1 | Done (v0.25.0) |
+| 2 | **Achievements**: long-term goals in tiers (harvest, produce, deliver, build, level) paying gems | Planned |
+| 3 | **Orchard**: fruit trees (apples, cherries) that regrow after harvest + a **Juice Press** factory | Planned |
+| 4 | **Weekend event**: a time-limited goal (e.g. "Harvest Festival") with a special reward and decoration | Planned |
+| 5 | Balance pass (daily rewards, achievements and event income in the model) | Planned |
+
+Design notes:
+* Days are counted in the phone's **local** time (`IClock` UTC + the device's time-zone offset). Offline means a player
+  could cheat by changing the phone's clock; acceptable until the backend (server time) exists.
+* All rewards and goals are content (GameContent / ScriptableObjects), not code.
+
+### Device checklist (Milestone 7 step 1: daily reward)
+- [ ] First start of the new version: the "Daily reward" calendar opens by itself with Day 1 highlighted
+- [ ] Claim day 1: +50 coins (toast + sound), the card turns green "(done)", the button says "Come back tomorrow!"
+- [ ] Close and reopen the app the same day: the calendar does **not** open again
+- [ ] Next day: it opens with Day 2 highlighted; skipping a day starts at Day 1 again
+- [ ] DEV → "Daily reward again" lets you claim the next day straight away (walk through all 7 days; day 7 pays 2 gems)
+- [ ] Day 3 / 5 / 6 materials appear in the barn
+
+## Milestone 8: Expansion
+Ship, helicopter, friends and co-op, monetisation, Google Play launch.
+
+## Milestone 9: Backend (moved from 7)
+Accounts, cloud saves with conflict resolution, server time (`IClock`), server-validated economy, analytics.
+Needs the owner's approval for the service (e.g. Firebase or Google Play Games saved games).

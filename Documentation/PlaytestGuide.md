@@ -1,11 +1,11 @@
-# Playtest guide (v0.24.3)
+# Playtest guide (v0.25.0)
 
 One place for testing the game on a real Android phone. The detailed per-feature checklists stay in
 DevelopmentRoadmap.md; this guide is the order to play in and what to write down.
 
 ## 1. Install
 
-APK: `Builds/Android/TownBuilder-0.24.3-28.apk` (37 MB, test build, test ads only, developer mode included).
+APK: `Builds/Android/TownBuilder-0.25.0-29.apk` (37 MB, test build, test ads only, developer mode included).
 
 **Option A: copy the file (no cable needed)**
 1. Upload the APK to Google Drive (or send it to yourself), open it on the phone.
@@ -18,7 +18,7 @@ APK: `Builds/Android/TownBuilder-0.24.3-28.apk` (37 MB, test build, test ads onl
 2. Connect the cable, tap **Allow** on the "Allow USB debugging?" popup.
 3. Tell me, and I'll run the install with Unity's `adb`, or run it yourself:
    ```
-   "C:\Program Files\Unity\Hub\Editor\6000.6.8f1\Editor\Data\PlaybackEngines\AndroidPlayer\SDK\platform-tools\adb.exe" install -r "D:\01-Projects\05-Township\TownBuilder\Builds\Android\TownBuilder-0.24.3-28.apk"
+   "C:\Program Files\Unity\Hub\Editor\6000.6.8f1\Editor\Data\PlaybackEngines\AndroidPlayer\SDK\platform-tools\adb.exe" install -r "D:\01-Projects\05-Township\TownBuilder\Builds\Android\TownBuilder-0.25.0-29.apk"
    ```
 
 ## 2. Session A: a new town (30–45 minutes, sound on)
@@ -33,6 +33,7 @@ Start with **Menu → New Game**. Play normally and follow the Tasks panel; don'
 | Building | Build → swipe the shop sideways → Bakery: hammer badge, finishes after 2 min, "+10 XP" |
 | Bakery | Queue bread, "+1 slot" card in the queue, collect: "+1 Bread" |
 | Orders | Deliver an order, coins pill pops |
+| Daily reward | The calendar opens at start; claim day 1 (+50 coins); reopening the app the same day doesn't show it again |
 | Tasks | Claim a finished task (green button), a new one appears |
 | Level 2–3 | Level-up dialog lists the unlocks; Corn and Silo become available |
 | Land (level 3) | Dark land with signs around the town; tap it: "Land for sale" panel with coins + Planks + Nails |
@@ -57,6 +58,7 @@ Use **developer mode** to get there in a minute: tap the purple **DEV** button (
 | Max barn + 10 of every item | Barn fully expanded, then 10 of each crop, product and material |
 | Finish all timers + call train | Crops ready, factories done, construction finished, train back now |
 | Unlock all land | Owns every plot for free |
+| Daily reward again | Lets you claim the next calendar day right away (to see all 7 days) |
 
 Suggested order: Unlock everything → +coins → Max barn → build the buildings → Finish all timers. Then test:
 

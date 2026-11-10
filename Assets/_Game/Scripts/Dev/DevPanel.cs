@@ -19,6 +19,7 @@ namespace TownBuilder
         [SerializeField] private Button fillBarnButton;
         [SerializeField] private Button finishTimersButton;
         [SerializeField] private Button unlockLandButton;
+        [SerializeField] private Button dailyAgainButton;
 
         private TownSceneController _scene;
         private GameContent _content;
@@ -42,6 +43,13 @@ namespace TownBuilder
             Bind(fillBarnButton, () => DevTools.FillBarn(_scene, _content), "Barn maxed and filled");
             Bind(finishTimersButton, () => DevTools.FinishAllTimers(_scene), "All timers finished");
             Bind(unlockLandButton, () => DevTools.UnlockAllLand(_scene), "All land unlocked");
+            if (dailyAgainButton != null)
+                Bind(dailyAgainButton, () =>
+                {
+                    _scene.Daily?.DevAllowClaimAgain();
+                    UnityEngine.Object.FindAnyObjectByType<DailyRewardDialog>()?.Open();
+                    panelRoot.SetActive(false);
+                }, null);
         }
 
         private void Bind(Button button, Action action, string message)

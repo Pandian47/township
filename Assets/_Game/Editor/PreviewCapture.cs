@@ -133,7 +133,7 @@ namespace TownBuilder.EditorTools
             return outputPath;
         }
 
-        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations }
+        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily }
 
         /// <summary>Command line: renders MainMenu + Town (idle, shop, placing) with UI into the folder after -previewOut.</summary>
         public static void CaptureUiFromCommandLine()
@@ -156,6 +156,7 @@ namespace TownBuilder.EditorTools
                 Capture(Path.Combine(folder, "Preview_Town_Effects.png"), HudState.Effects);
                 Capture(Path.Combine(folder, "Preview_Town_Train.png"), HudState.Train);
                 Capture(Path.Combine(folder, "Preview_Town_Land.png"), HudState.Land);
+                Capture(Path.Combine(folder, "Preview_Town_Daily.png"), HudState.Daily);
             }
             catch (Exception e)
             {
@@ -225,6 +226,32 @@ namespace TownBuilder.EditorTools
                 float top = bakeryView.SpriteRenderer.bounds.max.y - bakeryView.transform.position.y;
                 go.transform.localPosition = new Vector3(bakeryView.SpriteRenderer.bounds.center.x - bakeryView.transform.position.x, top + 0.3f, 0f);
                 go.transform.localScale = Vector3.one * 0.5f;
+            }
+
+            if (state == HudState.Daily)
+            {
+                // Day 3 waiting: days 1-2 claimed.
+                var root = Find(canvas, "DailyRewardDialog").transform.Find("Root").gameObject;
+                root.SetActive(true);
+                var backs = root.transform.Find("Window/Days").GetComponentsInChildren<UnityEngine.UI.Image>(true).Where(img => img.name.StartsWith("Day")).ToArray();
+                var coin = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CoinIconPath);
+                var gem = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.GemIconPath);
+                for (int i = 0; i < backs.Length && i < content.DailyRewards.Count; i++)
+                {
+                    var e = content.DailyRewards[i];
+                    var card = backs[i].transform;
+                    backs[i].color = i < 2 ? new Color(0.78f, 0.93f, 0.76f) : i == 2 ? new Color(1f, 0.86f, 0.45f) : Color.white;
+                    card.Find("Day/Text").GetComponent<TMPro.TMP_Text>().text = i < 2 ? $"Day {i + 1} (done)" : $"Day {i + 1}";
+                    var icon = card.Find("Icon").GetComponent<UnityEngine.UI.Image>();
+                    icon.sprite = e.material != null && e.materialAmount > 0 ? e.material.Icon : e.gems > 0 ? gem : coin;
+                    var lines = new System.Collections.Generic.List<string>();
+                    if (e.coins > 0) lines.Add($"{e.coins:N0} coins");
+                    if (e.gems > 0) lines.Add($"{e.gems} gems");
+                    if (e.material != null && e.materialAmount > 0) lines.Add($"{e.materialAmount} {e.material.DisplayName}");
+                    card.Find("Amount/Text").GetComponent<TMPro.TMP_Text>().text = string.Join(System.Environment.NewLine, lines);
+                }
+
+                root.transform.Find("Window/ClaimButton/Label").GetComponent<TMPro.TMP_Text>().text = "Claim day 3";
             }
 
             if (state == HudState.Land)

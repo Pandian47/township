@@ -15,6 +15,7 @@ namespace TownBuilder
         [SerializeField] private TasksPanel tasksPanel;
         [SerializeField] private TrainPanel trainPanel;
         [SerializeField] private LandPanel landPanel;
+        [SerializeField] private DailyRewardDialog dailyDialog;
         [SerializeField] private DevPanel devPanel;
         [SerializeField] private RewardFlyer rewardFlyer;
 
@@ -154,6 +155,16 @@ namespace TownBuilder
         {
             if (devPanel != null) devPanel.Initialize(scene, content, toast.Show);
         }
+
+        /// <summary>Daily reward calendar (opens by itself when a reward is waiting).</summary>
+        public void InitializeDaily(DailyRewardService daily)
+        {
+            if (daily == null || dailyDialog == null) return;
+            dailyDialog.Initialize(daily);
+            daily.Notification += toast.Show;
+        }
+
+        public DailyRewardDialog DailyDialog => dailyDialog;
 
         public void InitializeLand(LandController land)
         {

@@ -119,7 +119,22 @@ namespace TownBuilder
             };
         }
 
-        public void Dispose() => _dispose();
+        private System.Action _disposeDaily;
+
+        /// <summary>Daily reward sound (the daily service is created after the bridge).</summary>
+        public void AddDaily(DailyRewardService daily)
+        {
+            if (daily == null) return;
+            System.Action<int> claimed = _ => Play(SoundId.LevelUp);
+            daily.Claimed += claimed;
+            _disposeDaily = () => daily.Claimed -= claimed;
+        }
+
+        public void Dispose()
+        {
+            _dispose();
+            _disposeDaily?.Invoke();
+        }
 
         private void Play(SoundId id)
         {

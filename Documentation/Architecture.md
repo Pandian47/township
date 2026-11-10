@@ -247,6 +247,15 @@ for unowned cells (set after saved buildings load, so nothing is ever removed). 
 `PlacementSystem.GroundTapped`, and buys plots (prices: `GameContent.landTiers` per ring). `LandPanel` shows the price.
 Saved in `SaveData.land.ownedPlots` ("x_y"); empty = initialise (start area + plots under buildings).
 
+## 6g6b. Daily reward (Milestone 7 step 1)
+
+`DailyRewardTrack` (Domain) counts claims per whole local day index: `CanClaim(today)`, `Claim(today)` returns the
+calendar slot (streak continues when the last claim was yesterday, otherwise restarts), `LocalDay(utcMs, offsetMs)`.
+`DailyRewardService` (Scripts/Daily) works out today from `IClock` + the device's time-zone offset, pays the
+`GameContent.dailyRewards` entry (materials into the barn, coins instead when it's full) and raises `Claimed`.
+`DailyRewardDialog` shows 7 cards, opens on load when a reward is waiting and re-checks every 30 s for a new day.
+Saved in `SaveData.daily` (`lastClaimDay`, `streak`).
+
 ## 6g7. Ambient life (Milestone 6 step 1)
 
 * **Crop sway:** crop sprites use `Materials/CropSway.mat` (`Shaders/SpriteSway.shader`, Universal2D pass): vertices move
@@ -299,7 +308,8 @@ All UI text is TextMeshPro (`TMP_Text` fields, `TextMeshProUGUI` components). Ne
 
 ## 6i. Developer mode (test builds only)
 
-`DevTools` (Scripts/Dev) holds testing shortcuts (currency, level up, unlock all, fill barn, finish timers, unlock land);
+`DevTools` (Scripts/Dev) holds testing shortcuts (currency, level up, unlock all, fill barn, finish timers, unlock land,
+daily reward again);
 `DevPanel` is the purple DEV button + panel in the HUD. `DevTools.Enabled` is true only in the Editor and when compiled
 with `TOWNBUILDER_DEVTOOLS`, which `BuildTools.BuildApk` passes (`extraScriptingDefines`). `BuildAab` does not, so the
 Google Play bundle has no DEV button. Shortcuts use the normal systems (rewards, events, saving).

@@ -131,6 +131,35 @@ MonoBehaviour:
   trainXpDivisor: 4
   trainFullBonusFraction: 0.5
   trainMaterialChance: 0.35
+  dailyRewards:
+  - coins: 50
+    gems: 0
+    material: {fileID: 0}
+    materialAmount: 0
+  - coins: 80
+    gems: 0
+    material: {fileID: 0}
+    materialAmount: 0
+  - coins: 60
+    gems: 0
+    material: {fileID: 11400000, guid: 81887886b2c0bb949828912b3d72f71a, type: 2}
+    materialAmount: 1
+  - coins: 120
+    gems: 0
+    material: {fileID: 0}
+    materialAmount: 0
+  - coins: 0
+    gems: 0
+    material: {fileID: 11400000, guid: c36eae76314fdb544b1bc36ca3afd419, type: 2}
+    materialAmount: 2
+  - coins: 200
+    gems: 0
+    material: {fileID: 11400000, guid: de5ccea6c812a25428ccfd6a737ced41, type: 2}
+    materialAmount: 1
+  - coins: 300
+    gems: 2
+    material: {fileID: 0}
+    materialAmount: 0
   landPlotSize: 6
   landStartMin: {x: 2, y: 2}
   landStartMax: {x: 3, y: 3}

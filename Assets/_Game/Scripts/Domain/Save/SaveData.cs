@@ -25,6 +25,7 @@ namespace TownBuilder.Domain
         public List<string> completedTaskIds = new List<string>();
         public TrainSaveData train = new TrainSaveData();
         public LandSaveData land = new LandSaveData();
+        public DailySaveData daily = new DailySaveData();
     }
 
     /// <summary>One order-board slot. itemIds[i] / amounts[i] form one line.</summary>
@@ -40,6 +41,14 @@ namespace TownBuilder.Domain
     }
 
     /// <summary>One queued/finished product in a factory. Jobs of one factory are saved in queue order.</summary>
+    [Serializable]
+    public sealed class DailySaveData
+    {
+        /// <summary>Local day index of the last claim (long.MinValue = never).</summary>
+        public long lastClaimDay = long.MinValue;
+        public int streak;
+    }
+
     [Serializable]
     public sealed class LandSaveData
     {
