@@ -416,11 +416,16 @@ namespace TownBuilder.EditorTools
             Wire(topBar, ("levelText", levelText), ("coinsText", coinsText), ("gemsText", gemsText), ("barnText", barnText));
 
             // --- Bottom navigation
-            var nav = MakeRect("BottomNavigation", safe, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-30, 30), new Vector2(1340, 130));
+            var nav = MakeRect("BottomNavigation", safe, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-30, 30), new Vector2(1560, 130));
             HRow(nav, 24, TextAnchor.LowerRight);
             var adButton = MakeButton(nav, "RewardedAdButton", "Watch ad\n+100 coins", new Vector2(300, 120), new Color(0.95f, 0.65f, 0.15f), out var adLabel, 34);
             var rewarded = adButton.gameObject.AddComponent<RewardedCoinsButton>();
             Wire(rewarded, ("button", adButton), ("label", adLabel));
+            var goalsButton = MakeButton(nav, "GoalsButton", "Goals", new Vector2(200, 120), new Color(0.13f, 0.58f, 0.6f));
+            var goalsBadge = MakeRect("Badge", (RectTransform)goalsButton.transform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f),
+                new Vector2(-14, -10), new Vector2(54, 54));
+            AddImage(goalsBadge, Red, raycast: false);
+            var goalsBadgeText = Label(goalsBadge, "Text", "1", 30, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
             var ordersButton = MakeButton(nav, "OrdersButton", "Orders", new Vector2(220, 120), new Color(0.55f, 0.35f, 0.7f));
             var barnButton = MakeButton(nav, "BarnButton", "Barn", new Vector2(200, 120), new Color(0.62f, 0.38f, 0.25f));
             var menuButton = MakeButton(nav, "MenuButton", "Menu", new Vector2(200, 120), Slate);
@@ -466,6 +471,7 @@ namespace TownBuilder.EditorTools
             // --- Confirm dialog (last = drawn on top)
             var dialog = CreateConfirmDialog(canvas.transform);
             var levelUp = BuildLevelUpDialog(canvas.transform);
+            var achievements = BuildAchievementsPanel(canvas.transform, goalsButton, goalsBadge.gameObject, goalsBadgeText);
             var daily = BuildDailyRewardDialog(canvas.transform);
             var rewardLayer = Stretch("RewardFlyLayer", canvas.transform);
             var rewardFlyer = rewardLayer.gameObject.AddComponent<RewardFlyer>();
@@ -501,6 +507,7 @@ namespace TownBuilder.EditorTools
                 ("tasksPanel", tasksPanel),
                 ("devPanel", devPanel),
                 ("dailyDialog", daily),
+                ("achievementsPanel", achievements),
                 ("rewardFlyer", rewardFlyer),
                 ("bottomNavigation", nav.gameObject),
                 ("buildButton", buildButton),
@@ -582,6 +589,69 @@ namespace TownBuilder.EditorTools
             var panel = container.gameObject.AddComponent<OrdersPanel>();
             Wire(panel, ("panelRoot", root.gameObject), ("closeButton", close));
             WireArray(panel, "cards", cards);
+            root.gameObject.SetActive(false);
+            return panel;
+        }
+
+        private static AchievementsPanel BuildAchievementsPanel(Transform canvas, Button openButton, GameObject badge, TMP_Text badgeText)
+        {
+            const int rowCount = 7;
+            const float rowHeight = 112f, gap = 10f;
+            var container = Stretch("AchievementsPanel", canvas);
+            var root = Stretch("Root", container);
+            AddImage(root, Dim, rounded: false);
+            var window = MakeRect("Window", root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero,
+                new Vector2(1500, 130 + rowCount * (rowHeight + gap) + 20));
+            AddImage(window, PanelColor);
+
+            Label(MakeRect("Title", window, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -18), new Vector2(-80, 80)),
+                "Text", "Goals", 54, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
+            Label(MakeRect("Subtitle", window, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(200, -18), new Vector2(-480, 80)),
+                "Text", "Long-term goals. Each tier pays gems.", 30, TextAnchor.MiddleLeft, new Color(0.45f, 0.42f, 0.38f));
+            var close = MakeButton(window, "CloseButton", "X", new Vector2(90, 90), Red, 44);
+            var closeRect = (RectTransform)close.transform;
+            closeRect.anchorMin = closeRect.anchorMax = closeRect.pivot = new Vector2(1f, 1f);
+            closeRect.anchoredPosition = new Vector2(-20, -16);
+
+            var rows = new AchievementRowView[rowCount];
+            for (int i = 0; i < rowCount; i++)
+            {
+                var row = MakeRect($"Achievement{i + 1}", window, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
+                    new Vector2(0, -120 - i * (rowHeight + gap)), new Vector2(-60, rowHeight));
+                var back = AddImage(row, Color.white, raycast: false);
+
+                var name = Label(MakeRect("Name", row, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(20, -8), new Vector2(420, 50)),
+                    "Text", "Name", 34, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
+                var tier = Label(MakeRect("Tier", row, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(20, 10), new Vector2(420, 40)),
+                    "Text", "Tier 1 of 3", 26, TextAnchor.MiddleLeft, new Color(0.45f, 0.42f, 0.38f));
+                var goal = Label(MakeRect("Goal", row, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(450, -8), new Vector2(560, 50)),
+                    "Text", "Goal", 30, TextAnchor.MiddleLeft, Ink);
+
+                var barBg = MakeRect("Bar", row, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(450, 22), new Vector2(380, 20));
+                AddImage(barBg, new Color(0.82f, 0.78f, 0.7f), raycast: false);
+                var fill = AddImage(Stretch("Fill", barBg, 2f), Green, raycast: false);
+                fill.type = Image.Type.Filled;
+                fill.fillMethod = Image.FillMethod.Horizontal;
+                var progress = Label(MakeRect("Progress", row, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(845, 12), new Vector2(200, 40)),
+                    "Text", "0/10", 26, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
+
+                var reward = Label(MakeRect("Reward", row, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-210, 0), new Vector2(170, 50)),
+                    "Text", "+2 gems", 30, TextAnchor.MiddleRight, new Color(0.2f, 0.45f, 0.75f), FontStyle.Bold);
+                var claim = MakeButton(row, "ClaimButton", "Claim", new Vector2(170, 80), Green, 34);
+                var claimRect = (RectTransform)claim.transform;
+                claimRect.anchorMin = claimRect.anchorMax = claimRect.pivot = new Vector2(1f, 0.5f);
+                claimRect.anchoredPosition = new Vector2(-20, 0);
+
+                var view = row.gameObject.AddComponent<AchievementRowView>();
+                Wire(view, ("background", back), ("nameText", name), ("goalText", goal), ("tierText", tier), ("progressText", progress),
+                    ("rewardText", reward), ("progressFill", fill), ("claimButton", claim));
+                rows[i] = view;
+            }
+
+            var panel = container.gameObject.AddComponent<AchievementsPanel>();
+            Wire(panel, ("panelRoot", root.gameObject), ("openButton", openButton), ("closeButton", close), ("badge", badge), ("badgeText", badgeText));
+            WireArray(panel, "rows", rows);
+            badge.SetActive(false);
             root.gameObject.SetActive(false);
             return panel;
         }

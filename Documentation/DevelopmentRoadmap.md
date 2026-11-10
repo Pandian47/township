@@ -318,7 +318,7 @@ The backend moves to Milestone 9.
 | Step | Feature | Status |
 |---|---|---|
 | 1 | **Daily reward**: a 7-day calendar with growing rewards (coins, materials, gems on day 7); missing a day restarts at day 1 | Done (v0.25.0) |
-| 2 | **Achievements**: long-term goals in tiers (harvest, produce, deliver, build, level) paying gems | Planned |
+| 2 | **Achievements**: long-term goals in tiers (harvest, produce, deliver, build, level) paying gems | Done (v0.26.0) |
 | 3 | **Orchard**: fruit trees (apples, cherries) that regrow after harvest + a **Juice Press** factory | Planned |
 | 4 | **Weekend event**: a time-limited goal (e.g. "Harvest Festival") with a special reward and decoration | Planned |
 | 5 | Balance pass (daily rewards, achievements and event income in the model) | Planned |
@@ -335,6 +335,14 @@ Design notes:
 - [ ] Next day: it opens with Day 2 highlighted; skipping a day starts at Day 1 again
 - [ ] DEV → "Daily reward again" lets you claim the next day straight away (walk through all 7 days; day 7 pays 2 gems)
 - [ ] Day 3 / 5 / 6 materials appear in the barn
+
+### Device checklist (Milestone 7 step 2: achievements)
+- [ ] Bottom bar has a teal **Goals** button; it opens the Goals screen with 7 rows (name, goal, tier, progress, gems)
+- [ ] Harvesting, collecting products, delivering orders and loading crates move the matching progress bars
+- [ ] Reaching a goal: toast "Achievement ready", a red number badge on the Goals button, the row turns green with Claim
+- [ ] Claim pays the gems (sound + toast), the row moves to the next tier; after tier 3 it turns gold "Complete!"
+- [ ] DEV → "Unlock everything (level 10)": Rising Star tiers 1 and 2 become claimable
+- [ ] Progress and claimed tiers are kept after closing and reopening the app
 
 ## Milestone 8: Expansion
 Ship, helicopter, friends and co-op, monetisation, Google Play launch.

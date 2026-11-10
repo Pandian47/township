@@ -120,6 +120,22 @@ namespace TownBuilder
         }
 
         private System.Action _disposeDaily;
+        private System.Action _disposeAchievements;
+
+        /// <summary>Achievement sounds (the service is created after the bridge).</summary>
+        public void AddAchievements(AchievementService achievements)
+        {
+            if (achievements == null) return;
+            System.Action<string> ready = _ => Play(SoundId.Collect);
+            System.Action<string> claimed = _ => Play(SoundId.LevelUp);
+            achievements.Ready += ready;
+            achievements.Claimed += claimed;
+            _disposeAchievements = () =>
+            {
+                achievements.Ready -= ready;
+                achievements.Claimed -= claimed;
+            };
+        }
 
         /// <summary>Daily reward sound (the daily service is created after the bridge).</summary>
         public void AddDaily(DailyRewardService daily)
@@ -134,6 +150,7 @@ namespace TownBuilder
         {
             _dispose();
             _disposeDaily?.Invoke();
+            _disposeAchievements?.Invoke();
         }
 
         private void Play(SoundId id)

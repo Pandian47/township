@@ -256,6 +256,16 @@ calendar slot (streak continues when the last claim was yesterday, otherwise res
 `DailyRewardDialog` shows 7 cards, opens on load when a reward is waiting and re-checks every 30 s for a new day.
 Saved in `SaveData.daily` (`lastClaimDay`, `streak`).
 
+## 6g6c. Achievements (Milestone 7 step 2)
+
+`AchievementBook` (Domain) keeps one counter per `AchievementKind` (`Add` for event counts, `RaiseTo` for
+"highest so far" values like level and buildings owned) and the claimed tiers per achievement id; it raises
+`GoalReached` once when a counter crosses the next unclaimed goal. `AchievementDefinition` (ScriptableObject, GameContent →
+Achievements) holds the name, kind and tiers (goal + gems). `AchievementService` (Scripts/Achievements) listens to farming,
+production, orders, placement, the train, land and level-ups, syncs the "highest so far" counters on load, and pays gems on
+`Claim`. `AchievementsPanel` is the Goals screen + the Goals button badge. Saved in `SaveData.achievements`
+(counters by kind name, claimed tiers by id).
+
 ## 6g7. Ambient life (Milestone 6 step 1)
 
 * **Crop sway:** crop sprites use `Materials/CropSway.mat` (`Shaders/SpriteSway.shader`, Universal2D pass): vertices move

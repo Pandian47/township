@@ -16,6 +16,7 @@ namespace TownBuilder
         [SerializeField] private TrainPanel trainPanel;
         [SerializeField] private LandPanel landPanel;
         [SerializeField] private DailyRewardDialog dailyDialog;
+        [SerializeField] private AchievementsPanel achievementsPanel;
         [SerializeField] private DevPanel devPanel;
         [SerializeField] private RewardFlyer rewardFlyer;
 
@@ -165,6 +166,16 @@ namespace TownBuilder
         }
 
         public DailyRewardDialog DailyDialog => dailyDialog;
+
+        /// <summary>Achievements: the Goals button and screen.</summary>
+        public void InitializeAchievements(AchievementService achievements)
+        {
+            if (achievements == null || achievementsPanel == null) return;
+            achievementsPanel.Initialize(achievements);
+            achievements.Notification += toast.Show;
+        }
+
+        public AchievementsPanel AchievementsPanel => achievementsPanel;
 
         public void InitializeLand(LandController land)
         {

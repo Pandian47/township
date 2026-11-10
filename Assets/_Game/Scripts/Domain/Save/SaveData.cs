@@ -26,6 +26,7 @@ namespace TownBuilder.Domain
         public TrainSaveData train = new TrainSaveData();
         public LandSaveData land = new LandSaveData();
         public DailySaveData daily = new DailySaveData();
+        public AchievementsSaveData achievements = new AchievementsSaveData();
     }
 
     /// <summary>One order-board slot. itemIds[i] / amounts[i] form one line.</summary>
@@ -40,7 +41,29 @@ namespace TownBuilder.Domain
         public long availableAtUnixMs;
     }
 
-    /// <summary>One queued/finished product in a factory. Jobs of one factory are saved in queue order.</summary>
+    [Serializable]
+    public sealed class AchievementsSaveData
+    {
+        /// <summary>Achievement counters by kind (AchievementKind name).</summary>
+        public List<AchievementCounterSaveData> counters = new List<AchievementCounterSaveData>();
+        /// <summary>Claimed tiers by achievement id.</summary>
+        public List<AchievementClaimSaveData> claimed = new List<AchievementClaimSaveData>();
+    }
+
+    [Serializable]
+    public sealed class AchievementCounterSaveData
+    {
+        public string kind;
+        public long value;
+    }
+
+    [Serializable]
+    public sealed class AchievementClaimSaveData
+    {
+        public string id;
+        public int tiers;
+    }
+
     [Serializable]
     public sealed class DailySaveData
     {
@@ -85,6 +108,7 @@ namespace TownBuilder.Domain
         public int progress;
     }
 
+    /// <summary>One queued/finished product in a factory. Jobs of one factory are saved in queue order.</summary>
     [Serializable]
     public sealed class ProductionJobSaveData
     {

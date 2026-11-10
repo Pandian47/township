@@ -133,7 +133,7 @@ namespace TownBuilder.EditorTools
             return outputPath;
         }
 
-        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily }
+        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals }
 
         /// <summary>Command line: renders MainMenu + Town (idle, shop, placing) with UI into the folder after -previewOut.</summary>
         public static void CaptureUiFromCommandLine()
@@ -157,6 +157,7 @@ namespace TownBuilder.EditorTools
                 Capture(Path.Combine(folder, "Preview_Town_Train.png"), HudState.Train);
                 Capture(Path.Combine(folder, "Preview_Town_Land.png"), HudState.Land);
                 Capture(Path.Combine(folder, "Preview_Town_Daily.png"), HudState.Daily);
+                Capture(Path.Combine(folder, "Preview_Town_Goals.png"), HudState.Goals);
             }
             catch (Exception e)
             {
@@ -226,6 +227,32 @@ namespace TownBuilder.EditorTools
                 float top = bakeryView.SpriteRenderer.bounds.max.y - bakeryView.transform.position.y;
                 go.transform.localPosition = new Vector3(bakeryView.SpriteRenderer.bounds.center.x - bakeryView.transform.position.x, top + 0.3f, 0f);
                 go.transform.localScale = Vector3.one * 0.5f;
+            }
+
+            if (state == HudState.Goals)
+            {
+                // Some progress: one tier ready, one finished, the rest on the way.
+                var panel = UnityEngine.Object.FindAnyObjectByType<AchievementsPanel>(FindObjectsInactive.Include);
+                var book = new AchievementBook(content.Achievements.Select(a => a.ToSpec()));
+                book.Restore(new[]
+                {
+                    new System.Collections.Generic.KeyValuePair<AchievementKind, long>(AchievementKind.HarvestCrops, 342),
+                    new System.Collections.Generic.KeyValuePair<AchievementKind, long>(AchievementKind.MakeProducts, 120),
+                    new System.Collections.Generic.KeyValuePair<AchievementKind, long>(AchievementKind.DeliverOrders, 23),
+                    new System.Collections.Generic.KeyValuePair<AchievementKind, long>(AchievementKind.LoadCrates, 4),
+                    new System.Collections.Generic.KeyValuePair<AchievementKind, long>(AchievementKind.OwnBuildings, 9),
+                    new System.Collections.Generic.KeyValuePair<AchievementKind, long>(AchievementKind.BuyLand, 1),
+                    new System.Collections.Generic.KeyValuePair<AchievementKind, long>(AchievementKind.ReachLevel, 16),
+                }, new[]
+                {
+                    new System.Collections.Generic.KeyValuePair<string, int>("harvest_crops", 1),
+                    new System.Collections.Generic.KeyValuePair<string, int>("make_products", 1),
+                    new System.Collections.Generic.KeyValuePair<string, int>("deliver_orders", 1),
+                    new System.Collections.Generic.KeyValuePair<string, int>("own_buildings", 1),
+                    new System.Collections.Generic.KeyValuePair<string, int>("reach_level", 3),
+                });
+                Find(canvas, "AchievementsPanel").transform.Find("Root").gameObject.SetActive(true);
+                panel.Render(book, content);
             }
 
             if (state == HudState.Daily)

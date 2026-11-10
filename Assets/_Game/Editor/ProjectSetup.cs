@@ -50,7 +50,7 @@ namespace TownBuilder.EditorTools
             "Art/Environment/Tiles/TileAssets", "Art/Characters", "Art/Vehicles", "Art/Decorations", "Art/UI",
             "Animations", "Audio", "Fonts", "Materials", "Shaders",
             "Prefabs/World", "Prefabs/Buildings", "Prefabs/Crops", "Prefabs/Characters", "Prefabs/UI",
-            "Scenes", "Data/Buildings", "Data/Crops", "Data/Products", "Data/Recipes", "Data/Tasks", "Data/Materials",
+            "Scenes", "Data/Buildings", "Data/Crops", "Data/Products", "Data/Recipes", "Data/Tasks", "Data/Materials", "Data/Achievements",
             "ScriptableObjects", "Settings", "Tests/EditMode", "Tests/PlayMode",
         };
 
@@ -242,6 +242,7 @@ namespace TownBuilder.EditorTools
             CreateMaterials();
             ConfigureLand();
             ConfigureDailyRewards();
+            CreateAchievements();
             CreateTasks();
             ConfigureAds();
             ConfigureAudio();
@@ -591,6 +592,44 @@ namespace TownBuilder.EditorTools
             new MaterialSeed { Id = "bricks", Name = "Bricks", Style = PlaceholderArtGenerator.ProductStyle.Bricks, SellPrice = 14 },
             new MaterialSeed { Id = "nails", Name = "Nails", Style = PlaceholderArtGenerator.ProductStyle.Nails, SellPrice = 8 },
         };
+
+        private static readonly (string Id, string Name, AchievementKind Kind, int[] Goals)[] AchievementSeeds =
+        {
+            ("harvest_crops", "Green Fingers", AchievementKind.HarvestCrops, new[] { 50, 300, 1500 }),
+            ("make_products", "Busy Workshops", AchievementKind.MakeProducts, new[] { 30, 200, 1000 }),
+            ("deliver_orders", "Trusted Trader", AchievementKind.DeliverOrders, new[] { 10, 60, 250 }),
+            ("load_crates", "Freight Master", AchievementKind.LoadCrates, new[] { 10, 50, 200 }),
+            ("own_buildings", "Town Planner", AchievementKind.OwnBuildings, new[] { 5, 12, 25 }),
+            ("buy_land", "Land Owner", AchievementKind.BuyLand, new[] { 2, 8, 20 }),
+            ("reach_level", "Rising Star", AchievementKind.ReachLevel, new[] { 5, 10, 15 }),
+        };
+
+        /// <summary>Gems per tier (tier 1, 2, 3). Example values; edit each Achievement asset.</summary>
+        private static readonly int[] AchievementTierGems = { 2, 4, 8 };
+
+        /// <summary>Achievement assets (existing ones are kept as they are) and their order in GameContent.</summary>
+        private static void CreateAchievements()
+        {
+            var content = AssetDatabase.LoadAssetAtPath<GameContent>(ContentPath);
+            var list = content.Achievements.Where(a => a != null).ToList();
+            foreach (var s in AchievementSeeds)
+            {
+                var path = $"{Root}/Data/Achievements/Achievement_{s.Id}.asset";
+                var def = AssetDatabase.LoadAssetAtPath<AchievementDefinition>(path);
+                if (def == null)
+                {
+                    def = ScriptableObject.CreateInstance<AchievementDefinition>();
+                    var tiers = s.Goals.Select((g, i) => new AchievementTier { goal = g, gems = AchievementTierGems[Mathf.Min(i, AchievementTierGems.Length - 1)] }).ToList();
+                    def.EditorConfigure(s.Id, s.Name, s.Kind, tiers);
+                    AssetDatabase.CreateAsset(def, path);
+                }
+
+                if (!list.Contains(def)) list.Add(def);
+            }
+
+            content.EditorSetAchievements(list);
+            EditorUtility.SetDirty(content);
+        }
 
         /// <summary>Daily reward calendar (only if none is set). Example values; edit in GameContent → Daily reward.</summary>
         private static void ConfigureDailyRewards()

@@ -131,6 +131,14 @@ MonoBehaviour:
   trainXpDivisor: 4
   trainFullBonusFraction: 0.5
   trainMaterialChance: 0.35
+  achievements:
+  - {fileID: 11400000, guid: e92cb5a9d236a6145b30c518ad999930, type: 2}
+  - {fileID: 11400000, guid: 4c3c0ddf24ca5e0408c8828c84c1213d, type: 2}
+  - {fileID: 11400000, guid: a0cd39271f6e59f4a8f1d1f25764025c, type: 2}
+  - {fileID: 11400000, guid: a8583b1b55c06f64b991b2e4aecb45b8, type: 2}
+  - {fileID: 11400000, guid: 12f12a4039767f04aa382ded44a8ff3a, type: 2}
+  - {fileID: 11400000, guid: 8c14267abef1eee44afda976bad9546f, type: 2}
+  - {fileID: 11400000, guid: 98eb49b7cc415ee48abbf00e18276e4f, type: 2}
   dailyRewards:
   - coins: 50
     gems: 0

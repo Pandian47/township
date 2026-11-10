@@ -126,6 +126,29 @@ namespace TownBuilder
             land.Restore(owned);
         }
 
+        /// <summary>Restores achievement counters (unknown kinds dropped) and claimed tiers (unknown ids dropped).</summary>
+        public static void LoadAchievements(SaveData save, AchievementBook book)
+        {
+            var counts = new List<KeyValuePair<AchievementKind, long>>();
+            foreach (var c in save.achievements.counters)
+                if (c != null && System.Enum.TryParse(c.kind, out AchievementKind kind))
+                    counts.Add(new KeyValuePair<AchievementKind, long>(kind, c.value));
+            var claimed = new List<KeyValuePair<string, int>>();
+            foreach (var c in save.achievements.claimed)
+                if (c != null && !string.IsNullOrEmpty(c.id)) claimed.Add(new KeyValuePair<string, int>(c.id, c.tiers));
+            book.Restore(counts, claimed);
+        }
+
+        public static void WriteAchievements(SaveData save, AchievementBook book)
+        {
+            save.achievements.counters.Clear();
+            foreach (var c in book.Counts)
+                save.achievements.counters.Add(new AchievementCounterSaveData { kind = c.Key.ToString(), value = c.Value });
+            save.achievements.claimed.Clear();
+            foreach (var c in book.Claimed)
+                save.achievements.claimed.Add(new AchievementClaimSaveData { id = c.Key, tiers = c.Value });
+        }
+
         public static DailyRewardTrack LoadDaily(SaveData save, int calendarLength) =>
             new DailyRewardTrack(calendarLength, save.daily.lastClaimDay, save.daily.streak);
 

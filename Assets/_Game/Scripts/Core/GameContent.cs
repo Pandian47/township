@@ -71,6 +71,10 @@ namespace TownBuilder
         [Tooltip("Chance that a crate also pays 1 building material.")]
         [SerializeField, Range(0f, 1f)] private float trainMaterialChance = 0.35f;
 
+        [Header("Achievements")]
+        [Tooltip("Long-term goals in tiers, shown in this order on the Goals screen.")]
+        [SerializeField] private List<AchievementDefinition> achievements = new List<AchievementDefinition>();
+
         [Header("Daily reward")]
         [Tooltip("The calendar, day 1 first. Claiming on consecutive days walks through it; missing a day restarts at day 1.")]
         [SerializeField] private List<DailyRewardEntry> dailyRewards = new List<DailyRewardEntry>();
@@ -95,6 +99,24 @@ namespace TownBuilder
         private Dictionary<string, ProductDefinition> _productsById;
         private Dictionary<string, RecipeDefinition> _recipesById;
         private Dictionary<string, MaterialDefinition> _materialsById;
+
+        public IReadOnlyList<AchievementDefinition> Achievements => achievements;
+
+        public bool TryGetAchievement(string id, out AchievementDefinition achievement)
+        {
+            achievement = null;
+            if (string.IsNullOrEmpty(id) || achievements == null) return false;
+            foreach (var a in achievements)
+            {
+                if (a == null || a.Id != id) continue;
+                achievement = a;
+                return true;
+            }
+
+            return false;
+        }
+
+        public void EditorSetAchievements(List<AchievementDefinition> list) => achievements = list;
 
         public IReadOnlyList<DailyRewardEntry> DailyRewards => dailyRewards;
         public void EditorSetDailyRewards(List<DailyRewardEntry> list) => dailyRewards = list;

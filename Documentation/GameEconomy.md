@@ -192,6 +192,24 @@ it starts again at day 1; **missing a day restarts at day 1**. The calendar open
 * A full week pays **810 coins, 2 gems and 4 materials** (about 115 coins a day, small next to orders and the train).
 * If the barn is full, a material is paid as coins instead (2× its sell price).
 
+## Achievements (Milestone 7 step 2, `Data/Achievements`, Goals button)
+
+Long-term goals in 3 tiers. Each tier pays gems when claimed: **2 / 4 / 8 gems** (14 per achievement, 98 for all).
+
+| Achievement | Counts | Tier goals |
+|---|---|---|
+| Green Fingers | crops harvested | 50 / 300 / 1,500 |
+| Busy Workshops | products collected (factories and animals) | 30 / 200 / 1,000 |
+| Trusted Trader | orders delivered | 10 / 60 / 250 |
+| Freight Master | train crates loaded | 10 / 50 / 200 |
+| Town Planner | town buildings owned (not fields, decorations or the Town Hall/station) | 5 / 12 / 25 |
+| Land Owner | plots of land bought | 2 / 8 / 20 |
+| Rising Star | level reached | 5 / 10 / 15 |
+
+* Counters are per kind, so a new achievement of an existing kind sees the progress already made.
+* Existing saves: level, buildings and bought land count from the start; harvests, products, orders and crates count
+  from this version on.
+
 ## Building materials (Milestone 5 step 3, `Data/Materials`)
 
 | Material | Sells for | Where from |

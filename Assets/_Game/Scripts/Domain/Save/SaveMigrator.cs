@@ -60,6 +60,9 @@ namespace TownBuilder.Domain
             data.train ??= new TrainSaveData();
             data.land ??= new LandSaveData();
             data.daily ??= new DailySaveData();
+            data.achievements ??= new AchievementsSaveData();
+            data.achievements.counters ??= new List<AchievementCounterSaveData>();
+            data.achievements.claimed ??= new List<AchievementClaimSaveData>();
             if (data.daily.streak < 0) data.daily.streak = 0;
             data.land.ownedPlots ??= new List<string>();
             data.land.ownedPlots.RemoveAll(id => !PlotCoord.TryParse(id, out _));
