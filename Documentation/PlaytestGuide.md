@@ -101,7 +101,7 @@ And three quick feelings after Session A:
 
 ## 7. Art still to generate (all optional, prompts in ArtPrompts.md)
 
-Put the files in `D:-Projects-Township\Sources` with exactly these names, then tell me (or use
+Put the files in `D:\01-Projects\05-Township\Sources` with exactly these names, then tell me (or use
 TownBuilder → Art → Import AI Art Folder). Missing files simply keep their placeholder.
 
 | File | ArtPrompts.md section |
