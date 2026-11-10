@@ -1,11 +1,11 @@
-# Playtest guide (v0.19.1)
+# Playtest guide (v0.24.0)
 
 One place for testing the game on a real Android phone. The detailed per-feature checklists stay in
 DevelopmentRoadmap.md; this guide is the order to play in and what to write down.
 
 ## 1. Install
 
-APK: `Builds/Android/TownBuilder-0.19.1-20.apk` (37 MB, test build, test ads only, developer mode included).
+APK: `Builds/Android/TownBuilder-0.24.0-25.apk` (37 MB, test build, test ads only, developer mode included).
 
 **Option A: copy the file (no cable needed)**
 1. Upload the APK to Google Drive (or send it to yourself), open it on the phone.
@@ -18,7 +18,7 @@ APK: `Builds/Android/TownBuilder-0.19.1-20.apk` (37 MB, test build, test ads onl
 2. Connect the cable, tap **Allow** on the "Allow USB debugging?" popup.
 3. Tell me, and I'll run the install with Unity's `adb`, or run it yourself:
    ```
-   "C:\Program Files\Unity\Hub\Editor\6000.6.8f1\Editor\Data\PlaybackEngines\AndroidPlayer\SDK\platform-tools\adb.exe" install -r "D:\01-Projects\05-Township\TownBuilder\Builds\Android\TownBuilder-0.19.1-20.apk"
+   "C:\Program Files\Unity\Hub\Editor\6000.6.8f1\Editor\Data\PlaybackEngines\AndroidPlayer\SDK\platform-tools\adb.exe" install -r "D:\01-Projects\05-Township\TownBuilder\Builds\Android\TownBuilder-0.24.0-25.apk"
    ```
 
 ## 2. Session A: a new town (30–45 minutes, sound on)
@@ -66,7 +66,24 @@ Suggested order: Unlock everything → +coins → Max barn → build the buildin
 
 Developer mode changes your real save. To go back to normal play afterwards: Menu → New Game.
 
-## 5. What to send back
+## 5. Session D: Milestone 6 look and feel (10–15 minutes)
+
+Use developer mode (Unlock everything, +coins, Max barn) so everything is available, then watch rather than rush:
+
+| Check | Look for |
+|---|---|
+| Crops | Growing and ripe crops sway gently; the soil and wooden border stay still |
+| Smoke | Queue products in the Bakery, Feed Mill, Sugar Mill, Creamery: smoke rises from the chimney top, stops when done |
+| Badges | "Ready" product icons, construction hammer and station padlock float up and down |
+| Train | Send the train, then DEV → Finish all timers: it rolls in from the lower right, slows down, the station then shows it; Send: it pulls away to the upper left |
+| Roads | Townsfolk walk on the road edges and pause; two cars drive in their lane, lights facing the right way; a new Cottage adds a walker |
+| Panels | Barn / Orders / Shop pop in; bottom panels and bars slide up; nothing stays half-transparent |
+| Rewards | Selling, delivering, claiming: coins fly from your finger to the Coins pill (XP stars, gems too); spending flies nothing |
+| Buttons | Every button squashes while held |
+| Decorations | Build → Decorations tab: Tree, Flower Bed, Bench, Fence, Fountain; instant, unlimited, movable |
+| Smoothness | Panning and zooming stay smooth with smoke, walkers, train and a full farm at the same time |
+
+## 6. What to send back
 
 For each problem, one line is enough. A screenshot helps a lot (power + volume down).
 
@@ -81,3 +98,17 @@ And three quick feelings after Session A:
 1. **Pace:** too slow / OK / too fast? (Did you wait for coins or timers with nothing to do?)
 2. **Clarity:** was anything confusing (what to do next, what a button does)?
 3. **Comfort:** anything too small to tap, hidden behind a panel, or hard to read?
+
+## 7. Art still to generate (all optional, prompts in ArtPrompts.md)
+
+Put the files in `D:-Projects-Township\Sources` with exactly these names, then tell me (or use
+TownBuilder → Art → Import AI Art Folder). Missing files simply keep their placeholder.
+
+| File | ArtPrompts.md section |
+|---|---|
+| `train.png` | Milestone 6 step 2 (locomotive at the upper-left end) |
+| `rail.png` | Railway |
+| `person_1.png` … `person_4.png` | Milestone 6 step 3 |
+| `car_front.png`, then `car_back.png` (same chat) | Milestone 6 step 3 |
+| `coin.png`, `gem.png`, `xp_star.png` | Milestone 6 step 4 |
+| `tree.png`, `flower_bed.png`, `bench.png`, `fence.png`, `fountain.png` | Milestone 6 step 5 |
