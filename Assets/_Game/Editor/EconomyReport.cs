@@ -85,7 +85,7 @@ namespace TownBuilder.EditorTools
                 float minutes = crop.GrowSeconds / 60f;
                 rates.Add(new Rate
                 {
-                    Id = crop.Id, Name = crop.DisplayName, Kind = "Crop (per field)", Unlock = crop.UnlockLevel, Minutes = minutes,
+                    Id = crop.Id, Name = crop.DisplayName, Kind = crop.GrowsOnTree ? "Crop (per fruit tree)" : "Crop (per field)", Unlock = crop.UnlockLevel, Minutes = minutes,
                     CoinsPerMinute = (crop.HarvestYield * crop.SellPrice - crop.SeedCoinCost) / minutes,
                     XpPerMinute = crop.HarvestXp / minutes,
                 });
@@ -154,7 +154,7 @@ namespace TownBuilder.EditorTools
                 coins -= row.BuildingCosts;
                 row.BalanceAfterBuying = coins;
 
-                var bestCrop = content.Crops.Where(c => c.UnlockLevel <= level)
+                var bestCrop = content.Crops.Where(c => c.UnlockLevel <= level && !c.GrowsOnTree)
                     .OrderByDescending(c => (c.HarvestYield * c.SellPrice - c.SeedCoinCost) / (float)c.GrowSeconds).First();
                 float cropMinutes = bestCrop.GrowSeconds / 60f;
                 float cpm = row.Fields * (bestCrop.HarvestYield * bestCrop.SellPrice - bestCrop.SeedCoinCost) / cropMinutes;

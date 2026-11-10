@@ -103,10 +103,10 @@ namespace TownBuilder
             if (_land != null) _book.RaiseTo(AchievementKind.BuyLand, Math.Max(0, _land.Owned.Count - _startPlots));
         }
 
-        /// <summary>Buildings the player built: not fields, decorations or fixed landmarks.</summary>
+        /// <summary>Buildings the player built: not fields, fruit trees, decorations or fixed landmarks.</summary>
         private int CountOwnedBuildings() =>
             _town.Buildings.Count(b => _content.TryGetBuilding(b.DefinitionId, out var d)
-                                       && d.Movable && !d.IsFarmPlot && d.Category != BuildingCategory.Decoration);
+                                       && d.Movable && !d.IsFarmPlot && !d.IsFruitTree && d.Category != BuildingCategory.Decoration);
 
         private void OnGoalReached(string id)
         {

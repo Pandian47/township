@@ -64,6 +64,9 @@ namespace TownBuilder.EditorTools
             public bool Fixed;
             /// <summary>Decoration: drawn by PlaceholderArtGenerator.CreateDecoration (not as a box building).</summary>
             public PlaceholderArtGenerator.DecorationStyle? Deco;
+            /// <summary>Fruit tree: drawn from the decoration tree with fruit; <see cref="Fruit"/> grows on it by itself.</summary>
+            public PlaceholderArtGenerator.FruitStyle? Tree;
+            public string Fruit;
             public Color32 Wall, Roof;
         }
 
@@ -72,6 +75,9 @@ namespace TownBuilder.EditorTools
             public string Id, Name;
             public PlaceholderArtGenerator.CropStyle Style;
             public int GrowSeconds, Yield, SeedCost, Xp, Unlock, SellPrice;
+            /// <summary>Tree fruit: growth sprites are the whole tree; the icon is drawn separately.</summary>
+            public PlaceholderArtGenerator.FruitStyle? Tree;
+            public PlaceholderArtGenerator.ProductStyle Icon;
         }
 
         // Example balance values (not taken from any existing game). Tune them in the assets.
@@ -87,6 +93,11 @@ namespace TownBuilder.EditorTools
             // Milestone 4 step 3: sugar ingredient.
             new CropSeed { Id = "sugarcane", Name = "Sugarcane", Style = PlaceholderArtGenerator.CropStyle.Sugarcane,
                 GrowSeconds = 720, Yield = 3, SeedCost = 5, Xp = 3, Unlock = 7, SellPrice = 8 },
+            // Milestone 7 step 3: orchard fruit (grows on trees, regrows after every harvest, no seeds).
+            new CropSeed { Id = "apple", Name = "Apple", Tree = PlaceholderArtGenerator.FruitStyle.Apple, Icon = PlaceholderArtGenerator.ProductStyle.Apple,
+                GrowSeconds = 1800, Yield = 2, SeedCost = 0, Xp = 3, Unlock = 8, SellPrice = 18 },
+            new CropSeed { Id = "cherry", Name = "Cherry", Tree = PlaceholderArtGenerator.FruitStyle.Cherry, Icon = PlaceholderArtGenerator.ProductStyle.Cherry,
+                GrowSeconds = 3600, Yield = 2, SeedCost = 0, Xp = 5, Unlock = 10, SellPrice = 26 },
         };
 
         /// <summary>Fixed Train Station spot (2x3 footprint). Its platform track lies along its front-left side, over the railway.</summary>
@@ -140,6 +151,15 @@ namespace TownBuilder.EditorTools
                 Wall = new Color32(246, 246, 240, 255), Roof = new Color32(70, 70, 76, 255) },
             new BuildingSeed { Id = "field", Name = "Field", Category = BuildingCategory.Farming, Folder = "Farming",
                 W = 1, H = 1, Unlock = 1, Cost = 20, Removable = true, MaxCount = 12, FarmPlot = true },
+
+            // Milestone 7 step 3: the orchard (instant, up to 8 of each) and the Juice Press.
+            new BuildingSeed { Id = "apple_tree", Name = "Apple Tree", Category = BuildingCategory.Farming, Folder = "Farming",
+                W = 1, H = 1, Unlock = 8, Cost = 250, Removable = true, MaxCount = 8, Tree = PlaceholderArtGenerator.FruitStyle.Apple, Fruit = "apple" },
+            new BuildingSeed { Id = "cherry_tree", Name = "Cherry Tree", Category = BuildingCategory.Farming, Folder = "Farming",
+                W = 1, H = 1, Unlock = 10, Cost = 400, Removable = true, MaxCount = 8, Tree = PlaceholderArtGenerator.FruitStyle.Cherry, Fruit = "cherry" },
+            new BuildingSeed { Id = "juice_press", Name = "Juice Press", Category = BuildingCategory.Production, Folder = "Production",
+                W = 2, H = 2, HeightPx = 105, Unlock = 9, Cost = 1200, Removable = true, BuildSeconds = 300, BuildXp = 22,
+                Wall = new Color32(238, 220, 180, 255), Roof = new Color32(120, 170, 70, 255) },
 
             // Milestone 6 step 5: decorations (instant, no limit, purely for looks). Example prices.
             new BuildingSeed { Id = "tree", Name = "Tree", Category = BuildingCategory.Decoration, Folder = "Decorations",
@@ -214,7 +234,7 @@ namespace TownBuilder.EditorTools
             ConfigurePlayerSettings();
             ConfigureDepthSorting();
 
-            var art = PlaceholderArtGenerator.Generate(Seeds.Where(s => !s.FarmPlot && s.Deco == null).Select(s => new PlaceholderArtGenerator.BuildingArtSpec
+            var art = PlaceholderArtGenerator.Generate(Seeds.Where(s => !s.FarmPlot && s.Deco == null && s.Tree == null).Select(s => new PlaceholderArtGenerator.BuildingArtSpec
             {
                 Id = s.Id, Folder = $"{PlaceholderArtGenerator.BuildingsArtFolder}/{s.Folder}", FootprintX = s.W, FootprintY = s.H,
                 HeightPx = s.HeightPx, Wall = s.Wall, Roof = s.Roof,
@@ -224,6 +244,8 @@ namespace TownBuilder.EditorTools
             foreach (var s in Seeds.Where(s => s.FarmPlot)) art.Buildings[s.Id] = PlaceholderArtGenerator.CreateFieldSprite();
             foreach (var s in Seeds.Where(s => s.Deco != null))
                 art.Buildings[s.Id] = PlaceholderArtGenerator.CreateDecoration(s.Id, s.Deco.Value, s.W, s.H);
+            foreach (var s in Seeds.Where(s => s.Tree != null))
+                art.Buildings[s.Id] = PlaceholderArtGenerator.CreateFruitTree(s.Id, s.Tree.Value);
             PlaceholderArtGenerator.CreateConstructionIcon();
             PlaceholderArtGenerator.CreateLockedTile();
             PlaceholderArtGenerator.CreateRailTile();
@@ -238,6 +260,7 @@ namespace TownBuilder.EditorTools
 
             CreateContent(art);
             CreateCrops();
+            ConfigureOrchard();
             CreateProduction();
             CreateMaterials();
             ConfigureLand();
@@ -417,6 +440,9 @@ namespace TownBuilder.EditorTools
             new ProductSeed { Id = "cake", Name = "Cake", Style = PlaceholderArtGenerator.ProductStyle.Cake, SellPrice = 205 },
             new ProductSeed { Id = "butter", Name = "Butter", Style = PlaceholderArtGenerator.ProductStyle.Butter, SellPrice = 72 },
             new ProductSeed { Id = "cheese", Name = "Cheese", Style = PlaceholderArtGenerator.ProductStyle.Cheese, SellPrice = 140 },
+            // Milestone 7 step 3: juices.
+            new ProductSeed { Id = "apple_juice", Name = "Apple Juice", Style = PlaceholderArtGenerator.ProductStyle.AppleJuice, SellPrice = 80 },
+            new ProductSeed { Id = "cherry_juice", Name = "Cherry Juice", Style = PlaceholderArtGenerator.ProductStyle.CherryJuice, SellPrice = 150 },
         };
 
         private static readonly RecipeSeed[] RecipeSeeds =
@@ -443,6 +469,10 @@ namespace TownBuilder.EditorTools
                 Ingredients = new[] { ("milk", 1) }, Seconds = 480, Xp = 6, Unlock = 8 },
             new RecipeSeed { Id = "make_cheese", ProductId = "cheese", FactoryId = "creamery",
                 Ingredients = new[] { ("milk", 2) }, Seconds = 900, Xp = 10, Unlock = 9 },
+            new RecipeSeed { Id = "press_apple_juice", ProductId = "apple_juice", FactoryId = "juice_press",
+                Ingredients = new[] { ("apple", 3) }, Seconds = 420, Xp = 6, Unlock = 9 },
+            new RecipeSeed { Id = "press_cherry_juice", ProductId = "cherry_juice", FactoryId = "juice_press",
+                Ingredients = new[] { ("cherry", 3), ("sugar", 1) }, Seconds = 600, Xp = 9, Unlock = 10 },
         };
 
         private const int DefaultFactorySlots = 3;
@@ -576,6 +606,13 @@ namespace TownBuilder.EditorTools
 
             // Milestone 5 step 4.
             new TaskSeed("guide_buy_land", TaskKind.BuyLand, null, 1, 3, 50, 6, material: "planks", materialAmount: 1),
+
+            // Milestone 7 step 3: the orchard.
+            new TaskSeed("guide_plant_apple_tree", TaskKind.Build, "apple_tree", 1, 8, 60, 8),
+            new TaskSeed("guide_build_juice_press", TaskKind.Build, "juice_press", 1, 9, 100, 12, 1),
+            new TaskSeed("pick_apples", TaskKind.Harvest, "apple", 4, 8, 60, 6, repeatable: true),
+            new TaskSeed("press_apple_juice", TaskKind.Collect, "apple_juice", 2, 9, 120, 10, repeatable: true),
+            new TaskSeed("pick_cherries", TaskKind.Harvest, "cherry", 4, 10, 90, 8, repeatable: true),
         };
 
         private struct MaterialSeed
@@ -744,8 +781,11 @@ namespace TownBuilder.EditorTools
                 if (crop == null)
                 {
                     crop = ScriptableObject.CreateInstance<CropDefinition>();
-                    crop.EditorConfigure(s.Id, s.Name, PlaceholderArtGenerator.CreateCropStages(s.Id, s.Style),
-                        s.GrowSeconds, s.Yield, s.SeedCost, s.Xp, s.Unlock, s.SellPrice);
+                    var stages = s.Tree != null
+                        ? PlaceholderArtGenerator.CreateFruitStages(s.Id, s.Tree.Value)
+                        : PlaceholderArtGenerator.CreateCropStages(s.Id, s.Style);
+                    crop.EditorConfigure(s.Id, s.Name, stages, s.GrowSeconds, s.Yield, s.SeedCost, s.Xp, s.Unlock, s.SellPrice);
+                    if (s.Tree != null) crop.EditorConfigureTreeFruit(PlaceholderArtGenerator.CreateProductIcon(s.Id, s.Icon));
                     AssetDatabase.CreateAsset(crop, path);
                 }
 
@@ -758,6 +798,24 @@ namespace TownBuilder.EditorTools
                 if (!merged.Contains(c)) merged.Add(c);
             content.EditorSetCrops(merged);
             EditorUtility.SetDirty(content);
+        }
+
+        /// <summary>Links each fruit tree to its fruit (only when not set yet).</summary>
+        private static void ConfigureOrchard()
+        {
+            var content = AssetDatabase.LoadAssetAtPath<GameContent>(ContentPath);
+            foreach (var s in Seeds.Where(s => s.Fruit != null))
+            {
+                if (!content.TryGetBuilding(s.Id, out var tree) || tree.IsFruitTree) continue;
+                if (!content.TryGetCrop(s.Fruit, out var fruit))
+                {
+                    Debug.LogError($"[Setup] {s.Id}: unknown fruit '{s.Fruit}'");
+                    continue;
+                }
+
+                tree.EditorSetFruit(fruit);
+                EditorUtility.SetDirty(tree);
+            }
         }
 
         public const string AdsConfigPath = Root + "/ScriptableObjects/AdsConfig.asset";

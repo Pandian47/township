@@ -23,8 +23,12 @@ Coins/min for recipes is the value added (product value minus the ingredients' s
 | Sugar | Sugar Mill | 7 | 8 | 2.00 | 0.63 |
 | Cookies | Bakery | 8 | 10 | 1.80 | 0.70 |
 | Butter | Creamery | 8 | 8 | 2.50 | 0.75 |
+| Apple | Crop (per fruit tree) | 8 | 30 | 1.20 | 0.10 |
 | Cheese | Creamery | 9 | 15 | 2.40 | 0.67 |
+| Apple Juice | Juice Press | 9 | 7 | 3.71 | 0.86 |
 | Cake | Bakery | 10 | 20 | 2.85 | 0.70 |
+| Cherry | Crop (per fruit tree) | 10 | 60 | 0.87 | 0.08 |
+| Cherry Juice | Juice Press | 10 | 10 | 3.20 | 0.90 |
 
 ## Level pacing (efficiency 50%, orders ignored)
 
@@ -37,9 +41,9 @@ Coins/min for recipes is the value added (product value minus the ingredients' s
 | 5 | Chicken Coop, Train Station (800) | 718 | 7 | 120 | 13.2 (3.0) | 3.64 | 33 | 434 | 1,152 | 3.0 / 1.8 / 1.0 |
 | 6 | Dairy Shed (1,000) | 752 | 8 | 170 | 15.4 (3.3) | 4.26 | 40 | 613 | 1,365 | 1.1 / 2.0 / 1.1 |
 | 7 | Sugar Mill (1,000) | 1,065 | 9 | 230 | 17.7 (3.6) | 4.89 | 47 | 831 | 1,896 | 1.3 / 2.2 / 1.3 |
-| 8 | Creamery (1,400) | 1,296 | 10 | 300 | 20.5 (4.2) | 5.65 | 53 | 1,089 | 2,385 | 1.3 / 2.2 / 1.3 |
-| 9 | Land ring 2 (1,200) | 2,085 | 11 | 380 | 22.3 (5.0) | 6.08 | 62 | 1,394 | 3,479 | 1.5 / 2.4 / 1.5 |
-| 10 | - | 4,479 | 12 | 470 | 24.6 (6.2) | 6.45 | 73 | 1,791 | 6,270 | 1.7 / 2.8 / 1.7 |
+| 8 | Creamery (1,400) | 1,296 | 10 | 300 | 20.4 (4.1) | 5.64 | 53 | 1,088 | 2,384 | 1.2 / 2.1 / 1.2 |
+| 9 | Juice Press, Land ring 2 (2,400) | 884 | 11 | 380 | 24.3 (5.1) | 6.54 | 58 | 1,412 | 2,296 | 1.3 / 2.1 / 1.3 |
+| 10 | - | 3,296 | 12 | 470 | 26.9 (6.6) | 6.98 | 67 | 1,810 | 5,106 | 1.4 / 2.3 / 1.4 |
 
 ## Land: when the first plot of each ring is affordable
 

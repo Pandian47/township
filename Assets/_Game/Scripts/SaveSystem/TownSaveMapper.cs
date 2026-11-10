@@ -282,7 +282,7 @@ namespace TownBuilder
             foreach (var plot in save.cropPlots)
             {
                 if (!town.TryGet(plot.plotInstanceId, out var field) ||
-                    !content.TryGetBuilding(field.DefinitionId, out var fieldDef) || !fieldDef.IsFarmPlot)
+                    !content.TryGetBuilding(field.DefinitionId, out var fieldDef) || !(fieldDef.IsFarmPlot || fieldDef.IsFruitTree))
                 {
                     warnings.Add($"Crop on missing field '{plot.plotInstanceId}' dropped.");
                     continue;

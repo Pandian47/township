@@ -266,6 +266,16 @@ production, orders, placement, the train, land and level-ups, syncs the "highest
 `Claim`. `AchievementsPanel` is the Goals screen + the Goals button badge. Saved in `SaveData.achievements`
 (counters by kind name, claimed tiers by id).
 
+## 6g6d. Fruit trees (Milestone 7 step 3)
+
+A fruit tree is a building whose `BuildingDefinition.fruit` points at a `CropDefinition` with `growsOnTree = true`.
+It reuses farming: the fruit is a crop in `FarmPlots` keyed by the tree's instance id (saved in `cropPlots` like a
+field's crop). `FarmingController.EnsureTreeGrowing` starts it when the tree is added (or loaded without a crop), and
+`TryHarvest` calls `FarmPlots.TryHarvestAndRegrow`, which keeps the crop and restarts its timer. The fruit's growth
+sprites are the whole tree (unripe / ripe fruit), drawn in place of the plain tree sprite, without the crop sway.
+`FieldPanel` shows a selected tree's timer (and leaves tree fruit out of the field crop picker).
+Placeholder tree art is drawn from `tree.png` by `PlaceholderArtGenerator.CreateFruitTree/CreateFruitStages`.
+
 ## 6g7. Ambient life (Milestone 6 step 1)
 
 * **Crop sway:** crop sprites use `Materials/CropSway.mat` (`Shaders/SpriteSway.shader`, Universal2D pass): vertices move

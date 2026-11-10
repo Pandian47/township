@@ -103,6 +103,29 @@ already there or their slot count.
 its ingredients, every recipe belongs to exactly one factory, and no recipe unlocks before its factory or any of
 its ingredients.
 
+## Orchard and juice (Milestone 7 step 3)
+
+Fruit trees are 1×1 buildings (Build shop → Buildings, placed instantly, up to 8 of each). The fruit grows by itself,
+with no seeds and no planting. Tap a ripe tree to pick it; it starts growing again straight away. Trees can be moved;
+removing one loses its fruit.
+
+| Tree | Price | Unlock | Fruit | Grows | Per pick | XP | Fruit sells for |
+|---|---|---|---|---|---|---|---|
+| Apple Tree | 250 coins | 8 | Apple | 30 min | 2 | 3 | 18 |
+| Cherry Tree | 400 coins | 10 | Cherry | 1 h | 2 | 5 | 26 |
+
+| Factory | Recipe | Ingredients (raw value) | Time | XP | Sells for | Unlock |
+|---|---|---|---|---|---|---|
+| Juice Press (1,200 coins, level 9, 5 min to build) | press_apple_juice → Apple Juice | 3 Apple (54) | 7 min | 6 | 80 | 9 |
+| Juice Press | press_cherry_juice → Cherry Juice | 3 Cherry + 1 Sugar (118) | 10 min | 9 | 150 | 10 |
+
+* A tree earns less per minute than a field (apples 1.2 coins/min) but needs no attention: it's for players who check
+  in now and then. Its fruit is worth most as juice.
+* Fruit and juice appear in orders and train crates once unlocked. Tasks: "Plant an Apple Tree" (level 8), "Build a
+  Juice Press" (level 9, 1 gem), and repeatable "Pick 4 Apples", "Make 2 Apple Juice", "Pick 4 Cherries".
+* Picking fruit counts for Green Fingers; juice counts for Busy Workshops. Trees don't count for Town Planner.
+* Cherry Juice was first priced at 170; the balance check (no recipe earns more than 2× the average) flagged it, so 150.
+
 ## Levels (`GameContent` → Levels)
 
 | Level-up | XP needed | Total XP | Unlocks |

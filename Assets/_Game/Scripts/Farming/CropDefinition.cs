@@ -17,6 +17,8 @@ namespace TownBuilder
         [SerializeField, Min(0)] private int seedCoinCost;
         [SerializeField, Min(0)] private int harvestXp = 1;
         [SerializeField, Min(1)] private int unlockLevel = 1;
+        [Tooltip("Fruit that grows on a tree building (BuildingDefinition.fruit) instead of being planted on fields.")]
+        [SerializeField] private bool growsOnTree;
 
         /// <summary>Falls back to the "ready" growth sprite when no dedicated icon is set.</summary>
         public override Sprite Icon => base.Icon != null ? base.Icon : (growthStages.Length > 0 ? growthStages[growthStages.Length - 1] : null);
@@ -26,6 +28,7 @@ namespace TownBuilder
         public int SeedCoinCost => seedCoinCost;
         public int HarvestXp => harvestXp;
         public int UnlockLevel => unlockLevel;
+        public bool GrowsOnTree => growsOnTree;
 
         /// <summary>Sprite for a growth progress of 0..1 (1 = ready).</summary>
         public Sprite SpriteForProgress(float progress)
@@ -48,6 +51,13 @@ namespace TownBuilder
             seedCoinCost = seedCost;
             harvestXp = xp;
             unlockLevel = unlock;
+        }
+
+        /// <summary>Marks this crop as tree fruit and gives it its own icon (the growth sprites show the whole tree).</summary>
+        public void EditorConfigureTreeFruit(Sprite icon)
+        {
+            growsOnTree = true;
+            EditorConfigureItem(Id, DisplayName, icon, SellPrice);
         }
 #endif
     }

@@ -983,7 +983,8 @@ namespace TownBuilder.EditorTools
 
         public const string ProductsArtFolder = "Assets/_Game/Art/Products";
 
-        public enum ProductStyle { Bread, CornBread, ChickenFeed, CowFeed, Egg, Milk, Sugar, Cookies, Cake, Butter, Cheese, Planks, Bricks, Nails }
+        public enum ProductStyle { Bread, CornBread, ChickenFeed, CowFeed, Egg, Milk, Sugar, Cookies, Cake, Butter, Cheese, Planks, Bricks, Nails,
+            Apple, Cherry, AppleJuice, CherryJuice }
 
         public const string MaterialsArtFolder = "Assets/_Game/Art/Materials";
 
@@ -1000,6 +1001,15 @@ namespace TownBuilder.EditorTools
             const int size = 128;
             var tex = NewTexture(size, size);
             var pixels = new Color32[size * size];
+
+            if (style >= ProductStyle.Apple)
+            {
+                RenderOrchardIcon(pixels, size, style);
+                AddOutline(pixels, size, size);
+                tex.SetPixels32(pixels);
+                tex.Apply();
+                return tex;
+            }
 
             if (style == ProductStyle.Planks)
             {
@@ -1223,6 +1233,251 @@ namespace TownBuilder.EditorTools
             tex.SetPixels32(pixels);
             tex.Apply();
             return tex;
+        }
+
+        // ------------------------------------------------------------------ Orchard (Milestone 7 step 3)
+
+        public enum FruitStyle { Apple, Cherry }
+
+        /// <summary>The decoration tree (AI art once imported). Fruit trees are drawn from it so they match its style.</summary>
+        public const string TreeSourcePath = DecorationsArtFolder + "/PH_Building_tree.png";
+
+        /// <summary>Fruit tree building sprite: the tree with ripe fruit (shop icon, placement preview).</summary>
+        public static Sprite CreateFruitTree(string treeId, FruitStyle style) =>
+            CreateTreeVariant($"{FarmingBuildingsFolder}/PH_Building_{treeId}.png", style, ripe: true);
+
+        /// <summary>Fruit growth sprites: [0] the tree with small unripe fruit, [1] ripe. Same canvas and pivot as the tree.</summary>
+        public static Sprite[] CreateFruitStages(string cropId, FruitStyle style) => new[]
+        {
+            CreateTreeVariant($"{CropsArtFolder}/PH_Crop_{cropId}_1.png", style, ripe: false),
+            CreateTreeVariant($"{CropsArtFolder}/PH_Crop_{cropId}_2.png", style, ripe: true),
+        };
+
+        private static Sprite CreateTreeVariant(string path, FruitStyle style, bool ripe)
+        {
+            var source = AssetDatabase.LoadAssetAtPath<Sprite>(TreeSourcePath);
+            var pivot = source != null
+                ? new Vector2(source.pivot.x / source.rect.width, source.pivot.y / source.rect.height)
+                : new Vector2(0.5f, 0f);
+            return CreateSprite(path, () => RenderTreeVariant(style, ripe), pivot, SpriteMeshType.Tight);
+        }
+
+        private static Texture2D RenderTreeVariant(FruitStyle style, bool ripe)
+        {
+            var src = new Texture2D(2, 2);
+            src.LoadImage(File.ReadAllBytes(Path.Combine(Directory.GetCurrentDirectory(), TreeSourcePath)));
+            int w = src.width, h = src.height;
+            var px = src.GetPixels32();
+            Object.DestroyImmediate(src);
+
+            // Leaves: green, opaque, in the upper 70 % (not the trunk or grass at the base).
+            var mask = new bool[w * h];
+            for (int y = (int)(h * 0.3f); y < h; y++)
+            for (int x = 0; x < w; x++)
+            {
+                var c = px[y * w + x];
+                mask[y * w + x] = c.a > 200 && c.g > c.r + 12 && c.g > c.b + 8;
+            }
+
+            if (style == FruitStyle.Cherry)
+                for (int i = 0; i < px.Length; i++)
+                    if (mask[i]) px[i] = new Color32((byte)(px[i].r * 0.78f), (byte)(px[i].g * 0.86f), (byte)Mathf.Min(255, px[i].b * 0.95f), px[i].a);
+
+            // Fruit spots: on the leaves, spread out, the same spots for both stages (deterministic).
+            bool apple = style == FruitStyle.Apple;
+            float r = w * (apple ? 0.062f : 0.032f);
+            int want = apple ? 8 : 7;
+
+            bool OnLeaves(float cx, float cy, float rad)
+            {
+                for (int a = 0; a < 8; a++)
+                {
+                    float ang = a * Mathf.PI / 4f;
+                    int x = Mathf.RoundToInt(cx + Mathf.Cos(ang) * rad), y = Mathf.RoundToInt(cy + Mathf.Sin(ang) * rad);
+                    if (x < 0 || y < 0 || x >= w || y >= h || !mask[y * w + x]) return false;
+                }
+
+                int ix = (int)cx, iy = (int)cy;
+                return ix >= 0 && iy >= 0 && ix < w && iy < h && mask[iy * w + ix];
+            }
+
+            var candidates = new List<(float x, float y, float score)>();
+            int step = Mathf.Max(2, Mathf.RoundToInt(r * 1.2f));
+            for (int y = step; y < h - step; y += step)
+            for (int x = step; x < w - step; x += step)
+            {
+                float jx = x + (Hash(x, y) - 0.5f) * step, jy = y + (Hash(y, x) - 0.5f) * step;
+                if (OnLeaves(jx, jy, r * (apple ? 1.6f : 2.2f))) candidates.Add((jx, jy, Hash(x * 7, y * 13)));
+            }
+
+            candidates.Sort((a, b) => a.score.CompareTo(b.score));
+            var spots = new List<Vector2>();
+            foreach (var c in candidates)
+            {
+                var p = new Vector2(c.x, c.y);
+                bool far = true;
+                foreach (var q in spots)
+                    if ((q - p).sqrMagnitude < r * r * 16f) { far = false; break; }
+                if (!far) continue;
+                spots.Add(p);
+                if (spots.Count >= want) break;
+            }
+
+            var ripeColour = apple ? new Color32(214, 40, 36, 255) : new Color32(150, 14, 42, 255);
+            var unripe = apple ? new Color32(160, 196, 72, 255) : new Color32(176, 204, 92, 255);
+            var stem = new Color32(70, 90, 40, 255);
+
+            void Ball(Vector2 c, float rad, Color32 col)
+            {
+                for (int y = Mathf.Max(0, (int)(c.y - rad - 1)); y <= Mathf.Min(h - 1, (int)(c.y + rad + 1)); y++)
+                for (int x = Mathf.Max(0, (int)(c.x - rad - 1)); x <= Mathf.Min(w - 1, (int)(c.x + rad + 1)); x++)
+                {
+                    float dx = (x + 0.5f - c.x) / rad, dy = (y + 0.5f - c.y) / rad;
+                    float d = dx * dx + dy * dy;
+                    if (d > 1f) continue;
+                    float light = 0.82f + 0.3f * Mathf.Clamp01(0.5f + 0.5f * (dy - dx) * 0.7f);
+                    var shade = d > 0.72f ? Scale(col, 0.62f) : Scale(col, light);
+                    float hx = dx + 0.35f, hy = dy - 0.38f;
+                    if (hx * hx + hy * hy < 0.06f) shade = new Color32(255, 240, 230, 255);
+                    px[y * w + x] = shade;
+                }
+            }
+
+            void Line(Vector2 a, Vector2 b, float thick, Color32 col)
+            {
+                int n = Mathf.CeilToInt((b - a).magnitude * 2f) + 1;
+                for (int i = 0; i <= n; i++)
+                {
+                    var p = Vector2.Lerp(a, b, i / (float)n);
+                    for (int y = (int)(p.y - thick); y <= (int)(p.y + thick); y++)
+                    for (int x = (int)(p.x - thick); x <= (int)(p.x + thick); x++)
+                        if (x >= 0 && y >= 0 && x < w && y < h && (x - p.x) * (x - p.x) + (y - p.y) * (y - p.y) <= thick * thick)
+                            px[y * w + x] = col;
+                }
+            }
+
+            foreach (var spot in spots)
+            {
+                var col = ripe ? ripeColour : unripe;
+                float rad = ripe ? r : r * 0.7f;
+                if (apple)
+                {
+                    Ball(spot, rad, col);
+                    continue;
+                }
+
+                // Cherries hang in pairs from one stem.
+                var top = spot + new Vector2(0f, rad * 2.2f);
+                var left = spot + new Vector2(-rad * 0.95f, 0f);
+                var right = spot + new Vector2(rad * 0.95f, -rad * 0.3f);
+                Line(left, top, Mathf.Max(0.6f, rad * 0.18f), stem);
+                Line(right, top, Mathf.Max(0.6f, rad * 0.18f), stem);
+                Ball(left, rad, col);
+                Ball(right, rad, col);
+            }
+
+            var tex = NewTexture(w, h);
+            tex.SetPixels32(px);
+            tex.Apply();
+            return tex;
+        }
+
+        /// <summary>Apple, cherries and juice bottles (128x128 icons).</summary>
+        private static void RenderOrchardIcon(Color32[] pixels, int size, ProductStyle style)
+        {
+            void Ball(float cx, float cy, float rad, Color32 col)
+            {
+                for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float dx = (x + 0.5f - cx) / rad, dy = (y + 0.5f - cy) / rad;
+                    if (dx * dx + dy * dy > 1f) continue;
+                    var c = Scale(col, 0.8f + 0.35f * Mathf.Clamp01(0.5f + 0.5f * (dy - dx) * 0.7f));
+                    float hx = dx + 0.38f, hy = dy - 0.4f;
+                    if (hx * hx + hy * hy < 0.04f) c = new Color32(255, 245, 240, 255);
+                    pixels[y * size + x] = c;
+                }
+            }
+
+            void Line(Vector2 a, Vector2 b, float thick, Color32 col)
+            {
+                int n = Mathf.CeilToInt((b - a).magnitude * 2f) + 1;
+                for (int i = 0; i <= n; i++)
+                {
+                    var p = Vector2.Lerp(a, b, i / (float)n);
+                    for (int y = (int)(p.y - thick); y <= (int)(p.y + thick); y++)
+                    for (int x = (int)(p.x - thick); x <= (int)(p.x + thick); x++)
+                        if (x >= 0 && y >= 0 && x < size && y < size && (x - p.x) * (x - p.x) + (y - p.y) * (y - p.y) <= thick * thick)
+                            pixels[y * size + x] = col;
+                }
+            }
+
+            void Leaf(float cx, float cy, float rx, float ry)
+            {
+                for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float dx = (x + 0.5f - cx) / rx, dy = (y + 0.5f - cy) / ry;
+                    if (dx * dx + dy * dy <= 1f) pixels[y * size + x] = dy > 0 ? new Color32(110, 180, 60, 255) : new Color32(80, 150, 46, 255);
+                }
+            }
+
+            if (style == ProductStyle.Apple)
+            {
+                Ball(64, 56, 42, new Color32(214, 40, 36, 255));
+                Line(new Vector2(64, 92), new Vector2(68, 112), 3f, new Color32(110, 76, 40, 255));
+                Leaf(84, 106, 15, 7);
+                return;
+            }
+
+            if (style == ProductStyle.Cherry)
+            {
+                var stem = new Color32(70, 110, 40, 255);
+                Line(new Vector2(42, 56), new Vector2(72, 112), 2.5f, stem);
+                Line(new Vector2(88, 50), new Vector2(72, 112), 2.5f, stem);
+                Ball(42, 38, 25, new Color32(160, 16, 44, 255));
+                Ball(88, 32, 25, new Color32(160, 16, 44, 255));
+                Leaf(88, 108, 16, 7);
+                return;
+            }
+
+            // Juice bottle: glass, juice up to the shoulder, a label with the fruit, a cap.
+            bool appleJuice = style == ProductStyle.AppleJuice;
+            var juice = appleJuice ? new Color32(242, 178, 40, 255) : new Color32(170, 22, 52, 255);
+            var glass = new Color32(214, 236, 244, 255);
+            var cap = appleJuice ? new Color32(80, 160, 60, 255) : new Color32(230, 190, 60, 255);
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float fx = x + 0.5f, fy = y + 0.5f;
+                if (fy < 8f || fy > 122f) continue;
+                float half = fy <= 84f ? 30f : fy <= 100f ? Mathf.Lerp(30f, 11f, (fy - 84f) / 16f) : 11f;
+                if (fy < 18f && Mathf.Abs(fx - 64f) > 20f)
+                {
+                    float cx = fx < 64f ? 44f : 84f, ddx = fx - cx, ddy = fy - 18f;
+                    if (ddx * ddx + ddy * ddy > 100f) continue;
+                }
+
+                if (Mathf.Abs(fx - 64f) > half) continue;
+                Color32 c = fy > 112f ? cap
+                    : fy <= 88f ? Scale(juice, 0.85f + 0.3f * Mathf.Clamp01((fx - 34f) / 60f))
+                    : glass;
+                if (fx > 40f && fx < 46f && fy > 20f && fy < 80f) c = Scale(c, 1.25f); // shine
+                pixels[y * size + x] = c;
+            }
+
+            for (int y = 34; y < 62; y++)
+            for (int x = 34; x < 94; x++)
+                pixels[y * size + x] = new Color32(250, 246, 232, 255);
+            if (appleJuice)
+            {
+                Ball(64, 48, 10, new Color32(214, 40, 36, 255));
+            }
+            else
+            {
+                Ball(58, 46, 7, new Color32(160, 16, 44, 255));
+                Ball(71, 44, 7, new Color32(160, 16, 44, 255));
+            }
         }
 
         // ------------------------------------------------------------------ Helpers

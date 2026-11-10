@@ -1,11 +1,11 @@
-# Playtest guide (v0.26.0)
+# Playtest guide (v0.27.0)
 
 One place for testing the game on a real Android phone. The detailed per-feature checklists stay in
 DevelopmentRoadmap.md; this guide is the order to play in and what to write down.
 
 ## 1. Install
 
-APK: `Builds/Android/TownBuilder-0.26.0-30.apk` (37 MB, test build, test ads only, developer mode included).
+APK: `Builds/Android/TownBuilder-0.27.0-31.apk` (37 MB, test build, test ads only, developer mode included).
 
 **Option A: copy the file (no cable needed)**
 1. Upload the APK to Google Drive (or send it to yourself), open it on the phone.
@@ -18,7 +18,7 @@ APK: `Builds/Android/TownBuilder-0.26.0-30.apk` (37 MB, test build, test ads onl
 2. Connect the cable, tap **Allow** on the "Allow USB debugging?" popup.
 3. Tell me, and I'll run the install with Unity's `adb`, or run it yourself:
    ```
-   "C:\Program Files\Unity\Hub\Editor\6000.6.8f1\Editor\Data\PlaybackEngines\AndroidPlayer\SDK\platform-tools\adb.exe" install -r "D:\01-Projects\05-Township\TownBuilder\Builds\Android\TownBuilder-0.26.0-30.apk"
+   "C:\Program Files\Unity\Hub\Editor\6000.6.8f1\Editor\Data\PlaybackEngines\AndroidPlayer\SDK\platform-tools\adb.exe" install -r "D:\01-Projects\05-Township\TownBuilder\Builds\Android\TownBuilder-0.27.0-31.apk"
    ```
 
 ## 2. Session A: a new town (30–45 minutes, sound on)
@@ -34,6 +34,7 @@ Start with **Menu → New Game**. Play normally and follow the Tasks panel; don'
 | Bakery | Queue bread, "+1 slot" card in the queue, collect: "+1 Bread" |
 | Orders | Deliver an order, coins pill pops |
 | Daily reward | The calendar opens at start; claim day 1 (+50 coins); reopening the app the same day doesn't show it again |
+| Orchard (level 8–10) | Apple/Cherry Trees regrow fruit after each pick; Juice Press makes juice (use DEV to reach level 10) |
 | Goals | The Goals button opens 7 long-term goals; a red badge shows when one can be claimed (gems) |
 | Tasks | Claim a finished task (green button), a new one appears |
 | Level 2–3 | Level-up dialog lists the unlocks; Corn and Silo become available |

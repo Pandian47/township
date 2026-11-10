@@ -8,7 +8,7 @@ using TMPro;
 namespace TownBuilder
 {
     /// <summary>
-    /// Shown above the selection bar while a field is selected.
+    /// Shown above the selection bar while a field or fruit tree is selected (a tree is never empty: its fruit regrows).
     ///   Empty field   -> crop buttons (tap to plant).
     ///   Growing field -> time left, progress bar, "Finish now" (rewarded ad).
     ///   Ready field   -> "Harvest" button (tapping the field itself also harvests).
@@ -53,7 +53,7 @@ namespace TownBuilder
             cropTemplate.gameObject.SetActive(false);
             foreach (var crop in content.Crops)
             {
-                if (crop == null) continue;
+                if (crop == null || crop.GrowsOnTree) continue; // tree fruit isn't planted on fields
                 var button = Instantiate(cropTemplate, cropsParent);
                 button.gameObject.SetActive(true);
                 button.Bind(crop, OnCropClicked);
@@ -68,7 +68,7 @@ namespace TownBuilder
         {
             _plotId = plotId;
             panelRoot.SetActive(true);
-            _farming.IsField(plotId, out var def);
+            _farming.IsGrowingSpot(plotId, out var def);
             titleText.text = def != null ? def.DisplayName : "Field";
             Refresh(force: true);
         }
@@ -88,6 +88,7 @@ namespace TownBuilder
 
         private void Refresh(bool force)
         {
+            if (_farming.GetStage(_plotId) == PlotStage.Empty) _farming.EnsureTreeGrowing(_plotId);
             var stage = _farming.GetStage(_plotId);
             if (force || stage != _shownStage)
             {

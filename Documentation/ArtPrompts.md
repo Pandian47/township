@@ -303,6 +303,20 @@ Same building prompt style as the cottage, one object per image, plain magenta b
 * `fence.png`: "a short white wooden picket fence section running from lower left to upper right, on a 1x1 tile footprint"
 * `fountain.png`: "a round stone fountain with a small water jet and blue water, on a 2x2 tile footprint (same width as the cottage)"
 
+## Milestone 7 step 3: orchard and Juice Press
+
+Setup draws the fruit trees from `tree.png` (apples / cherries painted on the leaves), so these are optional upgrades.
+Building prompt style as the cottage, plain magenta background:
+* `juice_press.png`: "a small cheerful juice press workshop with a big wooden fruit press and barrels, green awning, crates of apples by the door, on a 2x2 tile footprint (same width as the cottage)"
+* Trees (1x1, same tree each time, same size and angle as `tree.png`): `apple_tree.png` (ripe red apples), then in the same chat
+  `apple_1.png` (small green apples), `apple_2.png` (ripe red apples); `cherry_tree.png`, `cherry_1.png`, `cherry_2.png` the same with cherries.
+
+Icon prompt as bread (section 15–16):
+* `apple`: "a shiny red apple with a short stem and one green leaf"
+* `cherry`: "two dark red cherries joined by their stems, with a small leaf"
+* `apple_juice`: "a glass bottle of golden apple juice with a small apple label and a green cap"
+* `cherry_juice`: "a glass bottle of deep red cherry juice with a cherry label and a yellow cap"
+
 ---
 
 Do a **test set first**: cottage, field, wheat_4, bread and grass. Send those, check them in the game preview, and

@@ -319,7 +319,7 @@ The backend moves to Milestone 9.
 |---|---|---|
 | 1 | **Daily reward**: a 7-day calendar with growing rewards (coins, materials, gems on day 7); missing a day restarts at day 1 | Done (v0.25.0) |
 | 2 | **Achievements**: long-term goals in tiers (harvest, produce, deliver, build, level) paying gems | Done (v0.26.0) |
-| 3 | **Orchard**: fruit trees (apples, cherries) that regrow after harvest + a **Juice Press** factory | Planned |
+| 3 | **Orchard**: fruit trees (apples, cherries) that regrow after harvest + a **Juice Press** factory | Done (v0.27.0) |
 | 4 | **Weekend event**: a time-limited goal (e.g. "Harvest Festival") with a special reward and decoration | Planned |
 | 5 | Balance pass (daily rewards, achievements and event income in the model) | Planned |
 
@@ -343,6 +343,14 @@ Design notes:
 - [ ] Claim pays the gems (sound + toast), the row moves to the next tier; after tier 3 it turns gold "Complete!"
 - [ ] DEV → "Unlock everything (level 10)": Rising Star tiers 1 and 2 become claimable
 - [ ] Progress and claimed tiers are kept after closing and reopening the app
+
+### Device checklist (Milestone 7 step 3: orchard)
+- [ ] DEV → "Unlock everything (level 10)", then Build → Buildings: Apple Tree, Cherry Tree and Juice Press are there
+- [ ] An Apple Tree is placed instantly and shows small green apples; tapping it shows "Apple: 29m left"
+- [ ] DEV → "Finish all timers": the apples turn red; tapping the tree picks 2 Apples and green apples appear again
+- [ ] A field's crop picker does **not** list Apple or Cherry
+- [ ] Juice Press: 3 Apples → Apple Juice; 3 Cherries + 1 Sugar → Cherry Juice
+- [ ] Trees keep growing while the app is closed; moving a tree keeps its fruit
 
 ## Milestone 8: Expansion
 Ship, helicopter, friends and co-op, monetisation, Google Play launch.

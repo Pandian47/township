@@ -42,6 +42,8 @@ namespace TownBuilder
         [Header("Gameplay roles")]
         [Tooltip("This building is a field where crops can be planted.")]
         [SerializeField] private bool isFarmPlot;
+        [Tooltip("Fruit tree: this crop grows on it by itself and regrows after every harvest (no planting).")]
+        [SerializeField] private CropDefinition fruit;
         [Tooltip("Extra barn capacity this building adds (e.g. Barn, Silo).")]
         [SerializeField, Min(0)] private int storageCapacityBonus;
         [Tooltip("Recipes this building can produce. Any recipe makes it a factory.")]
@@ -58,6 +60,8 @@ namespace TownBuilder
         public string Id => id;
         public int MaxCount => maxCount;
         public bool IsFarmPlot => isFarmPlot;
+        public CropDefinition Fruit => fruit;
+        public bool IsFruitTree => fruit != null;
         public int StorageCapacityBonus => storageCapacityBonus;
         public IReadOnlyList<RecipeDefinition> Recipes => recipes;
         public bool IsFactory => recipes != null && recipes.Count > 0;
@@ -77,6 +81,7 @@ namespace TownBuilder
         public bool HasChimney => chimney != Vector2.zero;
 
         public void EditorSetChimney(Vector2 point) => chimney = point;
+        public void EditorSetFruit(CropDefinition crop) => fruit = crop;
 
         public void EditorConfigureLandmark(bool isMovable, bool inShop)
         {

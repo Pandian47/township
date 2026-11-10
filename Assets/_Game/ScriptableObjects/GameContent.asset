@@ -30,11 +30,16 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b1a5b089221fa2a48a28cf6d71265284, type: 2}
   - {fileID: 11400000, guid: dd54f8dbc4c00204d8bcd7460d1ebd15, type: 2}
   - {fileID: 11400000, guid: 8d9ec5cd8453227498c0e9f91ebc4b91, type: 2}
+  - {fileID: 11400000, guid: 53cf103104d740a4993d6dbda542c685, type: 2}
+  - {fileID: 11400000, guid: fb6fd552bb930bc44903590cad5c74d0, type: 2}
+  - {fileID: 11400000, guid: 5c3f17c0216d97345afeeccef5bc07b6, type: 2}
   crops:
   - {fileID: 11400000, guid: a3036535aa3df024daad3d74b88f1f40, type: 2}
   - {fileID: 11400000, guid: 62b818b79b6cf7947af8159c1d81b0fa, type: 2}
   - {fileID: 11400000, guid: eadecb1c4feada54eb11bf0bbc7dee4e, type: 2}
   - {fileID: 11400000, guid: 8a0096341addad646901b5e7e738ec16, type: 2}
+  - {fileID: 11400000, guid: de688acb26573db48a2d484c6a1f7ade, type: 2}
+  - {fileID: 11400000, guid: bfb28e2ef94fbb244a7e4a75bcb6b89e, type: 2}
   products:
   - {fileID: 11400000, guid: 283e0dc43b6fa8848829f17a7b436934, type: 2}
   - {fileID: 11400000, guid: d1dc078b5b939504d8656b5e7eb9fcca, type: 2}
@@ -47,6 +52,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: f83afbb1768fbcf49bcebcb13aa1e58b, type: 2}
   - {fileID: 11400000, guid: b2d6faa1db4c7e54e8f32a740424cf16, type: 2}
   - {fileID: 11400000, guid: 98fc354c5e7d7ef4580e0aa77319d69f, type: 2}
+  - {fileID: 11400000, guid: bafbc31c1df042a4eb0378edab46590d, type: 2}
+  - {fileID: 11400000, guid: 29ebf1ce73102b24bb46b2d0c78c5b5d, type: 2}
   recipes:
   - {fileID: 11400000, guid: 37df8db348431214fb0c6fdc709d0821, type: 2}
   - {fileID: 11400000, guid: 7c6e5a274375a044380944114d8d4e2b, type: 2}
@@ -59,6 +66,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b9f4220e326ee22428a7f9526bd660d8, type: 2}
   - {fileID: 11400000, guid: 6971416e93e0f754f8a1680fd9120599, type: 2}
   - {fileID: 11400000, guid: c166eea1a9b0be74daad81afa186fb4a, type: 2}
+  - {fileID: 11400000, guid: 86d3ef5faf760db448e52c35e0699f07, type: 2}
+  - {fileID: 11400000, guid: b38df7c0612152645b456aa64782747b, type: 2}
   materials:
   - {fileID: 11400000, guid: 81887886b2c0bb949828912b3d72f71a, type: 2}
   - {fileID: 11400000, guid: de5ccea6c812a25428ccfd6a737ced41, type: 2}
@@ -123,6 +132,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 01a3f4a19d826ee489f38ef2c586891d, type: 2}
   - {fileID: 11400000, guid: e4c9cef0db5cdf74b8f171b7d1d54dd7, type: 2}
   - {fileID: 11400000, guid: 893e77edc3c820241a949f19bb9bfd8e, type: 2}
+  - {fileID: 11400000, guid: c51de23be4912c94ca74e22f6a759780, type: 2}
+  - {fileID: 11400000, guid: 562ceb94333de5e47954f35a93923ed8, type: 2}
+  - {fileID: 11400000, guid: 676c8cc493fc92a40b79a72137d80458, type: 2}
+  - {fileID: 11400000, guid: 52469ba7b0522504e8e50bbeca10fbda, type: 2}
+  - {fileID: 11400000, guid: ed2dbf951d4e0094d9556a24fa730a31, type: 2}
   taskSlots: 3
   trainStationId: train_station
   trainCrates: 6

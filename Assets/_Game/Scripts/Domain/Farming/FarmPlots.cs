@@ -82,6 +82,18 @@ namespace TownBuilder.Domain
             return crop.CropId;
         }
 
+        /// <summary>
+        /// Fruit trees: picks a ready crop and starts the same crop growing again right away (no replanting).
+        /// Returns the crop id, or null if the plot is empty or still growing.
+        /// </summary>
+        public string TryHarvestAndRegrow(string plotId, long nowUnixMs)
+        {
+            if (!TryGetCrop(plotId, out var crop) || !crop.IsReady(nowUnixMs)) return null;
+            crop.PlantedAtUnixMs = nowUnixMs;
+            PlotChanged?.Invoke(plotId);
+            return crop.CropId;
+        }
+
         /// <summary>Makes a growing crop ready immediately (rewarded ad, premium currency).</summary>
         public bool FinishNow(string plotId, long nowUnixMs)
         {

@@ -53,6 +53,7 @@ namespace TownBuilder.EditorTools
                 ("town_hall", 18, 18), ("cottage", 13, 19), ("cottage", 13, 22), ("barn", 20, 12),
                 ("bakery", 17, 12), ("silo", 24, 19), ("cottage", 18, 22), ("feed_mill", 23, 12), ("chicken_coop", 21, 23), ("dairy_shed", 24, 22), ("sugar_mill", 27, 21), ("creamery", 27, 17), ("train_station", 10, 18), ("tree", 15, 17), ("tree", 15, 19), ("flower_bed", 17, 21), ("bench", 21, 21), ("fountain", 13, 13),
                 ("field", 21, 17), ("field", 22, 17), ("field", 23, 17), ("field", 24, 17),
+                ("apple_tree", 25, 17), ("cherry_tree", 26, 17), ("apple_tree", 25, 18), ("cherry_tree", 26, 18),
                 ("field", 21, 18), ("field", 22, 18), ("field", 23, 18), ("field", 24, 18),
             };
 
@@ -431,7 +432,7 @@ namespace TownBuilder.EditorTools
                 var fieldRoot = Find(canvas, "FieldPanel").transform.Find("Root").gameObject;
                 fieldRoot.SetActive(true);
                 var template = fieldRoot.GetComponentsInChildren<CropButtonView>(true).First();
-                foreach (var crop in content.Crops)
+                foreach (var crop in content.Crops.Where(c => !c.GrowsOnTree))
                 {
                     var b = UnityEngine.Object.Instantiate(template, template.transform.parent);
                     b.gameObject.SetActive(true);

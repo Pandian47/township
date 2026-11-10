@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c0a84d6663c5284e8f80b42546915a0, type: 3}
+  m_Name: Crop_cherry
+  m_EditorClassIdentifier: TownBuilder.Runtime::TownBuilder.CropDefinition
+  id: cherry
+  displayName: Cherry
+  icon: {fileID: 21300000, guid: 9084a39f9c3ea944085bfdaba313da58, type: 3}
+  sellPrice: 26
+  growthStages:
+  - {fileID: 21300000, guid: 596e087abc591c74880ef04e1de4db58, type: 3}
+  - {fileID: 21300000, guid: 6f4948072297d7f4bb32278753759337, type: 3}
+  growSeconds: 3600
+  harvestYield: 2
+  seedCoinCost: 0
+  harvestXp: 5
+  unlockLevel: 10
+  growsOnTree: 1

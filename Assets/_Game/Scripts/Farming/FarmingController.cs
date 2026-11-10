@@ -15,8 +15,8 @@ namespace TownBuilder
     }
 
     /// <summary>
-    /// Farming in the Town scene: plant / grow / harvest on field buildings, barn capacity from storage buildings,
-    /// crop sprites on top of fields. Rules live in <see cref="FarmPlots"/> and <see cref="Inventory"/>;
+    /// Farming in the Town scene: plant / grow / harvest on field buildings, fruit trees that regrow by themselves,
+    /// crop sprites on top of fields (for trees: the whole tree with its fruit, in place of the plain tree sprite). Rules live in <see cref="FarmPlots"/> and <see cref="Inventory"/>;
     /// this class applies costs, yields and XP and keeps the visuals in sync.
     /// </summary>
     public sealed class FarmingController : MonoBehaviour
@@ -96,6 +96,18 @@ namespace TownBuilder
                    _content.TryGetBuilding(b.DefinitionId, out definition) && definition.IsFarmPlot;
         }
 
+        /// <summary>A fruit tree building (its fruit grows by itself and regrows after each harvest).</summary>
+        public bool IsTree(string instanceId, out BuildingDefinition definition)
+        {
+            definition = null;
+            return _town != null && _town.TryGet(instanceId, out var b) &&
+                   _content.TryGetBuilding(b.DefinitionId, out definition) && definition.IsFruitTree;
+        }
+
+        /// <summary>A field or a fruit tree: something with a crop on it.</summary>
+        public bool IsGrowingSpot(string instanceId, out BuildingDefinition definition) =>
+            IsField(instanceId, out definition) || IsTree(instanceId, out definition);
+
         public PlotStage GetStage(string plotId) => _plots.GetStage(plotId, NowUnixMs);
 
         public bool IsUnlocked(CropDefinition crop) => _progress.IsUnlocked(crop.UnlockLevel);
@@ -133,7 +145,8 @@ namespace TownBuilder
                 return false;
             }
 
-            _plots.TryHarvest(plotId, NowUnixMs);
+            if (IsTree(plotId, out _)) _plots.TryHarvestAndRegrow(plotId, NowUnixMs);
+            else _plots.TryHarvest(plotId, NowUnixMs);
             _inventory.TryAdd(crop.Id, crop.HarvestYield);
             if (crop.HarvestXp > 0) _progress.AddXp(crop.HarvestXp);
             Notification?.Invoke($"+{crop.HarvestYield} {crop.DisplayName}   +{crop.HarvestXp} XP");
@@ -152,10 +165,17 @@ namespace TownBuilder
 
         // ------------------------------------------------------------------ Internals
 
-        /// <summary>Tap on a ready field harvests it directly (no selection), the fastest farming flow.</summary>
+        /// <summary>Starts a fruit tree growing if nothing grows on it yet (new tree, or an old save). True if it changed.</summary>
+        public bool EnsureTreeGrowing(string instanceId)
+        {
+            if (!IsTree(instanceId, out var def) || _plots.TryGetCrop(instanceId, out _)) return false;
+            return _plots.TryPlant(instanceId, def.Fruit.Id, def.Fruit.GrowDurationMs, NowUnixMs);
+        }
+
+        /// <summary>Tap on a ready field or tree harvests it directly (no selection), the fastest farming flow.</summary>
         private bool OnBuildingTapped(PlacedBuilding building)
         {
-            if (!IsField(building.InstanceId, out _)) return false;
+            if (!IsGrowingSpot(building.InstanceId, out _)) return false;
             if (_plots.GetStage(building.InstanceId, NowUnixMs) != PlotStage.Ready) return false;
             TryHarvest(building.InstanceId);
             return true;
@@ -170,7 +190,8 @@ namespace TownBuilder
 
         private void OnBuildingAdded(PlacedBuilding building)
         {
-            if (IsField(building.InstanceId, out _)) RefreshPlot(building.InstanceId);
+            if (EnsureTreeGrowing(building.InstanceId)) Modified?.Invoke();
+            if (IsGrowingSpot(building.InstanceId, out _)) RefreshPlot(building.InstanceId);
         }
 
         private void OnBuildingRemoved(PlacedBuilding building)
@@ -193,6 +214,10 @@ namespace TownBuilder
             {
                 renderer.enabled = false;
             }
+
+            // A tree's growth sprites are the whole tree with its fruit: hide the plain tree underneath.
+            if (IsTree(plotId, out _) && buildings.TryGetView(plotId, out var view) && view.SpriteRenderer != null)
+                view.SpriteRenderer.enabled = !renderer.enabled;
         }
 
         /// <summary>
@@ -211,7 +236,8 @@ namespace TownBuilder
             var renderer = go.AddComponent<SpriteRenderer>();
             renderer.sortingLayerName = SortingLayers.Objects;
             renderer.spriteSortPoint = SpriteSortPoint.Pivot;
-            if (cropMaterial != null) renderer.sharedMaterial = cropMaterial;
+            // Field crops sway in the wind; whole trees stay still (like the decoration trees).
+            if (cropMaterial != null && !IsTree(plotId, out _)) renderer.sharedMaterial = cropMaterial;
             renderer.enabled = false;
             _cropRenderers[plotId] = renderer;
             return renderer;

@@ -277,7 +277,7 @@ namespace TownBuilder
             if (stationSelected) trainPanel.Show();
             else if (trainPanel != null && trainPanel.IsOpen) trainPanel.Hide();
 
-            bool fieldSelected = selected && definition != null && definition.IsFarmPlot;
+            bool fieldSelected = selected && !building && definition != null && (definition.IsFarmPlot || definition.IsFruitTree);
             if (fieldSelected && fieldPanel.PlotId != _placement.TargetInstanceId) fieldPanel.ShowFor(_placement.TargetInstanceId);
             else if (!fieldSelected && fieldPanel.PlotId != null) fieldPanel.Hide();
         }
