@@ -254,7 +254,7 @@ namespace TownBuilder
                 _lockBadge.sortingLayerName = SortingLayers.WorldUI;
                 float top = view.SpriteRenderer.bounds.max.y - view.transform.position.y;
                 float centre = view.SpriteRenderer.bounds.center.x - view.transform.position.x;
-                go.transform.localPosition = new Vector3(centre, top + 0.3f, 0f);
+                FloatBob.Place(go.transform, new Vector3(centre, top + 0.3f, 0f));
                 go.transform.localScale = Vector3.one * lockIconScale;
             }
 

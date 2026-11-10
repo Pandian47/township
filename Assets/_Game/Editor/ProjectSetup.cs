@@ -32,6 +32,17 @@ namespace TownBuilder.EditorTools
         public const string UIFontOutlineMaterialPath = Root + "/Materials/UIFont Outline.mat";
         public const string SilhouetteShaderPath = Root + "/Shaders/SpriteSilhouette.shader";
         public const string SilhouetteMaterialPath = Root + "/Materials/SpriteSilhouette.mat";
+        public const string SwayShaderPath = Root + "/Shaders/SpriteSway.shader";
+        public const string SwayMaterialPath = Root + "/Materials/CropSway.mat";
+
+        /// <summary>Chimney tops measured on the v0.1 AI art (0-1 from the sprite's bottom-left). Re-measure if the art changes.</summary>
+        private static readonly Dictionary<string, Vector2> ChimneyPoints = new Dictionary<string, Vector2>
+        {
+            { "bakery", new Vector2(0.805f, 0.92f) },
+            { "feed_mill", new Vector2(0.447f, 0.965f) },
+            { "sugar_mill", new Vector2(0.637f, 0.965f) },
+            { "creamery", new Vector2(0.655f, 0.97f) },
+        };
 
         private static readonly string[] Folders =
         {
@@ -200,6 +211,7 @@ namespace TownBuilder.EditorTools
             PlaceholderArtGenerator.CreateLockedTile();
             PlaceholderArtGenerator.CreateRailTile();
             PlaceholderArtGenerator.CreateLockIcon();
+            PlaceholderArtGenerator.CreateSmokePuff();
             PlaceholderArtGenerator.CreateSaleSign();
             var trainSprite = CreateTrainAtStationSprite();
 
@@ -682,10 +694,30 @@ namespace TownBuilder.EditorTools
             throw new InvalidOperationException("Importing TextMeshPro essential resources now. Run setup again once the import has finished.");
         }
 
+        /// <summary>Sets chimney points on factories that don't have one yet (keeps designer edits).</summary>
+        private static void ConfigureChimneys()
+        {
+            var content = AssetDatabase.LoadAssetAtPath<GameContent>(ContentPath);
+            foreach (var pair in ChimneyPoints)
+            {
+                if (!content.TryGetBuilding(pair.Key, out var def) || def.HasChimney) continue;
+                def.EditorSetChimney(pair.Value);
+                EditorUtility.SetDirty(def);
+            }
+        }
+
         /// <summary>Material for the selection outline (flat-colour sprite silhouette), created once.</summary>
         private static void ConfigureEffects()
         {
             CreateFontOutlineMaterial();
+            ConfigureChimneys();
+            if (AssetDatabase.LoadAssetAtPath<Material>(SwayMaterialPath) == null)
+            {
+                var sway = AssetDatabase.LoadAssetAtPath<Shader>(SwayShaderPath);
+                if (sway != null) AssetDatabase.CreateAsset(new Material(sway) { name = "CropSway" }, SwayMaterialPath);
+                else Debug.LogError($"[Setup] Missing shader {SwayShaderPath}");
+            }
+
             if (AssetDatabase.LoadAssetAtPath<Material>(SilhouetteMaterialPath) != null) return;
             var shader = AssetDatabase.LoadAssetAtPath<Shader>(SilhouetteShaderPath);
             if (shader == null)

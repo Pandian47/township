@@ -258,8 +258,24 @@ Design notes:
 - [ ] The outer ring of land (map edge) says "Level 9" until level 9
 - [ ] Play from a new game to level 6–7 and note: did you ever wait long for coins to afford a new building or land? Too fast or too slow?
 
-## Milestone 6: Visual polish (months 7–9)
-Building and crop animations, vehicles, UI transitions (switch to TextMeshPro), audio, particles.
+## Milestone 6: Visual polish (current)
+
+Owner's phone test of v0.19.1 passed. TextMeshPro and sound were already done in Milestone 3.
+
+| Step | Feature | Status |
+|---|---|---|
+| 1 | **Ambient life**: crops sway in the wind (shader), smoke from the chimneys of working factories, "ready"/hammer/padlock badges float | **Done** (v0.20.0) |
+| 2 | **The train drives**: arrives along the railway, stops at the station, leaves (placeholder train sprites + art prompt) | Next |
+| 3 | Townspeople and vehicles moving along the roads | Planned |
+| 4 | UI polish: panels slide/fade in, coins fly to the top bar on rewards | Planned |
+| 5 | Decorations (trees, flowers, benches, fences) in a new shop tab | Planned |
+
+### Device checklist (Milestone 6 step 1: ambient life)
+- [ ] Growing and ripe crops gently sway; the soil and wooden border of the field stay still
+- [ ] A factory that is producing (Bakery, Feed Mill, Sugar Mill, Creamery) puffs smoke from its chimney; it stops when the queue is done
+- [ ] The smoke starts at the chimney top (not beside it) at every zoom level
+- [ ] "Ready" product badges, the construction hammer and the station padlock float up and down slightly
+- [ ] Frame rate stays smooth with several factories smoking and a full farm
 
 ## Milestone 7: Backend (months 10–12)
 Accounts, cloud saves with conflict resolution, server time (`IClock`), server-validated economy, analytics.

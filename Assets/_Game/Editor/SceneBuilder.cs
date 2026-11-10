@@ -235,7 +235,11 @@ namespace TownBuilder.EditorTools
             Wire(construction, ("buildings", buildingController), ("placement", placement),
                 ("constructionIcon", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.ConstructionIconPath)));
             Wire(production, ("buildings", buildingController), ("placement", placement));
-            Wire(farming, ("buildings", buildingController), ("placement", placement));
+            Wire(farming, ("buildings", buildingController), ("placement", placement),
+                ("cropMaterial", AssetDatabase.LoadAssetAtPath<Material>(ProjectSetup.SwayMaterialPath)));
+            var smoke = Go("ChimneySmoke", world.transform).AddComponent<ChimneySmoke>();
+            Wire(smoke, ("buildings", buildingController), ("production", production),
+                ("puffSprite", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.SmokePuffPath)));
             var effectsGo = Go("TownEffects", systems.transform);
             var effects = effectsGo.AddComponent<TownEffects>();
             var outline = effectsGo.AddComponent<SelectionOutline>();

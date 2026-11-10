@@ -21,6 +21,9 @@ MonoBehaviour:
   coinCost: 450
   removable: 1
   maxCount: 0
+  movable: 1
+  showInShop: 1
+  chimney: {x: 0.805, y: 0.92}
   isFarmPlot: 0
   storageCapacityBonus: 0
   recipes:

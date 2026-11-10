@@ -84,6 +84,8 @@ namespace TownBuilder.EditorTools
                     sr.sortingLayerName = SortingLayers.Objects;
                     sr.spriteSortPoint = SpriteSortPoint.Pivot;
                     sr.sprite = crop.SpriteForProgress(cropStages[fieldIndex].progress);
+                    var sway = AssetDatabase.LoadAssetAtPath<Material>(ProjectSetup.SwayMaterialPath);
+                    if (sway != null) sr.sharedMaterial = sway;
                     fieldIndex++;
                 }
             }
@@ -114,6 +116,14 @@ namespace TownBuilder.EditorTools
             var center = grid.FootprintCenterWorld(new GridCoord(17, 18), new GridCoord(3, 3));
             cam.transform.position = new Vector3(center.x, center.y, -10f);
             cam.orthographicSize = 6.5f;
+
+            // Working factories: a smoke plume (puffs at different ages) from every chimney.
+            if (hud != HudState.None)
+            {
+                var smoke = UnityEngine.Object.FindAnyObjectByType<ChimneySmoke>();
+                foreach (var v in UnityEngine.Object.FindObjectsByType<BuildingView>().Where(v => v.Definition != null && v.Definition.HasChimney))
+                    for (int p = 0; p < 4; p++) smoke.Emit(v, 0.12f + p * 0.55f);
+            }
 
             if (hud != HudState.None) PrepareTownHud(cam, content, bakery, hud);
             Render(cam, outputPath);

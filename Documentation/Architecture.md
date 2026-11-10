@@ -240,6 +240,16 @@ for unowned cells (set after saved buildings load, so nothing is ever removed). 
 `PlacementSystem.GroundTapped`, and buys plots (prices: `GameContent.landTiers` per ring). `LandPanel` shows the price.
 Saved in `SaveData.land.ownedPlots` ("x_y"); empty = initialise (start area + plots under buildings).
 
+## 6g7. Ambient life (Milestone 6 step 1)
+
+* **Crop sway:** crop sprites use `Materials/CropSway.mat` (`Shaders/SpriteSway.shader`, Universal2D pass): vertices move
+  sideways by `uv.y^1.5 × amplitude × sin(time + world position)`, so the bottom stays put. Relies on each crop sprite
+  being its own texture (no atlas). `FarmingController.cropMaterial`.
+* **Chimney smoke:** `BuildingDefinition.chimney` = chimney top on the sprite (0–1 from bottom-left; 0,0 = none), set by
+  setup from measurements of the AI art (`ProjectSetup.ChimneyPoints`) and editable in the Inspector. `ChimneySmoke`
+  (World/ChimneySmoke) scans for factories with an active job twice a second and emits pooled puff sprites on the Effects layer.
+* **Floating badges:** `FloatBob.Place(transform, pos)` replaces direct `localPosition` writes for the ready, hammer and padlock badges.
+
 ## 6h. UI text (TextMeshPro)
 
 All UI text is TextMeshPro (`TMP_Text` fields, `TextMeshProUGUI` components). Never add legacy `UnityEngine.UI.Text`.

@@ -298,7 +298,7 @@ namespace TownBuilder
             {
                 float top = v.SpriteRenderer.bounds.max.y - v.transform.position.y;
                 var centerX = v.SpriteRenderer.bounds.center.x - v.transform.position.x;
-                renderer.transform.localPosition = new Vector3(centerX, top + 0.3f, 0f);
+                FloatBob.Place(renderer.transform, new Vector3(centerX, top + 0.3f, 0f));
                 renderer.transform.localScale = Vector3.one * readyIconScale;
             }
         }

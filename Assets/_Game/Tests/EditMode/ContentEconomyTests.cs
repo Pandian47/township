@@ -176,6 +176,19 @@ namespace TownBuilder.Tests
         }
 
         [Test]
+        public void ChimneyPoints_LieOnTheSprite()
+        {
+            foreach (var b in _content.Buildings.Where(b => b.HasChimney))
+            {
+                var p = b.ChimneyPoint;
+                Assert.That(p.x, Is.InRange(0f, 1f), $"{b.Id} chimney x");
+                Assert.That(p.y, Is.InRange(0.5f, 1f), $"{b.Id} chimney should be in the upper half of the sprite");
+            }
+
+            Assert.IsTrue(_content.Buildings.Any(b => b.IsFactory && b.HasChimney), "at least one factory smokes");
+        }
+
+        [Test]
         public void TrainStation_IsConfigured()
         {
             Assert.IsTrue(_content.TryGetBuilding(_content.TrainStationId, out var station), "train station building");

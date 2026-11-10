@@ -62,6 +62,12 @@ Keep your original images outside the project as a backup; the importer can be r
    (Sprite Mode Single, PPU 128, Pivot Custom, the pivot value from the table). Then assign it to the `BuildingDefinition`'s **Sprite** field.
 5. Run **TownBuilder → Debug → Capture Town Preview**. It writes `Temp/TownPreview.png` with a sample town, so you can check alignment and depth sorting.
 
+### Chimney smoke after replacing building art
+
+Factories smoke from `BuildingDefinition → Chimney` (x, y from 0 to 1, measured from the sprite's bottom-left corner).
+If new art moves the chimney: select the building asset in `Assets/_Game/Data/Buildings`, and in the Inspector set
+**Chimney** to the chimney top's position (e.g. a chimney 80% across and 92% up = 0.8, 0.92). Set it to 0, 0 for none.
+
 ## 3. New building type
 
 1. Right-click `Assets/_Game/Data/Buildings` → **Create → TownBuilder → Building Definition**.

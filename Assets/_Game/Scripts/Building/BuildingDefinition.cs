@@ -36,6 +36,8 @@ namespace TownBuilder
         [SerializeField] private bool movable = true;
         [Tooltip("False for buildings the player can't buy (landmarks that every town already has).")]
         [SerializeField] private bool showInShop = true;
+        [Tooltip("Chimney top on the sprite, 0-1 from the bottom-left (0,0 = no chimney). Smoke rises there while the factory works.")]
+        [SerializeField] private Vector2 chimney;
 
         [Header("Gameplay roles")]
         [Tooltip("This building is a field where crops can be planted.")]
@@ -71,6 +73,10 @@ namespace TownBuilder
         public bool Removable => removable;
         public bool Movable => movable;
         public bool ShowInShop => showInShop;
+        public Vector2 ChimneyPoint => chimney;
+        public bool HasChimney => chimney != Vector2.zero;
+
+        public void EditorSetChimney(Vector2 point) => chimney = point;
 
         public void EditorConfigureLandmark(bool isMovable, bool inShop)
         {

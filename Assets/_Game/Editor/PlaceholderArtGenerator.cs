@@ -611,6 +611,38 @@ namespace TownBuilder.EditorTools
         public const string ConstructionIconPath = UiArtFolder + "/PH_Icon_Construction.png";
 
         /// <summary>Hammer in a round badge, floated above buildings under construction. 128x128, pivot centre.</summary>
+        public const string SmokePuffPath = "Assets/_Game/Art/Effects/PH_Fx_Smoke.png";
+
+        /// <summary>Soft round white puff (tinted and faded by ChimneySmoke).</summary>
+        public static Sprite CreateSmokePuff() =>
+            CreateSprite(SmokePuffPath, RenderSmokePuff, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+
+        private static Texture2D RenderSmokePuff()
+        {
+            const int size = 64;
+            var tex = NewTexture(size, size);
+            var pixels = new Color32[size * size];
+            // A few overlapping soft blobs, so the puff looks cloudy rather than a perfect circle.
+            var blobs = new[] { new Vector3(32f, 30f, 20f), new Vector3(22f, 36f, 13f), new Vector3(42f, 37f, 12f), new Vector3(33f, 42f, 13f) };
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float a = 0f;
+                foreach (var b in blobs)
+                {
+                    float d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(b.x, b.y)) / b.z;
+                    a = Mathf.Max(a, Mathf.Clamp01(1f - d * d));
+                }
+
+                byte shade = (byte)(232 + 23 * Mathf.Clamp01((y - 20f) / 30f));
+                pixels[y * size + x] = new Color32(shade, shade, shade, (byte)(a * 255));
+            }
+
+            tex.SetPixels32(pixels);
+            tex.Apply();
+            return tex;
+        }
+
         public static Sprite CreateConstructionIcon() =>
             CreateSprite(ConstructionIconPath, RenderConstructionIcon, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
 

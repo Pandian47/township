@@ -25,6 +25,8 @@ namespace TownBuilder
 
         [SerializeField] private TownBuildingController buildings;
         [SerializeField] private PlacementSystem placement;
+        [Tooltip("Material for crop sprites (TownBuilder/SpriteSway: plants move in the wind). Empty = default sprite material.")]
+        [SerializeField] private Material cropMaterial;
         [Tooltip("How often growing crops refresh their sprite (seconds).")]
         [SerializeField] private float visualRefreshInterval = 0.25f;
 
@@ -209,6 +211,7 @@ namespace TownBuilder
             var renderer = go.AddComponent<SpriteRenderer>();
             renderer.sortingLayerName = SortingLayers.Objects;
             renderer.spriteSortPoint = SpriteSortPoint.Pivot;
+            if (cropMaterial != null) renderer.sharedMaterial = cropMaterial;
             renderer.enabled = false;
             _cropRenderers[plotId] = renderer;
             return renderer;

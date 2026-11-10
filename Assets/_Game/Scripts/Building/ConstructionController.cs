@@ -156,7 +156,7 @@ namespace TownBuilder
 
                 float top = view.SpriteRenderer.bounds.max.y - view.transform.position.y;
                 float centerX = view.SpriteRenderer.bounds.center.x - view.transform.position.x;
-                go.transform.localPosition = new Vector3(centerX, top + 0.3f, 0f);
+                FloatBob.Place(go.transform, new Vector3(centerX, top + 0.3f, 0f));
                 go.transform.localScale = Vector3.one * iconScale;
             }
 
