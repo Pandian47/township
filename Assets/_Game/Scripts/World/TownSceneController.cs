@@ -27,6 +27,7 @@ namespace TownBuilder
         [SerializeField] private TownEffects effects;
         [SerializeField] private TrainController trainController;
         [SerializeField] private TruckController truckController;
+        [SerializeField] private HappinessController happinessController;
         [SerializeField] private LandController landController;
         [SerializeField] private TrainMover trainMover;
         [SerializeField] private StreetLife streetLife;
@@ -53,6 +54,7 @@ namespace TownBuilder
         private AchievementService _achievements;
         private WeekendEventService _events;
         private DeliveryTruck _deliveryTruck;
+        private HomeCoins _homeCoins;
         private TownAudioBridge _audioBridge;
         private float _saveDueAt = -1f;
 
@@ -70,6 +72,7 @@ namespace TownBuilder
         public TaskService Tasks => _tasks;
         public TrainController Train => trainController;
         public TruckController Truck => truckController;
+        public HappinessController Homes => happinessController;
         public LandController LandController => landController;
         public LandPlots Land => _land;
         public DailyRewardService Daily => _daily;
@@ -196,6 +199,13 @@ namespace TownBuilder
                 truckController.Modified += ScheduleSave;
             }
 
+            _homeCoins = TownSaveMapper.LoadHomeCoins(save, _town);
+            if (happinessController != null)
+            {
+                happinessController.Initialize(_town, _homeCoins, _wallet, content, _context.Clock, id => !_sites.IsUnderConstruction(id));
+                happinessController.Modified += ScheduleSave;
+            }
+
             if (streetLife != null) streetLife.Initialize(_town, content);
 
             cameraController.SetWorldBounds(grid.WorldBounds());
@@ -212,13 +222,16 @@ namespace TownBuilder
             _audioBridge.AddAchievements(_achievements);
             _audioBridge.AddEvents(_events);
             _audioBridge.AddTruck(truckController);
+            _audioBridge.AddHomes(happinessController);
 
             if (effects != null) effects.Initialize(_town);
+            if (effects != null && happinessController != null) happinessController.Rewarded += effects.ShowReward;
 
             hud.Initialize(placement, farming, production, construction, _orders, _progression, _storage, _wallet, _progress, _context.Content, _context.Ads, ReturnToMainMenu);
             hud.InitializeTasks(_tasks);
             if (trainController != null) hud.InitializeTrain(trainController, _context.Content, _inventory, _context.Ads);
             if (truckController != null) hud.InitializeTruck(truckController, _context.Content, _inventory, _context.Ads);
+            if (happinessController != null) hud.InitializeHomes(happinessController);
             if (landController != null) hud.InitializeLand(landController);
             hud.InitializeDev(this, _context.Content);
             hud.InitializeDaily(_daily);
@@ -244,6 +257,7 @@ namespace TownBuilder
             _progression?.Dispose();
             if (trainController != null) trainController.Modified -= ScheduleSave;
             if (truckController != null) truckController.Modified -= ScheduleSave;
+            if (happinessController != null) happinessController.Modified -= ScheduleSave;
             if (landController != null) landController.Modified -= ScheduleSave;
             if (_tasks != null)
             {
@@ -291,6 +305,7 @@ namespace TownBuilder
                 TownSaveMapper.WriteTasks(_context.ActiveSave, _taskBoard);
                 TownSaveMapper.WriteTrain(_context.ActiveSave, _train);
                 TownSaveMapper.WriteTruck(_context.ActiveSave, _deliveryTruck);
+                TownSaveMapper.WriteHomeCoins(_context.ActiveSave, _homeCoins);
                 TownSaveMapper.WriteLand(_context.ActiveSave, _land);
                 TownSaveMapper.WriteDaily(_context.ActiveSave, _daily.Track);
                 TownSaveMapper.WriteAchievements(_context.ActiveSave, _achievements.Book);

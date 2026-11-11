@@ -227,6 +227,7 @@ namespace TownBuilder.EditorTools
             var construction = Go("ConstructionController", systems.transform).AddComponent<ConstructionController>();
             var train = Go("TrainController", systems.transform).AddComponent<TrainController>();
             var truck = Go("TruckController", systems.transform).AddComponent<TruckController>();
+            var homes = Go("HappinessController", systems.transform).AddComponent<HappinessController>();
             var streetLife = Go("StreetLife", world.transform).AddComponent<StreetLife>();
             Wire(streetLife, ("grid", isoGrid), ("roadTilemap", road),
                 ("carFront", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CarFrontPath)),
@@ -246,6 +247,8 @@ namespace TownBuilder.EditorTools
                 ("lockIcon", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.LockIconPath)));
             Wire(truck, ("buildings", buildingController),
                 ("truckIcon", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.TruckIconPath)));
+            Wire(homes, ("buildings", buildingController), ("placement", placement),
+                ("coinIcon", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CoinIconPath)));
             Wire(construction, ("buildings", buildingController), ("placement", placement),
                 ("constructionIcon", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.ConstructionIconPath)));
             Wire(production, ("buildings", buildingController), ("placement", placement));
@@ -290,6 +293,7 @@ namespace TownBuilder.EditorTools
                 ("effects", effects),
                 ("trainController", train),
                 ("truckController", truck),
+                ("happinessController", homes),
                 ("landController", land),
                 ("trainMover", mover),
                 ("streetLife", streetLife));
@@ -476,6 +480,7 @@ namespace TownBuilder.EditorTools
             var truckPanel = BuildTruckPanel(safe);
             var landPanel = BuildLandPanel(safe);
             var constructionPanel = BuildConstructionPanel(safe);
+            var homePanel = BuildHomePanel(safe);
             var toast = BuildToast(safe);
 
             // --- Barn screen
@@ -513,6 +518,7 @@ namespace TownBuilder.EditorTools
                 ("truckPanel", truckPanel),
                 ("landPanel", landPanel),
                 ("constructionPanel", constructionPanel),
+                ("homePanel", homePanel),
                 ("barnPanel", barnPanel),
                 ("ordersPanel", ordersPanel),
                 ("ordersButton", ordersButton),
@@ -1266,6 +1272,35 @@ namespace TownBuilder.EditorTools
             return panel;
         }
 
+        /// <summary>Home panel: name, happiness bar + %, what it earns, a decoration hint, Collect.</summary>
+        private static HomePanel BuildHomePanel(RectTransform safe)
+        {
+            var container = Stretch("HomePanel", safe);
+            var root = MakeRect("Root", container, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 196), new Vector2(1240, 270));
+            AddImage(root, PanelColor);
+            var title = Label(MakeRect("Title", root, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(24, -10), new Vector2(500, 54)),
+                "Text", "Cottage", 38, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
+            var happy = Label(MakeRect("Happiness", root, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(24, -72), new Vector2(300, 48)),
+                "Text", "Happiness 0%", 32, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
+            var barBg = MakeRect("Bar", root, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(330, -82), new Vector2(560, 30));
+            AddImage(barBg, new Color(0.82f, 0.78f, 0.7f), raycast: false);
+            var fill = AddImage(Stretch("Fill", barBg, 3f), Green, raycast: false);
+            fill.type = Image.Type.Filled;
+            fill.fillMethod = Image.FillMethod.Horizontal;
+            var info = Label(MakeRect("Info", root, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0f, 0f), new Vector2(24, 18), new Vector2(-340, 120)),
+                "Text", "", 27, TextAnchor.UpperLeft, new Color(0.40f, 0.36f, 0.32f));
+            var collect = MakeButton(root, "CollectButton", "Collect", new Vector2(260, 150), new Color(0.95f, 0.72f, 0.15f), out var collectLabel, 32);
+            var collectRect = (RectTransform)collect.transform;
+            collectRect.anchorMin = collectRect.anchorMax = collectRect.pivot = new Vector2(1f, 0.5f);
+            collectRect.anchoredPosition = new Vector2(-24, -10);
+
+            var panel = container.gameObject.AddComponent<HomePanel>();
+            Wire(panel, ("panelRoot", root.gameObject), ("titleText", title), ("happinessText", happy), ("happinessFill", fill), ("infoText", info),
+                ("collectButton", collect), ("collectLabel", collectLabel));
+            root.gameObject.SetActive(false);
+            return panel;
+        }
+
         /// <summary>Truck Depot panel: status line, three load cards (two item lines each), Send / Call back buttons.</summary>
         private static TruckPanel BuildTruckPanel(RectTransform safe)
         {
@@ -1553,6 +1588,10 @@ namespace TownBuilder.EditorTools
             var nameText = Label(nameRect, "Text", "Name", 32, TextAnchor.MiddleCenter, Ink, FontStyle.Bold);
             var priceRect = MakeRect("Price", template, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 14), new Vector2(-16, 46));
             var priceText = Label(priceRect, "Text", "0", 30, TextAnchor.MiddleCenter, Ink);
+            priceText.textWrappingMode = TMPro.TextWrappingModes.NoWrap; // "30 coins  ·  +5 happy" shrinks to one line
+            priceText.enableAutoSizing = true;
+            priceText.fontSizeMin = 20;
+            priceText.fontSizeMax = 30;
 
             var itemView = template.gameObject.AddComponent<ShopItemView>();
             Wire(itemView, ("button", button), ("icon", icon), ("nameText", nameText), ("priceText", priceText));

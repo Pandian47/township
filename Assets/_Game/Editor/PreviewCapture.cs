@@ -134,7 +134,7 @@ namespace TownBuilder.EditorTools
             return outputPath;
         }
 
-        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm, ShopCards, Event, Truck }
+        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm, ShopCards, Event, Truck, Home }
 
         /// <summary>Command line: renders MainMenu + Town (idle, shop, placing) with UI into the folder after -previewOut.</summary>
         public static void CaptureUiFromCommandLine()
@@ -152,6 +152,7 @@ namespace TownBuilder.EditorTools
                 Capture(Path.Combine(folder, "Preview_Town_ShopCards.png"), HudState.ShopCards);
                 Capture(Path.Combine(folder, "Preview_Town_Event.png"), HudState.Event);
                 Capture(Path.Combine(folder, "Preview_Town_Truck.png"), HudState.Truck);
+                Capture(Path.Combine(folder, "Preview_Town_Home.png"), HudState.Home);
                 Capture(Path.Combine(folder, "Preview_Town_Placing.png"), HudState.Placing);
                 Capture(Path.Combine(folder, "Preview_Town_Field.png"), HudState.Field);
                 Capture(Path.Combine(folder, "Preview_Town_Barn.png"), HudState.Barn);
@@ -446,6 +447,16 @@ namespace TownBuilder.EditorTools
                 }
             }
 
+            if (state == HudState.Home)
+            {
+                var selection = Find(canvas, "SelectionActionBar");
+                selection.SetActive(true);
+                selection.transform.Find("Name").GetComponent<TMPro.TMP_Text>().text = "Cottage";
+                Find(canvas, "HomePanel").transform.Find("Root").gameObject.SetActive(true);
+                Find(canvas, "HomePanel").GetComponent<HomePanel>().Render("Cottage", 45, TownHappiness.CoinsPerHour(content.HomeCoinsPerHour, 45),
+                    content.HomeCoinsMaxHours, content.HappinessRadius, 11);
+            }
+
             if (state == HudState.Truck)
             {
                 // Truck parked with three mixed loads: the first already loaded, the second ready, the third short.
@@ -511,7 +522,7 @@ namespace TownBuilder.EditorTools
                 shopPanel.BuildTabs(content);
                 shopPanel.HighlightTab(category);
                 var template = shopRoot.GetComponentsInChildren<ShopItemView>(true).First();
-                foreach (var def in content.Buildings.Where(d => d.ShowInShop && d.Category == category))
+                foreach (var def in content.Buildings.Where(d => d.ShowInShop && !d.EventOnly && d.Category == category))
                 {
                     var item = UnityEngine.Object.Instantiate(template, template.transform.parent);
                     item.gameObject.SetActive(true);

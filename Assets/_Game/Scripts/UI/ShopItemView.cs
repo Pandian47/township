@@ -29,6 +29,7 @@ namespace TownBuilder
             button.interactable = unlocked && affordable && !limitReached;
             if (limitReached) priceText.text = Definition.MaxCount == 1 ? "Built" : $"Max {Definition.MaxCount}";
             else priceText.text = unlocked ? $"{Definition.CoinCost:N0} coins" : $"Level {Definition.UnlockLevel}";
+            if (Definition.Happiness > 0 && !limitReached) priceText.text += $"  ·  +{Definition.Happiness} happy";
             priceText.color = unlocked && !affordable && !limitReached ? new Color(0.85f, 0.2f, 0.2f) : new Color(0.2f, 0.2f, 0.2f);
             icon.color = unlocked && !limitReached ? Color.white : new Color(0.3f, 0.3f, 0.3f, 0.8f);
         }

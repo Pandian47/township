@@ -332,6 +332,14 @@ calendar (`Tick`, called every second by `EventPanel`), counts harvests / produc
 set of unlocked decorations and filters the shop (`BuildingShopPanel.SetListingFilter`). `EventPanel` = the town button
 + window. DEV "Start weekend event now" runs one from today for two days. Saved in `SaveData.events`.
 
+## 6g6h. Happiness and home coins (Milestone 8 step 2)
+
+`TownHappiness` (Domain): footprint gap distance, a home's happiness from `HappinessSource`s within a radius (capped at
+100), coins per hour (base × (1 + happiness/100)). `HomeCoins` (Domain): last-collected time per home, pending coins up to
+a cap, `Collect`. `BuildingDefinition.happiness` is set per decoration. `HappinessController` (Scripts/Town) tracks
+finished Residential buildings, shows coin bubbles, collects on tap (tap interceptor) and raises `Rewarded` for the
+floating "+coins". `HomePanel` is the selected home's panel. Saved in `SaveData.homeCoins`.
+
 ## 6g6g. Delivery truck (Milestone 8 step 1)
 
 `DeliveryTruck` (Domain): AtDepot / Away, `TruckLoad`s of several `TruckLine`s, `TryLoad` (all lines or nothing),

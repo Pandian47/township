@@ -25,6 +25,8 @@ namespace TownBuilder.Domain
         public List<string> completedTaskIds = new List<string>();
         public TrainSaveData train = new TrainSaveData();
         public TruckSaveData truck = new TruckSaveData();
+        /// <summary>When each home's coins were last collected (homes keep earning while the app is closed).</summary>
+        public List<HomeCoinsSaveData> homeCoins = new List<HomeCoinsSaveData>();
         public LandSaveData land = new LandSaveData();
         public DailySaveData daily = new DailySaveData();
         public AchievementsSaveData achievements = new AchievementsSaveData();
@@ -91,6 +93,13 @@ namespace TownBuilder.Domain
     {
         /// <summary>Owned plot ids ("x_y"). Empty = not initialised yet (start area + plots under buildings).</summary>
         public List<string> ownedPlots = new List<string>();
+    }
+
+    [Serializable]
+    public sealed class HomeCoinsSaveData
+    {
+        public string homeId;
+        public long lastCollectedUnixMs;
     }
 
     [Serializable]

@@ -115,6 +115,21 @@ namespace TownBuilder
             truck.Restore((TruckState)save.truck.state, save.truck.returnsAtUnixMs, loads, cargo);
         }
 
+        public static HomeCoins LoadHomeCoins(SaveData save, Town town)
+        {
+            var coins = new HomeCoins();
+            foreach (var h in save.homeCoins)
+                if (town.TryGet(h.homeId, out _)) coins.Restore(h.homeId, h.lastCollectedUnixMs);
+            return coins;
+        }
+
+        public static void WriteHomeCoins(SaveData save, HomeCoins coins)
+        {
+            save.homeCoins.Clear();
+            foreach (var pair in coins.LastCollected)
+                save.homeCoins.Add(new HomeCoinsSaveData { homeId = pair.Key, lastCollectedUnixMs = pair.Value });
+        }
+
         public static void WriteTruck(SaveData save, DeliveryTruck truck)
         {
             var t = save.truck;

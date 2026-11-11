@@ -15,6 +15,7 @@ namespace TownBuilder
         [SerializeField] private TasksPanel tasksPanel;
         [SerializeField] private TrainPanel trainPanel;
         [SerializeField] private TruckPanel truckPanel;
+        [SerializeField] private HomePanel homePanel;
         [SerializeField] private LandPanel landPanel;
         [SerializeField] private DailyRewardDialog dailyDialog;
         [SerializeField] private AchievementsPanel achievementsPanel;
@@ -75,6 +76,7 @@ namespace TownBuilder
         private TaskService _tasks;
         private TrainController _train;
         private TruckController _truck;
+        private HappinessController _homes;
         private LandController _land;
 
         public void Initialize(PlacementSystem placement, FarmingController farming, ProductionController production, ConstructionController construction, OrderService orders,
@@ -144,6 +146,14 @@ namespace TownBuilder
         }
 
         /// <summary>Truck Depot panel (shown while the finished depot is selected).</summary>
+        public void InitializeHomes(HappinessController homes)
+        {
+            if (homes == null || homePanel == null) return;
+            _homes = homes;
+            homePanel.Initialize(homes);
+            Refresh();
+        }
+
         public void InitializeTruck(TruckController truck, GameContent content, Inventory inventory, IAdService ads)
         {
             if (truck == null || truckPanel == null) return;
@@ -301,6 +311,10 @@ namespace TownBuilder
             if (stationSelected) trainPanel.Show();
             else if (trainPanel != null && trainPanel.IsOpen) trainPanel.Hide();
 
+            bool homeSelected = selected && !building && _homes != null && _homes.IsHome(target, out _);
+            if (homeSelected && homePanel.HomeId != target) homePanel.ShowFor(target);
+            else if (!homeSelected && homePanel != null && homePanel.HomeId != null) homePanel.Hide();
+
             bool depotSelected = selected && !building && _truck != null && _truck.IsDepot(target);
             if (depotSelected) truckPanel.Show();
             else if (truckPanel != null && truckPanel.IsOpen) truckPanel.Hide();
@@ -326,7 +340,8 @@ namespace TownBuilder
             if (mode == PlacementSystem.Mode.PlacingNew)
             {
                 string cost = _placement.CanAffordActive ? $"{definition.CoinCost:N0} coins" : $"Need {definition.CoinCost:N0} coins";
-                return $"{definition.DisplayName}  -  {cost}\n{state}";
+                string happy = definition.Happiness > 0 ? $"  -  homes nearby +{definition.Happiness} happiness" : "";
+                return $"{definition.DisplayName}  -  {cost}{happy}\n{state}";
             }
 
             return $"Moving {definition.DisplayName}\n{state}";

@@ -68,6 +68,8 @@ namespace TownBuilder.EditorTools
             public bool Fixed;
             /// <summary>Only in the shop after a weekend-event prize unlocked it.</summary>
             public bool EventOnly;
+            /// <summary>Decorations: happiness for homes nearby.</summary>
+            public int Happy;
             /// <summary>Decoration: drawn by PlaceholderArtGenerator.CreateDecoration (not as a box building).</summary>
             public PlaceholderArtGenerator.DecorationStyle? Deco;
             /// <summary>Fruit tree: drawn from the decoration tree with fruit; <see cref="Fruit"/> grows on it by itself.</summary>
@@ -173,20 +175,20 @@ namespace TownBuilder.EditorTools
 
             // Milestone 6 step 5: decorations (instant, no limit, purely for looks). Example prices.
             new BuildingSeed { Id = "tree", Name = "Tree", Category = BuildingCategory.Decoration, Folder = "Decorations",
-                W = 1, H = 1, Unlock = 1, Cost = 30, Removable = true, Deco = PlaceholderArtGenerator.DecorationStyle.Tree },
+                W = 1, H = 1, Unlock = 1, Cost = 30, Removable = true, Deco = PlaceholderArtGenerator.DecorationStyle.Tree, Happy = 5 },
             new BuildingSeed { Id = "flower_bed", Name = "Flower Bed", Category = BuildingCategory.Decoration, Folder = "Decorations",
-                W = 1, H = 1, Unlock = 2, Cost = 40, Removable = true, Deco = PlaceholderArtGenerator.DecorationStyle.FlowerBed },
+                W = 1, H = 1, Unlock = 2, Cost = 40, Removable = true, Deco = PlaceholderArtGenerator.DecorationStyle.FlowerBed, Happy = 8 },
             new BuildingSeed { Id = "bench", Name = "Bench", Category = BuildingCategory.Decoration, Folder = "Decorations",
-                W = 1, H = 1, Unlock = 3, Cost = 60, Removable = true, Deco = PlaceholderArtGenerator.DecorationStyle.Bench },
+                W = 1, H = 1, Unlock = 3, Cost = 60, Removable = true, Deco = PlaceholderArtGenerator.DecorationStyle.Bench, Happy = 6 },
             new BuildingSeed { Id = "fence", Name = "Fence", Category = BuildingCategory.Decoration, Folder = "Decorations",
-                W = 1, H = 1, Unlock = 4, Cost = 15, Removable = true, Deco = PlaceholderArtGenerator.DecorationStyle.Fence },
+                W = 1, H = 1, Unlock = 4, Cost = 15, Removable = true, Deco = PlaceholderArtGenerator.DecorationStyle.Fence, Happy = 2 },
             new BuildingSeed { Id = "fountain", Name = "Fountain", Category = BuildingCategory.Decoration, Folder = "Decorations",
-                W = 2, H = 2, Unlock = 6, Cost = 400, Removable = true, Deco = PlaceholderArtGenerator.DecorationStyle.Fountain },
+                W = 2, H = 2, Unlock = 6, Cost = 400, Removable = true, Deco = PlaceholderArtGenerator.DecorationStyle.Fountain, Happy = 20 },
             // Milestone 7 step 4: event-only decorations (weekend event prizes).
             new BuildingSeed { Id = "scarecrow", Name = "Scarecrow", Category = BuildingCategory.Decoration, Folder = "Decorations",
-                W = 1, H = 1, Unlock = 1, Cost = 80, Removable = true, EventOnly = true, Deco = PlaceholderArtGenerator.DecorationStyle.Scarecrow },
+                W = 1, H = 1, Unlock = 1, Cost = 80, Removable = true, EventOnly = true, Deco = PlaceholderArtGenerator.DecorationStyle.Scarecrow, Happy = 12 },
             new BuildingSeed { Id = "festival_lantern", Name = "Festival Lantern", Category = BuildingCategory.Decoration, Folder = "Decorations",
-                W = 1, H = 1, Unlock = 1, Cost = 80, Removable = true, EventOnly = true, Deco = PlaceholderArtGenerator.DecorationStyle.Lantern },
+                W = 1, H = 1, Unlock = 1, Cost = 80, Removable = true, EventOnly = true, Deco = PlaceholderArtGenerator.DecorationStyle.Lantern, Happy = 12 },
         };
 
         [MenuItem("TownBuilder/Setup/Run Full Setup", priority = 0)]
@@ -378,6 +380,12 @@ namespace TownBuilder.EditorTools
                 {
                     def.EditorConfigure(def.Id, def.DisplayName, def.Category, art.Buildings[s.Id],
                         new Vector2Int(def.FootprintSize.X, def.FootprintSize.Y), def.UnlockLevel, def.CoinCost, def.Removable, def.MaxCount);
+                    EditorUtility.SetDirty(def);
+                }
+
+                if (s.Happy > 0 && def.Happiness == 0)
+                {
+                    def.EditorSetHappiness(s.Happy);
                     EditorUtility.SetDirty(def);
                 }
 

@@ -403,10 +403,17 @@ Our own features in the farming / town genre (not copied from any game).
 | Step | Feature | Status |
 |---|---|---|
 | 1 | **Delivery truck**: Truck Depot (level 11), 3 mixed loads, 1-hour trips, paid on return | Done (v0.30.0) |
-| 2 | **Town happiness**: decorations near houses raise happiness; happy houses pay bonus coins | Next |
-| 3 | **Collections**: rare finds while harvesting / producing, 3 sets of 5, rewards per set | Planned |
+| 2 | **Town happiness**: decorations near houses raise happiness; happy houses pay bonus coins | Done (v0.31.0) |
+| 3 | **Collections**: rare finds while harvesting / producing, 3 sets of 5, rewards per set | Next |
 | 4 | **Seasons**: the town's look follows the real month, seasonal decorations | Planned |
 | 5 | **Launch prep**: settings, credits, privacy policy, app icon, store screenshots, AAB checklist | Planned |
+
+### Device checklist (Milestone 8 step 2: town happiness)
+- [ ] A Cottage gets a coin bubble after about an hour; tapping the Cottage collects (floating "+coins", sound)
+- [ ] Selecting a Cottage shows Happiness %, a bar, coins an hour and Collect
+- [ ] Placing a Fountain or Flower Bed within 3 tiles raises that Cottage's happiness and coins an hour
+- [ ] Decoration cards in Build → Decorations show "+N happy"; the placement bar says "homes nearby +N happiness"
+- [ ] Coins keep filling while the app is closed, but stop at 3 hours' worth
 
 ### Device checklist (Milestone 8 step 1: delivery truck)
 - [ ] DEV → "Unlock everything (level 12)", then Build → Town: Truck Depot (2,500 coins, 10 min to build)

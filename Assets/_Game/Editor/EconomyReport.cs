@@ -29,7 +29,8 @@ namespace TownBuilder.EditorTools
     ///   reward every day (calendar in order), and reaches the first <see cref="EventPrizesPerWeekend"/> prizes of each weekend
     ///   event (counted as an even share per day). Goals (achievements) pay their tier gems when the model's counters
     ///   (crops, products, crates, buildings bought, land plots, level) reach them; orders are ignored, so Trusted Trader
-    ///   never pays here. Bonus coins are reported separately and NOT added to the coin balance above (errs on the poor side).
+    ///   never pays here. Home coins: level / 3 homes at 50 % happiness, emptied twice a day (each up to the cap).
+    ///   Bonus coins are reported separately and NOT added to the coin balance above (errs on the poor side).
     /// * Gems: starting gems + level-up gems + one-off task gems + daily + events + goals, against the gems it would cost to
     ///   skip every key building's construction (1 gem per minute). Since v0.29.1 gems also finish crops and factory
     ///   products at the same price, so any surplus has a use.
@@ -43,6 +44,9 @@ namespace TownBuilder.EditorTools
         public const float TaskMinutes = 12f;
         public const float PlayMinutesPerDay = 45f;
         public const int EventPrizesPerWeekend = 2;
+        /// <summary>Home coins: homes owned = level / 3, at 50 % happiness, emptied this many times a day (each up to the cap).</summary>
+        public const int HomeCollectionsPerDay = 2;
+        public const int ModelHappiness = 50;
 
         /// <summary>When the materials for the first plot of a land ring have been earned.</summary>
         public sealed class LandStatus
@@ -263,6 +267,9 @@ namespace TownBuilder.EditorTools
 
                     eventCoinCarry += eventCoinsPerDay;
                     eventGemCarry += eventGemsPerDay;
+                    int homes = level / 3;
+                    eventCoinCarry += (float)(homes * TownBuilder.Domain.TownHappiness.CoinsPerHour(content.HomeCoinsPerHour, ModelHappiness)
+                                              * content.HomeCoinsMaxHours * HomeCollectionsPerDay);
                 }
 
                 long eventCoins = (long)eventCoinCarry, eventGems = (long)eventGemCarry;
@@ -475,8 +482,8 @@ namespace TownBuilder.EditorTools
             }
 
             sb.AppendLine();
-            sb.AppendLine(string.Format(ci, "## Bonus income and gems ({0:0} min of play a day, daily reward every day, first {1} prizes of each weekend event)",
-                PlayMinutesPerDay, EventPrizesPerWeekend));
+            sb.AppendLine(string.Format(ci, "## Bonus income and gems ({0:0} min of play a day, daily reward every day, first {1} prizes of each weekend event, home coins: level/3 homes at {2}% happiness emptied {3}x a day)",
+                PlayMinutesPerDay, EventPrizesPerWeekend, ModelHappiness, HomeCollectionsPerDay));
             sb.AppendLine();
             sb.AppendLine("Bonus coins are not in the coin balance above. Gems to skip builds = 1 gem per minute of every key building's construction;");
             sb.AppendLine("gems left over can finish crops and factory products at the same price (1 gem per minute left).");

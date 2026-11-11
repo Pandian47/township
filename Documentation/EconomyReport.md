@@ -47,7 +47,7 @@ Coins/min for recipes is the value added (product value minus the ingredients' s
 | 11 | Truck Depot (2,500) | 3,706 | 12 | 570 | 33.3 (6.6) | 8.46 | 67 | 2,242 | 5,948 | 1.4 / 2.3 / 1.4 |
 | 12 | - | 7,148 | 12 | 670 | 33.3 (6.6) | 8.46 | 79 | 2,635 | 9,783 | 1.7 / 2.7 / 1.7 |
 
-## Bonus income and gems (45 min of play a day, daily reward every day, first 2 prizes of each weekend event)
+## Bonus income and gems (45 min of play a day, daily reward every day, first 2 prizes of each weekend event, home coins: level/3 homes at 50% happiness emptied 2x a day)
 
 Bonus coins are not in the coin balance above. Gems to skip builds = 1 gem per minute of every key building's construction;
 gems left over can finish crops and factory products at the same price (1 gem per minute left).
@@ -56,16 +56,16 @@ gems left over can finish crops and factory products at the same price (1 gem pe
 |---|---|---|---|---|---|---|---|---|
 | 1 | 12 min | 1 | 71 | 137% | - | 0 | 20 | 3 |
 | 2 | 32 min | 1 | 0 | 20% | Green Fingers 1 | 3 | 23 | 3 |
-| 3 | 61 min | 2 | 101 | 21% | - | 1 | 24 | 5 |
-| 4 | 94 min | 3 | 82 | 17% | Rising Star 1 | 5 | 29 | 8 |
-| 5 | 127 min | 3 | 0 | 10% | Green Fingers 2, Busy Workshops 1, Town Planner 1 | 10 | 39 | 11 |
-| 6 | 167 min | 4 | 141 | 11% | - | 3 | 42 | 15 |
-| 7 | 214 min | 5 | 22 | 8% | - | 3 | 45 | 20 |
-| 8 | 267 min | 6 | 221 | 9% | Freight Master 1 | 4 | 49 | 26 |
-| 9 | 325 min | 8 | 393 | 11% | Land Owner 1, Rising Star 2 | 11 | 60 | 31 |
-| 10 | 393 min | 9 | 101 | 9% | Green Fingers 3 | 11 | 71 | 31 |
-| 11 | 460 min | 11 | 223 | 9% | Busy Workshops 2 | 8 | 79 | 41 |
-| 12 | 539 min | 12 | 22 | 7% | - | 2 | 81 | 41 |
+| 3 | 61 min | 2 | 137 | 25% | - | 1 | 24 | 5 |
+| 4 | 94 min | 3 | 118 | 21% | Rising Star 1 | 5 | 29 | 8 |
+| 5 | 127 min | 3 | 0 | 13% | Green Fingers 2, Busy Workshops 1, Town Planner 1 | 10 | 39 | 11 |
+| 6 | 167 min | 4 | 213 | 15% | - | 3 | 42 | 15 |
+| 7 | 214 min | 5 | 94 | 12% | - | 3 | 45 | 20 |
+| 8 | 267 min | 6 | 293 | 13% | Freight Master 1 | 4 | 49 | 26 |
+| 9 | 325 min | 8 | 609 | 16% | Land Owner 1, Rising Star 2 | 11 | 60 | 31 |
+| 10 | 393 min | 9 | 209 | 14% | Green Fingers 3 | 11 | 71 | 31 |
+| 11 | 460 min | 11 | 439 | 14% | Busy Workshops 2 | 8 | 79 | 41 |
+| 12 | 539 min | 12 | 166 | 12% | - | 2 | 81 | 41 |
 
 ## Land: when the first plot of each ring is affordable
 

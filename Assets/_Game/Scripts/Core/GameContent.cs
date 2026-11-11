@@ -84,6 +84,16 @@ namespace TownBuilder
         [Tooltip("Bonus for a completely loaded truck, as a share of all load coins.")]
         [SerializeField, Min(0f)] private float truckFullBonusFraction = 0.3f;
 
+        [Header("Happiness and home coins")]
+        [Tooltip("Decorations count for homes up to this many cells away (gap between footprints).")]
+        [SerializeField, Min(0)] private int happinessRadius = 3;
+        [Tooltip("Coins a home earns per hour at 0 % happiness; 100 % happiness doubles it.")]
+        [SerializeField, Min(0)] private int homeCoinsPerHour = 4;
+        [Tooltip("A home holds at most this many hours of coins.")]
+        [SerializeField, Min(0.1f)] private float homeCoinsMaxHours = 3f;
+        [Tooltip("The coin bubble (tap to collect) shows from this many coins.")]
+        [SerializeField, Min(1)] private int homeCoinsBubbleMin = 5;
+
         [Header("Weekend events")]
         [Tooltip("One runs every Saturday + Sunday (local time); they take turns week by week, in this order.")]
         [SerializeField] private List<EventDefinition> weekendEvents = new List<EventDefinition>();
@@ -169,6 +179,10 @@ namespace TownBuilder
         public float TruckCoinMultiplier => truckCoinMultiplier;
         public int TruckXpDivisor => truckXpDivisor;
         public float TruckFullBonusFraction => truckFullBonusFraction;
+        public int HappinessRadius => happinessRadius;
+        public int HomeCoinsPerHour => homeCoinsPerHour;
+        public float HomeCoinsMaxHours => homeCoinsMaxHours;
+        public int HomeCoinsBubbleMin => homeCoinsBubbleMin;
         public IReadOnlyList<MaterialDefinition> Materials => materials;
         public void EditorSetMaterials(List<MaterialDefinition> list)
         {

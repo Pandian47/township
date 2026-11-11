@@ -156,6 +156,10 @@ MonoBehaviour:
   truckCoinMultiplier: 1.6
   truckXpDivisor: 4
   truckFullBonusFraction: 0.3
+  happinessRadius: 3
+  homeCoinsPerHour: 4
+  homeCoinsMaxHours: 3
+  homeCoinsBubbleMin: 5
   weekendEvents:
   - {fileID: 11400000, guid: 3be905845b6c6fc4d8506257cecf3975, type: 2}
   - {fileID: 11400000, guid: c2f0d7ebb215ad24e9acb671c76306d9, type: 2}

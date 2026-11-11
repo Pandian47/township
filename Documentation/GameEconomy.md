@@ -103,6 +103,25 @@ already there or their slot count.
 its ingredients, every recipe belongs to exactly one factory, and no recipe unlocks before its factory or any of
 its ingredients.
 
+## Town happiness and home coins (Milestone 8 step 2, `GameContent` → Happiness and home coins)
+
+* Every **home** (Houses tab, e.g. Cottage) slowly collects coins: **4 coins an hour**, up to **3 hours' worth**.
+  A coin bubble shows over a home with 5+ coins; tap the home to collect.
+* **Happiness** (0–100 %) = the sum of the decorations within **3 tiles** of the home. 100 % **doubles** its coins
+  (8 an hour). Shown in the home's panel and on the decoration cards in the shop.
+
+| Decoration | Happiness |
+|---|---|
+| Fence | +2 |
+| Tree | +5 |
+| Bench | +6 |
+| Flower Bed | +8 |
+| Scarecrow, Festival Lantern (event prizes) | +12 |
+| Fountain (2×2) | +20 |
+
+* Model: level ÷ 3 homes at 50 % happiness, emptied twice a day, adds ~36 coins a day per home. Bonus coins (daily +
+  events + homes) stay at **12–25 %** of normal income from level 2 on (guard rail: at most 25 %).
+
 ## Delivery truck (Milestone 8 step 1, `GameContent` → Delivery truck)
 
 * **Truck Depot**: Build → Town, level 11, 2,500 coins, 10 min to build, one per town. When it's finished the truck parks

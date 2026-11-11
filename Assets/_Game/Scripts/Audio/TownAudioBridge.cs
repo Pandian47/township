@@ -123,6 +123,16 @@ namespace TownBuilder
         private System.Action _disposeAchievements;
         private System.Action _disposeEvents;
         private System.Action _disposeTruck;
+        private System.Action _disposeHomes;
+
+        /// <summary>Coins sound when a home's coins are collected.</summary>
+        public void AddHomes(HappinessController homes)
+        {
+            if (homes == null) return;
+            System.Action<string, int> collected = (_, __) => Play(SoundId.Coins);
+            homes.Collected += collected;
+            _disposeHomes = () => homes.Collected -= collected;
+        }
 
         /// <summary>Truck sounds (the truck is set up after the bridge).</summary>
         public void AddTruck(TruckController truck)
@@ -191,6 +201,7 @@ namespace TownBuilder
             _disposeAchievements?.Invoke();
             _disposeEvents?.Invoke();
             _disposeTruck?.Invoke();
+            _disposeHomes?.Invoke();
         }
 
         private void Play(SoundId id)

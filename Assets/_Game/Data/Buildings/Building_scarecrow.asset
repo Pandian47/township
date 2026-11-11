@@ -23,6 +23,7 @@ MonoBehaviour:
   maxCount: 0
   movable: 1
   showInShop: 1
+  happiness: 12
   eventOnly: 1
   chimney: {x: 0, y: 0}
   isFarmPlot: 0
