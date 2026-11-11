@@ -1096,6 +1096,82 @@ namespace TownBuilder.EditorTools
 
         public static readonly string TasksIconPath = UiArtFolder + "/PH_Icon_Tasks.png";
         public static readonly string RouteFlagPath = UiArtFolder + "/PH_RouteFlag.png";
+        public const string SleepZPath = "Assets/_Game/Art/Effects/PH_Fx_SleepZ.png";
+        public const string GrainPath = "Assets/_Game/Art/Effects/PH_Fx_Grain.png";
+        public const string CarrySackPath = "Assets/_Game/Art/Effects/PH_Fx_CarrySack.png";
+
+        /// <summary>Working-building effects (v0.37.0): a sleepy "Z", a grain (white, tinted per building), a small sack.</summary>
+        public static void CreateFactoryLifeSprites()
+        {
+            CreateSprite(SleepZPath, RenderSleepZ, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+            CreateSprite(GrainPath, RenderGrain, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+            CreateSprite(CarrySackPath, RenderCarrySack, new Vector2(0.5f, 0f), SpriteMeshType.FullRect);
+        }
+
+        private static Texture2D RenderSleepZ()
+        {
+            const int n = 40;
+            var tex = NewTexture(n, n);
+            var px = new Color32[n * n];
+            var white = new Color32(255, 255, 255, 255);
+            void Box(int x0, int y0, int x1, int y1) { for (int y = y0; y < y1; y++) for (int x = x0; x < x1; x++) px[y * n + x] = white; }
+            Box(8, 29, 32, 35);  // top bar
+            Box(8, 5, 32, 11);   // bottom bar
+            for (int y = 11; y < 29; y++) // diagonal from bottom-left to top-right
+            {
+                float t = (y - 11) / 18f;
+                int cx = Mathf.RoundToInt(Mathf.Lerp(10f, 29f, t));
+                for (int x = cx - 3; x <= cx + 3; x++) px[y * n + x] = white;
+            }
+
+            AddOutline(px, n, n);
+            tex.SetPixels32(px);
+            tex.Apply();
+            return tex;
+        }
+
+        private static Texture2D RenderGrain()
+        {
+            const int w = 8, h = 7;
+            var tex = NewTexture(w, h);
+            var px = new Color32[w * h];
+            for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+            {
+                float dx = (x + 0.5f - w * 0.5f) / (w * 0.5f), dy = (y + 0.5f - h * 0.5f) / (h * 0.5f);
+                float d = dx * dx + dy * dy;
+                if (d > 1f) continue;
+                px[y * w + x] = d < 0.25f && dx < 0f && dy > 0f ? new Color32(255, 255, 255, 255)
+                    : d > 0.6f ? new Color32(196, 172, 140, 255) : new Color32(240, 232, 214, 255);
+            }
+
+            tex.SetPixels32(px);
+            tex.Apply();
+            return tex;
+        }
+
+        private static Texture2D RenderCarrySack()
+        {
+            const int w = 22, h = 24;
+            var tex = NewTexture(w, h);
+            var px = new Color32[w * h];
+            var burlap = new Color32(214, 178, 116, 255);
+            var shade = new Color32(176, 140, 84, 255);
+            for (int y = 0; y < 18; y++)
+            for (int x = 0; x < w; x++)
+            {
+                float dx = (x + 0.5f - 11f) / 10f, dy = (y + 0.5f - 9f) / 9f;
+                if (dx * dx + dy * dy <= 1f) px[y * w + x] = dx > 0.35f ? shade : burlap;
+            }
+
+            for (int y = 17; y < 23; y++)
+            for (int x = 8; x < 14; x++)
+                px[y * w + x] = y < 19 ? new Color32(130, 92, 50, 255) : burlap; // tie and neck
+            AddOutline(px, w, h);
+            tex.SetPixels32(px);
+            tex.Apply();
+            return tex;
+        }
 
         /// <summary>The flag at the end of a road route (v0.36.0): a pole with a yellow pennant, pivot at the pole's foot.</summary>
         public static Sprite CreateRouteFlag() =>

@@ -321,6 +321,14 @@ namespace TownBuilder.EditorTools
             var smoke = Go("ChimneySmoke", world.transform).AddComponent<ChimneySmoke>();
             Wire(smoke, ("buildings", buildingController), ("production", production),
                 ("puffSprite", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.SmokePuffPath)));
+            var life = Go("FactoryLife", world.transform).AddComponent<FactoryLife>();
+            Wire(life, ("buildings", buildingController), ("production", production),
+                ("sleepSprite", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.SleepZPath)),
+                ("grainSprite", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.GrainPath)),
+                ("dustSprite", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.SmokePuffPath)),
+                ("sackSprite", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CarrySackPath)));
+            WireArray(life, "workerSprites", Enumerable.Range(1, PlaceholderArtGenerator.PersonVariants)
+                .Select(i => AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.PersonSpritePath(i))).ToArray());
             var effectsGo = Go("TownEffects", systems.transform);
             var effects = effectsGo.AddComponent<TownEffects>();
             var outline = effectsGo.AddComponent<SelectionOutline>();

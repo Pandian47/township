@@ -101,7 +101,7 @@ namespace TownBuilder.EditorTools
             // Show a placement preview (bakery) on free grass.
             var bakery = content.Buildings.First(b => b.Id == "bakery");
             var previewOrigin = new GridCoord(10, 24);
-            if ((!_storeMode || hud == HudState.Placing) && hud != HudState.Landscape)
+            if ((!_storeMode || hud == HudState.Placing) && hud != HudState.Landscape && hud != HudState.MillLife)
                 highlighter.Show(previewOrigin, bakery.FootprintSize, new Color(0.35f, 1f, 0.45f, 0.55f));
             if (hud == HudState.Placing)
             {
@@ -126,12 +126,20 @@ namespace TownBuilder.EditorTools
             cam.transform.position = new Vector3(center.x, center.y, -10f);
             cam.orthographicSize = 6.5f;
 
-            // Working factories: a smoke plume (puffs at different ages) from every chimney.
-            if (hud != HudState.None)
+            // Working factories: a smoke plume (puffs at different ages) from every chimney (not in the animation frames,
+            // where a frozen plume would look odd).
+            if (hud != HudState.None && hud != HudState.MillLife)
             {
                 var smoke = UnityEngine.Object.FindAnyObjectByType<ChimneySmoke>();
                 foreach (var v in UnityEngine.Object.FindObjectsByType<BuildingView>().Where(v => v.Definition != null && v.Definition.HasChimney))
                     for (int p = 0; p < 4; p++) smoke.Emit(v, 0.12f + p * 0.55f);
+            }
+
+            if (hud == HudState.MillLife)
+            {
+                CaptureMillFrames(cam, outputPath);
+                EditorSceneManager.OpenScene(scene.path, OpenSceneMode.Single);
+                return outputPath;
             }
 
             if (hud != HudState.None) PrepareTownHud(cam, content, bakery, hud);
@@ -168,7 +176,50 @@ namespace TownBuilder.EditorTools
             return outputPath;
         }
 
-        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm, ShopCards, Event, Truck, Home, Collections, Autumn, Winter, Landscape, Settings, Credits, Tasks }
+        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm, ShopCards, Event, Truck, Home, Collections, Autumn, Winter, Landscape, Settings, Credits, Tasks, MillLife }
+
+        /// <summary>
+        /// Command line (v0.37.0): animation frames of the Feed Mill, idle then working, into &lt;-previewOut&gt;/MillLife
+        /// (frame_000.png ...). Stitch them into a GIF with ffmpeg to check the working animation.
+        /// </summary>
+        public static void CaptureMillLifeFromCommandLine()
+        {
+            try
+            {
+                var args = Environment.GetCommandLineArgs();
+                int i = Array.IndexOf(args, "-previewOut");
+                string folder = i >= 0 && i + 1 < args.Length ? args[i + 1] : Path.Combine(Directory.GetCurrentDirectory(), "Temp");
+                Capture(Path.Combine(folder, "MillLife"), HudState.MillLife);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                EditorApplication.Exit(1);
+            }
+        }
+
+        private static void CaptureMillFrames(Camera cam, string folder)
+        {
+            var canvas = UnityEngine.Object.FindAnyObjectByType<Canvas>();
+            if (canvas != null) canvas.gameObject.SetActive(false);
+            var mill = UnityEngine.Object.FindObjectsByType<BuildingView>().First(v => v.Definition != null && v.Definition.Id == "feed_mill");
+            var life = UnityEngine.Object.FindAnyObjectByType<FactoryLife>();
+            var b = mill.SpriteRenderer.bounds;
+            // Show the mill on its own: hide buildings standing in front of it (the sample barn hides the door side).
+            foreach (var other in UnityEngine.Object.FindObjectsByType<BuildingView>())
+                if (other != mill && other.SpriteRenderer.bounds.Intersects(b) && other.transform.position.y < mill.transform.position.y)
+                    other.gameObject.SetActive(false);
+            cam.transform.position = new Vector3(b.center.x, b.center.y - 0.05f, -10f);
+            cam.orthographicSize = 1.15f;
+            Directory.CreateDirectory(folder);
+            const float dt = 1f / 15f;
+            int frame = 0;
+            life.SetState(mill, FactoryLife.State.Idle);
+            for (int k = 0; k < 45; k++) { life.Step(dt); Render(cam, Path.Combine(folder, $"frame_{frame++:000}.png")); }
+            life.SetState(mill, FactoryLife.State.Working);
+            for (int k = 0; k < 90; k++) { life.Step(dt); Render(cam, Path.Combine(folder, $"frame_{frame++:000}.png")); }
+        }
+
 
         /// <summary>
         /// Command line (v0.35.0): Google Play phone screenshots, 1920x1080, without the DEV button, into the folder after
@@ -668,6 +719,7 @@ namespace TownBuilder.EditorTools
                 Canvas.ForceUpdateCanvases();
             }
 
+            UnityEngine.Rendering.SortingGroup.UpdateAllSortingGroups(); // groups added this frame (FactoryLife workers)
             cam.Render();
 
             RenderTexture.active = rt;

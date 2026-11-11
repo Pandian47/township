@@ -49,6 +49,8 @@ namespace TownBuilder
         [SerializeField] private bool eventOnly;
         [Tooltip("Chimney top on the sprite, 0-1 from the bottom-left (0,0 = no chimney). Smoke rises there while the factory works.")]
         [SerializeField] private Vector2 chimney;
+        [Tooltip("Production buildings: idle Z letters, falling grain, dust, workers and a gentle rumble while working.")]
+        [SerializeField] private WorkingAnimation working = new WorkingAnimation();
 
         [Header("Gameplay roles")]
         [Tooltip("This building is a field where crops can be planted.")]
@@ -97,9 +99,11 @@ namespace TownBuilder
         public int LandscapeToolOrder => landscapeToolKind == TownBuilder.Domain.LandscapeTool.Roads ? 0 : landscapeToolKind == TownBuilder.Domain.LandscapeTool.Paving ? 1 : 2;
         public TownBuilder.Domain.Season Season => season;
         public Vector2 ChimneyPoint => chimney;
+        public WorkingAnimation Working => working;
         public bool HasChimney => chimney != Vector2.zero;
 
         public void EditorSetChimney(Vector2 point) => chimney = point;
+        public void EditorSetWorking(WorkingAnimation value) => working = value;
         public void EditorSetFruit(CropDefinition crop) => fruit = crop;
         public void EditorSetCategory(BuildingCategory newCategory) => category = newCategory;
         public void EditorSetEventOnly(bool value) => eventOnly = value;

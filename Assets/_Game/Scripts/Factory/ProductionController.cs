@@ -86,6 +86,18 @@ namespace TownBuilder
                    (_isBuilt == null || _isBuilt(instanceId));
         }
 
+        /// <summary>Every finished factory in the town (instance ids).</summary>
+        public IEnumerable<string> BuiltFactoryIds()
+        {
+            if (_town == null) yield break;
+            foreach (var b in _town.Buildings)
+                if (IsFactory(b.InstanceId, out _)) yield return b.InstanceId;
+        }
+
+        /// <summary>True while the factory is making something right now.</summary>
+        public bool IsWorking(string factoryId) =>
+            _factories != null && _factories.TryGet(factoryId, out var q) && q.ActiveJob(NowUnixMs) != null;
+
         public ProductionQueue GetQueue(string factoryId) =>
             IsFactory(factoryId, out var def) ? _factories.GetOrCreate(factoryId, def.ProductionSlots) : null;
 

@@ -337,6 +337,22 @@ calendar (`Tick`, called every second by `EventPanel`), counts harvests / produc
 set of unlocked decorations and filters the shop (`BuildingShopPanel.SetListingFilter`). `EventPanel` = the town button
 + window. DEV "Start weekend event now" runs one from today for two days. Saved in `SaveData.events`.
 
+## 6g6n. Living production buildings (v0.37.0, Feed Mill first)
+
+`WorkingAnimation` (Scripts/Building) on `BuildingDefinition.Working`: points 0-1 on the sprite (like the chimney
+point) for the idle sleep letters, a falling stream (chute tip, fall distance, colour), dust puffs, a carrier's walk
+(from → to, carrying a sack one way), a worker on the spot, and the rumble strength. `ProjectSetup.WorkingAnimations`
+holds the measured values (re-measure if the art changes; setup rewrites them every run).
+
+`FactoryLife` (Scripts/Effects) scans `ProductionController.BuiltFactoryIds()` / `IsWorking(id)` twice a second and
+shows each factory idle (Z letters) or working (grain stream, dust, workers, squash-and-stretch from the pivot; skipped
+while a `PopAnimator` plays). Particles are pooled sprites on the Effects layer; workers are children of the building
+with a `SortingGroup`, so they are drawn in front of their own building but behind buildings in front of it. Everything
+is driven by `Step(dt)` so the editor preview can render frames:
+`PreviewCapture.CaptureMillLifeFromCommandLine -previewOut Logs` → `Logs/MillLife/frame_*.png`
+(`Documentation/Images/FeedMill_Life.gif`). To add another building, measure its points and add it to
+`ProjectSetup.WorkingAnimations`.
+
 ## 6g6m. Roads, paving and landscape tools (v0.36.0)
 
 Domain (`Domain/Town/Landscape.cs`): `Terrain` gained DirtPath, BrickLane, Boardwalk, CheckerTiles, StoneSlabs, Meadow

@@ -289,6 +289,7 @@ namespace TownBuilder.EditorTools
             PlaceholderArtGenerator.CreateLandscapeStyleTiles();
             RoadTileBuilder.BuildAll();
             PlaceholderArtGenerator.CreateRouteFlag();
+            PlaceholderArtGenerator.CreateFactoryLifeSprites();
             foreach (var s in Seeds.Where(s => s.Tree != null))
                 art.Buildings[s.Id] = PlaceholderArtGenerator.CreateFruitTree(s.Id, s.Tree.Value);
             PlaceholderArtGenerator.CreateConstructionIcon();
@@ -1033,6 +1034,41 @@ namespace TownBuilder.EditorTools
             throw new InvalidOperationException("Importing TextMeshPro essential resources now. Run setup again once the import has finished.");
         }
 
+        /// <summary>
+        /// Working animations (v0.37.0), measured on the current AI art (0-1 from the sprite's bottom-left). Re-measure if
+        /// the art changes. These are the source of truth: setup writes them every run.
+        /// </summary>
+        private static readonly Dictionary<string, WorkingAnimation> WorkingAnimations = new Dictionary<string, WorkingAnimation>
+        {
+            {
+                "feed_mill", new WorkingAnimation
+                {
+                    enabled = true,
+                    sleepPoint = new Vector2(0.28f, 0.42f),     // above the door
+                    streamPoint = new Vector2(0.893f, 0.384f),  // tip of the grain chute
+                    streamFall = 0.17f,                         // into the grain box below it
+                    streamColor = new Color(1f, 0.78f, 0.2f),
+                    dustPoint = new Vector2(0.895f, 0.30f),     // the grain box
+                    dustColor = new Color(0.98f, 0.93f, 0.8f, 0.7f),
+                    walkFrom = new Vector2(0.20f, 0.07f),       // in front of the door ramp
+                    walkTo = new Vector2(0.40f, 0.025f),        // in front of the sack pile
+                    workerSpot = new Vector2(0.75f, 0.06f),     // by the millstone
+                    rumble = 0.012f,
+                }
+            },
+        };
+
+        private static void ConfigureWorkingAnimations()
+        {
+            var content = AssetDatabase.LoadAssetAtPath<GameContent>(ContentPath);
+            foreach (var pair in WorkingAnimations)
+            {
+                if (!content.TryGetBuilding(pair.Key, out var def)) continue;
+                def.EditorSetWorking(pair.Value);
+                EditorUtility.SetDirty(def);
+            }
+        }
+
         /// <summary>Sets chimney points on factories that don't have one yet (keeps designer edits).</summary>
         private static void ConfigureChimneys()
         {
@@ -1050,6 +1086,7 @@ namespace TownBuilder.EditorTools
         {
             CreateFontOutlineMaterial();
             ConfigureChimneys();
+            ConfigureWorkingAnimations();
             if (AssetDatabase.LoadAssetAtPath<Material>(SwayMaterialPath) == null)
             {
                 var sway = AssetDatabase.LoadAssetAtPath<Shader>(SwayShaderPath);

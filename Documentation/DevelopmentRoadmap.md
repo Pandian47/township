@@ -408,6 +408,13 @@ Our own features in the farming / town genre (not copied from any game).
 | 4 | **Seasons**: the town's look follows the real month, seasonal decorations | Done (v0.33.0) |
 | 5 | **Launch prep**: settings, credits, privacy policy, app icon, store screenshots, AAB checklist | Done (v0.35.0) |
 
+### Device checklist (v0.37.0: living Feed Mill)
+- [ ] An idle Feed Mill (nothing queued) has small "Z" letters drifting up from above the door
+- [ ] Start Cow Feed: grains stream from the chute into the box, dust puffs rise, the mill gently squashes and stretches
+- [ ] Two little workers appear: one carries sacks from the door to the sack pile and walks back, one works by the millstone
+- [ ] A building standing in front of the mill still hides the workers (they never draw on top of it)
+- [ ] When the queue is empty again, the workers leave and the Z letters come back; the game stays smooth
+
 ### Device checklist (v0.36.0: roads, paving and landscape tools)
 - [ ] Build → Decorations starts with three free cards: Roads & Paths, Paving, Landscape
 - [ ] Roads & Paths: pick a style, tap where the road starts and drag: a green route and a flag follow your finger
