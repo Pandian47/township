@@ -29,6 +29,8 @@ namespace TownBuilder.Domain
         public List<HomeCoinsSaveData> homeCoins = new List<HomeCoinsSaveData>();
         /// <summary>The season the player was last told about (Season as int, -1 = never).</summary>
         public int lastSeason = -1;
+        /// <summary>Cells the player painted with the Landscape tool (on top of the starting map).</summary>
+        public List<LandscapeCellSaveData> landscape = new List<LandscapeCellSaveData>();
         public LandSaveData land = new LandSaveData();
         public DailySaveData daily = new DailySaveData();
         public AchievementsSaveData achievements = new AchievementsSaveData();
@@ -107,6 +109,15 @@ namespace TownBuilder.Domain
         /// <summary>Times each collection was completed: setIds[i] / completions[i].</summary>
         public List<string> setIds = new List<string>();
         public List<int> completions = new List<int>();
+    }
+
+    [Serializable]
+    public sealed class LandscapeCellSaveData
+    {
+        public int x;
+        public int y;
+        /// <summary>Terrain name (Grass, Sand, Soil, Pavement, Water, Road).</summary>
+        public string terrain;
     }
 
     [Serializable]

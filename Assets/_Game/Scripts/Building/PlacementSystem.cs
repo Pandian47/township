@@ -57,6 +57,9 @@ namespace TownBuilder
         /// <summary>A tap in Idle/Selected mode that hit no building (the cell under the finger).</summary>
         public event Action<GridCoord> GroundTapped;
 
+        /// <summary>While painting the landscape, taps paint instead of selecting buildings or land.</summary>
+        public bool TapsSuspended { get; set; }
+
         /// <summary>
         /// Optional hook asked when a placed building is tapped in Idle/Selected mode. Return true to consume the tap
         /// (e.g. farming harvests a ready field instead of selecting it).
@@ -121,6 +124,8 @@ namespace TownBuilder
 
         public bool BeginPlacement(BuildingDefinition definition)
         {
+            if (definition != null && definition.IsLandscapeTool) return false; // a tool, not a building
+
             if (_town == null || definition == null) return false;
             if (!_progress.IsUnlocked(definition.UnlockLevel)) return false;
             if (!CanBuildMore(definition)) return false;
@@ -238,7 +243,7 @@ namespace TownBuilder
 
         private void OnTapped(Vector2 screenPosition)
         {
-            if (_town == null) return;
+            if (_town == null || TapsSuspended) return;
 
             switch (CurrentMode)
             {

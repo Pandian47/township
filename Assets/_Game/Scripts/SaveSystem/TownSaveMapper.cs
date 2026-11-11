@@ -115,6 +115,21 @@ namespace TownBuilder
             truck.Restore((TruckState)save.truck.state, save.truck.returnsAtUnixMs, loads, cargo);
         }
 
+        public static LandscapeMap LoadLandscape(SaveData save)
+        {
+            var map = new LandscapeMap();
+            foreach (var c in save.landscape)
+                if (System.Enum.TryParse(c.terrain, out Terrain t)) map.Set(new GridCoord(c.x, c.y), t);
+            return map;
+        }
+
+        public static void WriteLandscape(SaveData save, LandscapeMap map)
+        {
+            save.landscape.Clear();
+            foreach (var pair in map.Cells)
+                save.landscape.Add(new LandscapeCellSaveData { x = pair.Key.X, y = pair.Key.Y, terrain = pair.Value.ToString() });
+        }
+
         public static HomeCoins LoadHomeCoins(SaveData save, Town town)
         {
             var coins = new HomeCoins();

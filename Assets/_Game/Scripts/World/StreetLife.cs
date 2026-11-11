@@ -82,6 +82,21 @@ namespace TownBuilder
 
         public bool IsRoad(GridCoord cell) => _road.Contains(cell);
 
+        /// <summary>After landscape painting: re-reads the roads and moves anyone left off-road onto a road.</summary>
+        public void RefreshRoads()
+        {
+            BuildGraph();
+            foreach (var a in _agents)
+            {
+                bool lost = !_road.Contains(a.From) || !_road.Contains(a.To);
+                a.Renderer.enabled = _roadCells.Count > 0;
+                if (!lost || _roadCells.Count == 0) continue;
+                var c = _roadCells[_random.Next(_roadCells.Count)];
+                a.From = a.To = c;
+                a.T = 0f;
+            }
+        }
+
         private void BuildGraph()
         {
             _road.Clear();

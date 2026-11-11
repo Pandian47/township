@@ -335,6 +335,16 @@ calendar (`Tick`, called every second by `EventPanel`), counts harvests / produc
 set of unlocked decorations and filters the shop (`BuildingShopPanel.SetListingFilter`). `EventPanel` = the town button
 + window. DEV "Start weekend event now" runs one from today for two days. Saved in `SaveData.events`.
 
+## 6g6k. Landscape painting (v0.34.0)
+
+`LandscapeEdit` (Domain): one paint session (before/after per cell, rules: editable = own land and not the railway;
+water/road never under a building). `LandscapeMap` (Domain): the saved painted cells. `TerrainRules.IsBlocking`.
+`LandscapeController` (Scripts/World) is an `IPointerDragHandler` (priority 200, only while painting) and listens to taps;
+it sets tiles on the ground / road / water tilemaps, updates `GridOccupancy.SetBlocked`, and suspends placement taps
+(`PlacementSystem.TapsSuspended`). Saved cells are painted before `IsoGrid.Build` on load so blocking is right.
+`StreetLife.RefreshRoads` re-reads roads after Done. The shop card is a `BuildingDefinition` with `landscapeTool` (never
+placed; `PlacementSystem.BeginPlacement` refuses it). `LandscapePanel` is the paint bar. Saved in `SaveData.landscape`.
+
 ## 6g6j. Seasons (Milestone 8 step 4)
 
 `SeasonCalendar` (Domain): month → `Season`, `At(utcMs, offsetMs)`, `Next`. `SeasonController` (Scripts/World) checks the

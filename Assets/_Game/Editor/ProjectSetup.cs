@@ -72,6 +72,8 @@ namespace TownBuilder.EditorTools
             public int Happy;
             /// <summary>Seasonal decoration: only sold in this season.</summary>
             public Season? SeasonOnly;
+            /// <summary>Not a building: the free Landscape card that opens ground painting.</summary>
+            public bool Landscape;
             /// <summary>Decoration: drawn by PlaceholderArtGenerator.CreateDecoration (not as a box building).</summary>
             public PlaceholderArtGenerator.DecorationStyle? Deco;
             /// <summary>Fruit tree: drawn from the decoration tree with fruit; <see cref="Fruit"/> grows on it by itself.</summary>
@@ -176,6 +178,8 @@ namespace TownBuilder.EditorTools
                 Wall = new Color32(238, 220, 180, 255), Roof = new Color32(120, 170, 70, 255) },
 
             // Milestone 6 step 5: decorations (instant, no limit, purely for looks). Example prices.
+            new BuildingSeed { Id = "landscape", Name = "Landscape", Category = BuildingCategory.Decoration, Folder = "Decorations",
+                W = 1, H = 1, Unlock = 1, Cost = 0, Removable = false, Landscape = true },
             new BuildingSeed { Id = "tree", Name = "Tree", Category = BuildingCategory.Decoration, Folder = "Decorations",
                 W = 1, H = 1, Unlock = 1, Cost = 30, Removable = true, Deco = PlaceholderArtGenerator.DecorationStyle.Tree, Happy = 5 },
             new BuildingSeed { Id = "flower_bed", Name = "Flower Bed", Category = BuildingCategory.Decoration, Folder = "Decorations",
@@ -263,7 +267,7 @@ namespace TownBuilder.EditorTools
             ConfigurePlayerSettings();
             ConfigureDepthSorting();
 
-            var art = PlaceholderArtGenerator.Generate(Seeds.Where(s => !s.FarmPlot && s.Deco == null && s.Tree == null).Select(s => new PlaceholderArtGenerator.BuildingArtSpec
+            var art = PlaceholderArtGenerator.Generate(Seeds.Where(s => !s.FarmPlot && s.Deco == null && s.Tree == null && !s.Landscape).Select(s => new PlaceholderArtGenerator.BuildingArtSpec
             {
                 Id = s.Id, Folder = $"{PlaceholderArtGenerator.BuildingsArtFolder}/{s.Folder}", FootprintX = s.W, FootprintY = s.H,
                 HeightPx = s.HeightPx, Wall = s.Wall, Roof = s.Roof,
@@ -273,6 +277,9 @@ namespace TownBuilder.EditorTools
             foreach (var s in Seeds.Where(s => s.FarmPlot)) art.Buildings[s.Id] = PlaceholderArtGenerator.CreateFieldSprite();
             foreach (var s in Seeds.Where(s => s.Deco != null))
                 art.Buildings[s.Id] = PlaceholderArtGenerator.CreateDecoration(s.Id, s.Deco.Value, s.W, s.H);
+            foreach (var s in Seeds.Where(s => s.Landscape))
+                art.Buildings[s.Id] = PlaceholderArtGenerator.CreateLandscapeIcon();
+            PlaceholderArtGenerator.CreatePavementTile();
             foreach (var s in Seeds.Where(s => s.Tree != null))
                 art.Buildings[s.Id] = PlaceholderArtGenerator.CreateFruitTree(s.Id, s.Tree.Value);
             PlaceholderArtGenerator.CreateConstructionIcon();
@@ -394,6 +401,12 @@ namespace TownBuilder.EditorTools
                 {
                     def.EditorConfigure(def.Id, def.DisplayName, def.Category, art.Buildings[s.Id],
                         new Vector2Int(def.FootprintSize.X, def.FootprintSize.Y), def.UnlockLevel, def.CoinCost, def.Removable, def.MaxCount);
+                    EditorUtility.SetDirty(def);
+                }
+
+                if (s.Landscape && !def.IsLandscapeTool)
+                {
+                    def.EditorSetLandscapeTool();
                     EditorUtility.SetDirty(def);
                 }
 

@@ -40,6 +40,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e9d7390d5c02eff4a851ca35f3b5570d, type: 2}
   - {fileID: 11400000, guid: 5fd45ba28ed5d79489b3ca5074af375f, type: 2}
   - {fileID: 11400000, guid: aaf198fec4785934390a42d7fa82819d, type: 2}
+  - {fileID: 11400000, guid: 104de84215340934bad00ed749e6d062, type: 2}
   crops:
   - {fileID: 11400000, guid: a3036535aa3df024daad3d74b88f1f40, type: 2}
   - {fileID: 11400000, guid: 62b818b79b6cf7947af8159c1d81b0fa, type: 2}

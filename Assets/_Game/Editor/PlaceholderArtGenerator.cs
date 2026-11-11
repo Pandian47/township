@@ -231,7 +231,54 @@ namespace TownBuilder.EditorTools
 
         // ------------------------------------------------------------------ Tiles
 
-        private enum TileStyle { Plain, Grass, Soil, Water, Road }
+        private enum TileStyle { Plain, Grass, Soil, Water, Road, Pavement }
+
+        /// <summary>Light stone pavement tile (landscape painting).</summary>
+        public static Tile CreatePavementTile() => CreateTile("PH_Tile_Pavement", new Color32(214, 206, 192, 255), TileStyle.Pavement);
+
+        /// <summary>Ground tiles in Terrain order: Grass, Sand, Soil, Pavement, Water, Road.</summary>
+        public static Object[] LoadLandscapeTiles() => new Object[]
+        {
+            AssetDatabase.LoadAssetAtPath<Tile>(TileAssetPath("PH_Tile_Grass")), AssetDatabase.LoadAssetAtPath<Tile>(TileAssetPath("PH_Tile_Sand")),
+            AssetDatabase.LoadAssetAtPath<Tile>(TileAssetPath("PH_Tile_Soil")), AssetDatabase.LoadAssetAtPath<Tile>(TileAssetPath("PH_Tile_Pavement")),
+            AssetDatabase.LoadAssetAtPath<Tile>(TileAssetPath("PH_Tile_Water")), AssetDatabase.LoadAssetAtPath<Tile>(TileAssetPath("PH_Tile_Road")),
+        };
+
+        /// <summary>The Landscape shop card: a grass block with earth sides (isometric), pivot bottom centre.</summary>
+        public static Sprite CreateLandscapeIcon() =>
+            CreateSprite($"{DecorationsArtFolder}/PH_Building_landscape.png", RenderLandscapeIcon, new Vector2(0.5f, 0f), SpriteMeshType.Tight);
+
+        private static Texture2D RenderLandscapeIcon()
+        {
+            const int w = 128, h = 96, depth = 30;
+            var tex = NewTexture(w, h);
+            var px = new Color32[w * h];
+            var grass = new Color32(110, 190, 70, 255);
+            var earthL = new Color32(150, 100, 60, 255);
+            var earthR = new Color32(120, 78, 46, 255);
+            for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+            {
+                float fx = x + 0.5f, fy = y + 0.5f;
+                float topY = depth + 32f; // centre of the top diamond
+                float d = Mathf.Abs(fx - 64f) / 64f + Mathf.Abs(fy - topY) / 32f;
+                if (d <= 1f)
+                {
+                    px[y * w + x] = Scale(grass, 0.92f + 0.16f * ((fy - depth) / 64f));
+                    continue;
+                }
+
+                // Sides: below the lower edges of the diamond, down by depth.
+                float edge = topY - 32f * (1f - Mathf.Abs(fx - 64f) / 64f);
+                if (fy < edge && fy >= edge - depth && fx > 0 && fx < w)
+                    px[y * w + x] = fx < 64f ? earthL : earthR;
+            }
+
+            AddOutline(px, w, h);
+            tex.SetPixels32(px);
+            tex.Apply();
+            return tex;
+        }
 
         private static Tile CreateTile(string name, Color32 baseColor, TileStyle style)
         {
@@ -282,6 +329,15 @@ namespace TownBuilder.EditorTools
                         case TileStyle.Road:
                             if (d > 0.82f) shade *= 0.85f; // kerb
                             break;
+                        case TileStyle.Pavement:
+                        {
+                            // Square slabs along the two grid axes.
+                            float u = (px / HalfW + py / HalfH) * 1.5f, v = (px / HalfW - py / HalfH) * 1.5f;
+                            float fu = u - Mathf.Floor(u), fv = v - Mathf.Floor(v);
+                            if (fu < 0.07f || fv < 0.07f) shade *= 0.8f;
+                            else if (((int)Mathf.Floor(u) + (int)Mathf.Floor(v)) % 2 == 0) shade *= 1.05f;
+                            break;
+                        }
                     }
 
                     if (d > 0.95f) shade *= 0.9f; // subtle cell edge so the grid reads in placement mode

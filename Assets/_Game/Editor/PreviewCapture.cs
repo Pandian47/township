@@ -5,6 +5,7 @@ using TownBuilder.Domain;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using Terrain = TownBuilder.Domain.Terrain;
 
 namespace TownBuilder.EditorTools
 {
@@ -130,6 +131,26 @@ namespace TownBuilder.EditorTools
             }
 
             if (hud != HudState.None) PrepareTownHud(cam, content, bakery, hud);
+            if (hud == HudState.Landscape)
+            {
+                // A pavement square around the fountain, a sandy path and a little pond.
+                var map = new LandscapeMap();
+                for (int x = 12; x <= 15; x++)
+                for (int y = 12; y <= 15; y++)
+                    if (x < 13 || x > 14 || y < 13 || y > 14) map.Set(new GridCoord(x, y), Terrain.Pavement);
+                for (int y = 17; y <= 21; y++) map.Set(new GridCoord(12, y), Terrain.Sand);
+                foreach (var (x, y) in new[] { (11, 23), (12, 23), (11, 24), (12, 24) }) map.Set(new GridCoord(x, y), Terrain.Water);
+                UnityEngine.Object.FindAnyObjectByType<LandscapeController>()?.ApplySaved(map);
+                var canvas = UnityEngine.Object.FindAnyObjectByType<Canvas>();
+                var bar = Find(canvas, "LandscapePanel").transform.Find("Root").gameObject;
+                bar.SetActive(true);
+                Find(canvas, "BottomNavigation").SetActive(false);
+                bar.transform.Find("Inner/Hint/Text").GetComponent<TMPro.TMP_Text>().text = "Painting Pavement: drag your finger over your land, then tap Done.";
+                var frames = bar.GetComponentsInChildren<UnityEngine.UI.Button>(true).Where(b => b.name.StartsWith("Swatch_")).ToArray();
+                for (int i = 0; i < frames.Length; i++)
+                    frames[i].GetComponent<UnityEngine.UI.Image>().color = i == 3 ? new Color(1f, 0.82f, 0.25f) : new Color(1f, 1f, 1f, 0.9f);
+            }
+
             if (hud == HudState.Autumn || hud == HudState.Winter)
                 UnityEngine.Object.FindAnyObjectByType<SeasonController>()?.Apply(hud == HudState.Autumn ? Season.Autumn : Season.Winter, cam);
             Render(cam, outputPath);
@@ -139,7 +160,7 @@ namespace TownBuilder.EditorTools
             return outputPath;
         }
 
-        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm, ShopCards, Event, Truck, Home, Collections, Autumn, Winter }
+        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm, ShopCards, Event, Truck, Home, Collections, Autumn, Winter, Landscape }
 
         /// <summary>Command line: renders MainMenu + Town (idle, shop, placing) with UI into the folder after -previewOut.</summary>
         public static void CaptureUiFromCommandLine()
@@ -161,6 +182,7 @@ namespace TownBuilder.EditorTools
                 Capture(Path.Combine(folder, "Preview_Town_Collections.png"), HudState.Collections);
                 Capture(Path.Combine(folder, "Preview_Town_Autumn.png"), HudState.Autumn);
                 Capture(Path.Combine(folder, "Preview_Town_Winter.png"), HudState.Winter);
+                Capture(Path.Combine(folder, "Preview_Town_Landscape.png"), HudState.Landscape);
                 Capture(Path.Combine(folder, "Preview_Town_Placing.png"), HudState.Placing);
                 Capture(Path.Combine(folder, "Preview_Town_Field.png"), HudState.Field);
                 Capture(Path.Combine(folder, "Preview_Town_Barn.png"), HudState.Barn);
@@ -542,7 +564,7 @@ namespace TownBuilder.EditorTools
                 shopRoot.transform.Find("Window").gameObject.SetActive(true);
                 shopPanel.SetTitle(category);
                 var template = shopRoot.GetComponentsInChildren<ShopItemView>(true).First();
-                foreach (var def in content.Buildings.Where(d => d.ShowInShop && !d.EventOnly && (!d.IsSeasonal || d.Season == Season.Autumn) && d.Category == category))
+                foreach (var def in content.Buildings.Where(d => d.ShowInShop && !d.EventOnly && (!d.IsSeasonal || d.Season == Season.Autumn) && d.Category == category).OrderByDescending(d => d.IsLandscapeTool))
                 {
                     var item = UnityEngine.Object.Instantiate(template, template.transform.parent);
                     item.gameObject.SetActive(true);

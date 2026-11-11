@@ -21,6 +21,7 @@ namespace TownBuilder
         [SerializeField] private AchievementsPanel achievementsPanel;
         [SerializeField] private EventPanel eventPanel;
         [SerializeField] private CollectionsPanel collectionsPanel;
+        [SerializeField] private LandscapePanel landscapePanel;
         [SerializeField] private DevPanel devPanel;
         [SerializeField] private RewardFlyer rewardFlyer;
 
@@ -78,6 +79,7 @@ namespace TownBuilder
         private TrainController _train;
         private TruckController _truck;
         private HappinessController _homes;
+        private LandscapeController _landscape;
         private LandController _land;
 
         public void Initialize(PlacementSystem placement, FarmingController farming, ProductionController production, ConstructionController construction, OrderService orders,
@@ -116,7 +118,11 @@ namespace TownBuilder
             bool adsOn = content.AdsConfig != null && content.AdsConfig.AdsEnabled && !(ads is NoAdService);
             rewardedCoinsButton.gameObject.SetActive(adsOn);
             if (adsOn) rewardedCoinsButton.Initialize(ads, wallet, content.AdsConfig.RewardedCoins);
-            shopPanel.Initialize(content, wallet, progress, _placement.CanBuildMore, d => _placement.BeginPlacement(d), _placement.CountOwned);
+            shopPanel.Initialize(content, wallet, progress, _placement.CanBuildMore, d =>
+            {
+                if (d.IsLandscapeTool) _landscape?.Begin();
+                else _placement.BeginPlacement(d);
+            }, _placement.CountOwned);
 
             buildButton.onClick.AddListener(() =>
             {
@@ -202,6 +208,17 @@ namespace TownBuilder
         public AchievementsPanel AchievementsPanel => achievementsPanel;
 
         /// <summary>Weekend events: the event button + window, and event-only decorations in the shop.</summary>
+        /// <summary>Landscape painting: the paint bar (the Landscape card in Build → Decorations starts it).</summary>
+        public void InitializeLandscape(LandscapeController landscape)
+        {
+            if (landscape == null) return;
+            _landscape = landscape;
+            if (landscapePanel != null) landscapePanel.Initialize(landscape);
+            landscape.Notification += toast.Show;
+        }
+
+        public LandscapePanel LandscapePanel => landscapePanel;
+
         /// <summary>Collections: the chest button and window.</summary>
         public void InitializeCollections(CollectionService collections)
         {

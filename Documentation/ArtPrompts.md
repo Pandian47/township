@@ -317,6 +317,11 @@ Icon prompt as bread (section 15–16):
 * `apple_juice`: "a glass bottle of golden apple juice with a small apple label and a green cap"
 * `cherry_juice`: "a glass bottle of deep red cherry juice with a cherry label and a yellow cap"
 
+## v0.34.0: landscape painting (optional)
+
+* `pavement.png`: same prompt as the grass texture, but "light grey and beige square stone paving slabs, seen from above"
+* `landscape.png` (shop card): "a single isometric block of ground: green grass on top and brown earth sides, 1x1 tile"
+
 ## Milestone 8 step 4: seasonal decorations (optional, setup draws simple ones)
 
 Same decoration prompt style as `tree.png` (1x1 tile footprint, magenta background, no text):

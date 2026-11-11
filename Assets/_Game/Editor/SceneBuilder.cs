@@ -229,12 +229,16 @@ namespace TownBuilder.EditorTools
             var truck = Go("TruckController", systems.transform).AddComponent<TruckController>();
             var homes = Go("HappinessController", systems.transform).AddComponent<HappinessController>();
             var seasons = Go("SeasonController", world.transform).AddComponent<SeasonController>();
+            var landscape = Go("LandscapeController", systems.transform).AddComponent<LandscapeController>();
             var seasonArt = PlaceholderArtGenerator.LoadSeasonArt();
             Wire(seasons, ("groundTilemap", ground), ("buildings", buildingController), ("placement", placement));
             WireArray(seasons, "grassTiles", seasonArt.Grass);
             WireArray(seasons, "fallingSprites", seasonArt.Falling);
             WireArray(seasons, "treeSprites", seasonArt.Trees);
             var streetLife = Go("StreetLife", world.transform).AddComponent<StreetLife>();
+            Wire(landscape, ("grid", isoGrid), ("pointerInput", input), ("placement", placement), ("seasons", seasons), ("streetLife", streetLife),
+                ("groundTilemap", ground), ("roadTilemap", road), ("waterTilemap", water), ("railTilemap", rail));
+            WireArray(landscape, "tiles", PlaceholderArtGenerator.LoadLandscapeTiles());
             Wire(streetLife, ("grid", isoGrid), ("roadTilemap", road),
                 ("carFront", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CarFrontPath)),
                 ("carBack", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CarBackPath)));
@@ -301,6 +305,7 @@ namespace TownBuilder.EditorTools
                 ("truckController", truck),
                 ("happinessController", homes),
                 ("seasonController", seasons),
+                ("landscapeController", landscape),
                 ("landController", land),
                 ("trainMover", mover),
                 ("streetLife", streetLife));
@@ -503,6 +508,7 @@ namespace TownBuilder.EditorTools
             var achievements = BuildAchievementsPanel(canvas.transform, goalsButton, goalsBadge.gameObject, goalsBadgeText);
             var eventPanel = BuildEventPanel(canvas.transform, safe);
             var collectionsPanel = BuildCollectionsPanel(canvas.transform, safe);
+            var landscapePanel = BuildLandscapePanel(safe, nav.gameObject, tasksPanel.gameObject);
             var daily = BuildDailyRewardDialog(canvas.transform);
             var rewardLayer = Stretch("RewardFlyLayer", canvas.transform);
             var rewardFlyer = rewardLayer.gameObject.AddComponent<RewardFlyer>();
@@ -543,6 +549,7 @@ namespace TownBuilder.EditorTools
                 ("achievementsPanel", achievements),
                 ("eventPanel", eventPanel),
                 ("collectionsPanel", collectionsPanel),
+                ("landscapePanel", landscapePanel),
                 ("rewardFlyer", rewardFlyer),
                 ("bottomNavigation", nav.gameObject),
                 ("buildButton", buildButton),
@@ -1392,6 +1399,66 @@ namespace TownBuilder.EditorTools
             var panel = container.gameObject.AddComponent<CollectionsPanel>();
             Wire(panel, ("panelRoot", root.gameObject), ("openButton", open), ("closeButton", close), ("badge", badge.gameObject), ("badgeText", badgeText));
             WireArray(panel, "rows", rows);
+            root.gameObject.SetActive(false);
+            return panel;
+        }
+
+        /// <summary>Landscape paint bar: six ground swatches (tile pictures), a hint, Cancel and Done.</summary>
+        private static LandscapePanel BuildLandscapePanel(RectTransform safe, params GameObject[] hide)
+        {
+            var outline = AssetDatabase.LoadAssetAtPath<Material>(ProjectSetup.UIFontOutlineMaterialPath);
+            var brown = new Color(0.40f, 0.24f, 0.10f);
+            var container = Stretch("LandscapePanel", safe);
+            var root = MakeRect("Root", container, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 24), new Vector2(1640, 250));
+            AddImage(root, new Color(0.30f, 0.17f, 0.07f));
+            var inner = Stretch("Inner", root, 8f);
+            AddImage(inner, new Color(1f, 0.96f, 0.86f));
+            var title = Label(MakeRect("Title", inner, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(24, -8), new Vector2(520, 54)),
+                "Text", "Paint the ground", 40, TextAnchor.MiddleLeft, brown, FontStyle.Bold);
+            var hint = Label(MakeRect("Hint", inner, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, 1f), new Vector2(560, -8), new Vector2(-900, 54)),
+                "Text", "", 26, TextAnchor.MiddleLeft, new Color(0.45f, 0.42f, 0.38f));
+            hint.enableAutoSizing = true;
+            hint.fontSizeMin = 18;
+            hint.fontSizeMax = 26;
+
+            var tiles = PlaceholderArtGenerator.LoadLandscapeTiles();
+            string[] names = { "Grass", "Sand", "Soil", "Pavement", "Water", "Road" };
+            var swatches = new Button[6];
+            var frames = new Image[6];
+            for (int i = 0; i < 6; i++)
+            {
+                var slot = MakeRect($"Swatch_{names[i]}", inner, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(24 + i * 190, 14), new Vector2(176, 168));
+                frames[i] = AddImage(slot, Color.white);
+                swatches[i] = slot.gameObject.AddComponent<Button>();
+                swatches[i].targetGraphic = frames[i];
+                var pic = MakeRect("Tile", slot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -12), new Vector2(150, 76));
+                var img = pic.gameObject.AddComponent<Image>();
+                img.sprite = tiles[i] is UnityEngine.Tilemaps.Tile t ? t.sprite : null;
+                img.preserveAspect = true;
+                img.raycastTarget = false;
+                Label(MakeRect("Name", slot, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 10), new Vector2(-10, 52)),
+                    "Text", names[i], 30, TextAnchor.MiddleCenter, brown, FontStyle.Bold);
+            }
+
+            var cancel = MakeButton(inner, "CancelButton", "X", new Vector2(150, 150), Red, 60);
+            var cancelRect = (RectTransform)cancel.transform;
+            cancelRect.anchorMin = cancelRect.anchorMax = cancelRect.pivot = new Vector2(1f, 0f);
+            cancelRect.anchoredPosition = new Vector2(-196, 18);
+            var done = MakeButton(inner, "DoneButton", "Done", new Vector2(170, 150), Green, 40);
+            var doneRect = (RectTransform)done.transform;
+            doneRect.anchorMin = doneRect.anchorMax = doneRect.pivot = new Vector2(1f, 0f);
+            doneRect.anchoredPosition = new Vector2(-18, 18);
+            if (outline != null)
+            {
+                cancel.GetComponentInChildren<TMP_Text>().fontSharedMaterial = outline;
+                done.GetComponentInChildren<TMP_Text>().fontSharedMaterial = outline;
+            }
+
+            var panel = container.gameObject.AddComponent<LandscapePanel>();
+            Wire(panel, ("panelRoot", root.gameObject), ("hintText", hint), ("cancelButton", cancel), ("doneButton", done));
+            WireArray(panel, "swatches", swatches);
+            WireArray(panel, "swatchFrames", frames);
+            WireArray(panel, "hideWhilePainting", hide);
             root.gameObject.SetActive(false);
             return panel;
         }

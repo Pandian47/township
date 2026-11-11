@@ -64,6 +64,7 @@ namespace TownBuilder
         /// <summary>What the building gives, in a few words.</summary>
         public static string Bonus(BuildingDefinition d)
         {
+            if (d.IsLandscapeTool) return "Paint the ground";
             if (d.Happiness > 0) return $"+{d.Happiness} happy";
             if (d.StorageCapacityBonus > 0) return $"+{d.StorageCapacityBonus} barn";
             if (d.IsFruitTree)

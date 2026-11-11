@@ -29,6 +29,7 @@ namespace TownBuilder
         [SerializeField] private TruckController truckController;
         [SerializeField] private HappinessController happinessController;
         [SerializeField] private SeasonController seasonController;
+        [SerializeField] private LandscapeController landscapeController;
         [SerializeField] private LandController landController;
         [SerializeField] private TrainMover trainMover;
         [SerializeField] private StreetLife streetLife;
@@ -64,6 +65,7 @@ namespace TownBuilder
         public Wallet Wallet => _wallet;
         public PlayerProgress Progress => _progress;
         public PlacementSystem Placement => placement;
+        public TownHudController Hud => hud;
         public FarmingController Farming => farming;
         public Inventory Inventory => _inventory;
         public StorageService Storage => _storage;
@@ -76,6 +78,7 @@ namespace TownBuilder
         public TruckController Truck => truckController;
         public HappinessController Homes => happinessController;
         public SeasonController Seasons => seasonController;
+        public LandscapeController Landscape => landscapeController;
         public LandController LandController => landController;
         public LandPlots Land => _land;
         public DailyRewardService Daily => _daily;
@@ -111,6 +114,8 @@ namespace TownBuilder
             var save = _context.ActiveSave;
             var warnings = new List<string>();
 
+            // Painted landscape first: water and roads change which cells can be built on.
+            if (landscapeController != null) landscapeController.ApplySaved(TownSaveMapper.LoadLandscape(save));
             grid.Build();
             _town = new Town(grid.Bounds, grid.BlockedCells);
             _wallet = TownSaveMapper.CreateWallet(save);
@@ -128,6 +133,11 @@ namespace TownBuilder
                 new PlotCoord(c0.LandStartMax.x, c0.LandStartMax.y));
             TownSaveMapper.LoadLand(save, _town, _land, c0);
             _town.SetLandCheck(_land.IsCellUnlocked);
+            if (landscapeController != null)
+            {
+                landscapeController.Initialize(_town, _land);
+                landscapeController.Modified += ScheduleSave;
+            }
 
             _plots = new FarmPlots();
             _inventory = new Inventory(_context.Content.BaseStorageCapacity);
@@ -251,6 +261,7 @@ namespace TownBuilder
             if (truckController != null) hud.InitializeTruck(truckController, _context.Content, _inventory, _context.Ads);
             if (happinessController != null) hud.InitializeHomes(happinessController);
             hud.InitializeSeasons(seasonController);
+            hud.InitializeLandscape(landscapeController);
             if (landController != null) hud.InitializeLand(landController);
             hud.InitializeDev(this, _context.Content);
             hud.InitializeDaily(_daily);
@@ -333,6 +344,7 @@ namespace TownBuilder
                 TownSaveMapper.WriteTruck(_context.ActiveSave, _deliveryTruck);
                 TownSaveMapper.WriteHomeCoins(_context.ActiveSave, _homeCoins);
                 if (seasonController != null) _context.ActiveSave.lastSeason = (int)seasonController.Current;
+                if (landscapeController != null) TownSaveMapper.WriteLandscape(_context.ActiveSave, landscapeController.Map);
                 TownSaveMapper.WriteLand(_context.ActiveSave, _land);
                 TownSaveMapper.WriteDaily(_context.ActiveSave, _daily.Track);
                 TownSaveMapper.WriteAchievements(_context.ActiveSave, _achievements.Book);

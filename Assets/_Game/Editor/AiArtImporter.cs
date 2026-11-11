@@ -175,6 +175,8 @@ namespace TownBuilder.EditorTools
             new Spec("sand", Art + "/Environment/Tiles/PH_Tile_Sand.png", Kind.Tile, 128),
             new Spec("water", Art + "/Environment/Tiles/PH_Tile_Water.png", Kind.Tile, 128),
             new Spec("road", Art + "/Environment/Tiles/PH_Tile_Road.png", Kind.Tile, 128),
+            new Spec("pavement", Art + "/Environment/Tiles/PH_Tile_Pavement.png", Kind.Tile, 128),
+            new Spec("landscape", Art + "/Buildings/Decorations/PH_Building_landscape.png", Kind.Flat, 128),
 
             // v0.27.4: Build window and top bar art.
             new Spec("build_sign", Art + "/UI/Build/UI_BuildSign.png", Kind.Ui, 1024),

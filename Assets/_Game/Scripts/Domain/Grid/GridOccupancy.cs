@@ -23,6 +23,13 @@ namespace TownBuilder.Domain
 
         public bool IsBlocked(GridCoord cell) => _blocked.Contains(cell);
 
+        /// <summary>Landscape painting: water and road block building, other ground doesn't.</summary>
+        public void SetBlocked(GridCoord cell, bool blocked)
+        {
+            if (blocked) _blocked.Add(cell);
+            else _blocked.Remove(cell);
+        }
+
         public bool TryGetOccupant(GridCoord cell, out string occupantId) => _occupants.TryGetValue(cell, out occupantId);
 
         /// <summary>

@@ -38,6 +38,8 @@ namespace TownBuilder
         [SerializeField] private bool showInShop = true;
         [Tooltip("Decorations: happiness this gives every home within GameContent → Happiness radius (0 = none).")]
         [SerializeField, Min(0)] private int happiness;
+        [Tooltip("Not a building: the shop card that opens landscape painting.")]
+        [SerializeField] private bool landscapeTool;
         [Tooltip("Seasonal decoration: only sold during this season (ones already built stay).")]
         [SerializeField] private bool seasonal;
         [SerializeField] private TownBuilder.Domain.Season season;
@@ -87,6 +89,7 @@ namespace TownBuilder
         public bool EventOnly => eventOnly;
         public int Happiness => happiness;
         public bool IsSeasonal => seasonal;
+        public bool IsLandscapeTool => landscapeTool;
         public TownBuilder.Domain.Season Season => season;
         public Vector2 ChimneyPoint => chimney;
         public bool HasChimney => chimney != Vector2.zero;
@@ -96,6 +99,7 @@ namespace TownBuilder
         public void EditorSetCategory(BuildingCategory newCategory) => category = newCategory;
         public void EditorSetEventOnly(bool value) => eventOnly = value;
         public void EditorSetHappiness(int value) => happiness = value;
+        public void EditorSetLandscapeTool() => landscapeTool = true;
 
         public void EditorSetSeason(TownBuilder.Domain.Season value)
         {

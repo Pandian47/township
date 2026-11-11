@@ -408,6 +408,15 @@ Our own features in the farming / town genre (not copied from any game).
 | 4 | **Seasons**: the town's look follows the real month, seasonal decorations | Done (v0.33.0) |
 | 5 | **Launch prep**: settings, credits, privacy policy, app icon, store screenshots, AAB checklist | Next |
 
+### Device checklist (v0.34.0: landscape painting)
+- [ ] Build → Decorations: the first card is Landscape (Free, "Paint the ground")
+- [ ] Tapping it shows the paint bar (Grass, Sand, Soil, Pavement, Water, Road) and hides the bottom bar and tasks
+- [ ] Dragging a finger paints tiles without moving the camera; pinch still zooms
+- [ ] Water/road on a building or outside your land doesn't paint (a toast explains); the railway never changes
+- [ ] X undoes everything painted in this session; Done keeps it; it's still there after reopening the app
+- [ ] You can't build on painted water or road; painting grass back over them makes the cells buildable again
+- [ ] Townsfolk walk on newly painted roads
+
 ### Device checklist (Milestone 8 step 4: seasons)
 - [ ] In November the town is autumn: golden grass and trees, leaves drifting down; a toast says autumn has come
 - [ ] Build → Decorations shows Pumpkin Pile (not the Snowman, Tulip Planter or Sunflower Patch)

@@ -103,6 +103,14 @@ already there or their slot count.
 its ingredients, every recipe belongs to exactly one factory, and no recipe unlocks before its factory or any of
 its ingredients.
 
+## Landscape painting (v0.34.0, Build → Decorations → Landscape)
+
+* The **Landscape** card is free and always first in Decorations. It opens paint mode: pick Grass, Sand, Soil,
+  Pavement, Water or Road, then drag a finger (or tap) over your own land. **Done** keeps it, **X** undoes the session.
+* Only on owned land, never on the railway. **Water and Road** can't be built on, so they never go under a building;
+  painting another ground over them makes the cell buildable again. Painted roads are used by townsfolk.
+* Free and unlimited: it's for the look of the town, not the economy. Painted grass follows the seasons.
+
 ## Seasons (Milestone 8 step 4)
 
 The town follows the phone's local month: **spring** (Mar–May), **summer** (Jun–Aug), **autumn** (Sep–Nov),
