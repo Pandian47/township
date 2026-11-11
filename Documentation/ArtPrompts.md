@@ -358,6 +358,10 @@ draw kerbs or edges** in the texture.
 * `stone_slabs.png`: "large light grey square stone slabs with thin dark joints"
 * `meadow.png`: "short green grass with many tiny white, yellow and pink wildflowers"
 
+The importer shows only part of `checker_tiles.png` (a quarter, i.e. 2 x 2 squares of an 8 x 8 checkerboard) and of
+`meadow.png` (40 %) per tile, so squares and flowers are big enough to read (`Spec.TileZoom` in AiArtImporter; edges
+are blended so tiles still join).
+
 Shop cards (optional; same style as `landscape.png`): `roads_tool.png` "a single isometric block of ground with a grey
 road with a dashed white centre line on top", `paving_tool.png` "a single isometric block with cream and terracotta
 checker tiles on top".

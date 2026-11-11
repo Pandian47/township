@@ -57,6 +57,11 @@ namespace TownBuilder.EditorTools
             /// building itself, for art whose base is a little deeper than its footprint (e.g. a platform over the railway).
             /// </summary>
             public Vector2 NudgeCells;
+            /// <summary>
+            /// Tiles only: how much of the texture one tile shows (1 = all of it). Smaller = bigger features, e.g. 0.25 shows
+            /// a quarter of the width, so pattern details are 4x bigger. Tile edges are blended so tiles still join.
+            /// </summary>
+            public float TileZoom = 1f;
             /// <summary>Skip the magenta-fringe cleanup (for art that is itself pink, like the pink ribbon).</summary>
             public bool NoFringeFix;
             /// <summary>Set by processing: sprite pivot (bottom corner of the footprint for buildings).</summary>
@@ -186,9 +191,11 @@ namespace TownBuilder.EditorTools
             new Spec("dirt_path", Art + "/Environment/Tiles/PH_Tile_DirtPath.png", Kind.Tile, 128),
             new Spec("brick_lane", Art + "/Environment/Tiles/PH_Tile_BrickLane.png", Kind.Tile, 128),
             new Spec("boardwalk", Art + "/Environment/Tiles/PH_Tile_Boardwalk.png", Kind.Tile, 128),
-            new Spec("checker_tiles", Art + "/Environment/Tiles/PH_Tile_CheckerTiles.png", Kind.Tile, 128),
+            // v0.36.2: show part of the texture per tile so the squares / flowers read at tile size.
+            // The checker image has 8x8 squares: a quarter = 2x2 big squares per tile (pattern period, so no seams).
+            new Spec("checker_tiles", Art + "/Environment/Tiles/PH_Tile_CheckerTiles.png", Kind.Tile, 128) { TileZoom = 0.25f },
             new Spec("stone_slabs", Art + "/Environment/Tiles/PH_Tile_StoneSlabs.png", Kind.Tile, 128),
-            new Spec("meadow", Art + "/Environment/Tiles/PH_Tile_Meadow.png", Kind.Tile, 128),
+            new Spec("meadow", Art + "/Environment/Tiles/PH_Tile_Meadow.png", Kind.Tile, 128) { TileZoom = 0.4f },
             new Spec("landscape", Art + "/Buildings/Decorations/PH_Building_landscape.png", Kind.Flat, 128),
             new Spec("roads_tool", Art + "/Buildings/Decorations/PH_Building_roads_tool.png", Kind.Flat, 128),
             new Spec("paving_tool", Art + "/Buildings/Decorations/PH_Building_paving_tool.png", Kind.Flat, 128),
@@ -321,7 +328,7 @@ namespace TownBuilder.EditorTools
 
         private static Img Process(Img src, Spec spec)
         {
-            if (spec.Kind == Kind.Tile) return MakeIsoTile(src, spec.Width);
+            if (spec.Kind == Kind.Tile) return MakeIsoTile(src, spec.Width, spec.TileZoom);
             if (spec.Kind == Kind.IsoRail) return MakeRailTile(KeyBackground(src), spec.Width);
 
             var keyed = KeyBackground(src, !spec.NoFringeFix);
@@ -723,10 +730,11 @@ namespace TownBuilder.EditorTools
             return Color.Lerp(Color.Lerp(P(x0, y0), P(x0 + 1, y0), tx), Color.Lerp(P(x0, y0 + 1), P(x0 + 1, y0 + 1), tx), ty);
         }
 
-        private static Img MakeIsoTile(Img src, int width)
+        private static Img MakeIsoTile(Img src, int width, float zoom = 1f)
         {
             int height = width / 2;
-            const int prescale = 256;
+            zoom = Mathf.Clamp(zoom, 0.05f, 1f);
+            int prescale = Mathf.Min(1024, Mathf.RoundToInt(256 / zoom)); // keep detail when zoomed in
             var small = Resample(src, 0, 0, src.W, src.H, prescale, prescale);
             var tile = new Img(width, height);
             const int ss = 4; // supersamples per axis
@@ -746,7 +754,7 @@ namespace TownBuilder.EditorTools
                     if (Mathf.Abs(dx) / halfW + Mathf.Abs(dy) / halfH > grow) continue;
                     float a = 0.5f + (dx / halfW + dy / halfH) * 0.5f;
                     float b = 0.5f + (dy / halfH - dx / halfW) * 0.5f;
-                    sum += SampleWrap(small, a, b);
+                    sum += zoom >= 1f ? SampleWrap(small, a, b) : SampleZoomed(small, a, b, zoom);
                     inside++;
                 }
 
@@ -756,6 +764,23 @@ namespace TownBuilder.EditorTools
             }
 
             return tile;
+        }
+
+        /// <summary>
+        /// Samples a <paramref name="zoom"/>-sized part of a seamless texture for one tile. Near the tile's far edges it
+        /// cross-fades towards the texture just before the part's start, so the far edge matches the near edge of the
+        /// next tile (no seam), whatever the texture.
+        /// </summary>
+        private static Color SampleZoomed(Img img, float a, float b, float zoom)
+        {
+            const float blend = 0.25f;
+            float wa = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(1f - blend, 1f, a));
+            float wb = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(1f - blend, 1f, b));
+            var c00 = SampleWrap(img, a * zoom, b * zoom);
+            var c10 = SampleWrap(img, (a - 1f) * zoom, b * zoom);
+            var c01 = SampleWrap(img, a * zoom, (b - 1f) * zoom);
+            var c11 = SampleWrap(img, (a - 1f) * zoom, (b - 1f) * zoom);
+            return Color.Lerp(Color.Lerp(c00, c10, wa), Color.Lerp(c01, c11, wa), wb);
         }
 
         private static Color SampleWrap(Img img, float u, float v)
