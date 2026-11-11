@@ -332,6 +332,14 @@ calendar (`Tick`, called every second by `EventPanel`), counts harvests / produc
 set of unlocked decorations and filters the shop (`BuildingShopPanel.SetListingFilter`). `EventPanel` = the town button
 + window. DEV "Start weekend event now" runs one from today for two days. Saved in `SaveData.events`.
 
+## 6g6i. Collections (Milestone 8 step 3)
+
+`CollectionBook` (Domain): `CollectionSetSpec`s (id, source `AchievementKind`, drop chance, item ids), item counts,
+completions, `Roll(source, random)` (one item of a set fed by that source, at its chance), `TryComplete` (uses one of
+each). `CollectionDefinition` (ScriptableObject) holds names, icons and rewards. `CollectionService` rolls on harvest /
+factory collect / delivered order, pays on Complete, has a DEV `DevFindItem`. `CollectionsPanel` + `CollectionRowView`
+are the window; the chest button sits under the menu button. Saved in `SaveData.collections`.
+
 ## 6g6h. Happiness and home coins (Milestone 8 step 2)
 
 `TownHappiness` (Domain): footprint gap distance, a home's happiness from `HappinessSource`s within a radius (capped at

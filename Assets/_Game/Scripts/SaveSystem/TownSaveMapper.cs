@@ -191,6 +191,25 @@ namespace TownBuilder
         }
 
         /// <summary>Restores achievement counters (unknown kinds dropped) and claimed tiers (unknown ids dropped).</summary>
+        public static void LoadCollections(SaveData save, CollectionBook book)
+        {
+            var c = save.collections;
+            var counts = new List<KeyValuePair<string, int>>();
+            for (int i = 0; i < c.itemIds.Count && i < c.counts.Count; i++) counts.Add(new KeyValuePair<string, int>(c.itemIds[i], c.counts[i]));
+            var completions = new List<KeyValuePair<string, int>>();
+            for (int i = 0; i < c.setIds.Count && i < c.completions.Count; i++) completions.Add(new KeyValuePair<string, int>(c.setIds[i], c.completions[i]));
+            book.Restore(counts, completions);
+        }
+
+        public static void WriteCollections(SaveData save, CollectionBook book)
+        {
+            var c = save.collections;
+            c.itemIds = book.Counts.Select(p => p.Key).ToList();
+            c.counts = book.Counts.Select(p => p.Value).ToList();
+            c.setIds = book.AllCompletions.Select(p => p.Key).ToList();
+            c.completions = book.AllCompletions.Select(p => p.Value).ToList();
+        }
+
         public static EventProgress LoadEvents(SaveData save)
         {
             var progress = new EventProgress();

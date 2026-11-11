@@ -94,6 +94,10 @@ namespace TownBuilder
         [Tooltip("The coin bubble (tap to collect) shows from this many coins.")]
         [SerializeField, Min(1)] private int homeCoinsBubbleMin = 5;
 
+        [Header("Collections")]
+        [Tooltip("Rare-item collections, shown in this order in the Collections window.")]
+        [SerializeField] private List<CollectionDefinition> collections = new List<CollectionDefinition>();
+
         [Header("Weekend events")]
         [Tooltip("One runs every Saturday + Sunday (local time); they take turns week by week, in this order.")]
         [SerializeField] private List<EventDefinition> weekendEvents = new List<EventDefinition>();
@@ -128,6 +132,22 @@ namespace TownBuilder
         private Dictionary<string, MaterialDefinition> _materialsById;
 
         public IReadOnlyList<EventDefinition> WeekendEvents => weekendEvents;
+        public IReadOnlyList<CollectionDefinition> Collections => collections;
+        public void EditorSetCollections(List<CollectionDefinition> list) => collections = list;
+
+        public bool TryGetCollection(string id, out CollectionDefinition collection)
+        {
+            collection = null;
+            if (string.IsNullOrEmpty(id) || collections == null) return false;
+            foreach (var c in collections)
+            {
+                if (c == null || c.Id != id) continue;
+                collection = c;
+                return true;
+            }
+
+            return false;
+        }
         public void EditorSetWeekendEvents(List<EventDefinition> list) => weekendEvents = list;
 
         public IReadOnlyList<AchievementDefinition> Achievements => achievements;

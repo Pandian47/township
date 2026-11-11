@@ -20,6 +20,7 @@ namespace TownBuilder
         [SerializeField] private DailyRewardDialog dailyDialog;
         [SerializeField] private AchievementsPanel achievementsPanel;
         [SerializeField] private EventPanel eventPanel;
+        [SerializeField] private CollectionsPanel collectionsPanel;
         [SerializeField] private DevPanel devPanel;
         [SerializeField] private RewardFlyer rewardFlyer;
 
@@ -201,6 +202,16 @@ namespace TownBuilder
         public AchievementsPanel AchievementsPanel => achievementsPanel;
 
         /// <summary>Weekend events: the event button + window, and event-only decorations in the shop.</summary>
+        /// <summary>Collections: the chest button and window.</summary>
+        public void InitializeCollections(CollectionService collections)
+        {
+            if (collections == null || collectionsPanel == null) return;
+            collectionsPanel.Initialize(collections);
+            collections.Notification += toast.Show;
+        }
+
+        public CollectionsPanel CollectionsPanel => collectionsPanel;
+
         public void InitializeEvents(WeekendEventService events)
         {
             if (events == null) return;

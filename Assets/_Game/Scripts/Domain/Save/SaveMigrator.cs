@@ -70,6 +70,11 @@ namespace TownBuilder.Domain
             data.daily ??= new DailySaveData();
             data.achievements ??= new AchievementsSaveData();
             data.events ??= new EventSaveData();
+            data.collections ??= new CollectionsSaveData();
+            data.collections.itemIds ??= new List<string>();
+            data.collections.counts ??= new List<int>();
+            data.collections.setIds ??= new List<string>();
+            data.collections.completions ??= new List<int>();
             data.events.unlockedDecorations ??= new List<string>();
             data.achievements.counters ??= new List<AchievementCounterSaveData>();
             data.achievements.claimed ??= new List<AchievementClaimSaveData>();

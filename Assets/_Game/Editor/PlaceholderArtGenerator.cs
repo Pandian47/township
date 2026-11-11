@@ -718,6 +718,210 @@ namespace TownBuilder.EditorTools
         public const string XpIconPath = UiArtFolder + "/PH_Icon_Xp.png";
 
         /// <summary>Coin, gem and XP-star icons (rewards flying to the top bar).</summary>
+        // ------------------------------------------------------------------ Collections (Milestone 8 step 3)
+
+        public const string CollectiblesArtFolder = "Assets/_Game/Art/Collectibles";
+        public static readonly string ChestIconPath = UiArtFolder + "/PH_Icon_Chest.png";
+
+        public enum CollectibleShape { Leaf, Acorn, Feather, Pebble, Drop, Cog, Button, Marble, Thimble, Horseshoe, Stamp, Bow, Watch, Star }
+
+        /// <summary>128x128 collectible icon: a simple shape in one colour, shaded, outlined. Placeholder until AI art.</summary>
+        public static Sprite CreateCollectibleIcon(string id, CollectibleShape shape, Color32 colour) =>
+            CreateSprite($"{CollectiblesArtFolder}/PH_Collectible_{id}.png", () => RenderCollectible(shape, colour), new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+
+        /// <summary>Little treasure chest (Collections button).</summary>
+        public static Sprite CreateChestIcon() =>
+            CreateSprite(ChestIconPath, RenderChest, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+
+        private static Texture2D RenderCollectible(CollectibleShape shape, Color32 colour)
+        {
+            const int size = 128;
+            var tex = NewTexture(size, size);
+            var px = new Color32[size * size];
+            Color32 Shade(Color32 c, float x, float y) => Scale(c, 0.78f + 0.4f * Mathf.Clamp01(0.5f + (y - x) / 180f));
+
+            void Disc(float cx, float cy, float r, Color32 c, bool shade = true)
+            {
+                for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float dx = x + 0.5f - cx, dy = y + 0.5f - cy;
+                    if (dx * dx + dy * dy <= r * r) px[y * size + x] = shade ? Shade(c, dx, dy) : c;
+                }
+            }
+
+            void Ellipse(float cx, float cy, float rx, float ry, Color32 c, float angle = 0f)
+            {
+                float ca = Mathf.Cos(angle), sa = Mathf.Sin(angle);
+                for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float dx = x + 0.5f - cx, dy = y + 0.5f - cy;
+                    float u = (dx * ca + dy * sa) / rx, v = (-dx * sa + dy * ca) / ry;
+                    if (u * u + v * v <= 1f) px[y * size + x] = Shade(c, dx, dy);
+                }
+            }
+
+            void Box(float x0, float y0, float x1, float y1, Color32 c)
+            {
+                for (int y = Mathf.Max(0, (int)y0); y < Mathf.Min(size, (int)y1); y++)
+                for (int x = Mathf.Max(0, (int)x0); x < Mathf.Min(size, (int)x1); x++)
+                    px[y * size + x] = Shade(c, x - 64, y - 64);
+            }
+
+            var dark = Scale(colour, 0.6f);
+            var white = new Color32(255, 255, 255, 255);
+            switch (shape)
+            {
+                case CollectibleShape.Leaf:
+                    for (int i = 0; i < 4; i++)
+                    {
+                        float a = i * Mathf.PI / 2f + Mathf.PI / 4f;
+                        Disc(64 + Mathf.Cos(a) * 22, 70 + Mathf.Sin(a) * 22, 22, colour);
+                    }
+
+                    Box(61, 14, 67, 52, dark);
+                    break;
+                case CollectibleShape.Acorn:
+                    Ellipse(64, 54, 30, 38, colour);
+                    Ellipse(64, 86, 38, 18, Scale(colour, 0.65f));
+                    Box(60, 100, 68, 116, dark);
+                    break;
+                case CollectibleShape.Feather:
+                    Ellipse(64, 66, 18, 50, colour, 0.5f);
+                    for (int t = 0; t < 90; t++) Disc(36 + t * 0.6f, 20 + t * 1.0f, 2.2f, dark, false);
+                    break;
+                case CollectibleShape.Pebble:
+                    Ellipse(64, 60, 46, 32, colour);
+                    Ellipse(50, 72, 12, 6, Scale(colour, 1.25f));
+                    break;
+                case CollectibleShape.Drop:
+                    Disc(64, 52, 34, colour);
+                    for (int y = 52; y < 116; y++)
+                    {
+                        float half = 34f * (1f - (y - 52) / 64f);
+                        for (int x = (int)(64 - half); x < (int)(64 + half); x++) px[y * size + x] = Shade(colour, x - 64, y - 64);
+                    }
+
+                    Ellipse(52, 52, 7, 12, white);
+                    break;
+                case CollectibleShape.Cog:
+                    for (int i = 0; i < 8; i++)
+                    {
+                        float a = i * Mathf.PI / 4f;
+                        Disc(64 + Mathf.Cos(a) * 40, 64 + Mathf.Sin(a) * 40, 11, colour);
+                    }
+
+                    Disc(64, 64, 38, colour);
+                    Disc(64, 64, 13, Scale(colour, 0.55f), false);
+                    break;
+                case CollectibleShape.Button:
+                    Disc(64, 64, 46, colour);
+                    Disc(64, 64, 36, Scale(colour, 0.85f));
+                    foreach (var (bx, by) in new[] { (54, 54), (74, 54), (54, 74), (74, 74) }) Disc(bx, by, 5, dark, false);
+                    break;
+                case CollectibleShape.Marble:
+                    Disc(64, 64, 42, colour);
+                    Ellipse(64, 64, 36, 9, Scale(colour, 1.3f), 0.8f);
+                    Disc(50, 80, 9, white, false);
+                    break;
+                case CollectibleShape.Thimble:
+                    for (int y = 22; y < 100; y++)
+                    {
+                        float half = 26 + (100 - y) * 0.12f;
+                        for (int x = (int)(64 - half); x < (int)(64 + half); x++) px[y * size + x] = Shade(colour, x - 64, y - 64);
+                    }
+
+                    Ellipse(64, 100, 26, 12, colour);
+                    Box(36, 22, 92, 32, Scale(colour, 0.8f));
+                    for (int y = 40; y < 96; y += 10)
+                    for (int x = 44; x < 88; x += 10) Disc(x, y, 2.4f, dark, false);
+                    break;
+                case CollectibleShape.Horseshoe:
+                    for (int y = 0; y < size; y++)
+                    for (int x = 0; x < size; x++)
+                    {
+                        float dx = x + 0.5f - 64, dy = y + 0.5f - 60;
+                        float d = Mathf.Sqrt(dx * dx + dy * dy);
+                        if (d >= 26 && d <= 46 && dy > -30) px[y * size + x] = Shade(colour, dx, dy);
+                    }
+
+                    foreach (var (hx, hy) in new[] { (30, 70), (98, 70), (40, 96), (88, 96) }) Disc(hx, hy, 3.5f, dark, false);
+                    break;
+                case CollectibleShape.Stamp:
+                    Box(28, 22, 100, 106, white);
+                    for (int i = 0; i < 9; i++)
+                    {
+                        Disc(28 + i * 9, 22, 4, new Color32(0, 0, 0, 0), false);
+                        Disc(28 + i * 9, 106, 4, new Color32(0, 0, 0, 0), false);
+                        Disc(28, 22 + i * 10.5f, 4, new Color32(0, 0, 0, 0), false);
+                        Disc(100, 22 + i * 10.5f, 4, new Color32(0, 0, 0, 0), false);
+                    }
+
+                    Box(38, 34, 90, 94, colour);
+                    Disc(64, 64, 14, white, false);
+                    break;
+                case CollectibleShape.Bow:
+                    Ellipse(40, 72, 26, 18, colour, -0.35f);
+                    Ellipse(88, 72, 26, 18, colour, 0.35f);
+                    Ellipse(48, 40, 10, 24, Scale(colour, 0.85f), -0.4f);
+                    Ellipse(80, 40, 10, 24, Scale(colour, 0.85f), 0.4f);
+                    Disc(64, 70, 12, Scale(colour, 0.75f));
+                    break;
+                case CollectibleShape.Watch:
+                    Box(58, 100, 70, 116, colour);
+                    Disc(64, 60, 44, colour);
+                    Disc(64, 60, 36, white, false);
+                    Box(62, 60, 66, 88, dark);
+                    Box(64, 58, 86, 62, dark);
+                    break;
+                default: // Star
+                    for (int y = 0; y < size; y++)
+                    for (int x = 0; x < size; x++)
+                    {
+                        float dx = x + 0.5f - 64, dy = y + 0.5f - 62;
+                        float a = Mathf.Atan2(dy, dx) + Mathf.PI / 2f;
+                        float r = Mathf.Sqrt(dx * dx + dy * dy);
+                        float k = Mathf.Repeat(a, 2f * Mathf.PI / 5f) / (2f * Mathf.PI / 5f);
+                        if (r <= 50f - Mathf.Abs(k - 0.5f) * 2f * 28f) px[y * size + x] = Shade(colour, dx, dy);
+                    }
+
+                    break;
+            }
+
+            AddOutline(px, size, size);
+            tex.SetPixels32(px);
+            tex.Apply();
+            return tex;
+        }
+
+        private static Texture2D RenderChest()
+        {
+            const int size = 128;
+            var tex = NewTexture(size, size);
+            var px = new Color32[size * size];
+            var wood = new Color32(170, 100, 50, 255);
+            var gold = new Color32(240, 196, 60, 255);
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float fx = x + 0.5f, fy = y + 0.5f;
+                bool body = fx > 14 && fx < 114 && fy > 18 && fy < 70;
+                float dx = (fx - 64) / 50f, dy = (fy - 70) / 34f;
+                bool lid = fy >= 70 && dx * dx + dy * dy <= 1f;
+                if (!body && !lid) continue;
+                var c = Scale(wood, 0.85f + 0.3f * (fy / size));
+                if (Mathf.Abs(fx - 34) < 5 || Mathf.Abs(fx - 94) < 5 || (fy > 64 && fy < 76)) c = gold;
+                if (fx > 56 && fx < 72 && fy > 50 && fy < 74) c = Scale(gold, 1.1f);
+                px[y * size + x] = c;
+            }
+
+            AddOutline(px, size, size);
+            tex.SetPixels32(px);
+            tex.Apply();
+            return tex;
+        }
+
         public static readonly string TruckIconPath = UiArtFolder + "/PH_Icon_Truck.png";
 
         /// <summary>Delivery truck icon (badge above the depot): a green cab and a cream cargo box, side-on, 128x128.</summary>

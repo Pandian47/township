@@ -124,6 +124,22 @@ namespace TownBuilder
         private System.Action _disposeEvents;
         private System.Action _disposeTruck;
         private System.Action _disposeHomes;
+        private System.Action _disposeCollections;
+
+        /// <summary>Collection sounds: a find, a completed set.</summary>
+        public void AddCollections(CollectionService collections)
+        {
+            if (collections == null) return;
+            System.Action<string, string> found = (_, __) => Play(SoundId.Collect);
+            System.Action<string> completed = _ => Play(SoundId.LevelUp);
+            collections.Found += found;
+            collections.Completed += completed;
+            _disposeCollections = () =>
+            {
+                collections.Found -= found;
+                collections.Completed -= completed;
+            };
+        }
 
         /// <summary>Coins sound when a home's coins are collected.</summary>
         public void AddHomes(HappinessController homes)
@@ -202,6 +218,7 @@ namespace TownBuilder
             _disposeEvents?.Invoke();
             _disposeTruck?.Invoke();
             _disposeHomes?.Invoke();
+            _disposeCollections?.Invoke();
         }
 
         private void Play(SoundId id)

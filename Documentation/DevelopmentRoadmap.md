@@ -404,9 +404,16 @@ Our own features in the farming / town genre (not copied from any game).
 |---|---|---|
 | 1 | **Delivery truck**: Truck Depot (level 11), 3 mixed loads, 1-hour trips, paid on return | Done (v0.30.0) |
 | 2 | **Town happiness**: decorations near houses raise happiness; happy houses pay bonus coins | Done (v0.31.0) |
-| 3 | **Collections**: rare finds while harvesting / producing, 3 sets of 5, rewards per set | Next |
-| 4 | **Seasons**: the town's look follows the real month, seasonal decorations | Planned |
+| 3 | **Collections**: rare finds while harvesting / producing, 3 sets of 5, rewards per set | Done (v0.32.0) |
+| 4 | **Seasons**: the town's look follows the real month, seasonal decorations | Next |
 | 5 | **Launch prep**: settings, credits, privacy policy, app icon, store screenshots, AAB checklist | Planned |
+
+### Device checklist (Milestone 8 step 3: collections)
+- [ ] A round chest button sits under the menu button (top-right); it opens the Collections window with 3 sets of 5
+- [ ] Harvesting / collecting products / delivering orders sometimes shows "Rare find: ..." and the item lights up
+- [ ] DEV → "Find a collection item" gives a missing item; with all 5 the row turns green and the chest gets a red badge
+- [ ] Complete pays coins + gems and uses one of each item (spares stay); the set can be collected again
+- [ ] Found items and completions are kept after closing the app
 
 ### Device checklist (Milestone 8 step 2: town happiness)
 - [ ] A Cottage gets a coin bubble after about an hour; tapping the Cottage collects (floating "+coins", sound)

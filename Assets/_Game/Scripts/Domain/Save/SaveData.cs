@@ -31,6 +31,7 @@ namespace TownBuilder.Domain
         public DailySaveData daily = new DailySaveData();
         public AchievementsSaveData achievements = new AchievementsSaveData();
         public EventSaveData events = new EventSaveData();
+        public CollectionsSaveData collections = new CollectionsSaveData();
     }
 
     /// <summary>One order-board slot. itemIds[i] / amounts[i] form one line.</summary>
@@ -93,6 +94,17 @@ namespace TownBuilder.Domain
     {
         /// <summary>Owned plot ids ("x_y"). Empty = not initialised yet (start area + plots under buildings).</summary>
         public List<string> ownedPlots = new List<string>();
+    }
+
+    [Serializable]
+    public sealed class CollectionsSaveData
+    {
+        /// <summary>Collection items owned: itemIds[i] / counts[i].</summary>
+        public List<string> itemIds = new List<string>();
+        public List<int> counts = new List<int>();
+        /// <summary>Times each collection was completed: setIds[i] / completions[i].</summary>
+        public List<string> setIds = new List<string>();
+        public List<int> completions = new List<int>();
     }
 
     [Serializable]

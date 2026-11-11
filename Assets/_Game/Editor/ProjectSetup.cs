@@ -277,6 +277,7 @@ namespace TownBuilder.EditorTools
             PlaceholderArtGenerator.CreateSaleSign();
             PlaceholderArtGenerator.CreateBuildScreenArt();
             PlaceholderArtGenerator.CreateTruckIcon();
+            PlaceholderArtGenerator.CreateChestIcon();
             PlaceholderArtGenerator.EnsureFolder(PlaceholderArtGenerator.UiArtFolder + "/Build");
 
             CreateContent(art);
@@ -289,6 +290,7 @@ namespace TownBuilder.EditorTools
             ConfigureDailyRewards();
             CreateAchievements();
             CreateWeekendEvents();
+            CreateCollections();
             CreateTasks();
             ConfigureAds();
             ConfigureAudio();
@@ -678,6 +680,63 @@ namespace TownBuilder.EditorTools
             ("buy_land", "Land Owner", AchievementKind.BuyLand, new[] { 2, 8, 20 }),
             ("reach_level", "Rising Star", AchievementKind.ReachLevel, new[] { 5, 10, 15 }),
         };
+
+        private static readonly (string Id, string Name, AchievementKind Source, float Chance, int Coins, int Gems,
+            (string id, string name, PlaceholderArtGenerator.CollectibleShape shape, Color32 colour)[] Items)[] CollectionSeeds =
+        {
+            ("meadow_treasures", "Meadow Treasures", AchievementKind.HarvestCrops, 0.06f, 150, 3, new[]
+            {
+                ("lucky_clover", "Lucky Clover", PlaceholderArtGenerator.CollectibleShape.Leaf, new Color32(80, 170, 70, 255)),
+                ("golden_acorn", "Golden Acorn", PlaceholderArtGenerator.CollectibleShape.Acorn, new Color32(220, 170, 50, 255)),
+                ("blue_feather", "Blue Feather", PlaceholderArtGenerator.CollectibleShape.Feather, new Color32(70, 130, 220, 255)),
+                ("smooth_pebble", "Smooth Pebble", PlaceholderArtGenerator.CollectibleShape.Pebble, new Color32(150, 150, 160, 255)),
+                ("dewdrop_bead", "Dewdrop Bead", PlaceholderArtGenerator.CollectibleShape.Drop, new Color32(120, 210, 240, 255)),
+            }),
+            ("workshop_curios", "Workshop Curios", AchievementKind.MakeProducts, 0.06f, 200, 3, new[]
+            {
+                ("brass_cog", "Brass Cog", PlaceholderArtGenerator.CollectibleShape.Cog, new Color32(200, 160, 70, 255)),
+                ("copper_button", "Copper Button", PlaceholderArtGenerator.CollectibleShape.Button, new Color32(190, 110, 60, 255)),
+                ("glass_marble", "Glass Marble", PlaceholderArtGenerator.CollectibleShape.Marble, new Color32(80, 160, 230, 255)),
+                ("silver_thimble", "Silver Thimble", PlaceholderArtGenerator.CollectibleShape.Thimble, new Color32(190, 195, 205, 255)),
+                ("lucky_horseshoe", "Lucky Horseshoe", PlaceholderArtGenerator.CollectibleShape.Horseshoe, new Color32(120, 120, 130, 255)),
+            }),
+            ("market_mementos", "Market Mementos", AchievementKind.DeliverOrders, 0.2f, 250, 4, new[]
+            {
+                ("old_coin", "Old Coin", PlaceholderArtGenerator.CollectibleShape.Button, new Color32(225, 185, 60, 255)),
+                ("postage_stamp", "Postage Stamp", PlaceholderArtGenerator.CollectibleShape.Stamp, new Color32(210, 70, 60, 255)),
+                ("ribbon_bow", "Ribbon Bow", PlaceholderArtGenerator.CollectibleShape.Bow, new Color32(235, 110, 170, 255)),
+                ("pocket_watch", "Pocket Watch", PlaceholderArtGenerator.CollectibleShape.Watch, new Color32(200, 200, 210, 255)),
+                ("glass_star", "Glass Star", PlaceholderArtGenerator.CollectibleShape.Star, new Color32(250, 210, 70, 255)),
+            }),
+        };
+
+        /// <summary>Collections (existing assets are kept as they are) with code-drawn item icons.</summary>
+        private static void CreateCollections()
+        {
+            var content = AssetDatabase.LoadAssetAtPath<GameContent>(ContentPath);
+            PlaceholderArtGenerator.EnsureFolder(Root + "/Data/Collections");
+            var list = content.Collections.Where(c => c != null).ToList();
+            foreach (var seed in CollectionSeeds)
+            {
+                var path = $"{Root}/Data/Collections/Collection_{seed.Id}.asset";
+                var def = AssetDatabase.LoadAssetAtPath<CollectionDefinition>(path);
+                if (def == null)
+                {
+                    var items = seed.Items.Select(i => new CollectionItem
+                    {
+                        id = i.id, displayName = i.name, icon = PlaceholderArtGenerator.CreateCollectibleIcon(i.id, i.shape, i.colour),
+                    }).ToList();
+                    def = ScriptableObject.CreateInstance<CollectionDefinition>();
+                    def.EditorConfigure(seed.Id, seed.Name, seed.Source, seed.Chance, items, seed.Coins, seed.Gems);
+                    AssetDatabase.CreateAsset(def, path);
+                }
+
+                if (!list.Contains(def)) list.Add(def);
+            }
+
+            content.EditorSetCollections(list);
+            EditorUtility.SetDirty(content);
+        }
 
         /// <summary>Weekend events (existing assets are kept as they are). Example prizes; edit each Event asset.</summary>
         private static void CreateWeekendEvents()

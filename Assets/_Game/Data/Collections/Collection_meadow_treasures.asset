@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7532785e055110145a1eb479f78e4aa5, type: 3}
+  m_Name: Collection_meadow_treasures
+  m_EditorClassIdentifier: TownBuilder.Runtime::TownBuilder.CollectionDefinition
+  id: meadow_treasures
+  displayName: Meadow Treasures
+  source: 0
+  dropChance: 0.06
+  items:
+  - id: lucky_clover
+    displayName: Lucky Clover
+    icon: {fileID: 21300000, guid: f2c1d2da2f5aab94a940372fad0ac541, type: 3}
+  - id: golden_acorn
+    displayName: Golden Acorn
+    icon: {fileID: 21300000, guid: a0df11203e98da247a5b2d3ee3a01827, type: 3}
+  - id: blue_feather
+    displayName: Blue Feather
+    icon: {fileID: 21300000, guid: 0e5cbd80185620f44ba4d19df206979b, type: 3}
+  - id: smooth_pebble
+    displayName: Smooth Pebble
+    icon: {fileID: 21300000, guid: 201b9e1fdf451f14b83c06e99151d0c1, type: 3}
+  - id: dewdrop_bead
+    displayName: Dewdrop Bead
+    icon: {fileID: 21300000, guid: c30a7b1e4a0b6a44fb9e61fef4c4593f, type: 3}
+  rewardCoins: 150
+  rewardGems: 3

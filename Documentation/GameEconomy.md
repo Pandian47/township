@@ -103,6 +103,21 @@ already there or their slot count.
 its ingredients, every recipe belongs to exactly one factory, and no recipe unlocks before its factory or any of
 its ingredients.
 
+## Collections (Milestone 8 step 3, `Data/Collections`, chest button under the menu)
+
+Rare items, kept apart from the barn. Each action has a chance to find one item of the matching collection
+(every item equally likely); finding all five lets you **Complete** the set, which uses one of each and pays its
+reward. Sets can be completed again and again.
+
+| Collection | Found while | Chance per action | Items | Reward |
+|---|---|---|---|---|
+| Meadow Treasures | harvesting (fields and fruit trees) | 6 % per harvest | Lucky Clover, Golden Acorn, Blue Feather, Smooth Pebble, Dewdrop Bead | 150 coins + 3 gems |
+| Workshop Curios | collecting factory products | 6 % per collect | Brass Cog, Copper Button, Glass Marble, Silver Thimble, Lucky Horseshoe | 200 coins + 3 gems |
+| Market Mementos | delivering orders | 20 % per order | Old Coin, Postage Stamp, Ribbon Bow, Pocket Watch, Glass Star | 250 coins + 4 gems |
+
+* Five different items take on average ~11.4 finds (duplicates happen): ~190 harvests, ~190 factory collects or
+  ~57 orders per completion, i.e. roughly one completed set every few hours of play. A small, steady gem source.
+
 ## Town happiness and home coins (Milestone 8 step 2, `GameContent` → Happiness and home coins)
 
 * Every **home** (Houses tab, e.g. Cottage) slowly collects coins: **4 coins an hour**, up to **3 hours' worth**.

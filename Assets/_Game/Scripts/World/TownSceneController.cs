@@ -53,6 +53,7 @@ namespace TownBuilder
         private DailyRewardService _daily;
         private AchievementService _achievements;
         private WeekendEventService _events;
+        private CollectionService _collections;
         private DeliveryTruck _deliveryTruck;
         private HomeCoins _homeCoins;
         private TownAudioBridge _audioBridge;
@@ -78,6 +79,7 @@ namespace TownBuilder
         public DailyRewardService Daily => _daily;
         public AchievementService Achievements => _achievements;
         public WeekendEventService Events => _events;
+        public CollectionService Collections => _collections;
         public StreetLife StreetLife => streetLife;
         public TownEffects Effects => effects;
         public bool IsReady => _town != null;
@@ -180,6 +182,12 @@ namespace TownBuilder
                 farming, production, _orders);
             _events.Modified += ScheduleSave;
 
+            var collectionBook = new CollectionBook(content.Collections.Where(c => c != null && !string.IsNullOrEmpty(c.Id) && c.Items.Count > 0)
+                .Select(c => c.ToSpec()));
+            TownSaveMapper.LoadCollections(save, collectionBook);
+            _collections = new CollectionService(collectionBook, content, _wallet, farming, production, _orders);
+            _collections.Modified += ScheduleSave;
+
             _train = new Train();
             TownSaveMapper.LoadTrain(save, content, _train, warnings);
             if (trainController != null)
@@ -223,6 +231,7 @@ namespace TownBuilder
             _audioBridge.AddEvents(_events);
             _audioBridge.AddTruck(truckController);
             _audioBridge.AddHomes(happinessController);
+            _audioBridge.AddCollections(_collections);
 
             if (effects != null) effects.Initialize(_town);
             if (effects != null && happinessController != null) happinessController.Rewarded += effects.ShowReward;
@@ -237,6 +246,7 @@ namespace TownBuilder
             hud.InitializeDaily(_daily);
             hud.InitializeAchievements(_achievements);
             hud.InitializeEvents(_events);
+            hud.InitializeCollections(_collections);
         }
 
         private void OnDestroy()
@@ -264,6 +274,12 @@ namespace TownBuilder
                 _tasks.Modified -= ScheduleSave;
                 _tasks.Dispose();
             }
+            if (_collections != null)
+            {
+                _collections.Modified -= ScheduleSave;
+                _collections.Dispose();
+            }
+
             if (_events != null)
             {
                 _events.Modified -= ScheduleSave;
@@ -310,6 +326,7 @@ namespace TownBuilder
                 TownSaveMapper.WriteDaily(_context.ActiveSave, _daily.Track);
                 TownSaveMapper.WriteAchievements(_context.ActiveSave, _achievements.Book);
                 TownSaveMapper.WriteEvents(_context.ActiveSave, _events);
+                TownSaveMapper.WriteCollections(_context.ActiveSave, _collections.Book);
                 _context.SaveActive();
             }
             catch (Exception e)

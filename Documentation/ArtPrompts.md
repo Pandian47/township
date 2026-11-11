@@ -317,6 +317,19 @@ Icon prompt as bread (section 15–16):
 * `apple_juice`: "a glass bottle of golden apple juice with a small apple label and a green cap"
 * `cherry_juice`: "a glass bottle of deep red cherry juice with a cherry label and a yellow cap"
 
+## Milestone 8 step 3: collection items (optional, setup draws simple ones)
+
+Icon prompt as bread (one item per image, magenta background, no text), file name = id:
+* Meadow: `lucky_clover` "a four-leaf clover", `golden_acorn` "a shiny golden acorn", `blue_feather` "a soft blue feather",
+  `smooth_pebble` "a smooth round grey river pebble", `dewdrop_bead` "a clear light-blue glass bead shaped like a water drop"
+* Workshop: `brass_cog` "a small brass cogwheel", `copper_button` "a round copper sewing button with four holes",
+  `glass_marble` "a blue glass marble with a swirl inside", `silver_thimble` "a silver sewing thimble",
+  `lucky_horseshoe` "an old iron horseshoe"
+* Market: `old_coin` "an old worn gold coin with a simple wheat pattern", `postage_stamp` "a red postage stamp with
+  perforated edges and a flower picture", `ribbon_bow` "a pink ribbon bow", `pocket_watch` "a silver pocket watch",
+  `glass_star` "a small yellow glass star ornament"
+* `collections_chest`: "a small wooden treasure chest with gold bands, closed"
+
 ## Milestone 8 step 1: delivery truck (optional, setup draws simple ones)
 
 * `truck_depot.png` (building prompt style as the cottage): "a small delivery depot with a wide garage door, a loading

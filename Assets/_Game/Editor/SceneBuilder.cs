@@ -495,6 +495,7 @@ namespace TownBuilder.EditorTools
             var levelUp = BuildLevelUpDialog(canvas.transform);
             var achievements = BuildAchievementsPanel(canvas.transform, goalsButton, goalsBadge.gameObject, goalsBadgeText);
             var eventPanel = BuildEventPanel(canvas.transform, safe);
+            var collectionsPanel = BuildCollectionsPanel(canvas.transform, safe);
             var daily = BuildDailyRewardDialog(canvas.transform);
             var rewardLayer = Stretch("RewardFlyLayer", canvas.transform);
             var rewardFlyer = rewardLayer.gameObject.AddComponent<RewardFlyer>();
@@ -534,6 +535,7 @@ namespace TownBuilder.EditorTools
                 ("dailyDialog", daily),
                 ("achievementsPanel", achievements),
                 ("eventPanel", eventPanel),
+                ("collectionsPanel", collectionsPanel),
                 ("rewardFlyer", rewardFlyer),
                 ("bottomNavigation", nav.gameObject),
                 ("buildButton", buildButton),
@@ -1140,13 +1142,13 @@ namespace TownBuilder.EditorTools
 
             var root = Stretch("Root", container);
             AddImage(root, Dim, rounded: false);
-            var window = MakeRect("Window", root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(640, 1000));
+            var window = MakeRect("Window", root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(640, 1050));
             AddImage(window, PanelColor);
-            VColumn(window, 10, TextAnchor.UpperCenter, 22);
+            VColumn(window, 8, TextAnchor.UpperCenter, 20);
             var title = Label(window, "Title", "Developer mode (test builds only)", 34, TextAnchor.MiddleCenter, Ink, FontStyle.Bold);
             Prefer(title, 560, 60);
 
-            Button Row(string name, string label, Color color) => MakeButton(window, name, label, new Vector2(560, 86), color, 30);
+            Button Row(string name, string label, Color color) => MakeButton(window, name, label, new Vector2(560, 80), color, 28);
             var coins = Row("CoinsButton", "+10,000 coins  +100 gems", new Color(0.95f, 0.65f, 0.15f));
             var levelUp = Row("LevelUpButton", "Level up (+1)", Blue);
             var unlockAll = Row("UnlockAllButton", $"Unlock everything (level {DevTools.UnlockAllLevel})", Blue);
@@ -1155,12 +1157,14 @@ namespace TownBuilder.EditorTools
             var land = Row("UnlockLandButton", "Unlock all land", Green);
             var dailyAgain = Row("DailyAgainButton", "Daily reward again", new Color(0.55f, 0.35f, 0.7f));
             var startEvent = Row("DevEventButton", "Start weekend event now", new Color(0.95f, 0.5f, 0.15f));
+            var findItem = Row("DevCollectionButton", "Find a collection item", new Color(0.2f, 0.6f, 0.6f));
             var close = Row("CloseButton", "Close", Slate);
 
             var panel = container.gameObject.AddComponent<DevPanel>();
             Wire(panel, ("openButton", open), ("panelRoot", root.gameObject), ("closeButton", close), ("coinsButton", coins),
                 ("levelUpButton", levelUp), ("unlockAllButton", unlockAll), ("fillBarnButton", fillBarn),
-                ("finishTimersButton", finish), ("unlockLandButton", land), ("dailyAgainButton", dailyAgain), ("eventButton", startEvent));
+                ("finishTimersButton", finish), ("unlockLandButton", land), ("dailyAgainButton", dailyAgain), ("eventButton", startEvent),
+                ("collectionButton", findItem));
             root.gameObject.SetActive(false);
             return panel;
         }
@@ -1268,6 +1272,118 @@ namespace TownBuilder.EditorTools
             Wire(panel, ("panelRoot", root.gameObject), ("titleText", title), ("statusText", status), ("cratesRow", row.gameObject),
                 ("sendButton", send), ("sendLabel", sendLabel), ("callButton", call), ("callLabel", callLabel));
             WireArray(panel, "crates", crates);
+            root.gameObject.SetActive(false);
+            return panel;
+        }
+
+        /// <summary>
+        /// Collections: a round chest button under the menu button (badge = sets ready to complete) and the window with
+        /// one row per collection: name, where it's found, five item slots, reward, Complete.
+        /// </summary>
+        private static CollectionsPanel BuildCollectionsPanel(Transform canvas, RectTransform safe)
+        {
+            var outline = AssetDatabase.LoadAssetAtPath<Material>(ProjectSetup.UIFontOutlineMaterialPath);
+            var brown = new Color(0.40f, 0.24f, 0.10f);
+
+            var open = MakeButton(safe, "CollectionsButton", "", new Vector2(104, 104), new Color(0.62f, 0.38f, 0.22f), 30);
+            var openRect = (RectTransform)open.transform;
+            openRect.anchorMin = openRect.anchorMax = openRect.pivot = new Vector2(1f, 1f);
+            openRect.anchoredPosition = new Vector2(-24, -150);
+            var openImg = open.GetComponent<Image>();
+            openImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CirclePath);
+            openImg.type = Image.Type.Simple;
+            var chest = MakeRect("Icon", openRect, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(70, 70));
+            var chestImg = chest.gameObject.AddComponent<Image>();
+            chestImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.ChestIconPath);
+            chestImg.preserveAspect = true;
+            chestImg.raycastTarget = false;
+            var badge = MakeRect("Badge", openRect, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-8, -8), new Vector2(46, 46));
+            var badgeImg = badge.gameObject.AddComponent<Image>();
+            badgeImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CirclePath);
+            badgeImg.color = new Color(0.90f, 0.17f, 0.14f);
+            badgeImg.raycastTarget = false;
+            var badgeText = Label(badge, "Text", "1", 28, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+            if (outline != null) badgeText.fontSharedMaterial = outline;
+            badge.gameObject.SetActive(false);
+
+            var container = Stretch("CollectionsPanel", canvas);
+            var root = Stretch("Root", container);
+            AddImage(root, Dim, rounded: false);
+            var window = MakeRect("Window", root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1640, 930));
+            AddImage(window, new Color(0.62f, 0.38f, 0.22f));
+            var inner = Stretch("Inner", window, 14f);
+            AddImage(inner, new Color(1f, 0.96f, 0.86f));
+            Label(MakeRect("Title", inner, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, 1f), new Vector2(40, -14), new Vector2(-300, 80)),
+                "Text", "Collections", 58, TextAnchor.MiddleLeft, brown, FontStyle.Bold);
+            Label(MakeRect("Subtitle", inner, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, 1f), new Vector2(420, -14), new Vector2(-600, 80)),
+                "Text", "Rare finds turn up now and then. Find all five to complete a set.", 30, TextAnchor.MiddleLeft, new Color(0.45f, 0.42f, 0.38f));
+            var close = MakeButton(window, "CloseButton", "", new Vector2(110, 110), Red, 44);
+            var closeRect = (RectTransform)close.transform;
+            closeRect.anchorMin = closeRect.anchorMax = new Vector2(1f, 1f);
+            closeRect.pivot = new Vector2(0.5f, 0.5f);
+            closeRect.anchoredPosition = new Vector2(-34, -34);
+            var closeSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Game/Art/UI/Build/UI_CloseButton.png");
+            if (closeSprite != null)
+            {
+                var closeImg = close.GetComponent<Image>();
+                closeImg.sprite = closeSprite;
+                closeImg.type = Image.Type.Simple;
+                closeImg.preserveAspect = true;
+                closeImg.color = Color.white;
+            }
+            else
+            {
+                close.GetComponentInChildren<TMP_Text>().text = "X";
+            }
+
+            var rows = new CollectionRowView[3];
+            for (int i = 0; i < rows.Length; i++)
+            {
+                var row = MakeRect($"Collection{i + 1}", inner, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -108 - i * 266), new Vector2(-60, 252));
+                var bg = AddImage(row, Color.white, raycast: false);
+                var name = Label(MakeRect("Name", row, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, 1f), new Vector2(22, -6), new Vector2(-300, 50)),
+                    "Text", "Meadow Treasures", 36, TextAnchor.MiddleLeft, brown, FontStyle.Bold);
+                var source = Label(MakeRect("Source", row, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, 1f), new Vector2(22, -54), new Vector2(-300, 36)),
+                    "Text", "", 25, TextAnchor.MiddleLeft, new Color(0.45f, 0.42f, 0.38f));
+                var icons = new Image[5];
+                var counts = new TMP_Text[5];
+                var names = new TMP_Text[5];
+                for (int s = 0; s < 5; s++)
+                {
+                    var slot = MakeRect($"Slot{s + 1}", row, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(22 + s * 228, 12), new Vector2(214, 148));
+                    AddImage(slot, new Color(0.95f, 0.91f, 0.82f), raycast: false);
+                    var iconRect = MakeRect("Icon", slot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -6), new Vector2(96, 96));
+                    icons[s] = iconRect.gameObject.AddComponent<Image>();
+                    icons[s].preserveAspect = true;
+                    icons[s].raycastTarget = false;
+                    counts[s] = Label(MakeRect("Count", slot, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-8, -6), new Vector2(60, 34)),
+                        "Text", "", 26, TextAnchor.MiddleRight, brown, FontStyle.Bold);
+                    names[s] = Label(MakeRect("Name", slot, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 6), new Vector2(-10, 36)),
+                        "Text", "?", 22, TextAnchor.MiddleCenter, brown, FontStyle.Bold);
+                    names[s].enableAutoSizing = true;
+                    names[s].fontSizeMin = 16;
+                    names[s].fontSizeMax = 22;
+                    names[s].textWrappingMode = TMPro.TextWrappingModes.NoWrap;
+                }
+
+                var reward = Label(MakeRect("Reward", row, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-22, -20), new Vector2(330, 70)),
+                    "Text", "Reward: 150 coins + 3 gems", 26, TextAnchor.MiddleCenter, new Color(0.2f, 0.45f, 0.75f), FontStyle.Bold);
+                var complete = MakeButton(row, "CompleteButton", "Complete", new Vector2(300, 100), Green, 36);
+                var completeRect = (RectTransform)complete.transform;
+                completeRect.anchorMin = completeRect.anchorMax = completeRect.pivot = new Vector2(1f, 0f);
+                completeRect.anchoredPosition = new Vector2(-36, 24);
+
+                var view = row.gameObject.AddComponent<CollectionRowView>();
+                Wire(view, ("background", bg), ("nameText", name), ("sourceText", source), ("rewardText", reward), ("completeButton", complete));
+                WireArray(view, "slotIcons", icons);
+                WireArray(view, "slotCounts", counts);
+                WireArray(view, "slotNames", names);
+                rows[i] = view;
+            }
+
+            var panel = container.gameObject.AddComponent<CollectionsPanel>();
+            Wire(panel, ("panelRoot", root.gameObject), ("openButton", open), ("closeButton", close), ("badge", badge.gameObject), ("badgeText", badgeText));
+            WireArray(panel, "rows", rows);
             root.gameObject.SetActive(false);
             return panel;
         }

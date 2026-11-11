@@ -134,7 +134,7 @@ namespace TownBuilder.EditorTools
             return outputPath;
         }
 
-        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm, ShopCards, Event, Truck, Home }
+        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm, ShopCards, Event, Truck, Home, Collections }
 
         /// <summary>Command line: renders MainMenu + Town (idle, shop, placing) with UI into the folder after -previewOut.</summary>
         public static void CaptureUiFromCommandLine()
@@ -153,6 +153,7 @@ namespace TownBuilder.EditorTools
                 Capture(Path.Combine(folder, "Preview_Town_Event.png"), HudState.Event);
                 Capture(Path.Combine(folder, "Preview_Town_Truck.png"), HudState.Truck);
                 Capture(Path.Combine(folder, "Preview_Town_Home.png"), HudState.Home);
+                Capture(Path.Combine(folder, "Preview_Town_Collections.png"), HudState.Collections);
                 Capture(Path.Combine(folder, "Preview_Town_Placing.png"), HudState.Placing);
                 Capture(Path.Combine(folder, "Preview_Town_Field.png"), HudState.Field);
                 Capture(Path.Combine(folder, "Preview_Town_Barn.png"), HudState.Barn);
@@ -445,6 +446,18 @@ namespace TownBuilder.EditorTools
                     b.Bind(crop, null);
                     b.Refresh(true, true);
                 }
+            }
+
+            if (state == HudState.Collections && content.Collections.Count > 0)
+            {
+                // Meadow set complete (ready), Workshop 3/5 with a spare, Market 1/5.
+                var book = new CollectionBook(content.Collections.Select(c => c.ToSpec()));
+                foreach (var item in content.Collections[0].Items) book.Add(item.id);
+                book.Add(content.Collections[0].Items[0].id);
+                if (content.Collections.Count > 1) for (int i = 0; i < 3; i++) book.Add(content.Collections[1].Items[i].id, i == 1 ? 2 : 1);
+                if (content.Collections.Count > 2) book.Add(content.Collections[2].Items[3].id);
+                Find(canvas, "CollectionsPanel").transform.Find("Root").gameObject.SetActive(true);
+                Find(canvas, "CollectionsPanel").GetComponent<CollectionsPanel>().Render(book, content);
             }
 
             if (state == HudState.Home)

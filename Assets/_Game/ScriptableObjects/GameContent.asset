@@ -160,6 +160,10 @@ MonoBehaviour:
   homeCoinsPerHour: 4
   homeCoinsMaxHours: 3
   homeCoinsBubbleMin: 5
+  collections:
+  - {fileID: 11400000, guid: b54f327abe80b5e408337708e8be1d67, type: 2}
+  - {fileID: 11400000, guid: 74dcc6c840410d746a99498dc9870b07, type: 2}
+  - {fileID: 11400000, guid: 6a0c36e92f84ccd4f8dfc1e1dae21c4f, type: 2}
   weekendEvents:
   - {fileID: 11400000, guid: 3be905845b6c6fc4d8506257cecf3975, type: 2}
   - {fileID: 11400000, guid: c2f0d7ebb215ad24e9acb671c76306d9, type: 2}
