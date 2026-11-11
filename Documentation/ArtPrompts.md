@@ -317,6 +317,12 @@ Icon prompt as bread (section 15–16):
 * `apple_juice`: "a glass bottle of golden apple juice with a small apple label and a green cap"
 * `cherry_juice`: "a glass bottle of deep red cherry juice with a cherry label and a yellow cap"
 
+## Milestone 8 step 1: delivery truck (optional, setup draws simple ones)
+
+* `truck_depot.png` (building prompt style as the cottage): "a small delivery depot with a wide garage door, a loading
+  ramp with stacked crates and a blue roof, on a 2x2 tile footprint (same width as the cottage)"
+* `delivery_truck.png` (icon prompt as bread): "a cute small delivery truck with a green cab and a cream cargo box, side view"
+
 ## Milestone 7 step 4: event decorations (optional, setup draws simple ones)
 
 Same decoration prompt style as `tree.png` (1x1 tile footprint, magenta background, no text):

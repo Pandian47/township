@@ -58,6 +58,12 @@ namespace TownBuilder.Domain
             data.tasks ??= new List<TaskSaveData>();
             data.completedTaskIds ??= new List<string>();
             data.train ??= new TrainSaveData();
+            data.truck ??= new TruckSaveData();
+            data.truck.loads ??= new List<TruckLoadSaveData>();
+            data.truck.loads.RemoveAll(l => l == null || l.itemIds == null || l.amounts == null || l.itemIds.Count == 0);
+            data.truck.cargoMaterialIds ??= new List<string>();
+            data.truck.cargoMaterialAmounts ??= new List<int>();
+            if (data.truck.state != 0 && data.truck.state != 1) data.truck.state = 1;
             data.land ??= new LandSaveData();
             data.daily ??= new DailySaveData();
             data.achievements ??= new AchievementsSaveData();

@@ -103,6 +103,21 @@ already there or their slot count.
 its ingredients, every recipe belongs to exactly one factory, and no recipe unlocks before its factory or any of
 its ingredients.
 
+## Delivery truck (Milestone 8 step 1, `GameContent` → Delivery truck)
+
+* **Truck Depot**: Build → Town, level 11, 2,500 coins, 10 min to build, one per town. When it's finished the truck parks
+  there (a truck badge bobs above the depot).
+* The truck asks for **3 loads**; each load is **2 different items** in bigger amounts than train crates
+  (cheap goods 5–8, mid 3–5, valuable 2–3). A load is put on the truck all at once.
+* Send it with **at least one load**; it goes on a **1-hour trip** and pays when it comes back:
+  load value × **1.6** in coins, value ÷ 4 in XP, **1 building material per load**, plus **+30 %** for a full truck.
+  Materials that don't fit in the barn are paid as coins (2× their sell price).
+* Call it back early with a rewarded ad, or with gems (1 gem per minute left).
+* Different rhythm from the train (30-min trips, paid per crate right away): the truck is a slow, big payout that also
+  keeps building materials coming for land ring 2.
+* Model: a full truck every trip + 15 min loading adds ~6 coins/min at level 11. The depot is affordable on arrival
+  (3,706 coins left); levels 11–12 take ~67–79 min.
+
 ## Weekend events (Milestone 7 step 4, `Data/Events`, GameContent → Weekend events)
 
 Every **Saturday and Sunday** (phone's local time, Saturday 00:00 to Monday 00:00) one event runs. The events take

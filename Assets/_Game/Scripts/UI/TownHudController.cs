@@ -14,6 +14,7 @@ namespace TownBuilder
         [SerializeField] private ConfirmDialog confirmDialog;
         [SerializeField] private TasksPanel tasksPanel;
         [SerializeField] private TrainPanel trainPanel;
+        [SerializeField] private TruckPanel truckPanel;
         [SerializeField] private LandPanel landPanel;
         [SerializeField] private DailyRewardDialog dailyDialog;
         [SerializeField] private AchievementsPanel achievementsPanel;
@@ -73,6 +74,7 @@ namespace TownBuilder
         private Wallet _wallet;
         private TaskService _tasks;
         private TrainController _train;
+        private TruckController _truck;
         private LandController _land;
 
         public void Initialize(PlacementSystem placement, FarmingController farming, ProductionController production, ConstructionController construction, OrderService orders,
@@ -139,6 +141,16 @@ namespace TownBuilder
             _tasks = tasks;
             tasksPanel.Initialize(tasks);
             tasks.Notification += toast.Show;
+        }
+
+        /// <summary>Truck Depot panel (shown while the finished depot is selected).</summary>
+        public void InitializeTruck(TruckController truck, GameContent content, Inventory inventory, IAdService ads)
+        {
+            if (truck == null || truckPanel == null) return;
+            _truck = truck;
+            truckPanel.Initialize(truck, content, inventory, ads);
+            truck.Notification += toast.Show;
+            Refresh();
         }
 
         /// <summary>Train Station panel (shown while the finished station is selected).</summary>
@@ -288,6 +300,10 @@ namespace TownBuilder
             bool stationSelected = selected && !building && _train != null && _train.IsStation(target);
             if (stationSelected) trainPanel.Show();
             else if (trainPanel != null && trainPanel.IsOpen) trainPanel.Hide();
+
+            bool depotSelected = selected && !building && _truck != null && _truck.IsDepot(target);
+            if (depotSelected) truckPanel.Show();
+            else if (truckPanel != null && truckPanel.IsOpen) truckPanel.Hide();
 
             bool fieldSelected = selected && !building && definition != null && (definition.IsFarmPlot || definition.IsFruitTree);
             if (fieldSelected && fieldPanel.PlotId != _placement.TargetInstanceId) fieldPanel.ShowFor(_placement.TargetInstanceId);

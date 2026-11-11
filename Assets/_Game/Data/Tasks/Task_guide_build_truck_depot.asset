@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d530bcb82cb41b448a2ef4a77e21a26, type: 3}
+  m_Name: Task_guide_build_truck_depot
+  m_EditorClassIdentifier: TownBuilder.Runtime::TownBuilder.TaskDefinition
+  id: guide_build_truck_depot
+  kind: 3
+  targetItem: {fileID: 0}
+  targetBuilding: {fileID: 11400000, guid: ca815bea5a281904ea47f832a9e43e0d, type: 2}
+  amount: 1
+  unlockLevel: 11
+  repeatable: 0
+  rewardCoins: 150
+  rewardXp: 15
+  rewardGems: 2
+  rewardMaterial: {fileID: 0}
+  rewardMaterialAmount: 0

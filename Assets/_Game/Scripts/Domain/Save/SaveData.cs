@@ -24,6 +24,7 @@ namespace TownBuilder.Domain
         /// <summary>Ids of tasks claimed at least once (one-off guide tasks don't come back).</summary>
         public List<string> completedTaskIds = new List<string>();
         public TrainSaveData train = new TrainSaveData();
+        public TruckSaveData truck = new TruckSaveData();
         public LandSaveData land = new LandSaveData();
         public DailySaveData daily = new DailySaveData();
         public AchievementsSaveData achievements = new AchievementsSaveData();
@@ -90,6 +91,33 @@ namespace TownBuilder.Domain
     {
         /// <summary>Owned plot ids ("x_y"). Empty = not initialised yet (start area + plots under buildings).</summary>
         public List<string> ownedPlots = new List<string>();
+    }
+
+    [Serializable]
+    public sealed class TruckSaveData
+    {
+        /// <summary>0 = at the depot, 1 = away (TruckState).</summary>
+        public int state = 1;
+        public long returnsAtUnixMs;
+        public List<TruckLoadSaveData> loads = new List<TruckLoadSaveData>();
+        /// <summary>Earnings on the way back (paid when the truck returns).</summary>
+        public long cargoCoins;
+        public long cargoXp;
+        public List<string> cargoMaterialIds = new List<string>();
+        public List<int> cargoMaterialAmounts = new List<int>();
+    }
+
+    /// <summary>One truck load. itemIds[i] / amounts[i] form one line.</summary>
+    [Serializable]
+    public sealed class TruckLoadSaveData
+    {
+        public List<string> itemIds = new List<string>();
+        public List<int> amounts = new List<int>();
+        public long rewardCoins;
+        public long rewardXp;
+        public string materialId;
+        public int materialAmount;
+        public bool loaded;
     }
 
     [Serializable]

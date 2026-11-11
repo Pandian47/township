@@ -122,6 +122,28 @@ namespace TownBuilder
         private System.Action _disposeDaily;
         private System.Action _disposeAchievements;
         private System.Action _disposeEvents;
+        private System.Action _disposeTruck;
+
+        /// <summary>Truck sounds (the truck is set up after the bridge).</summary>
+        public void AddTruck(TruckController truck)
+        {
+            if (truck == null) return;
+            System.Action<int> loaded = _ => Play(SoundId.Collect);
+            System.Action<bool> departed = _ => Play(SoundId.BuildComplete);
+            System.Action<TruckPayout> returned = _ => Play(SoundId.Coins);
+            System.Action failed = () => Play(SoundId.Error);
+            truck.Loaded += loaded;
+            truck.Departed += departed;
+            truck.Returned += returned;
+            truck.Failed += failed;
+            _disposeTruck = () =>
+            {
+                truck.Loaded -= loaded;
+                truck.Departed -= departed;
+                truck.Returned -= returned;
+                truck.Failed -= failed;
+            };
+        }
 
         /// <summary>Weekend event sounds (the service is created after the bridge).</summary>
         public void AddEvents(WeekendEventService events)
@@ -168,6 +190,7 @@ namespace TownBuilder
             _disposeDaily?.Invoke();
             _disposeAchievements?.Invoke();
             _disposeEvents?.Invoke();
+            _disposeTruck?.Invoke();
         }
 
         private void Play(SoundId id)

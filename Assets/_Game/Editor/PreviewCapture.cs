@@ -134,7 +134,7 @@ namespace TownBuilder.EditorTools
             return outputPath;
         }
 
-        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm, ShopCards, Event }
+        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm, ShopCards, Event, Truck }
 
         /// <summary>Command line: renders MainMenu + Town (idle, shop, placing) with UI into the folder after -previewOut.</summary>
         public static void CaptureUiFromCommandLine()
@@ -151,6 +151,7 @@ namespace TownBuilder.EditorTools
                 Capture(Path.Combine(folder, "Preview_Town_ShopFarm.png"), HudState.ShopFarm);
                 Capture(Path.Combine(folder, "Preview_Town_ShopCards.png"), HudState.ShopCards);
                 Capture(Path.Combine(folder, "Preview_Town_Event.png"), HudState.Event);
+                Capture(Path.Combine(folder, "Preview_Town_Truck.png"), HudState.Truck);
                 Capture(Path.Combine(folder, "Preview_Town_Placing.png"), HudState.Placing);
                 Capture(Path.Combine(folder, "Preview_Town_Field.png"), HudState.Field);
                 Capture(Path.Combine(folder, "Preview_Town_Barn.png"), HudState.Barn);
@@ -443,6 +444,26 @@ namespace TownBuilder.EditorTools
                     b.Bind(crop, null);
                     b.Refresh(true, true);
                 }
+            }
+
+            if (state == HudState.Truck)
+            {
+                // Truck parked with three mixed loads: the first already loaded, the second ready, the third short.
+                var selection = Find(canvas, "SelectionActionBar");
+                selection.SetActive(true);
+                selection.transform.Find("Name").GetComponent<TMPro.TMP_Text>().text = "Truck Depot";
+                var root = Find(canvas, "TruckPanel").transform.Find("Root").gameObject;
+                root.SetActive(true);
+                root.transform.Find("Status/Text").GetComponent<TMPro.TMP_Text>().text = "Loaded 1/3. Earnings are paid when the truck comes back.";
+                Sprite Icon(string id) => content.TryGetItem(id, out var item) ? item.Icon : null;
+                var views = root.GetComponentsInChildren<TruckLoadView>(true);
+                string nl = System.Environment.NewLine;
+                views[0].Show(new[] { (Icon("bread"), "Bread  6/6", true), (Icon("egg"), "Egg  4/4", true) }, "+187 coins  +16 XP" + nl + "+1 Planks", true, true, null);
+                views[1].Show(new[] { (Icon("corn"), "Corn  8/8", true), (Icon("milk"), "Milk  3/3", true) }, "+301 coins  +27 XP" + nl + "+1 Bricks", false, true, null);
+                views[2].Show(new[] { (Icon("cookies"), "Cookies  1/3", false), (Icon("wheat"), "Wheat  7/7", true) }, "+320 coins  +28 XP" + nl + "+1 Nails", false, false, null);
+                root.transform.Find("SendButton/Label").GetComponent<TMPro.TMP_Text>().text = "Send truck";
+                root.transform.Find("CallButton").gameObject.SetActive(false);
+                root.transform.Find("GemsButton").gameObject.SetActive(false);
             }
 
             if (state == HudState.Event && content.WeekendEvents.Count > 0)

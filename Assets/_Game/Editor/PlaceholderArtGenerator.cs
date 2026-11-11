@@ -718,6 +718,48 @@ namespace TownBuilder.EditorTools
         public const string XpIconPath = UiArtFolder + "/PH_Icon_Xp.png";
 
         /// <summary>Coin, gem and XP-star icons (rewards flying to the top bar).</summary>
+        public static readonly string TruckIconPath = UiArtFolder + "/PH_Icon_Truck.png";
+
+        /// <summary>Delivery truck icon (badge above the depot): a green cab and a cream cargo box, side-on, 128x128.</summary>
+        public static Sprite CreateTruckIcon() =>
+            CreateSprite(TruckIconPath, RenderTruckIcon, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+
+        private static Texture2D RenderTruckIcon()
+        {
+            const int size = 128;
+            var tex = NewTexture(size, size);
+            var px = new Color32[size * size];
+            void Box(float x0, float y0, float x1, float y1, Color32 c)
+            {
+                for (int y = Mathf.Max(0, (int)y0); y < Mathf.Min(size, (int)y1); y++)
+                for (int x = Mathf.Max(0, (int)x0); x < Mathf.Min(size, (int)x1); x++)
+                    px[y * size + x] = c;
+            }
+
+            void Wheel(float cx, float cy)
+            {
+                for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float d = Mathf.Sqrt((x + 0.5f - cx) * (x + 0.5f - cx) + (y + 0.5f - cy) * (y + 0.5f - cy));
+                    if (d <= 13f) px[y * size + x] = d <= 6f ? new Color32(200, 200, 206, 255) : new Color32(46, 46, 52, 255);
+                }
+            }
+
+            Box(10, 34, 82, 100, new Color32(244, 232, 204, 255));   // cargo box
+            Box(10, 34, 82, 42, new Color32(214, 196, 160, 255));    // box floor
+            Box(18, 60, 74, 74, new Color32(232, 120, 60, 255));     // stripe on the box
+            Box(84, 34, 118, 80, new Color32(70, 160, 80, 255));     // cab
+            Box(88, 56, 112, 76, new Color32(170, 220, 245, 255));   // window
+            Box(112, 38, 120, 48, new Color32(255, 220, 90, 255));   // headlight
+            Wheel(32, 30);
+            Wheel(98, 30);
+            AddOutline(px, size, size);
+            tex.SetPixels32(px);
+            tex.Apply();
+            return tex;
+        }
+
         public static void CreateRewardIcons()
         {
             CreateSprite(CoinIconPath, () => RenderRewardIcon(0), new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);

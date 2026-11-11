@@ -54,7 +54,7 @@ namespace TownBuilder.EditorTools
             /// <summary>Level during which the materials are complete, or -1 if not within the report levels.</summary>
             public int MaterialsReadyLevel = -1;
         }
-        public const int ReportLevels = 10;
+        public const int ReportLevels = 12;
 
         public sealed class Rate
         {
@@ -163,7 +163,8 @@ namespace TownBuilder.EditorTools
             var curve = content.CreateLevelCurve();
             var rows = new List<LevelRow>();
             long coins = content.StartingCoins;
-            var keyBuildings = content.Buildings.Where(b => b.IsFactory || b.StorageCapacityBonus > 0 || b.Id == content.TrainStationId).ToList();
+            var keyBuildings = content.Buildings.Where(b => b.IsFactory || b.StorageCapacityBonus > 0 || b.Id == content.TrainStationId
+                                                            || b.Id == content.TruckDepotId).ToList();
 
             // Bonus income (Milestone 7).
             float playMinutes = 0f;
@@ -231,6 +232,14 @@ namespace TownBuilder.EditorTools
                     row.TrainCoinsPerMinute = trainCpm * Efficiency;
                     cpm += trainCpm;
                     xpm += trainXpm;
+                }
+
+                var depot = content.Buildings.FirstOrDefault(b => b.Id == content.TruckDepotId);
+                if (depot != null && depot.UnlockLevel <= level)
+                {
+                    TruckRates(content, level, out float truckCpm, out float truckXpm);
+                    cpm += truckCpm;
+                    xpm += truckXpm;
                 }
 
                 row.CoinsPerMinute = cpm * Efficiency;
@@ -369,6 +378,28 @@ namespace TownBuilder.EditorTools
             }
 
             return rates;
+        }
+
+        /// <summary>
+        /// Delivery-truck income per minute at a level: a full truck every trip + loading time, counting only the extra over
+        /// selling the items to the barn (load coins × (multiplier − 1) plus the full-truck bonus).
+        /// </summary>
+        public static void TruckRates(GameContent content, int level, out float coinsPerMinute, out float xpPerMinute)
+        {
+            var values = content.Crops.Where(c => c.UnlockLevel <= level).Select(c => c.SellPrice).ToList();
+            foreach (var factory in content.Buildings.Where(b => b.IsFactory && b.UnlockLevel <= level))
+                values.AddRange(factory.Recipes.Where(r => r.UnlockLevel <= level).Select(r => r.Output.SellPrice));
+            coinsPerMinute = 0f;
+            xpPerMinute = 0f;
+            if (values.Count == 0) return;
+
+            // Matching TruckLoadGenerator's amounts (5-8 / 3-5 / 2-3 by item value).
+            float lineValue = (float)values.Average(v => v * (v <= 10 ? 6.5 : v <= 40 ? 4 : 2.5));
+            float tripValue = lineValue * content.TruckLinesPerLoad * content.TruckLoads;
+            float tripMinutes = content.TruckTripSeconds / 60f + TrainLoadingMinutes;
+            float extraShare = content.TruckCoinMultiplier - 1f + content.TruckCoinMultiplier * content.TruckFullBonusFraction;
+            coinsPerMinute = tripValue * extraShare / tripMinutes;
+            xpPerMinute = tripValue / content.TruckXpDivisor / tripMinutes;
         }
 
         /// <summary>Train income per minute at a level: extra coins over selling the crate items, and XP.</summary>

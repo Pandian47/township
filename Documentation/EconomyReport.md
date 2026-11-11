@@ -44,6 +44,8 @@ Coins/min for recipes is the value added (product value minus the ingredients' s
 | 8 | Creamery (1,400) | 1,296 | 10 | 300 | 20.4 (4.1) | 5.64 | 53 | 1,088 | 2,384 | 1.2 / 2.1 / 1.2 |
 | 9 | Juice Press, Land ring 2 (2,400) | 884 | 11 | 380 | 24.3 (5.1) | 6.54 | 58 | 1,412 | 2,296 | 1.3 / 2.1 / 1.3 |
 | 10 | - | 3,296 | 12 | 470 | 26.9 (6.6) | 6.98 | 67 | 1,810 | 5,106 | 1.4 / 2.3 / 1.4 |
+| 11 | Truck Depot (2,500) | 3,706 | 12 | 570 | 33.3 (6.6) | 8.46 | 67 | 2,242 | 5,948 | 1.4 / 2.3 / 1.4 |
+| 12 | - | 7,148 | 12 | 670 | 33.3 (6.6) | 8.46 | 79 | 2,635 | 9,783 | 1.7 / 2.7 / 1.7 |
 
 ## Bonus income and gems (45 min of play a day, daily reward every day, first 2 prizes of each weekend event)
 
@@ -62,6 +64,8 @@ gems left over can finish crops and factory products at the same price (1 gem pe
 | 8 | 267 min | 6 | 221 | 9% | Freight Master 1 | 4 | 49 | 26 |
 | 9 | 325 min | 8 | 393 | 11% | Land Owner 1, Rising Star 2 | 11 | 60 | 31 |
 | 10 | 393 min | 9 | 101 | 9% | Green Fingers 3 | 11 | 71 | 31 |
+| 11 | 460 min | 11 | 223 | 9% | Busy Workshops 2 | 8 | 79 | 41 |
+| 12 | 539 min | 12 | 22 | 7% | - | 2 | 81 | 41 |
 
 ## Land: when the first plot of each ring is affordable
 

@@ -35,6 +35,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 5c3f17c0216d97345afeeccef5bc07b6, type: 2}
   - {fileID: 11400000, guid: 52615fd43c1403a499b5e4fffbd48973, type: 2}
   - {fileID: 11400000, guid: cae09e1a6417a75469088928e89ebdac, type: 2}
+  - {fileID: 11400000, guid: ca815bea5a281904ea47f832a9e43e0d, type: 2}
   crops:
   - {fileID: 11400000, guid: a3036535aa3df024daad3d74b88f1f40, type: 2}
   - {fileID: 11400000, guid: 62b818b79b6cf7947af8159c1d81b0fa, type: 2}
@@ -139,6 +140,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 676c8cc493fc92a40b79a72137d80458, type: 2}
   - {fileID: 11400000, guid: 52469ba7b0522504e8e50bbeca10fbda, type: 2}
   - {fileID: 11400000, guid: ed2dbf951d4e0094d9556a24fa730a31, type: 2}
+  - {fileID: 11400000, guid: 735142047176b2240807128038c71e0a, type: 2}
   taskSlots: 3
   trainStationId: train_station
   trainCrates: 6
@@ -147,6 +149,13 @@ MonoBehaviour:
   trainXpDivisor: 4
   trainFullBonusFraction: 0.5
   trainMaterialChance: 0.35
+  truckDepotId: truck_depot
+  truckLoads: 3
+  truckLinesPerLoad: 2
+  truckTripSeconds: 3600
+  truckCoinMultiplier: 1.6
+  truckXpDivisor: 4
+  truckFullBonusFraction: 0.3
   weekendEvents:
   - {fileID: 11400000, guid: 3be905845b6c6fc4d8506257cecf3975, type: 2}
   - {fileID: 11400000, guid: c2f0d7ebb215ad24e9acb671c76306d9, type: 2}

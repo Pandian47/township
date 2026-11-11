@@ -96,6 +96,8 @@ namespace TownBuilder.EditorTools
             new Spec("field", Art + "/Buildings/Farming/PH_Building_field.png", Kind.Flat, 128),
             // Milestone 7 step 3: the orchard. Trees are drawn from tree.png by setup; these names replace them if supplied.
             new Spec("juice_press", Art + "/Buildings/Production/PH_Building_juice_press.png", Kind.Building, 256),
+            new Spec("truck_depot", Art + "/Buildings/Community/PH_Building_truck_depot.png", Kind.Building, 256),
+            new Spec("delivery_truck", Art + "/UI/PH_Icon_Truck.png", Kind.Icon, 128),
             new Spec("apple_tree", Art + "/Buildings/Farming/PH_Building_apple_tree.png", Kind.Building, 128),
             new Spec("cherry_tree", Art + "/Buildings/Farming/PH_Building_cherry_tree.png", Kind.Building, 128),
             new Spec("apple_1", Art + "/Crops/PH_Crop_apple_1.png", Kind.Building, 128),

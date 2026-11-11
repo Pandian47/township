@@ -84,6 +84,55 @@ namespace TownBuilder
             train.Restore((TrainState)save.train.state, save.train.arrivesAtUnixMs, crates);
         }
 
+        /// <summary>Restores the delivery truck (loads with unknown items are dropped).</summary>
+        public static void LoadTruck(SaveData save, GameContent content, DeliveryTruck truck, List<string> warnings)
+        {
+            var loads = new List<TruckLoad>();
+            foreach (var l in save.truck.loads)
+            {
+                var lines = new List<TruckLine>();
+                bool ok = true;
+                for (int i = 0; i < l.itemIds.Count && i < l.amounts.Count; i++)
+                {
+                    if (!content.TryGetItem(l.itemIds[i], out _)) { ok = false; break; }
+                    lines.Add(new TruckLine(l.itemIds[i], l.amounts[i]));
+                }
+
+                if (!ok || lines.Count == 0)
+                {
+                    warnings.Add("Truck load with an unknown item dropped.");
+                    continue;
+                }
+
+                string material = !string.IsNullOrEmpty(l.materialId) && content.TryGetItem(l.materialId, out _) ? l.materialId : null;
+                loads.Add(new TruckLoad(lines, l.rewardCoins, l.rewardXp, material, l.materialAmount, l.loaded));
+            }
+
+            var cargo = new TruckPayout { Coins = save.truck.cargoCoins, Xp = save.truck.cargoXp };
+            for (int i = 0; i < save.truck.cargoMaterialIds.Count && i < save.truck.cargoMaterialAmounts.Count; i++)
+                if (content.TryGetItem(save.truck.cargoMaterialIds[i], out _))
+                    cargo.Materials[save.truck.cargoMaterialIds[i]] = save.truck.cargoMaterialAmounts[i];
+            truck.Restore((TruckState)save.truck.state, save.truck.returnsAtUnixMs, loads, cargo);
+        }
+
+        public static void WriteTruck(SaveData save, DeliveryTruck truck)
+        {
+            var t = save.truck;
+            t.state = (int)truck.State;
+            t.returnsAtUnixMs = truck.ReturnsAtUnixMs;
+            t.loads.Clear();
+            foreach (var l in truck.Loads)
+                t.loads.Add(new TruckLoadSaveData
+                {
+                    itemIds = l.Lines.Select(x => x.ItemId).ToList(), amounts = l.Lines.Select(x => x.Amount).ToList(),
+                    rewardCoins = l.RewardCoins, rewardXp = l.RewardXp, materialId = l.MaterialId, materialAmount = l.MaterialAmount, loaded = l.Loaded,
+                });
+            t.cargoCoins = truck.Cargo.Coins;
+            t.cargoXp = truck.Cargo.Xp;
+            t.cargoMaterialIds = truck.Cargo.Materials.Keys.ToList();
+            t.cargoMaterialAmounts = truck.Cargo.Materials.Values.ToList();
+        }
+
         public static void WriteTrain(SaveData save, Train train)
         {
             save.train.state = (int)train.State;

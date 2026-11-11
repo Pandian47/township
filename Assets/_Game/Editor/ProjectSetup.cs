@@ -163,6 +163,10 @@ namespace TownBuilder.EditorTools
                 W = 1, H = 1, Unlock = 8, Cost = 250, Removable = true, MaxCount = 8, Tree = PlaceholderArtGenerator.FruitStyle.Apple, Fruit = "apple" },
             new BuildingSeed { Id = "cherry_tree", Name = "Cherry Tree", Category = BuildingCategory.Farming, Folder = "Farming",
                 W = 1, H = 1, Unlock = 10, Cost = 400, Removable = true, MaxCount = 8, Tree = PlaceholderArtGenerator.FruitStyle.Cherry, Fruit = "cherry" },
+            // Milestone 8 step 1: the delivery truck's depot.
+            new BuildingSeed { Id = "truck_depot", Name = "Truck Depot", Category = BuildingCategory.Community, Folder = "Community",
+                W = 2, H = 2, HeightPx = 95, Unlock = 11, Cost = 2500, Removable = true, MaxCount = 1, BuildSeconds = 600, BuildXp = 30,
+                Wall = new Color32(214, 196, 170, 255), Roof = new Color32(56, 120, 176, 255) },
             new BuildingSeed { Id = "juice_press", Name = "Juice Press", Category = BuildingCategory.Production, Folder = "Production",
                 W = 2, H = 2, HeightPx = 105, Unlock = 9, Cost = 1200, Removable = true, BuildSeconds = 300, BuildXp = 22,
                 Wall = new Color32(238, 220, 180, 255), Roof = new Color32(120, 170, 70, 255) },
@@ -270,6 +274,7 @@ namespace TownBuilder.EditorTools
             PlaceholderArtGenerator.CreateCarSprite(false);
             PlaceholderArtGenerator.CreateSaleSign();
             PlaceholderArtGenerator.CreateBuildScreenArt();
+            PlaceholderArtGenerator.CreateTruckIcon();
             PlaceholderArtGenerator.EnsureFolder(PlaceholderArtGenerator.UiArtFolder + "/Build");
 
             CreateContent(art);
@@ -635,6 +640,9 @@ namespace TownBuilder.EditorTools
             new TaskSeed("pick_apples", TaskKind.Harvest, "apple", 4, 8, 60, 6, repeatable: true),
             new TaskSeed("press_apple_juice", TaskKind.Collect, "apple_juice", 2, 9, 120, 10, repeatable: true),
             new TaskSeed("pick_cherries", TaskKind.Harvest, "cherry", 4, 10, 90, 8, repeatable: true),
+
+            // Milestone 8 step 1.
+            new TaskSeed("guide_build_truck_depot", TaskKind.Build, "truck_depot", 1, 11, 150, 15, 2),
         };
 
         private struct MaterialSeed

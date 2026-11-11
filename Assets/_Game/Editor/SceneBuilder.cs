@@ -226,6 +226,7 @@ namespace TownBuilder.EditorTools
             var production = Go("ProductionController", systems.transform).AddComponent<ProductionController>();
             var construction = Go("ConstructionController", systems.transform).AddComponent<ConstructionController>();
             var train = Go("TrainController", systems.transform).AddComponent<TrainController>();
+            var truck = Go("TruckController", systems.transform).AddComponent<TruckController>();
             var streetLife = Go("StreetLife", world.transform).AddComponent<StreetLife>();
             Wire(streetLife, ("grid", isoGrid), ("roadTilemap", road),
                 ("carFront", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CarFrontPath)),
@@ -243,6 +244,8 @@ namespace TownBuilder.EditorTools
                 ("saleSign", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.SaleSignPath)));
             Wire(train, ("buildings", buildingController),
                 ("lockIcon", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.LockIconPath)));
+            Wire(truck, ("buildings", buildingController),
+                ("truckIcon", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.TruckIconPath)));
             Wire(construction, ("buildings", buildingController), ("placement", placement),
                 ("constructionIcon", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.ConstructionIconPath)));
             Wire(production, ("buildings", buildingController), ("placement", placement));
@@ -286,6 +289,7 @@ namespace TownBuilder.EditorTools
                 ("hud", hud),
                 ("effects", effects),
                 ("trainController", train),
+                ("truckController", truck),
                 ("landController", land),
                 ("trainMover", mover),
                 ("streetLife", streetLife));
@@ -469,6 +473,7 @@ namespace TownBuilder.EditorTools
             var fieldPanel = BuildFieldPanel(safe);
             var factoryPanel = BuildFactoryPanel(safe);
             var trainPanel = BuildTrainPanel(safe);
+            var truckPanel = BuildTruckPanel(safe);
             var landPanel = BuildLandPanel(safe);
             var constructionPanel = BuildConstructionPanel(safe);
             var toast = BuildToast(safe);
@@ -505,6 +510,7 @@ namespace TownBuilder.EditorTools
                 ("fieldPanel", fieldPanel),
                 ("factoryPanel", factoryPanel),
                 ("trainPanel", trainPanel),
+                ("truckPanel", truckPanel),
                 ("landPanel", landPanel),
                 ("constructionPanel", constructionPanel),
                 ("barnPanel", barnPanel),
@@ -1137,9 +1143,9 @@ namespace TownBuilder.EditorTools
             Button Row(string name, string label, Color color) => MakeButton(window, name, label, new Vector2(560, 86), color, 30);
             var coins = Row("CoinsButton", "+10,000 coins  +100 gems", new Color(0.95f, 0.65f, 0.15f));
             var levelUp = Row("LevelUpButton", "Level up (+1)", Blue);
-            var unlockAll = Row("UnlockAllButton", "Unlock everything (level 10)", Blue);
+            var unlockAll = Row("UnlockAllButton", $"Unlock everything (level {DevTools.UnlockAllLevel})", Blue);
             var fillBarn = Row("FillBarnButton", "Max barn + 10 of every item", new Color(0.62f, 0.38f, 0.25f));
-            var finish = Row("FinishTimersButton", "Finish all timers + call train", Green);
+            var finish = Row("FinishTimersButton", "Finish all timers + call train/truck", Green);
             var land = Row("UnlockLandButton", "Unlock all land", Green);
             var dailyAgain = Row("DailyAgainButton", "Daily reward again", new Color(0.55f, 0.35f, 0.7f));
             var startEvent = Row("DevEventButton", "Start weekend event now", new Color(0.95f, 0.5f, 0.15f));
@@ -1256,6 +1262,79 @@ namespace TownBuilder.EditorTools
             Wire(panel, ("panelRoot", root.gameObject), ("titleText", title), ("statusText", status), ("cratesRow", row.gameObject),
                 ("sendButton", send), ("sendLabel", sendLabel), ("callButton", call), ("callLabel", callLabel));
             WireArray(panel, "crates", crates);
+            root.gameObject.SetActive(false);
+            return panel;
+        }
+
+        /// <summary>Truck Depot panel: status line, three load cards (two item lines each), Send / Call back buttons.</summary>
+        private static TruckPanel BuildTruckPanel(RectTransform safe)
+        {
+            var container = Stretch("TruckPanel", safe);
+            var root = MakeRect("Root", container, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 196), new Vector2(1640, 360));
+            AddImage(root, PanelColor);
+
+            Label(MakeRect("Title", root, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(24, -10), new Vector2(400, 54)),
+                "Text", "Truck Depot", 38, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
+            var status = Label(MakeRect("Status", root, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(150, -10), new Vector2(-700, 54)),
+                "Text", "", 28, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
+
+            var row = MakeRect("Loads", root, new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), Vector2.zero, Vector2.zero);
+            row.offsetMin = new Vector2(24, 16);
+            row.offsetMax = new Vector2(24 + 3 * 400 + 2 * 14, -72);
+            HRow(row, 14, TextAnchor.MiddleLeft);
+
+            var loads = new TruckLoadView[3];
+            for (int i = 0; i < loads.Length; i++)
+            {
+                var card = MakeRect($"Load{i + 1}", row, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400, 260));
+                Prefer(card, 400, 260);
+                var bg = AddImage(card, Color.white, raycast: false);
+                var icons = new Image[2];
+                var texts = new TMP_Text[2];
+                for (int l = 0; l < 2; l++)
+                {
+                    var iconRect = MakeRect($"Icon{l + 1}", card, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(14, -12 - l * 66), new Vector2(60, 60));
+                    icons[l] = iconRect.gameObject.AddComponent<Image>();
+                    icons[l].preserveAspect = true;
+                    icons[l].raycastTarget = false;
+                    texts[l] = Label(MakeRect($"Line{l + 1}", card, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, 1f), new Vector2(84, -12 - l * 66), new Vector2(-96, 60)),
+                        "Text", "", 26, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
+                }
+
+                var reward = Label(MakeRect("Reward", card, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0f, 0f), new Vector2(14, 10), new Vector2(-200, 100)),
+                    "Text", "", 22, TextAnchor.MiddleLeft, new Color(0.45f, 0.42f, 0.38f));
+                var loadButton = MakeButton(card, "LoadButton", "Load", new Vector2(160, 70), Green, 30);
+                var loadRect = (RectTransform)loadButton.transform;
+                loadRect.anchorMin = loadRect.anchorMax = loadRect.pivot = new Vector2(1f, 0f);
+                loadRect.anchoredPosition = new Vector2(-14, 14);
+                var loaded = Label(MakeRect("Loaded", card, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-14, 14), new Vector2(160, 70)),
+                    "Text", "Loaded", 30, TextAnchor.MiddleCenter, new Color(0.25f, 0.55f, 0.2f), FontStyle.Bold);
+
+                var view = card.gameObject.AddComponent<TruckLoadView>();
+                Wire(view, ("background", bg), ("rewardText", reward), ("loadButton", loadButton), ("loadedText", loaded));
+                WireArray(view, "lineIcons", icons);
+                WireArray(view, "lineTexts", texts);
+                loads[i] = view;
+            }
+
+            var send = MakeButton(root, "SendButton", "Send truck", new Vector2(320, 130), Blue, out var sendLabel, 32);
+            var sendRect = (RectTransform)send.transform;
+            sendRect.anchorMin = sendRect.anchorMax = sendRect.pivot = new Vector2(1f, 0.5f);
+            sendRect.anchoredPosition = new Vector2(-30, -30);
+            var call = MakeButton(root, "CallButton", "Call back", new Vector2(300, 130), new Color(0.95f, 0.65f, 0.15f), out var callLabel, 30);
+            var callRect = (RectTransform)call.transform;
+            callRect.anchorMin = callRect.anchorMax = callRect.pivot = new Vector2(0.5f, 0.5f);
+            callRect.anchoredPosition = new Vector2(-170, -40);
+            var gems = MakeButton(root, "GemsButton", "Call back\n1 gem", new Vector2(300, 130), new Color(0.3f, 0.6f, 0.85f), out var gemsLabel, 30);
+            var gemsRect = (RectTransform)gems.transform;
+            gemsRect.anchorMin = gemsRect.anchorMax = gemsRect.pivot = new Vector2(0.5f, 0.5f);
+            gemsRect.anchoredPosition = new Vector2(170, -40);
+
+            var panel = container.gameObject.AddComponent<TruckPanel>();
+            Wire(panel, ("panelRoot", root.gameObject), ("statusText", status), ("loadsRow", row.gameObject),
+                ("sendButton", send), ("sendLabel", sendLabel), ("callButton", call), ("callLabel", callLabel),
+                ("gemsButton", gems), ("gemsLabel", gemsLabel));
+            WireArray(panel, "loads", loads);
             root.gameObject.SetActive(false);
             return panel;
         }

@@ -332,6 +332,15 @@ calendar (`Tick`, called every second by `EventPanel`), counts harvests / produc
 set of unlocked decorations and filters the shop (`BuildingShopPanel.SetListingFilter`). `EventPanel` = the town button
 + window. DEV "Start weekend event now" runs one from today for two days. Saved in `SaveData.events`.
 
+## 6g6g. Delivery truck (Milestone 8 step 1)
+
+`DeliveryTruck` (Domain): AtDepot / Away, `TruckLoad`s of several `TruckLine`s, `TryLoad` (all lines or nothing),
+`SendOff` (needs one load; the earnings become the `Cargo`), `UpdateReturn` (hands over the cargo and parks with new loads),
+`ReturnNow`. `TruckLoadGenerator` picks different items per load from the order candidates. `TruckController`
+(Scripts/Truck) runs it at the finished Truck Depot, pays the cargo on return (coins, XP, materials into the barn),
+shows the badge, and calls back with ads or gems. `TruckPanel` + `TruckLoadView` are the depot panel. Saved in
+`SaveData.truck` (state, return time, loads, cargo). DEV "Unlock everything" now goes to level 12.
+
 ## 6g6f. Skipping waits with gems (v0.29.1)
 
 `TimeSkip.GemCost(remainingMs)` (Domain) is the one price rule: 1 gem per started minute, at least 1. It is used by

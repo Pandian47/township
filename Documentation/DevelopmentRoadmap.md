@@ -396,8 +396,25 @@ gems finish crops and factory products (1 gem per minute left).
 - [ ] Tapping it spends N gems and the crop is ready at once; with too few gems the button is greyed out
 - [ ] Factory making a product: the same blue button finishes the current product; the next one in the queue starts
 
-## Milestone 8: Expansion
-Ship, helicopter, friends and co-op, monetisation, Google Play launch.
+## Milestone 8: Expansion (current)
+
+Our own features in the farming / town genre (not copied from any game).
+
+| Step | Feature | Status |
+|---|---|---|
+| 1 | **Delivery truck**: Truck Depot (level 11), 3 mixed loads, 1-hour trips, paid on return | Done (v0.30.0) |
+| 2 | **Town happiness**: decorations near houses raise happiness; happy houses pay bonus coins | Next |
+| 3 | **Collections**: rare finds while harvesting / producing, 3 sets of 5, rewards per set | Planned |
+| 4 | **Seasons**: the town's look follows the real month, seasonal decorations | Planned |
+| 5 | **Launch prep**: settings, credits, privacy policy, app icon, store screenshots, AAB checklist | Planned |
+
+### Device checklist (Milestone 8 step 1: delivery truck)
+- [ ] DEV → "Unlock everything (level 12)", then Build → Town: Truck Depot (2,500 coins, 10 min to build)
+- [ ] When the depot is finished a truck badge bobs above it; tapping the depot opens the Truck Depot panel
+- [ ] Each of the 3 loads shows 2 items with have/need (red when short); "Load" takes both at once
+- [ ] "Send truck" needs at least one load; no coins on leaving; the badge disappears
+- [ ] After 1 hour (or DEV "Finish all timers", or Call back with ad / gems) the truck returns: toast with coins, XP and materials
+- [ ] Closing the app while the truck is away keeps its earnings
 
 ## Milestone 9: Backend (moved from 7)
 Accounts, cloud saves with conflict resolution, server time (`IClock`), server-validated economy, analytics.

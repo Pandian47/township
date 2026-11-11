@@ -71,6 +71,19 @@ namespace TownBuilder
         [Tooltip("Chance that a crate also pays 1 building material.")]
         [SerializeField, Range(0f, 1f)] private float trainMaterialChance = 0.35f;
 
+        [Header("Delivery truck")]
+        [Tooltip("Building id of the Truck Depot.")]
+        [SerializeField] private string truckDepotId = "truck_depot";
+        [SerializeField, Min(1)] private int truckLoads = 3;
+        [Tooltip("Different items per load.")]
+        [SerializeField, Min(1)] private int truckLinesPerLoad = 2;
+        [SerializeField, Min(0)] private int truckTripSeconds = 3600;
+        [Tooltip("Load reward = items' sell value × this.")]
+        [SerializeField, Min(1f)] private float truckCoinMultiplier = 1.6f;
+        [SerializeField, Min(1)] private int truckXpDivisor = 4;
+        [Tooltip("Bonus for a completely loaded truck, as a share of all load coins.")]
+        [SerializeField, Min(0f)] private float truckFullBonusFraction = 0.3f;
+
         [Header("Weekend events")]
         [Tooltip("One runs every Saturday + Sunday (local time); they take turns week by week, in this order.")]
         [SerializeField] private List<EventDefinition> weekendEvents = new List<EventDefinition>();
@@ -149,6 +162,13 @@ namespace TownBuilder
         public int TrainXpDivisor => trainXpDivisor;
         public float TrainFullBonusFraction => trainFullBonusFraction;
         public float TrainMaterialChance => trainMaterialChance;
+        public string TruckDepotId => truckDepotId;
+        public int TruckLoads => truckLoads;
+        public int TruckLinesPerLoad => truckLinesPerLoad;
+        public int TruckTripSeconds => truckTripSeconds;
+        public float TruckCoinMultiplier => truckCoinMultiplier;
+        public int TruckXpDivisor => truckXpDivisor;
+        public float TruckFullBonusFraction => truckFullBonusFraction;
         public IReadOnlyList<MaterialDefinition> Materials => materials;
         public void EditorSetMaterials(List<MaterialDefinition> list)
         {

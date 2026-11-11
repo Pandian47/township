@@ -17,7 +17,7 @@ namespace TownBuilder
 #endif
 
         /// <summary>Level that unlocks all current content.</summary>
-        public const int UnlockAllLevel = 10;
+        public const int UnlockAllLevel = 12;
 
         public static void AddCurrency(TownSceneController scene, long coins = 10_000, long gems = 100)
         {
@@ -77,6 +77,7 @@ namespace TownBuilder
             foreach (var site in scene.Construction.Sites.Sites.Keys.ToList()) scene.Construction.FinishNow(site);
 
             if (scene.Train != null) scene.Train.CallNow();
+            if (scene.Truck != null) scene.Truck.CallBack();
             scene.SaveNow();
         }
 

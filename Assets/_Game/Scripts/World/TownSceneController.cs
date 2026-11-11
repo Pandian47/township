@@ -26,6 +26,7 @@ namespace TownBuilder
         [SerializeField] private TownHudController hud;
         [SerializeField] private TownEffects effects;
         [SerializeField] private TrainController trainController;
+        [SerializeField] private TruckController truckController;
         [SerializeField] private LandController landController;
         [SerializeField] private TrainMover trainMover;
         [SerializeField] private StreetLife streetLife;
@@ -51,6 +52,7 @@ namespace TownBuilder
         private DailyRewardService _daily;
         private AchievementService _achievements;
         private WeekendEventService _events;
+        private DeliveryTruck _deliveryTruck;
         private TownAudioBridge _audioBridge;
         private float _saveDueAt = -1f;
 
@@ -67,6 +69,7 @@ namespace TownBuilder
         public ProgressionService Progression => _progression;
         public TaskService Tasks => _tasks;
         public TrainController Train => trainController;
+        public TruckController Truck => truckController;
         public LandController LandController => landController;
         public LandPlots Land => _land;
         public DailyRewardService Daily => _daily;
@@ -184,6 +187,15 @@ namespace TownBuilder
                 if (trainMover != null) trainMover.Initialize();
             }
 
+            _deliveryTruck = new DeliveryTruck();
+            TownSaveMapper.LoadTruck(save, content, _deliveryTruck, warnings);
+            if (truckController != null)
+            {
+                truckController.Initialize(_town, _deliveryTruck, _inventory, _wallet, _progress, content, _context.Clock,
+                    id => !_sites.IsUnderConstruction(id), _orders.Candidates);
+                truckController.Modified += ScheduleSave;
+            }
+
             if (streetLife != null) streetLife.Initialize(_town, content);
 
             cameraController.SetWorldBounds(grid.WorldBounds());
@@ -199,12 +211,14 @@ namespace TownBuilder
             _audioBridge.AddDaily(_daily);
             _audioBridge.AddAchievements(_achievements);
             _audioBridge.AddEvents(_events);
+            _audioBridge.AddTruck(truckController);
 
             if (effects != null) effects.Initialize(_town);
 
             hud.Initialize(placement, farming, production, construction, _orders, _progression, _storage, _wallet, _progress, _context.Content, _context.Ads, ReturnToMainMenu);
             hud.InitializeTasks(_tasks);
             if (trainController != null) hud.InitializeTrain(trainController, _context.Content, _inventory, _context.Ads);
+            if (truckController != null) hud.InitializeTruck(truckController, _context.Content, _inventory, _context.Ads);
             if (landController != null) hud.InitializeLand(landController);
             hud.InitializeDev(this, _context.Content);
             hud.InitializeDaily(_daily);
@@ -229,6 +243,7 @@ namespace TownBuilder
             if (_progress != null) _progress.Changed -= ScheduleSave;
             _progression?.Dispose();
             if (trainController != null) trainController.Modified -= ScheduleSave;
+            if (truckController != null) truckController.Modified -= ScheduleSave;
             if (landController != null) landController.Modified -= ScheduleSave;
             if (_tasks != null)
             {
@@ -275,6 +290,7 @@ namespace TownBuilder
                 TownSaveMapper.WriteOrders(_context.ActiveSave, _orderBoard);
                 TownSaveMapper.WriteTasks(_context.ActiveSave, _taskBoard);
                 TownSaveMapper.WriteTrain(_context.ActiveSave, _train);
+                TownSaveMapper.WriteTruck(_context.ActiveSave, _deliveryTruck);
                 TownSaveMapper.WriteLand(_context.ActiveSave, _land);
                 TownSaveMapper.WriteDaily(_context.ActiveSave, _daily.Track);
                 TownSaveMapper.WriteAchievements(_context.ActiveSave, _achievements.Book);
