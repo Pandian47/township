@@ -565,7 +565,7 @@ namespace TownBuilder.EditorTools
         public const string ConstructionIconPath = UiArtFolder + "/PH_Icon_Construction.png";
 
         /// <summary>Hammer in a round badge, floated above buildings under construction. 128x128, pivot centre.</summary>
-        public enum DecorationStyle { Tree, FlowerBed, Bench, Fence, Fountain, Scarecrow, Lantern }
+        public enum DecorationStyle { Tree, FlowerBed, Bench, Fence, Fountain, Scarecrow, Lantern, TulipPlanter, Sunflowers, PumpkinPile, Snowman }
 
         public const string DecorationsArtFolder = BuildingsArtFolder + "/Decorations";
 
@@ -692,6 +692,56 @@ namespace TownBuilder.EditorTools
                     Rect(centre.x - 13, centre.y + 114, centre.x + 13, centre.y + 118, new Color32(200, 60, 50, 255));  // hat band
                     break;
                 }
+                case DecorationStyle.TulipPlanter:
+                {
+                    var box = new Color32(160, 106, 60, 255);
+                    Rect(centre.x - 34, centre.y, centre.x + 34, centre.y + 26, box);
+                    Rect(centre.x - 34, centre.y + 22, centre.x + 34, centre.y + 28, Scale(box, 0.8f));
+                    var colours = new[] { new Color32(235, 70, 90, 255), new Color32(255, 200, 60, 255), new Color32(170, 90, 220, 255),
+                        new Color32(255, 130, 60, 255), new Color32(240, 90, 160, 255) };
+                    for (int i = 0; i < 5; i++)
+                    {
+                        float x = centre.x - 26 + i * 13;
+                        Rect(x - 1.5f, centre.y + 26, x + 1.5f, centre.y + 52 + (i % 2) * 8, new Color32(70, 150, 60, 255));
+                        Ellipse(new Vector2(x, centre.y + 56 + (i % 2) * 8), 6, 9, colours[i]);
+                    }
+
+                    break;
+                }
+                case DecorationStyle.Sunflowers:
+                    for (int i = 0; i < 3; i++)
+                    {
+                        float x = centre.x - 22 + i * 22, top = centre.y + 70 + (i == 1 ? 18 : 0);
+                        Rect(x - 2, centre.y, x + 2, top, new Color32(80, 150, 60, 255));
+                        Ellipse(new Vector2(x - 8, centre.y + 30 + i * 4), 8, 4, new Color32(90, 170, 70, 255), false);
+                        Ellipse(new Vector2(x, top), 15, 15, new Color32(255, 205, 40, 255));
+                        Ellipse(new Vector2(x, top), 7, 7, new Color32(120, 74, 30, 255), false);
+                    }
+
+                    break;
+                case DecorationStyle.PumpkinPile:
+                    foreach (var (dx, dy, r) in new[] { (-16f, 14f, 18f), (18f, 12f, 16f), (0f, 34f, 17f) })
+                    {
+                        var c = centre + new Vector2(dx, dy);
+                        Ellipse(c, r * 1.2f, r, new Color32(240, 130, 30, 255));
+                        Ellipse(c + new Vector2(-r * 0.4f, 0), r * 0.35f, r * 0.9f, new Color32(220, 110, 20, 255), false);
+                        Rect(c.x - 2, c.y + r - 2, c.x + 3, c.y + r + 8, new Color32(90, 120, 50, 255));
+                    }
+
+                    break;
+                case DecorationStyle.Snowman:
+                {
+                    var snow = new Color32(245, 248, 255, 255);
+                    Ellipse(centre + new Vector2(0, 22), 26, 22, snow);
+                    Ellipse(centre + new Vector2(0, 58), 19, 17, snow);
+                    Ellipse(centre + new Vector2(0, 86), 14, 13, snow);
+                    Rect(centre.x - 12, centre.y + 96, centre.x + 12, centre.y + 100, new Color32(40, 40, 50, 255));   // hat brim
+                    Rect(centre.x - 8, centre.y + 100, centre.x + 8, centre.y + 114, new Color32(40, 40, 50, 255));    // hat
+                    Rect(centre.x + 2, centre.y + 84, centre.x + 14, centre.y + 88, new Color32(245, 130, 40, 255));   // carrot
+                    Rect(centre.x - 16, centre.y + 70, centre.x + 16, centre.y + 76, new Color32(210, 50, 50, 255));   // scarf
+                    Rect(centre.x + 6, centre.y + 52, centre.x + 12, centre.y + 72, new Color32(210, 50, 50, 255));
+                    break;
+                }
                 case DecorationStyle.Lantern:
                 {
                     var iron = new Color32(60, 62, 70, 255);
@@ -718,6 +768,138 @@ namespace TownBuilder.EditorTools
         public const string XpIconPath = UiArtFolder + "/PH_Icon_Xp.png";
 
         /// <summary>Coin, gem and XP-star icons (rewards flying to the top bar).</summary>
+        // ------------------------------------------------------------------ Seasons (Milestone 8 step 4)
+
+        public const string EffectsArtFolder = "Assets/_Game/Art/Effects";
+
+        public sealed class SeasonArt
+        {
+            /// <summary>Grass tiles in Season order (Spring = the normal grass tile).</summary>
+            public Object[] Grass = new Object[4];
+            /// <summary>Falling sprites in Season order (Summer = none).</summary>
+            public Object[] Falling = new Object[4];
+            /// <summary>The decoration tree per season (Spring = the normal tree sprite).</summary>
+            public Object[] Trees = new Object[4];
+        }
+
+        static string SeasonGrassName(int season) => season == 0 ? "PH_Tile_Grass" : $"PH_Tile_Grass_{(TownBuilder.Domain.Season)season}";
+        static string FallingPath(string name) => $"{EffectsArtFolder}/PH_Fx_{name}.png";
+        static string SeasonTreePath(int season) => season == 0 ? TreeSourcePath : $"{DecorationsArtFolder}/PH_Building_tree_{(TownBuilder.Domain.Season)season}.png";
+
+        /// <summary>Season grass tiles (recoloured from the current grass tile) and falling sprites. Kept if they exist.</summary>
+        public static void CreateSeasonArt()
+        {
+            var grassPath = $"{TilesArtFolder}/PH_Tile_Grass.png";
+            for (int season = 1; season < 4; season++)
+            {
+                int s = season;
+                string name = SeasonGrassName(s);
+                var sprite = CreateSprite($"{TilesArtFolder}/{name}.png", () => Recolour(grassPath, s, false), new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+                var tilePath = TileAssetPath(name);
+                if (AssetDatabase.LoadAssetAtPath<Tile>(tilePath) == null)
+                {
+                    var tile = ScriptableObject.CreateInstance<Tile>();
+                    tile.sprite = sprite;
+                    tile.colliderType = Tile.ColliderType.None;
+                    AssetDatabase.CreateAsset(tile, tilePath);
+                }
+            }
+
+            // Decoration tree: golden in autumn, snowy in winter (only the leaves change; same pivot as the tree).
+            var tree = AssetDatabase.LoadAssetAtPath<Sprite>(TreeSourcePath);
+            if (tree != null)
+            {
+                var pivot = new Vector2(tree.pivot.x / tree.rect.width, tree.pivot.y / tree.rect.height);
+                for (int season = 1; season < 4; season++)
+                {
+                    int s = season;
+                    CreateSprite(SeasonTreePath(s), () => Recolour(TreeSourcePath, s, true), pivot, SpriteMeshType.Tight);
+                }
+            }
+
+            CreateSprite(FallingPath("Petal"), () => RenderFalling(0), new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+            CreateSprite(FallingPath("Leaf"), () => RenderFalling(2), new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+            CreateSprite(FallingPath("Snowflake"), () => RenderFalling(3), new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+        }
+
+        public static SeasonArt LoadSeasonArt()
+        {
+            var art = new SeasonArt();
+            for (int s = 0; s < 4; s++) art.Grass[s] = AssetDatabase.LoadAssetAtPath<Tile>(TileAssetPath(SeasonGrassName(s)));
+            for (int s = 0; s < 4; s++) art.Trees[s] = AssetDatabase.LoadAssetAtPath<Sprite>(SeasonTreePath(s));
+            art.Falling[0] = AssetDatabase.LoadAssetAtPath<Sprite>(FallingPath("Petal"));
+            art.Falling[2] = AssetDatabase.LoadAssetAtPath<Sprite>(FallingPath("Leaf"));
+            art.Falling[3] = AssetDatabase.LoadAssetAtPath<Sprite>(FallingPath("Snowflake"));
+            return art;
+        }
+
+        /// <summary>
+        /// An image recoloured for a season: sunnier (summer), golden (autumn), snowy (winter). Alpha kept.
+        /// leavesOnly: only green pixels change, so a tree trunk stays brown.
+        /// </summary>
+        private static Texture2D Recolour(string path, int season, bool leavesOnly)
+        {
+            var src = new Texture2D(2, 2);
+            src.LoadImage(File.ReadAllBytes(Path.Combine(Directory.GetCurrentDirectory(), path)));
+            var px = src.GetPixels();
+            for (int i = 0; i < px.Length; i++)
+            {
+                var c = px[i];
+                if (c.a <= 0f) continue;
+                if (leavesOnly && !(c.g > c.r + 0.04f && c.g > c.b + 0.03f)) continue;
+                float lum = 0.3f * c.r + 0.59f * c.g + 0.11f * c.b;
+                Color target;
+                float amount;
+                switch (season)
+                {
+                    case 1: target = new Color(c.r * 1.12f + 0.04f, c.g * 1.04f, c.b * 0.7f); amount = 0.7f; break;               // summer
+                    case 2: target = new Color(lum * 1.6f + 0.14f, lum * 1.1f + 0.05f, lum * 0.3f); amount = 0.85f; break;       // autumn
+                    default: target = new Color(0.86f, 0.9f, 0.97f) * (0.78f + 0.32f * lum); amount = 0.88f; break;            // winter
+                }
+
+                var o = Color.Lerp(c, target, amount);
+                o.a = c.a;
+                px[i] = o;
+            }
+
+            var tex = NewTexture(src.width, src.height);
+            tex.SetPixels(px);
+            tex.Apply();
+            Object.DestroyImmediate(src);
+            return tex;
+        }
+
+        /// <summary>A petal (spring), a leaf (autumn) or a snowflake (winter), 32x32.</summary>
+        private static Texture2D RenderFalling(int season)
+        {
+            const int size = 32;
+            var tex = NewTexture(size, size);
+            var px = new Color32[size * size];
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float dx = (x + 0.5f - 16f) / 16f, dy = (y + 0.5f - 16f) / 16f;
+                Color32? c = null;
+                if (season == 0 && (dx * dx) / 0.55f + (dy * dy) / 0.25f <= 1f) c = new Color32(255, 182, 206, 255);
+                else if (season == 2)
+                {
+                    float half = Mathf.Sin((dx * 0.5f + 0.5f) * Mathf.PI) * 0.45f;
+                    if (Mathf.Abs(dy) <= half && Mathf.Abs(dx) < 0.95f) c = dy > 0 ? new Color32(236, 130, 40, 255) : new Color32(205, 95, 30, 255);
+                }
+                else if (season == 3)
+                {
+                    float d = Mathf.Sqrt(dx * dx + dy * dy);
+                    if (d <= 0.55f) c = new Color32(255, 255, 255, (byte)(255 * Mathf.Clamp01((0.55f - d) * 6f)));
+                }
+
+                if (c.HasValue) px[y * size + x] = c.Value;
+            }
+
+            tex.SetPixels32(px);
+            tex.Apply();
+            return tex;
+        }
+
         // ------------------------------------------------------------------ Collections (Milestone 8 step 3)
 
         public const string CollectiblesArtFolder = "Assets/_Game/Art/Collectibles";

@@ -212,11 +212,19 @@ namespace TownBuilder
 
         public CollectionsPanel CollectionsPanel => collectionsPanel;
 
+        /// <summary>Seasons: season toasts and seasonal decorations in the shop.</summary>
+        public void InitializeSeasons(SeasonController seasons)
+        {
+            if (seasons == null) return;
+            if (shopPanel != null) shopPanel.AddListingFilter(seasons.IsListedInShop);
+            seasons.Notification += toast.Show;
+        }
+
         public void InitializeEvents(WeekendEventService events)
         {
             if (events == null) return;
             if (eventPanel != null) eventPanel.Initialize(events);
-            if (shopPanel != null) shopPanel.SetListingFilter(events.IsListedInShop);
+            if (shopPanel != null) shopPanel.AddListingFilter(events.IsListedInShop);
             events.Notification += toast.Show;
         }
 

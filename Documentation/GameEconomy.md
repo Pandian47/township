@@ -103,6 +103,22 @@ already there or their slot count.
 its ingredients, every recipe belongs to exactly one factory, and no recipe unlocks before its factory or any of
 its ingredients.
 
+## Seasons (Milestone 8 step 4)
+
+The town follows the phone's local month: **spring** (Mar–May), **summer** (Jun–Aug), **autumn** (Sep–Nov),
+**winter** (Dec–Feb). Grass, decoration trees and falling effects change; water, sand and roads don't.
+
+| Season | Grass | Trees | Falling | Seasonal decoration (sold only this season, 1×1) |
+|---|---|---|---|---|
+| Spring | fresh green | green | petals | Tulip Planter, 60 coins, +8 happy |
+| Summer | sunny | green | – | Sunflower Patch, 60 coins, +8 happy |
+| Autumn | golden | golden | leaves | Pumpkin Pile, 60 coins, +8 happy |
+| Winter | snowy | snowy | snowflakes | Snowman, 80 coins, +10 happy |
+
+* Seasonal decorations unlock at level 2. Once built they stay all year (only the shop hides them out of season).
+* A toast announces a new season the first time the player opens the game in it.
+* No economy effect beyond the decorations (same prices and happiness as normal ones).
+
 ## Collections (Milestone 8 step 3, `Data/Collections`, chest button under the menu)
 
 Rare items, kept apart from the barn. Each action has a chance to find one item of the matching collection

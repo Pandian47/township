@@ -55,7 +55,8 @@ namespace TownBuilder.Tests
             scene.Farming.FinishNow(field);
             yield return new WaitForSecondsRealtime(0.1f); // past the anti-spam window
             scene.Farming.TryHarvest(field);
-            Assert.AreEqual(SoundId.Harvest, audio.LastSound);
+            // A rare collection find can play its own sound right after the harvest, so check the history.
+            Assert.IsTrue(audio.PlayedWithin(SoundId.Harvest, 0.5f));
 
             scene.Progress.AddXp(1000);
             // Other sounds may follow in the same moment (e.g. the station opening at level 5), so check the history.

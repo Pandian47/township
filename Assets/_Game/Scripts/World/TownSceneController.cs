@@ -28,6 +28,7 @@ namespace TownBuilder
         [SerializeField] private TrainController trainController;
         [SerializeField] private TruckController truckController;
         [SerializeField] private HappinessController happinessController;
+        [SerializeField] private SeasonController seasonController;
         [SerializeField] private LandController landController;
         [SerializeField] private TrainMover trainMover;
         [SerializeField] private StreetLife streetLife;
@@ -74,6 +75,7 @@ namespace TownBuilder
         public TrainController Train => trainController;
         public TruckController Truck => truckController;
         public HappinessController Homes => happinessController;
+        public SeasonController Seasons => seasonController;
         public LandController LandController => landController;
         public LandPlots Land => _land;
         public DailyRewardService Daily => _daily;
@@ -214,6 +216,13 @@ namespace TownBuilder
                 happinessController.Modified += ScheduleSave;
             }
 
+            if (seasonController != null)
+            {
+                seasonController.Notification += _ => ScheduleSave(); // remember the announced season
+                seasonController.Initialize(_town, _context.Clock,
+                    () => (long)System.TimeZoneInfo.Local.GetUtcOffset(System.DateTime.UtcNow).TotalMilliseconds, save.lastSeason, content);
+            }
+
             if (streetLife != null) streetLife.Initialize(_town, content);
 
             cameraController.SetWorldBounds(grid.WorldBounds());
@@ -241,6 +250,7 @@ namespace TownBuilder
             if (trainController != null) hud.InitializeTrain(trainController, _context.Content, _inventory, _context.Ads);
             if (truckController != null) hud.InitializeTruck(truckController, _context.Content, _inventory, _context.Ads);
             if (happinessController != null) hud.InitializeHomes(happinessController);
+            hud.InitializeSeasons(seasonController);
             if (landController != null) hud.InitializeLand(landController);
             hud.InitializeDev(this, _context.Content);
             hud.InitializeDaily(_daily);
@@ -322,6 +332,7 @@ namespace TownBuilder
                 TownSaveMapper.WriteTrain(_context.ActiveSave, _train);
                 TownSaveMapper.WriteTruck(_context.ActiveSave, _deliveryTruck);
                 TownSaveMapper.WriteHomeCoins(_context.ActiveSave, _homeCoins);
+                if (seasonController != null) _context.ActiveSave.lastSeason = (int)seasonController.Current;
                 TownSaveMapper.WriteLand(_context.ActiveSave, _land);
                 TownSaveMapper.WriteDaily(_context.ActiveSave, _daily.Track);
                 TownSaveMapper.WriteAchievements(_context.ActiveSave, _achievements.Book);

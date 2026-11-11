@@ -36,6 +36,7 @@ namespace TownBuilder.Tests
         {
             yield return LoadTown();
             var content = GameRoot.Current.Context.Content;
+            var scene = Object.FindAnyObjectByType<TownSceneController>();
             var shop = Object.FindAnyObjectByType<BuildingShopPanel>();
             GameObject.Find("BuildButton").GetComponent<Button>().onClick.Invoke();
             Assert.IsTrue(shop.IsOpen);
@@ -60,14 +61,14 @@ namespace TownBuilder.Tests
                 GameObject.Find($"Card_{category}").GetComponent<Button>().onClick.Invoke();
                 Assert.IsFalse(shop.ShowingCategories, "the category opens in its own full window");
                 Assert.AreEqual(category, shop.CurrentCategory);
-                int count = content.Buildings.Count(b => b.ShowInShop && !b.EventOnly && b.Category == category);
+                int count = content.Buildings.Count(b => b.ShowInShop && !b.EventOnly && (!b.IsSeasonal || b.Season == scene.Seasons.Current) && b.Category == category);
                 Assert.AreEqual(count, shop.VisibleItems, $"{category} window");
                 total += count;
                 GameObject.Find("BackButton").GetComponent<Button>().onClick.Invoke();
                 Assert.IsTrue(shop.ShowingCategories);
             }
 
-            Assert.AreEqual(content.Buildings.Count(b => b.ShowInShop && !b.EventOnly), total, "every shop item is in one tab (event prizes stay hidden)");
+            Assert.AreEqual(content.Buildings.Count(b => b.ShowInShop && !b.EventOnly && (!b.IsSeasonal || b.Season == scene.Seasons.Current)), total, "every shop item is in one tab (event prizes stay hidden)");
 
             // Factories tab: only factories. Fruit trees are on the Farm tab.
             Assert.IsTrue(content.Buildings.Where(b => b.ShowInShop && b.Category == BuildingCategory.Production).All(b => b.IsFactory));

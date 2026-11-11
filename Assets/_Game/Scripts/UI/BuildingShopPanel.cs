@@ -83,8 +83,16 @@ namespace TownBuilder
         private Func<BuildingDefinition, bool> _isListed = _ => true;
         private Func<BuildingDefinition, int> _ownedCount;
 
-        /// <summary>Hides cards that aren't for sale right now (event-only decorations not unlocked yet).</summary>
-        public void SetListingFilter(Func<BuildingDefinition, bool> isListed) => _isListed = isListed ?? (_ => true);
+        /// <summary>
+        /// Hides cards that aren't for sale right now (event-only decorations not unlocked yet, other seasons' decorations).
+        /// Filters add up: a card shows only when every filter allows it.
+        /// </summary>
+        public void AddListingFilter(Func<BuildingDefinition, bool> isListed)
+        {
+            if (isListed == null) return;
+            var previous = _isListed;
+            _isListed = d => previous(d) && isListed(d);
+        }
 
         public bool IsOpen => panelRoot.activeSelf;
         public bool ShowingCategories => cardsScreen != null && cardsScreen.activeSelf;

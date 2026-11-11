@@ -94,7 +94,8 @@ namespace TownBuilder.Tests
 
             shop.Open();
             shop.OpenCategory(BuildingCategory.Decoration);
-            int listed = content.Buildings.Count(b => b.ShowInShop && b.Category == BuildingCategory.Decoration && (!b.EventOnly || b == deco));
+            int listed = content.Buildings.Count(b => b.ShowInShop && b.Category == BuildingCategory.Decoration && (!b.EventOnly || b == deco)
+                                                      && (!b.IsSeasonal || b.Season == scene.Seasons.Current));
             Assert.AreEqual(listed, shop.VisibleItems);
             shop.Close();
 

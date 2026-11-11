@@ -38,6 +38,9 @@ namespace TownBuilder
         [SerializeField] private bool showInShop = true;
         [Tooltip("Decorations: happiness this gives every home within GameContent → Happiness radius (0 = none).")]
         [SerializeField, Min(0)] private int happiness;
+        [Tooltip("Seasonal decoration: only sold during this season (ones already built stay).")]
+        [SerializeField] private bool seasonal;
+        [SerializeField] private TownBuilder.Domain.Season season;
         [Tooltip("Only in the shop after a weekend-event prize unlocked it.")]
         [SerializeField] private bool eventOnly;
         [Tooltip("Chimney top on the sprite, 0-1 from the bottom-left (0,0 = no chimney). Smoke rises there while the factory works.")]
@@ -83,6 +86,8 @@ namespace TownBuilder
         public bool ShowInShop => showInShop;
         public bool EventOnly => eventOnly;
         public int Happiness => happiness;
+        public bool IsSeasonal => seasonal;
+        public TownBuilder.Domain.Season Season => season;
         public Vector2 ChimneyPoint => chimney;
         public bool HasChimney => chimney != Vector2.zero;
 
@@ -91,6 +96,12 @@ namespace TownBuilder
         public void EditorSetCategory(BuildingCategory newCategory) => category = newCategory;
         public void EditorSetEventOnly(bool value) => eventOnly = value;
         public void EditorSetHappiness(int value) => happiness = value;
+
+        public void EditorSetSeason(TownBuilder.Domain.Season value)
+        {
+            seasonal = true;
+            season = value;
+        }
 
         public void EditorConfigureLandmark(bool isMovable, bool inShop)
         {

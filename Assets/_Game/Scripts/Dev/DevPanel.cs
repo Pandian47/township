@@ -22,6 +22,7 @@ namespace TownBuilder
         [SerializeField] private Button dailyAgainButton;
         [SerializeField] private Button eventButton;
         [SerializeField] private Button collectionButton;
+        [SerializeField] private Button seasonButton;
 
         private TownSceneController _scene;
         private GameContent _content;
@@ -60,6 +61,12 @@ namespace TownBuilder
                 }, "Weekend event started (for 2 days)");
             if (collectionButton != null)
                 Bind(collectionButton, () => _scene.Collections?.DevFindItem(), null);
+            if (seasonButton != null)
+                Bind(seasonButton, () =>
+                {
+                    _scene.Seasons?.DevNextSeason(_content);
+                    panelRoot.SetActive(false);
+                }, null);
         }
 
         private void Bind(Button button, Action action, string message)

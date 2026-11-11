@@ -94,6 +94,10 @@ namespace TownBuilder.EditorTools
             // Tall, thin decorations: sized by height (about a tree), pivot at the bottom centre like other 1x1 objects.
             new Spec("scarecrow", Art + "/Buildings/Decorations/PH_Building_scarecrow.png", Kind.Prop, 170),
             new Spec("festival_lantern", Art + "/Buildings/Decorations/PH_Building_festival_lantern.png", Kind.Prop, 165),
+            new Spec("tulip_planter", Art + "/Buildings/Decorations/PH_Building_tulip_planter.png", Kind.Building, 128),
+            new Spec("sunflower_patch", Art + "/Buildings/Decorations/PH_Building_sunflower_patch.png", Kind.Prop, 160),
+            new Spec("pumpkin_pile", Art + "/Buildings/Decorations/PH_Building_pumpkin_pile.png", Kind.Building, 128),
+            new Spec("snowman", Art + "/Buildings/Decorations/PH_Building_snowman.png", Kind.Prop, 160),
             new Spec("field", Art + "/Buildings/Farming/PH_Building_field.png", Kind.Flat, 128),
             // Milestone 7 step 3: the orchard. Trees are drawn from tree.png by setup; these names replace them if supplied.
             new Spec("juice_press", Art + "/Buildings/Production/PH_Building_juice_press.png", Kind.Building, 256),

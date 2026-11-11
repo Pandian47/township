@@ -27,6 +27,8 @@ namespace TownBuilder.Domain
         public TruckSaveData truck = new TruckSaveData();
         /// <summary>When each home's coins were last collected (homes keep earning while the app is closed).</summary>
         public List<HomeCoinsSaveData> homeCoins = new List<HomeCoinsSaveData>();
+        /// <summary>The season the player was last told about (Season as int, -1 = never).</summary>
+        public int lastSeason = -1;
         public LandSaveData land = new LandSaveData();
         public DailySaveData daily = new DailySaveData();
         public AchievementsSaveData achievements = new AchievementsSaveData();

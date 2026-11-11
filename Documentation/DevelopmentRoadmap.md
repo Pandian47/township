@@ -405,8 +405,14 @@ Our own features in the farming / town genre (not copied from any game).
 | 1 | **Delivery truck**: Truck Depot (level 11), 3 mixed loads, 1-hour trips, paid on return | Done (v0.30.0) |
 | 2 | **Town happiness**: decorations near houses raise happiness; happy houses pay bonus coins | Done (v0.31.0) |
 | 3 | **Collections**: rare finds while harvesting / producing, 3 sets of 5, rewards per set | Done (v0.32.0) |
-| 4 | **Seasons**: the town's look follows the real month, seasonal decorations | Next |
-| 5 | **Launch prep**: settings, credits, privacy policy, app icon, store screenshots, AAB checklist | Planned |
+| 4 | **Seasons**: the town's look follows the real month, seasonal decorations | Done (v0.33.0) |
+| 5 | **Launch prep**: settings, credits, privacy policy, app icon, store screenshots, AAB checklist | Next |
+
+### Device checklist (Milestone 8 step 4: seasons)
+- [ ] In November the town is autumn: golden grass and trees, leaves drifting down; a toast says autumn has come
+- [ ] Build → Decorations shows Pumpkin Pile (not the Snowman, Tulip Planter or Sunflower Patch)
+- [ ] DEV → "Next season (test)": winter (snowy grass and trees, snowflakes, Snowman for sale), then spring, then summer
+- [ ] Water, sand and roads never change colour; the effect doesn't block taps and stays smooth
 
 ### Device checklist (v0.32.1: full-window Build categories)
 - [ ] Build → tap a category card: a second full window opens with the category name on the sign (e.g. HOUSES)

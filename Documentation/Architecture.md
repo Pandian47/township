@@ -335,6 +335,16 @@ calendar (`Tick`, called every second by `EventPanel`), counts harvests / produc
 set of unlocked decorations and filters the shop (`BuildingShopPanel.SetListingFilter`). `EventPanel` = the town button
 + window. DEV "Start weekend event now" runs one from today for two days. Saved in `SaveData.events`.
 
+## 6g6j. Seasons (Milestone 8 step 4)
+
+`SeasonCalendar` (Domain): month → `Season`, `At(utcMs, offsetMs)`, `Next`. `SeasonController` (Scripts/World) checks the
+season every 2 s, swaps the grass tile on the ground tilemap (`Tilemap.SwapTile`, other tiles untouched), swaps the
+decoration tree's sprite, and runs a small pool of falling sprites that wraps around the camera view. Seasonal decorations
+have `BuildingDefinition.seasonal/season`; the shop hides them out of season via `BuildingShopPanel.AddListingFilter`
+(filters from events and seasons add up). `SaveData.lastSeason` remembers the announced season. Season grass and trees
+are recoloured from the current grass/tree art by `PlaceholderArtGenerator.CreateSeasonArt` (delete them to regenerate
+after new art). DEV "Next season (test)".
+
 ## 6g6i. Collections (Milestone 8 step 3)
 
 `CollectionBook` (Domain): `CollectionSetSpec`s (id, source `AchievementKind`, drop chance, item ids), item counts,

@@ -317,6 +317,14 @@ Icon prompt as bread (section 15–16):
 * `apple_juice`: "a glass bottle of golden apple juice with a small apple label and a green cap"
 * `cherry_juice`: "a glass bottle of deep red cherry juice with a cherry label and a yellow cap"
 
+## Milestone 8 step 4: seasonal decorations (optional, setup draws simple ones)
+
+Same decoration prompt style as `tree.png` (1x1 tile footprint, magenta background, no text):
+* `tulip_planter.png`: "a small wooden planter box full of colourful tulips"
+* `sunflower_patch.png`: "three tall sunflowers with green leaves growing from a little patch of soil"
+* `pumpkin_pile.png`: "a small pile of three orange pumpkins with green stems"
+* `snowman.png`: "a cheerful snowman with a black top hat, a carrot nose and a red scarf"
+
 ## Milestone 8 step 3: collection items (optional, setup draws simple ones)
 
 Icon prompt as bread (one item per image, magenta background, no text), file name = id:

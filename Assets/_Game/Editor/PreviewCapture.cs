@@ -57,6 +57,9 @@ namespace TownBuilder.EditorTools
                 ("field", 21, 18), ("field", 22, 18), ("field", 23, 18), ("field", 24, 18),
             };
 
+            if (hud == HudState.Autumn) layout = layout.Append(("pumpkin_pile", 17, 15)).Append(("tree", 19, 15)).ToArray();
+            if (hud == HudState.Winter) layout = layout.Append(("snowman", 17, 15)).Append(("tree", 19, 15)).ToArray();
+
             // Crop stage per field (index into growth sprites; -1 = empty) to check crop art and depth sorting.
             var cropStages = new (string crop, float progress)[]
             {
@@ -127,6 +130,8 @@ namespace TownBuilder.EditorTools
             }
 
             if (hud != HudState.None) PrepareTownHud(cam, content, bakery, hud);
+            if (hud == HudState.Autumn || hud == HudState.Winter)
+                UnityEngine.Object.FindAnyObjectByType<SeasonController>()?.Apply(hud == HudState.Autumn ? Season.Autumn : Season.Winter, cam);
             Render(cam, outputPath);
 
             // Discard the temporary objects: reopen the scene from disk.
@@ -134,7 +139,7 @@ namespace TownBuilder.EditorTools
             return outputPath;
         }
 
-        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm, ShopCards, Event, Truck, Home, Collections }
+        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm, ShopCards, Event, Truck, Home, Collections, Autumn, Winter }
 
         /// <summary>Command line: renders MainMenu + Town (idle, shop, placing) with UI into the folder after -previewOut.</summary>
         public static void CaptureUiFromCommandLine()
@@ -154,6 +159,8 @@ namespace TownBuilder.EditorTools
                 Capture(Path.Combine(folder, "Preview_Town_Truck.png"), HudState.Truck);
                 Capture(Path.Combine(folder, "Preview_Town_Home.png"), HudState.Home);
                 Capture(Path.Combine(folder, "Preview_Town_Collections.png"), HudState.Collections);
+                Capture(Path.Combine(folder, "Preview_Town_Autumn.png"), HudState.Autumn);
+                Capture(Path.Combine(folder, "Preview_Town_Winter.png"), HudState.Winter);
                 Capture(Path.Combine(folder, "Preview_Town_Placing.png"), HudState.Placing);
                 Capture(Path.Combine(folder, "Preview_Town_Field.png"), HudState.Field);
                 Capture(Path.Combine(folder, "Preview_Town_Barn.png"), HudState.Barn);
@@ -535,7 +542,7 @@ namespace TownBuilder.EditorTools
                 shopRoot.transform.Find("Window").gameObject.SetActive(true);
                 shopPanel.SetTitle(category);
                 var template = shopRoot.GetComponentsInChildren<ShopItemView>(true).First();
-                foreach (var def in content.Buildings.Where(d => d.ShowInShop && !d.EventOnly && d.Category == category))
+                foreach (var def in content.Buildings.Where(d => d.ShowInShop && !d.EventOnly && (!d.IsSeasonal || d.Season == Season.Autumn) && d.Category == category))
                 {
                     var item = UnityEngine.Object.Instantiate(template, template.transform.parent);
                     item.gameObject.SetActive(true);

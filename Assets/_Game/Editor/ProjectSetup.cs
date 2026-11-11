@@ -70,6 +70,8 @@ namespace TownBuilder.EditorTools
             public bool EventOnly;
             /// <summary>Decorations: happiness for homes nearby.</summary>
             public int Happy;
+            /// <summary>Seasonal decoration: only sold in this season.</summary>
+            public Season? SeasonOnly;
             /// <summary>Decoration: drawn by PlaceholderArtGenerator.CreateDecoration (not as a box building).</summary>
             public PlaceholderArtGenerator.DecorationStyle? Deco;
             /// <summary>Fruit tree: drawn from the decoration tree with fruit; <see cref="Fruit"/> grows on it by itself.</summary>
@@ -184,6 +186,15 @@ namespace TownBuilder.EditorTools
                 W = 1, H = 1, Unlock = 4, Cost = 15, Removable = true, Deco = PlaceholderArtGenerator.DecorationStyle.Fence, Happy = 2 },
             new BuildingSeed { Id = "fountain", Name = "Fountain", Category = BuildingCategory.Decoration, Folder = "Decorations",
                 W = 2, H = 2, Unlock = 6, Cost = 400, Removable = true, Deco = PlaceholderArtGenerator.DecorationStyle.Fountain, Happy = 20 },
+            // Milestone 8 step 4: seasonal decorations (sold only in their season).
+            new BuildingSeed { Id = "tulip_planter", Name = "Tulip Planter", Category = BuildingCategory.Decoration, Folder = "Decorations",
+                W = 1, H = 1, Unlock = 2, Cost = 60, Removable = true, Deco = PlaceholderArtGenerator.DecorationStyle.TulipPlanter, Happy = 8, SeasonOnly = Season.Spring },
+            new BuildingSeed { Id = "sunflower_patch", Name = "Sunflower Patch", Category = BuildingCategory.Decoration, Folder = "Decorations",
+                W = 1, H = 1, Unlock = 2, Cost = 60, Removable = true, Deco = PlaceholderArtGenerator.DecorationStyle.Sunflowers, Happy = 8, SeasonOnly = Season.Summer },
+            new BuildingSeed { Id = "pumpkin_pile", Name = "Pumpkin Pile", Category = BuildingCategory.Decoration, Folder = "Decorations",
+                W = 1, H = 1, Unlock = 2, Cost = 60, Removable = true, Deco = PlaceholderArtGenerator.DecorationStyle.PumpkinPile, Happy = 8, SeasonOnly = Season.Autumn },
+            new BuildingSeed { Id = "snowman", Name = "Snowman", Category = BuildingCategory.Decoration, Folder = "Decorations",
+                W = 1, H = 1, Unlock = 2, Cost = 80, Removable = true, Deco = PlaceholderArtGenerator.DecorationStyle.Snowman, Happy = 10, SeasonOnly = Season.Winter },
             // Milestone 7 step 4: event-only decorations (weekend event prizes).
             new BuildingSeed { Id = "scarecrow", Name = "Scarecrow", Category = BuildingCategory.Decoration, Folder = "Decorations",
                 W = 1, H = 1, Unlock = 1, Cost = 80, Removable = true, EventOnly = true, Deco = PlaceholderArtGenerator.DecorationStyle.Scarecrow, Happy = 12 },
@@ -278,6 +289,7 @@ namespace TownBuilder.EditorTools
             PlaceholderArtGenerator.CreateBuildScreenArt();
             PlaceholderArtGenerator.CreateTruckIcon();
             PlaceholderArtGenerator.CreateChestIcon();
+            PlaceholderArtGenerator.CreateSeasonArt();
             PlaceholderArtGenerator.EnsureFolder(PlaceholderArtGenerator.UiArtFolder + "/Build");
 
             CreateContent(art);
@@ -382,6 +394,12 @@ namespace TownBuilder.EditorTools
                 {
                     def.EditorConfigure(def.Id, def.DisplayName, def.Category, art.Buildings[s.Id],
                         new Vector2Int(def.FootprintSize.X, def.FootprintSize.Y), def.UnlockLevel, def.CoinCost, def.Removable, def.MaxCount);
+                    EditorUtility.SetDirty(def);
+                }
+
+                if (s.SeasonOnly != null && !def.IsSeasonal)
+                {
+                    def.EditorSetSeason(s.SeasonOnly.Value);
                     EditorUtility.SetDirty(def);
                 }
 

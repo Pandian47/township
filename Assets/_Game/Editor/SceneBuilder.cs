@@ -228,6 +228,12 @@ namespace TownBuilder.EditorTools
             var train = Go("TrainController", systems.transform).AddComponent<TrainController>();
             var truck = Go("TruckController", systems.transform).AddComponent<TruckController>();
             var homes = Go("HappinessController", systems.transform).AddComponent<HappinessController>();
+            var seasons = Go("SeasonController", world.transform).AddComponent<SeasonController>();
+            var seasonArt = PlaceholderArtGenerator.LoadSeasonArt();
+            Wire(seasons, ("groundTilemap", ground), ("buildings", buildingController), ("placement", placement));
+            WireArray(seasons, "grassTiles", seasonArt.Grass);
+            WireArray(seasons, "fallingSprites", seasonArt.Falling);
+            WireArray(seasons, "treeSprites", seasonArt.Trees);
             var streetLife = Go("StreetLife", world.transform).AddComponent<StreetLife>();
             Wire(streetLife, ("grid", isoGrid), ("roadTilemap", road),
                 ("carFront", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CarFrontPath)),
@@ -294,6 +300,7 @@ namespace TownBuilder.EditorTools
                 ("trainController", train),
                 ("truckController", truck),
                 ("happinessController", homes),
+                ("seasonController", seasons),
                 ("landController", land),
                 ("trainMover", mover),
                 ("streetLife", streetLife));
@@ -1148,7 +1155,7 @@ namespace TownBuilder.EditorTools
             var title = Label(window, "Title", "Developer mode (test builds only)", 34, TextAnchor.MiddleCenter, Ink, FontStyle.Bold);
             Prefer(title, 560, 60);
 
-            Button Row(string name, string label, Color color) => MakeButton(window, name, label, new Vector2(560, 80), color, 28);
+            Button Row(string name, string label, Color color) => MakeButton(window, name, label, new Vector2(560, 74), color, 26);
             var coins = Row("CoinsButton", "+10,000 coins  +100 gems", new Color(0.95f, 0.65f, 0.15f));
             var levelUp = Row("LevelUpButton", "Level up (+1)", Blue);
             var unlockAll = Row("UnlockAllButton", $"Unlock everything (level {DevTools.UnlockAllLevel})", Blue);
@@ -1158,13 +1165,14 @@ namespace TownBuilder.EditorTools
             var dailyAgain = Row("DailyAgainButton", "Daily reward again", new Color(0.55f, 0.35f, 0.7f));
             var startEvent = Row("DevEventButton", "Start weekend event now", new Color(0.95f, 0.5f, 0.15f));
             var findItem = Row("DevCollectionButton", "Find a collection item", new Color(0.2f, 0.6f, 0.6f));
+            var nextSeason = Row("DevSeasonButton", "Next season (test)", new Color(0.35f, 0.55f, 0.2f));
             var close = Row("CloseButton", "Close", Slate);
 
             var panel = container.gameObject.AddComponent<DevPanel>();
             Wire(panel, ("openButton", open), ("panelRoot", root.gameObject), ("closeButton", close), ("coinsButton", coins),
                 ("levelUpButton", levelUp), ("unlockAllButton", unlockAll), ("fillBarnButton", fillBarn),
                 ("finishTimersButton", finish), ("unlockLandButton", land), ("dailyAgainButton", dailyAgain), ("eventButton", startEvent),
-                ("collectionButton", findItem));
+                ("collectionButton", findItem), ("seasonButton", nextSeason));
             root.gameObject.SetActive(false);
             return panel;
         }
