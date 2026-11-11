@@ -48,7 +48,18 @@ namespace TownBuilder.Tests
             yield return null;
             var panel = GameObject.Find("TasksPanel");
             Assert.NotNull(panel, "tasks panel in the HUD");
+            var tasks = scene.Hud.TasksPanel;
+            Assert.IsFalse(tasks.IsOpen, "the list is closed until the Tasks button is tapped");
+            Assert.IsTrue(tasks.OpenButton.gameObject.activeInHierarchy, "Tasks button visible");
+            tasks.OpenButton.onClick.Invoke();
+            Assert.IsTrue(tasks.IsOpen, "the Tasks button opens the list");
             Assert.IsTrue(panel.transform.Find("Root").gameObject.activeSelf);
+            scene.Hud.MenuButton.onClick.Invoke();
+            Assert.IsFalse(tasks.IsOpen, "another button closes the list");
+            scene.Hud.SettingsPanel.Close();
+            tasks.OpenButton.onClick.Invoke();
+            tasks.OpenButton.onClick.Invoke();
+            Assert.IsFalse(tasks.IsOpen, "tapping the Tasks button again closes it");
         }
 
         [UnityTest]

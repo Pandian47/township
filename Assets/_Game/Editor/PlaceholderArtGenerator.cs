@@ -971,6 +971,51 @@ namespace TownBuilder.EditorTools
         public static Sprite CreateChestIcon() =>
             CreateSprite(ChestIconPath, RenderChest, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
 
+        public static readonly string TasksIconPath = UiArtFolder + "/PH_Icon_Tasks.png";
+
+        /// <summary>Clipboard with three ticked lines (Tasks button, v0.35.2), 128x128.</summary>
+        public static Sprite CreateTasksIcon() =>
+            CreateSprite(TasksIconPath, RenderTasksIcon, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+
+        private static Texture2D RenderTasksIcon()
+        {
+            const int size = 128;
+            var tex = NewTexture(size, size);
+            var px = new Color32[size * size];
+            void Box(float x0, float y0, float x1, float y1, Color32 c)
+            {
+                for (int y = Mathf.Max(0, (int)y0); y < Mathf.Min(size, (int)y1); y++)
+                for (int x = Mathf.Max(0, (int)x0); x < Mathf.Min(size, (int)x1); x++)
+                    px[y * size + x] = c;
+            }
+
+            void Tick(float x0, float y0, Color32 c)
+            {
+                // A small check mark: short stroke down-right, long stroke up-right, 4 px thick.
+                for (float t = 0f; t <= 1f; t += 0.02f)
+                {
+                    Box(x0 + t * 6f, y0 + 6f - t * 6f, x0 + t * 6f + 4f, y0 + 10f - t * 6f, c);
+                    Box(x0 + 6f + t * 10f, y0 + t * 12f, x0 + 10f + t * 10f, y0 + 4f + t * 12f, c);
+                }
+            }
+
+            Box(22, 6, 106, 114, new Color32(150, 96, 52, 255));     // board
+            Box(30, 14, 98, 100, new Color32(255, 250, 236, 255));   // paper
+            Box(46, 98, 82, 120, new Color32(160, 164, 172, 255));   // clip
+            Box(54, 108, 74, 116, new Color32(110, 114, 122, 255));  // clip hole
+            for (int i = 0; i < 3; i++)
+            {
+                float y = 74 - i * 24;
+                Tick(36, y - 2, new Color32(70, 160, 80, 255));
+                Box(60, y + 2, 90, y + 8, new Color32(120, 112, 100, 255));
+            }
+
+            AddOutline(px, size, size);
+            tex.SetPixels32(px);
+            tex.Apply();
+            return tex;
+        }
+
         private static Texture2D RenderCollectible(CollectibleShape shape, Color32 colour)
         {
             const int size = 128;

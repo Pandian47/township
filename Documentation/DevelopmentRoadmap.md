@@ -408,6 +408,12 @@ Our own features in the farming / town genre (not copied from any game).
 | 4 | **Seasons**: the town's look follows the real month, seasonal decorations | Done (v0.33.0) |
 | 5 | **Launch prep**: settings, credits, privacy policy, app icon, store screenshots, AAB checklist | Done (v0.35.0) |
 
+### Device checklist (v0.35.2: Tasks button)
+- [ ] The task list is closed when the town opens; a round green clipboard button sits under the level star
+- [ ] Its red badge shows how many tasks are ready to claim (hidden when none)
+- [ ] Tapping it opens the list next to it; tapping it again closes it; Claim still works and the badge updates
+- [ ] Opening Build, Barn, Orders, Goals, the chest, the event or the menu closes the list (it never shows behind a window)
+
 ### Device checklist (Milestone 8 step 5: launch prep)
 - [ ] v0.35.1: the home screen shows the owner's icon (cottage, apple tree, sun); the tree and roof aren't cut off
 - [ ] v0.35.1: the new train (red engine, blue and green wagons) drives in, stops at the platform and leaves

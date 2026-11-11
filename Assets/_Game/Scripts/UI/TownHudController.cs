@@ -164,6 +164,11 @@ namespace TownBuilder
             _tasks = tasks;
             tasksPanel.Initialize(tasks);
             tasks.Notification += toast.Show;
+            // Any other button (Build, Barn, Orders, menu, chest, event...) closes the task list, so it never stays
+            // open behind a window.
+            foreach (var button in GetComponentsInChildren<Button>(true))
+                if (!button.transform.IsChildOf(tasksPanel.transform))
+                    button.onClick.AddListener(tasksPanel.Close);
         }
 
         /// <summary>Truck Depot panel (shown while the finished depot is selected).</summary>
@@ -233,6 +238,7 @@ namespace TownBuilder
 
         public LandscapePanel LandscapePanel => landscapePanel;
         public SettingsPanel SettingsPanel => settingsPanel;
+        public TasksPanel TasksPanel => tasksPanel;
         public Button MenuButton => menuButton;
 
         /// <summary>Collections: the chest button and window.</summary>

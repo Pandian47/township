@@ -562,6 +562,7 @@ namespace TownBuilder.EditorTools
             var eventPanel = BuildEventPanel(canvas.transform, safe);
             var collectionsPanel = BuildCollectionsPanel(canvas.transform, safe);
             var landscapePanel = BuildLandscapePanel(safe, nav.gameObject, tasksPanel.gameObject);
+            tasksPanel.transform.SetAsLastSibling(); // the open list covers the Event button under it
             var daily = BuildDailyRewardDialog(canvas.transform);
             var settingsPanel = BuildSettingsPanel(canvas.transform);
             var rewardLayer = Stretch("RewardFlyLayer", canvas.transform);
@@ -1623,9 +1624,33 @@ namespace TownBuilder.EditorTools
         private static TasksPanel BuildTasksPanel(RectTransform safe)
         {
             const float width = 470f, rowHeight = 96f;
-            var container = MakeRect("TasksPanel", safe, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(30, -150),
-                new Vector2(width, 52 + 3 * (rowHeight + 8) + 12));
-            var root = Stretch("Root", container);
+            var outline = AssetDatabase.LoadAssetAtPath<Material>(ProjectSetup.UIFontOutlineMaterialPath);
+
+            // v0.35.2: closed by default; a round Tasks button (left, mirrors the Collections chest on the right) opens it.
+            var container = MakeRect("TasksPanel", safe, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(24, -150),
+                new Vector2(104 + 14 + width, 52 + 3 * (rowHeight + 8) + 12));
+            var open = MakeButton(container, "TasksButton", "", new Vector2(104, 104), new Color(0.30f, 0.62f, 0.35f), 30);
+            var openRect = (RectTransform)open.transform;
+            openRect.anchorMin = openRect.anchorMax = openRect.pivot = new Vector2(0f, 1f);
+            openRect.anchoredPosition = Vector2.zero;
+            var openImg = open.GetComponent<Image>();
+            openImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CirclePath);
+            openImg.type = Image.Type.Simple;
+            var icon = MakeRect("Icon", openRect, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 2), new Vector2(68, 68));
+            var iconImg = icon.gameObject.AddComponent<Image>();
+            iconImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.TasksIconPath);
+            iconImg.preserveAspect = true;
+            iconImg.raycastTarget = false;
+            var badge = MakeRect("Badge", openRect, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-8, -8), new Vector2(46, 46));
+            var badgeImg = badge.gameObject.AddComponent<Image>();
+            badgeImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CirclePath);
+            badgeImg.color = new Color(0.90f, 0.17f, 0.14f);
+            badgeImg.raycastTarget = false;
+            var badgeText = Label(badge, "Text", "1", 28, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+            if (outline != null) badgeText.fontSharedMaterial = outline;
+            badge.gameObject.SetActive(false);
+
+            var root = MakeRect("Root", container, new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(118, 0), new Vector2(width, 0));
             AddImage(root, new Color(PanelColor.r, PanelColor.g, PanelColor.b, 0.94f), raycast: false);
 
             var titleRect = MakeRect("Title", root, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -6), new Vector2(-28, 44));
@@ -1663,8 +1688,9 @@ namespace TownBuilder.EditorTools
             }
 
             var panel = container.gameObject.AddComponent<TasksPanel>();
-            Wire(panel, ("panelRoot", root.gameObject));
+            Wire(panel, ("panelRoot", root.gameObject), ("openButton", open), ("badge", badge.gameObject), ("badgeText", badgeText));
             WireArray(panel, "rows", rows);
+            root.gameObject.SetActive(false);
             return panel;
         }
 

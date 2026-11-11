@@ -296,6 +296,7 @@ namespace TownBuilder.EditorTools
             PlaceholderArtGenerator.CreateBuildScreenArt();
             PlaceholderArtGenerator.CreateTruckIcon();
             PlaceholderArtGenerator.CreateChestIcon();
+            PlaceholderArtGenerator.CreateTasksIcon();
             PlaceholderArtGenerator.CreateSeasonArt();
             AppIconTools.EnsureAndApply();
             PlaceholderArtGenerator.EnsureFolder(PlaceholderArtGenerator.UiArtFolder + "/Build");

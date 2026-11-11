@@ -215,7 +215,9 @@ claims completed tasks and refills slots (guide tasks in order, then random repe
 when X exists). `TaskDefinition` assets are the content (`GameContent.Tasks`, order matters). `TaskService` maps events
 to progress: `FarmingController.Rewarded` → Harvest, `ProductionController.Rewarded` → Collect, `OrderService.Delivered` → Deliver,
 `PlacementSystem.BuildingPlaced` → Build; it pays rewards on `Claim` and refills on level-up. Saved in `SaveData.tasks` and
-`completedTaskIds`. UI: `TasksPanel` + `TaskRowView` (top-left of the HUD).
+`completedTaskIds`. UI: `TasksPanel` + `TaskRowView` (top-left of the HUD). Since v0.35.2 the list is closed by default:
+a round Tasks button (clipboard icon, red badge = tasks ready to claim) toggles it, and every other HUD button closes it
+(`TownHudController.InitializeTasks` adds `TasksPanel.Close` to their clicks).
 
 ## 6g4. Train
 

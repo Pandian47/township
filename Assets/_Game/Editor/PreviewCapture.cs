@@ -164,7 +164,7 @@ namespace TownBuilder.EditorTools
             return outputPath;
         }
 
-        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm, ShopCards, Event, Truck, Home, Collections, Autumn, Winter, Landscape, Settings, Credits }
+        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm, ShopCards, Event, Truck, Home, Collections, Autumn, Winter, Landscape, Settings, Credits, Tasks }
 
         /// <summary>
         /// Command line (v0.35.0): Google Play phone screenshots, 1920x1080, without the DEV button, into the folder after
@@ -230,6 +230,7 @@ namespace TownBuilder.EditorTools
                 Capture(Path.Combine(folder, "Preview_Town_Goals.png"), HudState.Goals);
                 Capture(Path.Combine(folder, "Preview_Town_Settings.png"), HudState.Settings);
                 Capture(Path.Combine(folder, "Preview_Town_Credits.png"), HudState.Credits);
+                Capture(Path.Combine(folder, "Preview_Town_Tasks.png"), HudState.Tasks);
             }
             catch (Exception e)
             {
@@ -263,10 +264,15 @@ namespace TownBuilder.EditorTools
             taskRows[0].Show("Harvest 6 Wheat", 4, 6, "+20 coins  +3 XP", false);
             taskRows[1].Show("Build a Bakery", 1, 1, "+40 coins  +5 XP", true);
             taskRows[2].Show("Make 2 Bread", 0, 2, "+30 coins  +4 XP", false);
+            // Tasks button with "1 ready" badge; the list itself only in the Tasks preview (closed by default since v0.35.2).
+            var tasksPanel = Find(canvas, "TasksPanel").transform;
+            tasksPanel.Find("TasksButton/Badge").gameObject.SetActive(true);
+            tasksPanel.Find("TasksButton/Badge/Text").GetComponent<TMPro.TMP_Text>().text = "1";
+            tasksPanel.Find("Root").gameObject.SetActive(state == HudState.Tasks);
 
             Find(canvas, "PlacementActionBar").SetActive(state == HudState.Placing);
             Find(canvas, "SelectionActionBar").SetActive(false);
-            Find(canvas, "BottomNavigation").SetActive(state == HudState.Idle || state == HudState.Settings);
+            Find(canvas, "BottomNavigation").SetActive(state == HudState.Idle || state == HudState.Settings || state == HudState.Tasks);
             if (_storeMode) Find(canvas, "DevPanel").SetActive(false);
 
             if (state == HudState.Settings || state == HudState.Credits)
