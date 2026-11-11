@@ -1040,13 +1040,14 @@ namespace TownBuilder.EditorTools
 
             var actions = MakeRect("Actions", queue, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), Vector2.zero, new Vector2(0, 90));
             HRow(actions, 12, TextAnchor.MiddleLeft);
-            var collect = MakeButton(actions, "CollectButton", "Collect", new Vector2(260, 86), Green, out var collectLabel, 32);
-            var finish = MakeButton(actions, "FinishNowButton", "Finish now", new Vector2(300, 86), new Color(0.95f, 0.65f, 0.15f), out var finishLabel, 28);
+            var collect = MakeButton(actions, "CollectButton", "Collect", new Vector2(220, 86), Green, out var collectLabel, 32);
+            var finish = MakeButton(actions, "FinishNowButton", "Finish now", new Vector2(270, 86), new Color(0.95f, 0.65f, 0.15f), out var finishLabel, 26);
+            var factoryGems = MakeButton(actions, "GemsButton", "Finish now\n1 gem", new Vector2(250, 86), new Color(0.3f, 0.6f, 0.85f), out var factoryGemsLabel, 26);
 
             var panel = container.gameObject.AddComponent<FactoryPanel>();
             Wire(panel, ("panelRoot", root.gameObject), ("titleText", title), ("queueTitleText", queueTitle),
                 ("recipesParent", recipes), ("recipeTemplate", recipeView), ("collectButton", collect), ("collectLabel", collectLabel),
-                ("finishNowButton", finish), ("finishNowLabel", finishLabel),
+                ("finishNowButton", finish), ("finishNowLabel", finishLabel), ("gemsButton", factoryGems), ("gemsLabel", factoryGemsLabel),
                 ("addSlotButton", addSlot), ("addSlotLabel", addSlotLabel));
             WireArray(panel, "slots", slotViews);
             root.gameObject.SetActive(false);
@@ -1089,25 +1090,29 @@ namespace TownBuilder.EditorTools
             var growing = MakeRect("Growing", root, Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
             growing.offsetMin = new Vector2(24, 16);
             growing.offsetMax = new Vector2(-24, -66);
-            var statusRect = MakeRect("Status", growing, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0, -10), new Vector2(680, 70));
+            var statusRect = MakeRect("Status", growing, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0, -10), new Vector2(520, 70));
             var status = Label(statusRect, "Text", "", 36, TextAnchor.MiddleLeft, Ink);
-            var barBg = MakeRect("ProgressBar", growing, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0, 30), new Vector2(680, 36));
+            var barBg = MakeRect("ProgressBar", growing, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0, 30), new Vector2(520, 36));
             AddImage(barBg, new Color(0.82f, 0.78f, 0.7f), raycast: false);
             var fillRect = Stretch("Fill", barBg, 4f);
             var fill = AddImage(fillRect, Green, raycast: false);
             fill.type = Image.Type.Filled;
             fill.fillMethod = Image.FillMethod.Horizontal;
             fill.fillAmount = 0.3f;
-            var action = MakeButton(growing, "ActionButton", "Finish now", new Vector2(320, 140), new Color(0.95f, 0.65f, 0.15f), out var actionLabel, 34);
+            var action = MakeButton(growing, "ActionButton", "Finish now", new Vector2(250, 140), new Color(0.95f, 0.65f, 0.15f), out var actionLabel, 30);
             var actionRect = (RectTransform)action.transform;
             actionRect.anchorMin = actionRect.anchorMax = actionRect.pivot = new Vector2(1f, 0.5f);
-            actionRect.anchoredPosition = Vector2.zero;
+            actionRect.anchoredPosition = new Vector2(-262, 0);
+            var fieldGems = MakeButton(growing, "GemsButton", "Finish now\n1 gem", new Vector2(250, 140), new Color(0.3f, 0.6f, 0.85f), out var fieldGemsLabel, 30);
+            var fieldGemsRect = (RectTransform)fieldGems.transform;
+            fieldGemsRect.anchorMin = fieldGemsRect.anchorMax = fieldGemsRect.pivot = new Vector2(1f, 0.5f);
+            fieldGemsRect.anchoredPosition = Vector2.zero;
             growing.gameObject.SetActive(false);
 
             var panel = container.gameObject.AddComponent<FieldPanel>();
             Wire(panel, ("panelRoot", root.gameObject), ("titleText", title), ("cropsView", crops.gameObject), ("cropsParent", crops),
                 ("cropTemplate", cropView), ("growingView", growing.gameObject), ("statusText", status), ("progressFill", fill),
-                ("actionButton", action), ("actionLabel", actionLabel));
+                ("actionButton", action), ("actionLabel", actionLabel), ("gemsButton", fieldGems), ("gemsLabel", fieldGemsLabel));
             root.gameObject.SetActive(false);
             return panel;
         }

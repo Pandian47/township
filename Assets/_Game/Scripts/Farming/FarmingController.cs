@@ -156,6 +156,25 @@ namespace TownBuilder
             return true;
         }
 
+        /// <summary>Gems to finish this crop now (0 when nothing is growing).</summary>
+        public int GemCostToFinish(string plotId) =>
+            _plots.TryGetCrop(plotId, out var state) && !state.IsReady(NowUnixMs) ? TimeSkip.GemCost(state.RemainingMs(NowUnixMs)) : 0;
+
+        /// <summary>Finishes a growing crop / fruit now for gems (1 per minute left).</summary>
+        public bool FinishWithGems(string plotId)
+        {
+            int cost = GemCostToFinish(plotId);
+            if (cost <= 0) return false;
+            if (!_wallet.TrySpendGems(cost))
+            {
+                Notification?.Invoke($"You need {cost} gems.");
+                Failed?.Invoke();
+                return false;
+            }
+
+            return FinishNow(plotId);
+        }
+
         public bool FinishNow(string plotId)
         {
             if (!_plots.FinishNow(plotId, NowUnixMs)) return false;

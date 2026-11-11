@@ -351,12 +351,12 @@ What it shows (EconomyReport.md, "Bonus income and gems"):
 | Do daily rewards + events replace normal play? | After the first minutes they add **8–21 %** on top of normal coins | OK: a bonus, not a shortcut. No change. |
 | Are Goals reached early enough to feel alive? | First tier (Green Fingers) during level 2, then one every level or two | OK. No change. |
 | Can a weekend event be finished? | Harvest Festival's last prize takes ~60 min of play at level 3 (2 weekend days ≈ 90 min) | OK. Market Weekend counts orders, which the model ignores. |
-| Are gems scarce enough to matter? | **~71 free gems by level 10**, while skipping every construction costs only ~31 | **Too many for their one use.** See below. |
+| Are gems scarce enough to matter? | **~71 free gems by level 10**, while skipping every construction costs only ~31 | Too many for one use: solved in v0.29.1 (below). |
 
-**Gems decision (open):** finishing construction (1 gem per minute) is the only thing gems buy, so gems pile up.
-The recommendation is to keep the income and give gems a second use in Milestone 8 (for example "finish a factory
-job / crop now" for gems next to the ad button, or gem-only decorations), rather than cutting Goal gems now and having
-to raise them again later. Until then, nothing is out of balance for coins or pacing.
+**Gems decision (owner, v0.29.1): a second use.** Gems now also finish a **growing crop or fruit** and the **product a
+factory is making**, at the same price as construction: **1 gem per started minute left** (`TimeSkip.GemCost`). The
+blue "Finish now · N gems" button sits next to the ad button in the field and factory panels. Gem income stays as it
+is; 71 gems by level 10 ≈ 71 minutes of waiting skipped, so gems stay worth saving.
 
 New guard rails in `BalanceTests`: bonus coins at most 25 % of normal income from level 2 on; free gems never fewer than
 needed to skip every build; a Goal tier within the first three levels; every harvest/product event finishable within one

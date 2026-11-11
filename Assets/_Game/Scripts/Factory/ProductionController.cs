@@ -209,6 +209,31 @@ namespace TownBuilder
             return true;
         }
 
+        public bool HasGems(long amount) => _wallet != null && _wallet.Gems >= amount;
+
+        /// <summary>Gems to finish the product being made now (0 when the factory is idle).</summary>
+        public int GemCostToFinish(string factoryId)
+        {
+            if (!_factories.TryGet(factoryId, out var queue)) return 0;
+            var active = queue.ActiveJob(NowUnixMs);
+            return active != null ? TimeSkip.GemCost(active.RemainingMs(NowUnixMs)) : 0;
+        }
+
+        /// <summary>Finishes the product being made now for gems (1 per minute left); the rest of the queue moves up.</summary>
+        public bool FinishWithGems(string factoryId)
+        {
+            int cost = GemCostToFinish(factoryId);
+            if (cost <= 0) return false;
+            if (!_wallet.TrySpendGems(cost))
+            {
+                Notification?.Invoke($"You need {cost} gems.");
+                Failed?.Invoke();
+                return false;
+            }
+
+            return FinishActiveNow(factoryId);
+        }
+
         public bool FinishActiveNow(string factoryId)
         {
             if (!_factories.TryGet(factoryId, out var queue) || !queue.FinishActiveNow(NowUnixMs)) return false;

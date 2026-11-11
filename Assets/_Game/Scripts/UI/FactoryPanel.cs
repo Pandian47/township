@@ -26,6 +26,9 @@ namespace TownBuilder
         [SerializeField] private TMP_Text collectLabel;
         [SerializeField] private Button finishNowButton;
         [SerializeField] private TMP_Text finishNowLabel;
+        [Tooltip("Finish the product being made now for gems (1 per minute left).")]
+        [SerializeField] private Button gemsButton;
+        [SerializeField] private TMP_Text gemsLabel;
         [Tooltip("'+1 slot' card after the queue slots: buys an extra queue slot for coins.")]
         [SerializeField] private Button addSlotButton;
         [SerializeField] private TMP_Text addSlotLabel;
@@ -54,6 +57,13 @@ namespace TownBuilder
                 Refresh();
             });
             finishNowButton.onClick.AddListener(OnFinishNow);
+            if (gemsButton != null)
+                gemsButton.onClick.AddListener(() =>
+                {
+                    if (_factoryId == null) return;
+                    _production.FinishWithGems(_factoryId);
+                    Refresh();
+                });
             Hide();
         }
 
@@ -143,6 +153,17 @@ namespace TownBuilder
             finishNowButton.gameObject.SetActive(active != null && adsAvailable);
             finishNowButton.interactable = _ads.IsRewardedReady;
             finishNowLabel.text = _ads.IsRewardedReady ? "Finish now\n(watch ad)" : "Ad loading...";
+
+            if (gemsButton != null)
+            {
+                int gems = active != null ? _production.GemCostToFinish(_factoryId) : 0;
+                gemsButton.gameObject.SetActive(gems > 0);
+                if (gems > 0)
+                {
+                    gemsLabel.text = $"Finish now\n{gems} gem{(gems == 1 ? "" : "s")}";
+                    gemsButton.interactable = _production.HasGems(gems);
+                }
+            }
         }
 
         private void OnRecipeClicked(RecipeDefinition recipe)

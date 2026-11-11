@@ -29,6 +29,9 @@ namespace TownBuilder
         [SerializeField] private Image progressFill;
         [SerializeField] private Button actionButton;
         [SerializeField] private TMP_Text actionLabel;
+        [Tooltip("Finish now for gems (1 per minute left).")]
+        [SerializeField] private Button gemsButton;
+        [SerializeField] private TMP_Text gemsLabel;
 
         private readonly List<CropButtonView> _cropButtons = new List<CropButtonView>();
         private FarmingController _farming;
@@ -61,6 +64,13 @@ namespace TownBuilder
             }
 
             actionButton.onClick.AddListener(OnActionClicked);
+            if (gemsButton != null)
+                gemsButton.onClick.AddListener(() =>
+                {
+                    if (_plotId == null) return;
+                    _farming.FinishWithGems(_plotId);
+                    Refresh(force: true);
+                });
             Hide();
         }
 
@@ -109,6 +119,17 @@ namespace TownBuilder
             string cropName = crop != null ? crop.DisplayName : state.CropId;
             long now = _farming.NowUnixMs;
             progressFill.fillAmount = state.Progress(now);
+
+            if (gemsButton != null)
+            {
+                int gems = stage == PlotStage.Growing ? _farming.GemCostToFinish(_plotId) : 0;
+                gemsButton.gameObject.SetActive(gems > 0);
+                if (gems > 0)
+                {
+                    gemsLabel.text = $"Finish now\n{gems} gem{(gems == 1 ? "" : "s")}";
+                    gemsButton.interactable = _wallet.Gems >= gems;
+                }
+            }
 
             if (stage == PlotStage.Ready)
             {

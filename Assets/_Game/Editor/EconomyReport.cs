@@ -31,7 +31,8 @@ namespace TownBuilder.EditorTools
     ///   (crops, products, crates, buildings bought, land plots, level) reach them; orders are ignored, so Trusted Trader
     ///   never pays here. Bonus coins are reported separately and NOT added to the coin balance above (errs on the poor side).
     /// * Gems: starting gems + level-up gems + one-off task gems + daily + events + goals, against the gems it would cost to
-    ///   skip every key building's construction (1 gem per minute), the only gem sink so far.
+    ///   skip every key building's construction (1 gem per minute). Since v0.29.1 gems also finish crops and factory
+    ///   products at the same price, so any surplus has a use.
     ///
     /// Menu: TownBuilder > Debug > Write Economy Report (writes Documentation/EconomyReport.md).
     /// </summary>
@@ -446,7 +447,8 @@ namespace TownBuilder.EditorTools
             sb.AppendLine(string.Format(ci, "## Bonus income and gems ({0:0} min of play a day, daily reward every day, first {1} prizes of each weekend event)",
                 PlayMinutesPerDay, EventPrizesPerWeekend));
             sb.AppendLine();
-            sb.AppendLine("Bonus coins are not in the coin balance above. Gems to skip builds = 1 gem per minute of every key building's construction.");
+            sb.AppendLine("Bonus coins are not in the coin balance above. Gems to skip builds = 1 gem per minute of every key building's construction;");
+            sb.AppendLine("gems left over can finish crops and factory products at the same price (1 gem per minute left).");
             sb.AppendLine();
             sb.AppendLine("| Level | Play time so far | Day | Bonus coins (daily + events) | Bonus vs normal coins so far | Goal tiers reached | Gems this level | Gems so far | Gems to skip all builds so far |");
             sb.AppendLine("|---|---|---|---|---|---|---|---|---|");

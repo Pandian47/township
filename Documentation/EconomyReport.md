@@ -47,7 +47,8 @@ Coins/min for recipes is the value added (product value minus the ingredients' s
 
 ## Bonus income and gems (45 min of play a day, daily reward every day, first 2 prizes of each weekend event)
 
-Bonus coins are not in the coin balance above. Gems to skip builds = 1 gem per minute of every key building's construction.
+Bonus coins are not in the coin balance above. Gems to skip builds = 1 gem per minute of every key building's construction;
+gems left over can finish crops and factory products at the same price (1 gem per minute left).
 
 | Level | Play time so far | Day | Bonus coins (daily + events) | Bonus vs normal coins so far | Goal tiers reached | Gems this level | Gems so far | Gems to skip all builds so far |
 |---|---|---|---|---|---|---|---|---|

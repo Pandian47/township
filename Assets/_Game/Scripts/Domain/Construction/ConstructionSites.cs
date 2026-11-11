@@ -93,6 +93,6 @@ namespace TownBuilder.Domain
         }
 
         /// <summary>Gems to finish now: 1 per started minute remaining, at least 1.</summary>
-        public static int GemCostToFinish(long remainingMs) => Math.Max(1, (int)Math.Ceiling(remainingMs / 60000.0));
+        public static int GemCostToFinish(long remainingMs) => TimeSkip.GemCost(remainingMs);
     }
 }

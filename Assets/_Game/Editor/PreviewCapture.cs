@@ -404,7 +404,8 @@ namespace TownBuilder.EditorTools
                 root.transform.Find("Queue/Slots/AddSlotButton/Label").GetComponent<TMPro.TMP_Text>().text = "+1 slot" + System.Environment.NewLine + "250";
                 root.transform.Find("QueueTitle/Text").GetComponent<TMPro.TMP_Text>().text = "Queue 3/3";
                 root.transform.Find("Queue/Actions/CollectButton/Label").GetComponent<TMPro.TMP_Text>().text = "Collect (1)";
-                root.transform.Find("Queue/Actions/FinishNowButton/Label").GetComponent<TMPro.TMP_Text>().text = "Finish now (ad)";
+                root.transform.Find("Queue/Actions/FinishNowButton/Label").GetComponent<TMPro.TMP_Text>().text = "Finish now" + System.Environment.NewLine + "(watch ad)";
+                root.transform.Find("Queue/Actions/GemsButton/Label").GetComponent<TMPro.TMP_Text>().text = "Finish now" + System.Environment.NewLine + "2 gems";
             }
 
             if (state == HudState.Barn)

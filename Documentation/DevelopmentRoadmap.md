@@ -388,12 +388,16 @@ Design notes:
 - [ ] Juice Press: 3 Apples → Apple Juice; 3 Cherries + 1 Sugar → Cherry Juice
 - [ ] Trees keep growing while the app is closed; moving a tree keeps its fruit
 
-**Milestone 7 complete (v0.29.0).** Open point from the balance pass: gems have only one use (finishing construction)
-and pile up (~71 by level 10 vs ~31 to skip every build). Recommended for Milestone 8: a second gem use.
+**Milestone 7 complete (v0.29.0).** The balance pass found gems piling up (only one use); v0.29.1 adds a second use:
+gems finish crops and factory products (1 gem per minute left).
+
+### Device checklist (v0.29.1: finish with gems)
+- [ ] Field with a growing crop (or a fruit tree): blue "Finish now · N gems" next to the ad button; N = minutes left, rounded up
+- [ ] Tapping it spends N gems and the crop is ready at once; with too few gems the button is greyed out
+- [ ] Factory making a product: the same blue button finishes the current product; the next one in the queue starts
 
 ## Milestone 8: Expansion
-Ship, helicopter, friends and co-op, monetisation, Google Play launch. First candidate: a second use for gems
-(see GameEconomy.md, "v0.29 balance pass").
+Ship, helicopter, friends and co-op, monetisation, Google Play launch.
 
 ## Milestone 9: Backend (moved from 7)
 Accounts, cloud saves with conflict resolution, server time (`IClock`), server-validated economy, analytics.

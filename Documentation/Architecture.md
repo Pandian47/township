@@ -332,6 +332,13 @@ calendar (`Tick`, called every second by `EventPanel`), counts harvests / produc
 set of unlocked decorations and filters the shop (`BuildingShopPanel.SetListingFilter`). `EventPanel` = the town button
 + window. DEV "Start weekend event now" runs one from today for two days. Saved in `SaveData.events`.
 
+## 6g6f. Skipping waits with gems (v0.29.1)
+
+`TimeSkip.GemCost(remainingMs)` (Domain) is the one price rule: 1 gem per started minute, at least 1. It is used by
+`ConstructionSites.GemCostToFinish`, `FarmingController.GemCostToFinish/FinishWithGems` (crops and fruit) and
+`ProductionController.GemCostToFinish/FinishWithGems` (the active job; later jobs move up). `FieldPanel` and
+`FactoryPanel` show the blue gems button next to the ad button.
+
 ## 6h0. Game font
 
 UI text uses **Fredoka SemiBold** (`Fonts/Fredoka-SemiBold SDF.asset`, a dynamic TMP font asset made by
