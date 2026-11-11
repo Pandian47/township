@@ -405,10 +405,10 @@ namespace TownBuilder.EditorTools
             // --- Top bar
             var topBarRect = MakeRect("TopBar", safe, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -20), new Vector2(-60, 90));
             HRow(topBarRect, 24, TextAnchor.MiddleLeft);
-            var levelText = Pill(topBarRect, "LevelPill", 330);
-            var coinsText = Pill(topBarRect, "CoinsPill", 340);
-            var gemsText = Pill(topBarRect, "GemsPill", 240);
-            var barnText = Pill(topBarRect, "BarnPill", 300);
+            var levelText = Pill(topBarRect, "LevelPill", 350, PlaceholderArtGenerator.UiArtFolder + "/PH_Icon_Level.png", "Lv");
+            var coinsText = Pill(topBarRect, "CoinsPill", 330, PlaceholderArtGenerator.CoinIconPath);
+            var gemsText = Pill(topBarRect, "GemsPill", 260, PlaceholderArtGenerator.GemIconPath);
+            var barnText = Pill(topBarRect, "BarnPill", 310, PlaceholderArtGenerator.UiArtFolder + "/PH_Icon_Barn.png");
             var barnPill = barnText.transform.parent.gameObject;
             var barnPillButton = barnPill.AddComponent<Button>();
             barnPillButton.targetGraphic = barnPill.GetComponent<Image>();
@@ -1215,12 +1215,34 @@ namespace TownBuilder.EditorTools
             return toast;
         }
 
-        private static TMP_Text Pill(RectTransform parent, string name, float width)
+        /// <summary>Top-bar pill: dark rounded bar, an icon overlapping its left end, the value text after it.</summary>
+        private static TMP_Text Pill(RectTransform parent, string name, float width, string iconPath = null, string iconLabel = null)
         {
             var rt = MakeRect(name, parent, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(width, 76));
             AddImage(rt, PillColor);
             Prefer(rt, width, 76);
-            return Label(rt, "Text", "-", 38, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+            var text = Label(rt, "Text", "-", 38, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+
+            var sprite = iconPath != null ? AssetDatabase.LoadAssetAtPath<Sprite>(iconPath) : null;
+            if (sprite == null) return text;
+            var iconRect = MakeRect("Icon", rt, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(30, 0), new Vector2(92, 92));
+            var icon = iconRect.gameObject.AddComponent<Image>();
+            icon.sprite = sprite;
+            icon.preserveAspect = true;
+            icon.raycastTarget = false;
+            if (iconLabel != null)
+            {
+                var l = Label(iconRect, "Text", iconLabel, 30, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+                var outline = AssetDatabase.LoadAssetAtPath<Material>(ProjectSetup.UIFontOutlineMaterialPath);
+                if (outline != null) l.fontSharedMaterial = outline;
+                ((RectTransform)l.transform).anchoredPosition = new Vector2(0, -4);
+            }
+
+            var textRect = (RectTransform)text.transform;
+            textRect.offsetMin = new Vector2(84, 0);
+            textRect.offsetMax = new Vector2(-14, 0);
+            text.alignment = TMPro.TextAlignmentOptions.Left;
+            return text;
         }
 
         private static BuildingShopPanel BuildShop(Transform canvas)
@@ -1293,93 +1315,133 @@ namespace TownBuilder.EditorTools
                 ("tabsParent", tabs), ("tabTemplate", tabView), ("listScreen", window.gameObject), ("backButton", back),
                 ("cardsScreen", cards), ("cardsParent", cardsParent), ("cardTemplate", cardTemplate), ("cardsCloseButton", cardsClose),
                 ("scroll", viewport.GetComponent<ScrollRect>()));
+            WireArray(panel, "cardRibbons", RibbonArtNames.Select(n => (Object)AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/_Game/Art/UI/Build/UI_Ribbon_{n}.png")).ToArray());
+            WireArray(panel, "cardPictures", CardArtNames.Select(n => (Object)AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/_Game/Art/UI/Build/UI_Card_{n}.png")).ToArray());
             root.gameObject.SetActive(false);
             return panel;
         }
 
         /// <summary>
-        /// Build screen 1: a cream window with a leafy green frame and one big picture card per category
-        /// (coloured ribbon, building in a meadow scene, "N buildings" line, badge). Our own layout and art.
+        /// Build screen 1 (v0.27.4, owner's design): a blue-framed cream window with a striped awning, the wooden BUILD
+        /// sign, a round close button, and one card per category (ribbon, picture, "N buildings", badge), leaves in the
+        /// bottom corners. Art: Art/UI/Build (AI images, see ArtPrompts.md) + awning/badge drawn in code.
         /// </summary>
         private static GameObject BuildShopCardsScreen(RectTransform root, out Transform cardsParent, out ShopCategoryCardView cardTemplate,
             out Button close)
         {
-            var leafGreen = new Color(0.40f, 0.66f, 0.28f);
-            var frame = MakeRect("CardsWindow", root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -10),
-                new Vector2(1720, 880));
-            AddImage(frame, leafGreen);
-            var inner = Stretch("Inner", frame, 14f);
-            AddImage(inner, new Color(1f, 0.97f, 0.88f));
+            Sprite Ui(string file) => AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/_Game/Art/UI/Build/{file}.png");
+            var outline = AssetDatabase.LoadAssetAtPath<Material>(ProjectSetup.UIFontOutlineMaterialPath);
+            var brown = new Color(0.40f, 0.24f, 0.10f);
 
-            var leaf = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.LeafPath);
-            void Leaf(string name, Vector2 anchor, Vector2 pos, float angle, float scale)
+            var frame = MakeRect("CardsWindow", root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -34),
+                new Vector2(1720, 860));
+            AddImage(frame, new Color(0.20f, 0.50f, 0.90f));
+            var inner = Stretch("Inner", frame, 16f);
+            AddImage(inner, new Color(1f, 0.96f, 0.86f));
+
+            var awning = MakeRect("Awning", frame, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -12), new Vector2(-28, 72));
+            var awningImg = awning.gameObject.AddComponent<Image>();
+            awningImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.AwningPath);
+            awningImg.type = Image.Type.Tiled;
+            awningImg.raycastTarget = false;
+
+            // Leaves in the bottom corners (the right one mirrored).
+            var leaves = Ui("UI_CornerLeaves");
+            foreach (var (name, anchor, pos, flip) in new[] { ("LeavesLeft", new Vector2(0f, 0f), new Vector2(36, 34), 1f), ("LeavesRight", new Vector2(1f, 0f), new Vector2(-36, 34), -1f) })
             {
-                var r = MakeRect(name, frame, anchor, anchor, new Vector2(0.5f, 0.5f), pos, new Vector2(64, 40) * scale);
+                var r = MakeRect(name, frame, anchor, anchor, new Vector2(0.5f, 0.5f), pos, new Vector2(160, 139));
                 var img = r.gameObject.AddComponent<Image>();
-                img.sprite = leaf;
+                img.sprite = leaves;
+                img.preserveAspect = true;
                 img.raycastTarget = false;
-                r.localRotation = Quaternion.Euler(0, 0, angle);
+                img.enabled = leaves != null;
+                r.localScale = new Vector3(flip, 1f, 1f);
             }
 
-            Leaf("LeafTL1", new Vector2(0f, 1f), new Vector2(26, -10), 25f, 1.5f);
-            Leaf("LeafTL2", new Vector2(0f, 1f), new Vector2(8, -40), -60f, 1.2f);
-            Leaf("LeafBL1", new Vector2(0f, 0f), new Vector2(30, 10), -25f, 1.5f);
-            Leaf("LeafBL2", new Vector2(0f, 0f), new Vector2(8, 42), 60f, 1.2f);
-            Leaf("LeafBR1", new Vector2(1f, 0f), new Vector2(-30, 10), 205f, 1.5f);
-            Leaf("LeafBR2", new Vector2(1f, 0f), new Vector2(-8, 42), 120f, 1.2f);
+            // Wooden sign with the title, poking out above the window.
+            var sign = MakeRect("Sign", frame, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0, -6), new Vector2(640, 154));
+            var signImg = sign.gameObject.AddComponent<Image>();
+            signImg.sprite = Ui("UI_BuildSign");
+            signImg.preserveAspect = true;
+            signImg.raycastTarget = false;
+            if (signImg.sprite == null) signImg.color = new Color(0.85f, 0.5f, 0.2f);
+            var signText = Label(MakeRect("Title", sign, new Vector2(0.2f, 0f), new Vector2(0.8f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0, 4), Vector2.zero),
+                "Text", "BUILD", 84, TextAnchor.MiddleCenter, new Color(1f, 0.95f, 0.85f), FontStyle.Bold);
+            if (outline != null) signText.fontSharedMaterial = outline;
 
-            Label(MakeRect("Title", inner, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, 1f), new Vector2(46, -18), new Vector2(-300, 86)),
-                "Text", "Build", 62, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
-            Label(MakeRect("Subtitle", inner, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, 1f), new Vector2(260, -18), new Vector2(-560, 86)),
-                "Text", "What would you like to build?", 34, TextAnchor.MiddleLeft, new Color(0.45f, 0.42f, 0.38f));
-            close = MakeButton(inner, "CloseButton", "X", new Vector2(90, 90), Red, 44);
+            Label(MakeRect("Subtitle", inner, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -112), new Vector2(-200, 64)),
+                "Text", "What would you like to build?", 42, TextAnchor.MiddleCenter, brown, FontStyle.Bold);
+
+            close = MakeButton(frame, "CloseButton", "", new Vector2(130, 130), Red, 44);
             var closeRect = (RectTransform)close.transform;
-            closeRect.anchorMin = closeRect.anchorMax = closeRect.pivot = new Vector2(1f, 1f);
-            closeRect.anchoredPosition = new Vector2(-18, -16);
+            closeRect.anchorMin = closeRect.anchorMax = new Vector2(1f, 1f);
+            closeRect.pivot = new Vector2(0.5f, 0.5f);
+            closeRect.anchoredPosition = new Vector2(-46, -20);
+            var closeSprite = Ui("UI_CloseButton");
+            if (closeSprite != null)
+            {
+                var closeImg = close.GetComponent<Image>();
+                closeImg.sprite = closeSprite;
+                closeImg.type = Image.Type.Simple;
+                closeImg.preserveAspect = true;
+                closeImg.color = Color.white;
+            }
+            else
+            {
+                close.GetComponentInChildren<TMP_Text>().text = "X";
+            }
 
-            var row = MakeRect("Cards", inner, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 34), new Vector2(1640, 660));
-            HRow(row, 26, TextAnchor.MiddleCenter);
+            var row = MakeRect("Cards", inner, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 76), new Vector2(1620, 490));
+            HRow(row, 24, TextAnchor.MiddleCenter);
             cardsParent = row;
 
             // Card template (cloned per category by BuildingShopPanel).
-            var card = MakeRect("CardTemplate", row, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(300, 640));
-            Prefer(card, 300, 640);
-            var cardBg = AddImage(card, Color.white);
+            var card = MakeRect("CardTemplate", row, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(300, 470));
+            Prefer(card, 300, 470);
+            var cardBg = AddImage(card, new Color(1f, 0.985f, 0.94f));
+            var shadow = card.gameObject.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0.45f, 0.30f, 0.15f, 0.35f);
+            shadow.effectDistance = new Vector2(0f, -7f);
             var button = card.gameObject.AddComponent<Button>();
             button.targetGraphic = cardBg;
 
-            var scene = MakeRect("Scene", card, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -12), new Vector2(-24, 470));
-            var sceneImg = scene.gameObject.AddComponent<Image>();
-            sceneImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CardScenePath);
-            sceneImg.raycastTarget = false;
-
-            var pictureRect = MakeRect("Picture", scene, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 26), new Vector2(250, 300));
+            var pictureRect = MakeRect("Picture", card, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -52), new Vector2(268, 284));
             var picture = pictureRect.gameObject.AddComponent<Image>();
             picture.preserveAspect = true;
             picture.raycastTarget = false;
 
-            var ribbonRect = MakeRect("Ribbon", card, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0, -26), new Vector2(340, 90));
-            var ribbon = ribbonRect.gameObject.AddComponent<Image>();
-            ribbon.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.RibbonPath);
-            ribbon.raycastTarget = false;
-            var title = Label(MakeRect("Title", ribbonRect, new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0, 6), new Vector2(-90, -24)),
-                "Text", "Houses", 36, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
-
-            var info = Label(MakeRect("Info", card, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 40), new Vector2(-20, 70)),
-                "Text", "3 buildings", 34, TextAnchor.MiddleCenter, Ink, FontStyle.Bold);
-
-            var lockRect = Stretch("Lock", scene);
-            AddImage(lockRect, new Color(0f, 0f, 0f, 0.42f), rounded: false, raycast: false);
-            var lockIconRect = MakeRect("Icon", lockRect, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 30), new Vector2(110, 110));
+            var lockRect = Stretch("Lock", pictureRect, 6f);
+            AddImage(lockRect, new Color(0.1f, 0.08f, 0.06f, 0.5f), raycast: false);
+            var lockIconRect = MakeRect("Icon", lockRect, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(110, 110));
             var lockIcon = lockIconRect.gameObject.AddComponent<Image>();
             lockIcon.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.LockIconPath);
             lockIcon.preserveAspect = true;
             lockIcon.raycastTarget = false;
             lockRect.gameObject.SetActive(false);
 
-            var badge = MakeRect("Badge", card, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-14, -84), new Vector2(68, 68));
-            AddImage(badge, Red, raycast: false);
-            var badgeText = Label(badge, "Text", "1", 34, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+            var ribbonRect = MakeRect("Ribbon", card, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0, -6), new Vector2(340, 150));
+            var ribbon = ribbonRect.gameObject.AddComponent<Image>();
+            ribbon.sprite = Ui("UI_Ribbon_Blue");
+            ribbon.preserveAspect = true;
+            ribbon.raycastTarget = false;
+            var title = Label(MakeRect("Title", ribbonRect, new Vector2(0.14f, 0.38f), new Vector2(0.86f, 0.9f), new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero),
+                "Text", "HOUSES", 38, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+            title.enableAutoSizing = true;
+            title.fontSizeMin = 24;
+            title.fontSizeMax = 40;
+            title.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
+            if (outline != null) title.fontSharedMaterial = outline;
+
+            var info = Label(MakeRect("Info", card, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 26), new Vector2(-20, 76)),
+                "Text", "3 buildings", 42, TextAnchor.MiddleCenter, brown, FontStyle.Bold);
+
+            var badge = MakeRect("Badge", card, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-34, -102), new Vector2(74, 74));
+            var badgeImg = badge.gameObject.AddComponent<Image>();
+            badgeImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CirclePath);
+            badgeImg.color = new Color(0.90f, 0.17f, 0.14f);
+            badgeImg.raycastTarget = false;
+            var badgeText = Label(badge, "Text", "1", 38, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+            if (outline != null) badgeText.fontSharedMaterial = outline;
             badge.gameObject.SetActive(false);
 
             cardTemplate = card.gameObject.AddComponent<ShopCategoryCardView>();
@@ -1388,6 +1450,10 @@ namespace TownBuilder.EditorTools
             card.gameObject.SetActive(false);
             return frame.gameObject;
         }
+
+        /// <summary>Category art for the Build cards, in BuildingShopPanel.TabOrder.</summary>
+        private static readonly string[] CardArtNames = { "Houses", "Town", "Factories", "Farm", "Decorations" };
+        private static readonly string[] RibbonArtNames = { "Blue", "Yellow", "Orange", "Green", "Pink" };
 
         private static ConfirmDialog CreateConfirmDialog(Transform canvas)
         {

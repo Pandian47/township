@@ -344,6 +344,12 @@ Design notes:
 - [ ] DEV → "Unlock everything (level 10)": Rising Star tiers 1 and 2 become claimable
 - [ ] Progress and claimed tiers are kept after closing and reopening the app
 
+### Device checklist (v0.27.4: Build window art + new font)
+- [ ] All text uses the new round font (Fredoka); no missing letters or empty boxes anywhere (also numbers like 1,350 and "·")
+- [ ] Top bar: blue "Lv" star, coin, gem and barn icons on the pills
+- [ ] Build: blue window with striped awning, wooden BUILD sign, round red X; 5 cards with coloured ribbons and pictures
+- [ ] Phone screens with a different shape (e.g. 20:9): the window still fits, nothing cut off
+
 ### Device checklist (v0.27.3: Build screen)
 - [ ] Build opens a big "Build" window with 5 cards: Houses (blue), Town (yellow), Factories (orange), Farm (green),
       Decorations (pink), each with a building picture and "N buildings"

@@ -57,6 +57,10 @@ namespace TownBuilder
         [SerializeField] private Transform cardsParent;
         [SerializeField] private ShopCategoryCardView cardTemplate;
         [SerializeField] private Button cardsCloseButton;
+        [Tooltip("Ribbon art per category, in TabOrder (Houses, Town, Factories, Farm, Decorations). Empty = tinted template ribbon.")]
+        [SerializeField] private Sprite[] cardRibbons = new Sprite[0];
+        [Tooltip("Card picture per category, in TabOrder. Empty = the category's building sprite.")]
+        [SerializeField] private Sprite[] cardPictures = new Sprite[0];
         [Header("Screen 2: buildings of one category")]
         [SerializeField] private GameObject listScreen;
         [SerializeField] private Button backButton;
@@ -162,7 +166,10 @@ namespace TownBuilder
                 var card = Instantiate(cardTemplate, cardsParent);
                 card.name = $"Card_{category}";
                 card.gameObject.SetActive(true);
-                card.Bind(category, TabLabel(category), CategoryColour(category), CardSprite(content, category), OpenCategory);
+                int i = Array.IndexOf(TabOrder, category);
+                var ribbon = i >= 0 && i < cardRibbons.Length ? cardRibbons[i] : null;
+                var picture = i >= 0 && i < cardPictures.Length && cardPictures[i] != null ? cardPictures[i] : CardSprite(content, category);
+                card.Bind(category, TabLabel(category), ribbon, CategoryColour(category), picture, OpenCategory);
                 _cards.Add(card);
             }
         }

@@ -6,8 +6,8 @@ using UnityEngine.UI;
 namespace TownBuilder
 {
     /// <summary>
-    /// One big card on the Build screen: a coloured ribbon with the category name, one of its buildings in a little
-    /// meadow scene, a line underneath ("5 buildings" / "Level 8"), and a badge with how many can be built right now.
+    /// One big card on the Build screen: a ribbon with the category name, a picture, a line underneath
+    /// ("5 buildings" / "Level 8"), and a badge with how many of its buildings can be built right now.
     /// </summary>
     public sealed class ShopCategoryCardView : MonoBehaviour
     {
@@ -24,13 +24,24 @@ namespace TownBuilder
         public Button Button => button;
         public int BadgeCount { get; private set; }
 
-        public void Bind(BuildingCategory category, string title, Color colour, Sprite sprite, Action<BuildingCategory> onClick)
+        /// <param name="ribbonSprite">Coloured ribbon art; when null the template ribbon is tinted with <paramref name="colour"/>.</param>
+        public void Bind(BuildingCategory category, string title, Sprite ribbonSprite, Color colour, Sprite pictureSprite,
+            Action<BuildingCategory> onClick)
         {
             Category = category;
-            titleText.text = title;
-            ribbon.color = colour;
-            picture.sprite = sprite;
-            picture.enabled = sprite != null;
+            titleText.text = title.ToUpperInvariant();
+            if (ribbonSprite != null)
+            {
+                ribbon.sprite = ribbonSprite;
+                ribbon.color = Color.white;
+            }
+            else
+            {
+                ribbon.color = colour;
+            }
+
+            picture.sprite = pictureSprite;
+            picture.enabled = pictureSprite != null;
             button.onClick.RemoveAllListeners();
             if (onClick != null) button.onClick.AddListener(() => onClick(category));
         }

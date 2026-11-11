@@ -316,7 +316,17 @@ cloned at runtime from a `ShopTabView` template with the picture of the category
 v0.27.3: the shop opens on a **category screen** first (`ShopCategoryCardView` cards: coloured ribbon, one of the
 category's buildings in a meadow scene from `PlaceholderArtGenerator.CreateBuildScreenArt`, "N buildings" or the
 unlock level, and a badge counting what can be built right now). Tapping a card opens that category's list; Back returns.
-The layout, names and art are our own; we don't copy another game's store screen (CLAUDE.md rule 10). Placeholder art: `PlaceholderArtGenerator.CreateDecoration` (setup seeds with `Deco`).
+The layout, names and art are our own; we don't copy another game's store screen (CLAUDE.md rule 10).
+v0.27.4 (owner's design): blue-framed window with a tiled awning (`PlaceholderArtGenerator.AwningPath`), wooden BUILD
+sign, round close button, ribbon + picture per category (`BuildingShopPanel.cardRibbons/cardPictures`, AI art in
+`Art/UI/Build`, imported with `AiArtImporter` Kind.Ui), red round badges. Top-bar pills have icons (level star, coin,
+gem, barn).
+
+## 6h0. Game font
+
+UI text uses **Fredoka SemiBold** (`Fonts/Fredoka-SemiBold SDF.asset`, a dynamic TMP font asset made by
+`ProjectSetup.EnsureGameFont`; LiberationSans is its fallback). `EditorUtil.AddText` picks it automatically and skips
+TMP's synthetic bold for it. Outlined text uses `Materials/UIFont Outline Rounded.mat`. Licence: ThirdPartyLicenses.md. Placeholder art: `PlaceholderArtGenerator.CreateDecoration` (setup seeds with `Deco`).
 
 ## 6h. UI text (TextMeshPro)
 

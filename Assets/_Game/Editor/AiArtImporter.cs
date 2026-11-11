@@ -38,6 +38,11 @@ namespace TownBuilder.EditorTools
             /// (a whole number of sleepers, so tiles join without seams) into a 128x64 tile along the grid Y axis.
             /// </summary>
             IsoRail,
+            /// <summary>
+            /// UI art (signs, buttons, ribbons, card pictures, icons): background removed, only the biggest shape kept
+            /// (bits of neighbouring objects at the edges are dropped), trimmed, at most <see cref="Spec.Width"/> px.
+            /// </summary>
+            Ui,
         }
 
         private sealed class Spec
@@ -47,6 +52,8 @@ namespace TownBuilder.EditorTools
             public Kind Kind;
             public int Width; // footprint width (Building/Flat), canvas width (Crop), square size (Icon)
             public int FootprintX = 1, FootprintY = 1;
+            /// <summary>Skip the magenta-fringe cleanup (for art that is itself pink, like the pink ribbon).</summary>
+            public bool NoFringeFix;
             /// <summary>Set by processing: sprite pivot (bottom corner of the footprint for buildings).</summary>
             public Vector2 Pivot = new Vector2(0.5f, 0f);
 
@@ -143,6 +150,23 @@ namespace TownBuilder.EditorTools
             new Spec("sand", Art + "/Environment/Tiles/PH_Tile_Sand.png", Kind.Tile, 128),
             new Spec("water", Art + "/Environment/Tiles/PH_Tile_Water.png", Kind.Tile, 128),
             new Spec("road", Art + "/Environment/Tiles/PH_Tile_Road.png", Kind.Tile, 128),
+
+            // v0.27.4: Build window and top bar art.
+            new Spec("build_sign", Art + "/UI/Build/UI_BuildSign.png", Kind.Ui, 1024),
+            new Spec("close_button", Art + "/UI/Build/UI_CloseButton.png", Kind.Ui, 256),
+            new Spec("corner_leaves", Art + "/UI/Build/UI_CornerLeaves.png", Kind.Ui, 256),
+            new Spec("ribbon_blue", Art + "/UI/Build/UI_Ribbon_Blue.png", Kind.Ui, 400),
+            new Spec("ribbon_yellow", Art + "/UI/Build/UI_Ribbon_Yellow.png", Kind.Ui, 400),
+            new Spec("ribbon_orange", Art + "/UI/Build/UI_Ribbon_Orange.png", Kind.Ui, 400),
+            new Spec("ribbon_green", Art + "/UI/Build/UI_Ribbon_Green.png", Kind.Ui, 400),
+            new Spec("ribbon_pink", Art + "/UI/Build/UI_Ribbon_Pink.png", Kind.Ui, 400) { NoFringeFix = true },
+            new Spec("card_houses", Art + "/UI/Build/UI_Card_Houses.png", Kind.Ui, 400),
+            new Spec("card_town", Art + "/UI/Build/UI_Card_Town.png", Kind.Ui, 400),
+            new Spec("card_factories", Art + "/UI/Build/UI_Card_Factories.png", Kind.Ui, 400),
+            new Spec("card_farm", Art + "/UI/Build/UI_Card_Farm.png", Kind.Ui, 400),
+            new Spec("card_decorations", Art + "/UI/Build/UI_Card_Decorations.png", Kind.Ui, 400),
+            new Spec("icon_level", Art + "/UI/PH_Icon_Level.png", Kind.Ui, 160),
+            new Spec("icon_barn", Art + "/UI/PH_Icon_Barn.png", Kind.Ui, 160),
         };
 
         // Crop plants sit inside the field's soil: narrower than the field and lifted by the field's border height.
@@ -234,7 +258,8 @@ namespace TownBuilder.EditorTools
             if (spec.Kind == Kind.Tile) return MakeIsoTile(src, spec.Width);
             if (spec.Kind == Kind.IsoRail) return MakeRailTile(KeyBackground(src), spec.Width);
 
-            var keyed = KeyBackground(src);
+            var keyed = KeyBackground(src, !spec.NoFringeFix);
+            if (spec.Kind == Kind.Ui) KeepLargestShape(keyed);
             if (!FindBounds(keyed, out int minX, out int maxX, out int minY, out int maxY))
                 throw new InvalidOperationException($"{spec.Source}: no object found on the background");
 
@@ -248,6 +273,15 @@ namespace TownBuilder.EditorTools
                     float srcW = outW / scale;
                     spec.Pivot = new Vector2(0.5f, 0f);
                     return Resample(keyed, cx - srcW * 0.5f, minY, srcW, spec.Width / scale, outW, spec.Width);
+                }
+
+                case Kind.Ui:
+                {
+                    const int pad = 2;
+                    float w = maxX - minX + 1 + 2 * pad, h = maxY - minY + 1 + 2 * pad;
+                    float scale = Mathf.Min(1f, spec.Width / Mathf.Max(w, h));
+                    int outW = Mathf.Max(1, Mathf.RoundToInt(w * scale)), outH = Mathf.Max(1, Mathf.RoundToInt(h * scale));
+                    return Resample(keyed, minX - pad, minY - pad, w, h, outW, outH);
                 }
 
                 case Kind.Icon:
@@ -291,7 +325,7 @@ namespace TownBuilder.EditorTools
         }
 
         /// <summary>Background colour = median of the border pixels; alpha from the distance to it; colour unmixed at edges.</summary>
-        private static Img KeyBackground(Img src)
+        private static Img KeyBackground(Img src, bool fixFringe = true)
         {
             var border = new List<Color>();
             for (int x = 0; x < src.W; x += 4) { border.Add(src[x, 0]); border.Add(src[x, src.H - 1]); }
@@ -318,6 +352,8 @@ namespace TownBuilder.EditorTools
                 dst.P[i] = new Color(c.r, c.g, c.b, a);
             }
 
+            if (!fixFringe) return dst;
+
             // Magenta fringe on pixels touching the background: pull red/blue down to green (keeps real pinks inside).
             var copy = (Color[])dst.P.Clone();
             for (int y = 1; y < dst.H - 1; y++)
@@ -342,6 +378,66 @@ namespace TownBuilder.EditorTools
             }
 
             return dst;
+        }
+
+        /// <summary>Clears every opaque region except the biggest one (4-connected, alpha &gt;= 0.5 seeds).</summary>
+        private static void KeepLargestShape(Img img)
+        {
+            var label = new int[img.P.Length];
+            var sizes = new List<int> { 0 };
+            var stack = new Stack<int>();
+            for (int i = 0; i < img.P.Length; i++)
+            {
+                if (label[i] != 0 || img.P[i].a < 0.5f) continue;
+                int id = sizes.Count, count = 0;
+                label[i] = id;
+                stack.Push(i);
+                while (stack.Count > 0)
+                {
+                    int p = stack.Pop();
+                    count++;
+                    int x = p % img.W, y = p / img.W;
+                    void Visit(int q)
+                    {
+                        if (label[q] != 0 || img.P[q].a < 0.5f) return;
+                        label[q] = id;
+                        stack.Push(q);
+                    }
+
+                    if (x > 0) Visit(p - 1);
+                    if (x < img.W - 1) Visit(p + 1);
+                    if (y > 0) Visit(p - img.W);
+                    if (y < img.H - 1) Visit(p + img.W);
+                }
+
+                sizes.Add(count);
+            }
+
+            int best = 0;
+            for (int k = 1; k < sizes.Count; k++)
+                if (sizes[k] > sizes[best]) best = k;
+
+            // Keep the biggest shape plus its soft edge (semi-transparent pixels next to it).
+            for (int y = 0; y < img.H; y++)
+            for (int x = 0; x < img.W; x++)
+            {
+                int i = y * img.W + x;
+                if (label[i] == best) continue;
+                if (label[i] == 0)
+                {
+                    bool nearBest = false;
+                    for (int oy = -2; oy <= 2 && !nearBest; oy++)
+                    for (int ox = -2; ox <= 2 && !nearBest; ox++)
+                    {
+                        int nx = x + ox, ny = y + oy;
+                        nearBest = nx >= 0 && ny >= 0 && nx < img.W && ny < img.H && label[ny * img.W + nx] == best;
+                    }
+
+                    if (nearBest) continue;
+                }
+
+                img.P[i] = new Color(0f, 0f, 0f, 0f);
+            }
         }
 
         /// <summary>Bounding box of the object, ignoring stray specks (rows/columns need a few opaque pixels).</summary>
@@ -642,7 +738,7 @@ namespace TownBuilder.EditorTools
 
         private static void ConfigureImporter(Spec spec)
         {
-            bool centred = spec.Kind == Kind.Tile || spec.Kind == Kind.Icon;
+            bool centred = spec.Kind == Kind.Tile || spec.Kind == Kind.Icon || spec.Kind == Kind.Ui;
             var pivot = centred ? new Vector2(0.5f, 0.5f) : spec.Pivot;
             var mesh = spec.Kind == Kind.Building ? SpriteMeshType.Tight : SpriteMeshType.FullRect;
             PlaceholderArtGenerator.ConfigureSpriteImporter(spec.Target, pivot, mesh);

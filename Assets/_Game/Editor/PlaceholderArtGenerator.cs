@@ -1480,59 +1480,43 @@ namespace TownBuilder.EditorTools
             }
         }
 
-        // ------------------------------------------------------------------ Build screen (v0.27.3)
+        // ------------------------------------------------------------------ Build window (v0.27.4)
 
-        public const string CardScenePath = UiArtFolder + "/PH_UI_CardScene.png";
-        public const string RibbonPath = UiArtFolder + "/PH_UI_Ribbon.png";
-        public const string LeafPath = UiArtFolder + "/PH_UI_Leaf.png";
+        public const string AwningPath = UiArtFolder + "/Build/PH_UI_Awning.png";
+        public const string CirclePath = UiArtFolder + "/Build/PH_UI_Circle.png";
 
-        /// <summary>Build-screen art: a sky-and-meadow card background, a white ribbon (tinted per card), a leaf.</summary>
+        /// <summary>Build window pieces drawn in code: an awning stripe pair (tiled along the top) and a round badge.</summary>
         public static void CreateBuildScreenArt()
         {
-            CreateSprite(CardScenePath, RenderCardScene, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
-            CreateSprite(RibbonPath, RenderRibbon, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
-            CreateSprite(LeafPath, RenderLeaf, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+            CreateSprite(AwningPath, RenderAwning, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+            CreateSprite(CirclePath, RenderCircle, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
         }
 
-        private static Texture2D RenderCardScene()
+        /// <summary>One blue and one white stripe (96x72), scalloped at the bottom; tiles seamlessly sideways.</summary>
+        private static Texture2D RenderAwning()
         {
-            const int w = 256, h = 320, corner = 20;
+            const int w = 96, h = 72, stripe = 48;
             var tex = NewTexture(w, h);
             var px = new Color32[w * h];
-            var skyTop = new Color(0.55f, 0.79f, 0.96f);
-            var skyLow = new Color(0.86f, 0.94f, 0.99f);
-            var grassTop = new Color(0.55f, 0.80f, 0.32f);
-            var grassLow = new Color(0.38f, 0.66f, 0.24f);
-            (float x, float y, float r)[] clouds = { (60, 268, 22), (86, 274, 28), (114, 266, 20), (178, 240, 18), (200, 246, 24), (222, 239, 16) };
-
-            for (int y = 0; y < h; y++)
+            var blue = new Color(0.20f, 0.52f, 0.92f);
+            var white = new Color(0.98f, 0.98f, 1f);
+            var rim = new Color(0.10f, 0.28f, 0.62f);
             for (int x = 0; x < w; x++)
             {
-                // Rounded corners.
-                float cx = Mathf.Clamp(x + 0.5f, corner, w - corner), cy = Mathf.Clamp(y + 0.5f, corner, h - corner);
-                float dx = x + 0.5f - cx, dy = y + 0.5f - cy;
-                if (dx * dx + dy * dy > corner * corner) continue;
-
-                float hill = 118f + 16f * Mathf.Sin((x / (float)w) * Mathf.PI * 1.6f + 0.4f);
-                Color c;
-                if (y < hill)
+                bool isBlue = x < stripe;
+                float u = (x % stripe + 0.5f - stripe / 2f) / (stripe / 2f);
+                float edge = 18f - 16f * Mathf.Sqrt(Mathf.Max(0f, 1f - u * u)); // scallop: lowest in the middle of a stripe
+                for (int y = 0; y < h; y++)
                 {
-                    c = Color.Lerp(grassLow, grassTop, y / hill);
-                    if (y > hill - 5f) c = Color.Lerp(c, new Color(0.70f, 0.88f, 0.42f), 0.6f); // sunlit edge
-                    if (Hash(x / 3, y / 3) > 0.93f) c *= 0.92f;                               // grass speckles
+                    if (y < edge) continue;
+                    var c = isBlue ? blue : white;
+                    float shade = Mathf.Lerp(0.82f, 1.04f, (y - edge) / (h - edge)); // darker towards the bottom
+                    c = new Color(c.r * shade, c.g * shade, c.b * shade);
+                    if (y < edge + 3f) c = Color.Lerp(c, rim, 0.75f);           // dark edge along the scallops
+                    if (y > h - 6) c = Color.Lerp(c, rim, 0.35f);               // band along the top
+                    c.a = 1f;
+                    px[y * w + x] = c;
                 }
-                else
-                {
-                    c = Color.Lerp(skyLow, skyTop, (y - hill) / (h - hill));
-                    foreach (var cl in clouds)
-                    {
-                        float ex = (x + 0.5f - cl.x) / (cl.r * 1.3f), ey = (y + 0.5f - cl.y) / cl.r;
-                        if (ex * ex + ey * ey < 1f && y > cl.y - cl.r * 0.45f) c = Color.Lerp(c, Color.white, 0.85f);
-                    }
-                }
-
-                c.a = 1f;
-                px[y * w + x] = c;
             }
 
             tex.SetPixels32(px);
@@ -1540,68 +1524,25 @@ namespace TownBuilder.EditorTools
             return tex;
         }
 
-        private static Texture2D RenderRibbon()
+        /// <summary>White disc with a soft darker rim and a white ring (tinted red for badges).</summary>
+        private static Texture2D RenderCircle()
         {
-            const int w = 320, h = 84;
-            var tex = NewTexture(w, h);
-            var px = new Color32[w * h];
-            var face = new Color32(250, 250, 250, 255);
-            var shade = new Color32(214, 214, 214, 255);
-            var tail = new Color32(178, 178, 178, 255);
-            var fold = new Color32(128, 128, 128, 255);
-
-            for (int y = 0; y < h; y++)
-            for (int x = 0; x < w; x++)
+            const int size = 96;
+            var tex = NewTexture(size, size);
+            var px = new Color32[size * size];
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
             {
-                float fx = x + 0.5f, fy = y + 0.5f;
-                Color32? c = null;
-
-                // Tails (behind, lower), with a V notch at the outer end.
-                float tx = fx < w / 2f ? fx : w - fx;
-                if (tx < 50f && fy > 6f && fy < 58f)
-                {
-                    float notch = Mathf.Abs(fy - 32f) * 0.55f;
-                    if (tx > 26f - notch * 0.9f + 12f || tx > notch) c = tail;
-                }
-
-                // Folds where the band meets the tails.
-                if (tx >= 34f && tx < 48f && fy > 6f && fy < 22f && (fy - 6f) < (tx - 34f) * 1.15f) c = fold;
-
-                // Front band.
-                if (tx >= 34f && fy > 20f && fy < 80f)
-                {
-                    c = fy < 30f ? shade : face;
-                    if (fy > 74f) c = shade;
-                }
-
-                if (c.HasValue) px[y * w + x] = c.Value;
+                float dx = x + 0.5f - size / 2f, dy = y + 0.5f - size / 2f;
+                float d = Mathf.Sqrt(dx * dx + dy * dy) / (size / 2f);
+                if (d > 1f) continue;
+                float a = Mathf.Clamp01((1f - d) * size / 2f); // anti-aliased edge
+                Color c = d > 0.86f ? new Color(1f, 1f, 1f) : d > 0.78f ? new Color(0.62f, 0.62f, 0.62f) : new Color(0.92f, 0.92f, 0.92f);
+                if (d <= 0.78f && dy > 0) c = Color.Lerp(c, Color.white, dy / size); // gloss on top
+                c.a = a;
+                px[y * size + x] = c;
             }
 
-            AddOutline(px, w, h);
-            tex.SetPixels32(px);
-            tex.Apply();
-            return tex;
-        }
-
-        private static Texture2D RenderLeaf()
-        {
-            const int w = 64, h = 40;
-            var tex = NewTexture(w, h);
-            var px = new Color32[w * h];
-            var light = new Color32(120, 190, 70, 255);
-            var dark = new Color32(76, 146, 48, 255);
-            for (int y = 0; y < h; y++)
-            for (int x = 0; x < w; x++)
-            {
-                float u = (x + 0.5f) / w, v = (y + 0.5f - h / 2f) / (h / 2f);
-                float half = Mathf.Sin(u * Mathf.PI) * (1f - 0.25f * u);
-                if (Mathf.Abs(v) > half) continue;
-                var c = v > 0 ? light : dark;
-                if (Mathf.Abs(v) < 0.08f && u > 0.08f && u < 0.92f) c = new Color32(70, 120, 40, 255); // vein
-                px[y * w + x] = c;
-            }
-
-            AddOutline(px, w, h);
             tex.SetPixels32(px);
             tex.Apply();
             return tex;

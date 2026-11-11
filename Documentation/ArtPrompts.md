@@ -317,6 +317,12 @@ Icon prompt as bread (section 15–16):
 * `apple_juice`: "a glass bottle of golden apple juice with a small apple label and a green cap"
 * `cherry_juice`: "a glass bottle of deep red cherry juice with a cherry label and a yellow cap"
 
+## v0.27.4: Build window and top bar → `Art/UI/Build`
+
+Files (owner-made, imported with `AiArtImporter` Kind.Ui; the biggest shape is kept, so crops with bits of neighbours are fine):
+`build_sign`, `close_button`, `corner_leaves`, `ribbon_blue/yellow/orange/green/pink`,
+`card_houses/town/factories/farm/decorations`, `icon_level`, `icon_barn`. No text in any image (the game writes it).
+
 ---
 
 Do a **test set first**: cottage, field, wheat_4, bread and grass. Send those, check them in the game preview, and

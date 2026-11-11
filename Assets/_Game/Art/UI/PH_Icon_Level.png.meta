@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 6270772677543764f91457e0a8894d5b
+guid: 4f12250c647b6f845888d1c7af7c209a
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5146361357465760609
-    second: PH_UI_Ribbon_0
+      213: -480547877838401480
+    second: PH_Icon_Level_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -128,13 +128,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: PH_UI_Ribbon_0
+      name: PH_Icon_Level_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 5
-        width: 320
-        height: 76
+        y: 0
+        width: 160
+        height: 152
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -143,8 +143,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f9cc47aac937498b0800000000000000
-      internalID: -5146361357465760609
+      spriteID: 830dfdb4040c459f0800000000000000
+      internalID: -480547877838401480
       vertices: []
       indices: 
       edges: []
@@ -163,7 +163,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      PH_UI_Ribbon_0: -5146361357465760609
+      PH_Icon_Level_0: -480547877838401480
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

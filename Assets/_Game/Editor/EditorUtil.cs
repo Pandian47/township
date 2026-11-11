@@ -52,13 +52,17 @@ namespace TownBuilder.EditorTools
 
         public static Font UIFont => _font != null ? _font : _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
-        /// <summary>TextMeshPro font used by all UI text (imported by ProjectSetup.EnsureTextMeshPro).</summary>
+        /// <summary>
+        /// TextMeshPro font used by all UI text: the game font (Fredoka) when it exists, else LiberationSans
+        /// (imported by ProjectSetup.EnsureTextMeshPro).
+        /// </summary>
         public static TMP_FontAsset UIFontAsset
         {
             get
             {
                 if (_fontAsset != null) return _fontAsset;
-                _fontAsset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(ProjectSetup.UIFontAssetPath);
+                _fontAsset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(ProjectSetup.GameFontAssetPath)
+                             ?? AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(ProjectSetup.UIFontAssetPath);
                 if (_fontAsset == null) throw new InvalidOperationException($"Missing UI font {ProjectSetup.UIFontAssetPath}. Run TownBuilder > Setup.");
                 return _fontAsset;
             }
@@ -105,7 +109,10 @@ namespace TownBuilder.EditorTools
             t.color = color;
             t.fontStyle = ToTmp(style);
             // TMP's synthetic bold adds letter spacing; pull it back so bold reads like a normal bold weight.
-            if ((style & FontStyle.Bold) != 0) t.characterSpacing = BoldCharacterSpacing;
+            // The game font is already semi-bold: no synthetic bold on top (it would smear the round letters).
+            bool gameFont = t.font != null && t.font.name.StartsWith("Fredoka");
+            if (gameFont) t.fontStyle &= ~FontStyles.Bold;
+            else if ((style & FontStyle.Bold) != 0) t.characterSpacing = BoldCharacterSpacing;
             t.raycastTarget = false;
             t.textWrappingMode = TextWrappingModes.Normal;
             t.overflowMode = TextOverflowModes.Overflow;

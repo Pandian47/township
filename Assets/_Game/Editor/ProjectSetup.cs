@@ -29,7 +29,10 @@ namespace TownBuilder.EditorTools
         /// <summary>TextMeshPro's bundled font (Liberation Sans, SIL Open Font License). Swap for the final game font later.</summary>
         public const string UIFontAssetPath = "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset";
         private const string TmpEssentialsPackage = "Packages/com.unity.ugui/Package Resources/TMP Essential Resources.unitypackage";
-        public const string UIFontOutlineMaterialPath = Root + "/Materials/UIFont Outline.mat";
+        public const string UIFontOutlineMaterialPath = Root + "/Materials/UIFont Outline Rounded.mat";
+        /// <summary>Game font (Fredoka SemiBold, SIL Open Font License, from Google Fonts; see Documentation/ThirdPartyLicenses.md).</summary>
+        public const string GameFontPath = Root + "/Fonts/Fredoka-SemiBold.ttf";
+        public const string GameFontAssetPath = Root + "/Fonts/Fredoka-SemiBold SDF.asset";
         public const string SilhouetteShaderPath = Root + "/Shaders/SpriteSilhouette.shader";
         public const string SilhouetteMaterialPath = Root + "/Materials/SpriteSilhouette.mat";
         public const string SwayShaderPath = Root + "/Shaders/SpriteSway.shader";
@@ -232,6 +235,7 @@ namespace TownBuilder.EditorTools
         {
             CreateFolders();
             EnsureTextMeshPro();
+            EnsureGameFont();
             ConfigurePlayerSettings();
             ConfigureDepthSorting();
 
@@ -259,6 +263,7 @@ namespace TownBuilder.EditorTools
             PlaceholderArtGenerator.CreateCarSprite(false);
             PlaceholderArtGenerator.CreateSaleSign();
             PlaceholderArtGenerator.CreateBuildScreenArt();
+            PlaceholderArtGenerator.EnsureFolder(PlaceholderArtGenerator.UiArtFolder + "/Build");
 
             CreateContent(art);
             ConfigureShopCategories();
@@ -893,10 +898,40 @@ namespace TownBuilder.EditorTools
         /// Outline + soft shadow variant of the UI font material, for text drawn over the world ("+2 Wheat").
         /// The mobile TMP shader only draws outlines/underlays when their keywords are on, so it's a separate preset.
         /// </summary>
+        /// <summary>
+        /// TextMeshPro font asset for the game font (created once from the .ttf). Dynamic, with the basic Latin
+        /// characters already in the atlas; LiberationSans is the fallback for anything Fredoka doesn't have.
+        /// </summary>
+        private static void EnsureGameFont()
+        {
+            if (AssetDatabase.LoadAssetAtPath<TMPro.TMP_FontAsset>(GameFontAssetPath) != null) return;
+            var font = AssetDatabase.LoadAssetAtPath<Font>(GameFontPath);
+            if (font == null) return; // no game font: UI keeps LiberationSans
+
+            var asset = TMPro.TMP_FontAsset.CreateFontAsset(font, 90, 9, UnityEngine.TextCore.LowLevel.GlyphRenderMode.SDFAA, 1024, 1024,
+                TMPro.AtlasPopulationMode.Dynamic, true);
+            asset.name = "Fredoka-SemiBold SDF";
+            AssetDatabase.CreateAsset(asset, GameFontAssetPath);
+            asset.atlasTextures[0].name = asset.name + " Atlas";
+            AssetDatabase.AddObjectToAsset(asset.atlasTextures[0], asset);
+            asset.material.name = asset.name + " Material";
+            AssetDatabase.AddObjectToAsset(asset.material, asset);
+
+            var chars = new System.Text.StringBuilder();
+            for (char c = ' '; c <= '~'; c++) chars.Append(c);
+            chars.Append("·×–—…é");
+            asset.TryAddCharacters(chars.ToString());
+
+            var fallback = AssetDatabase.LoadAssetAtPath<TMPro.TMP_FontAsset>(UIFontAssetPath);
+            if (fallback != null) asset.fallbackFontAssetTable = new List<TMPro.TMP_FontAsset> { fallback };
+            EditorUtility.SetDirty(asset);
+            AssetDatabase.SaveAssets();
+        }
+
         private static void CreateFontOutlineMaterial()
         {
             if (AssetDatabase.LoadAssetAtPath<Material>(UIFontOutlineMaterialPath) != null) return;
-            var font = AssetDatabase.LoadAssetAtPath<TMPro.TMP_FontAsset>(UIFontAssetPath);
+            var font = EditorUtil.UIFontAsset;
             if (font == null || font.material == null) return;
 
             var mat = new Material(font.material) { name = "UIFont Outline" };
@@ -904,7 +939,7 @@ namespace TownBuilder.EditorTools
             mat.EnableKeyword("UNDERLAY_ON");
             mat.SetFloat("_FaceDilate", 0.2f);
             mat.SetFloat("_OutlineWidth", 0.25f);
-            mat.SetColor("_OutlineColor", new Color(0.12f, 0.1f, 0.08f, 1f));
+            mat.SetColor("_OutlineColor", new Color(0.22f, 0.13f, 0.06f, 1f));
             mat.SetColor("_UnderlayColor", new Color(0f, 0f, 0f, 0.45f));
             mat.SetFloat("_UnderlayOffsetX", 0.3f);
             mat.SetFloat("_UnderlayOffsetY", -0.6f);

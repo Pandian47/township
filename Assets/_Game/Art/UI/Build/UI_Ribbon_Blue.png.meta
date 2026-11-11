@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: db71bbc309c5d1342bc80014d4c85588
+guid: 468b247c9319d304ab579dffe84c4e21
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5946280222350618066
-    second: PH_UI_CardScene_0
+      213: 7195276106030903703
+    second: UI_Ribbon_Blue_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -128,13 +128,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: PH_UI_CardScene_0
+      name: UI_Ribbon_Blue_0
       rect:
         serializedVersion: 2
-        x: 0
+        x: 1
         y: 0
-        width: 256
-        height: 320
+        width: 304
+        height: 122
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -143,8 +143,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2dda3248b5e658250800000000000000
-      internalID: 5946280222350618066
+      spriteID: 791f3d80f71cad360800000000000000
+      internalID: 7195276106030903703
       vertices: []
       indices: 
       edges: []
@@ -163,7 +163,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      PH_UI_CardScene_0: 5946280222350618066
+      UI_Ribbon_Blue_0: 7195276106030903703
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
