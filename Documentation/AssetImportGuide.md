@@ -109,3 +109,19 @@ If `Assets/TextMesh Pro/` is missing (fresh clone without it), import TMP's reso
 ```bash
 "$UNITY" -batchmode -quit -projectPath . -importPackage "<project>\Library\PackageCache\com.unity.ugui@<hash>\Package Resources\TMP Essential Resources.unitypackage"
 ```
+
+## 3D models → FBX (for pre-rendered buildings)
+
+AI 3D tools usually export GLB. Unity reads FBX without extra packages, so convert with Blender (free):
+
+1. Export the model as **GLB** (or FBX directly if the tool offers it) and save it to
+   `Sources\Models\<building>\<building>.glb`, e.g. `Sources\Models\feed_mill\feed_mill.glb`.
+2. Run `Tools/blender/glb_to_fbx.py`:
+   * terminal: `"<path to>\blender.exe" --background --python Tools\blender\glb_to_fbx.py -- "D:\01-Projects\05-Township\Sources\Models"`
+     (a file or a whole folder; each GLB gets an FBX with the same name next to it, plus its texture images), or
+   * inside Blender: Scripting tab → Open → the script → set `INPUT` at the top → Run Script.
+3. The script centres the model and puts its lowest point at height 0, and uses Unity-friendly FBX settings (Y up,
+   real scale, no extra bones, animations kept).
+
+Only models of **our own** art (made from our PNGs). Moving parts (e.g. a millstone) go in their own GLB/FBX so they
+can be animated separately.
