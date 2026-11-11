@@ -52,6 +52,11 @@ namespace TownBuilder.EditorTools
             public Kind Kind;
             public int Width; // footprint width (Building/Flat), canvas width (Crop), square size (Icon)
             public int FootprintX = 1, FootprintY = 1;
+            /// <summary>
+            /// Moves the drawn picture by this many grid cells (X = screen up-right, Y = screen up-left) without moving the
+            /// building itself, for art whose base is a little deeper than its footprint (e.g. a platform over the railway).
+            /// </summary>
+            public Vector2 NudgeCells;
             /// <summary>Skip the magenta-fringe cleanup (for art that is itself pink, like the pink ribbon).</summary>
             public bool NoFringeFix;
             /// <summary>Set by processing: sprite pivot (bottom corner of the footprint for buildings).</summary>
@@ -77,7 +82,8 @@ namespace TownBuilder.EditorTools
             new Spec("town_hall", Art + "/Buildings/Community/PH_Building_town_hall.png", Kind.Building, 384),
             new Spec("barn", Art + "/Buildings/Production/PH_Building_barn.png", Kind.Building, 256),
             new Spec("bakery", Art + "/Buildings/Production/PH_Building_bakery.png", Kind.Building, 256),
-            new Spec("train_station", Art + "/Buildings/Community/PH_Building_train_station.png", Kind.Building, 320, 2, 3),
+            // The platform deck is a little deeper than the 2x3 footprint: shift the picture away from the railway (grid +X).
+            new Spec("train_station", Art + "/Buildings/Community/PH_Building_train_station.png", Kind.Building, 320, 2, 3) { NudgeCells = new Vector2(0.45f, 0f) },
             // Vehicles are long diagonal shapes: measure the whole object (Flat), not the lower 40% (Building).
             new Spec("train", Art + "/Vehicles/PH_Vehicle_train.png", Kind.Flat, 384, 1, 5),
             new Spec("silo", Art + "/Buildings/Production/PH_Building_silo.png", Kind.Building, 128),
@@ -243,6 +249,13 @@ namespace TownBuilder.EditorTools
 
                 var image = Load(source);
                 var output = Process(image, spec);
+                if (spec.NudgeCells != Vector2.zero)
+                {
+                    // One grid cell along X is (0.5, 0.25) world units, along Y (-0.5, 0.25). Moving the picture by w = moving
+                    // the pivot by -w (in pixels, as a share of the sprite size).
+                    var world = spec.NudgeCells.x * new Vector2(0.5f, 0.25f) + spec.NudgeCells.y * new Vector2(-0.5f, 0.25f);
+                    spec.Pivot -= new Vector2(world.x * ArtConventions.PixelsPerUnit / output.W, world.y * ArtConventions.PixelsPerUnit / output.H);
+                }
                 WritePng(output, spec.Target);
                 ConfigureImporter(spec);
                 done.Add($"{spec.Source} -> {Path.GetFileName(spec.Target)} ({output.W}x{output.H})");
