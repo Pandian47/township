@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f73483496becdaa448e08f1ca184aa18, type: 3}
+  m_Name: PH_RoadTile_Road
+  m_EditorClassIdentifier: TownBuilder.Runtime::TownBuilder.JoinedRoadTile
+  sprites:
+  - {fileID: 21300000, guid: b538270bc09d8154695cd0ba77693ef0, type: 3}
+  - {fileID: 21300000, guid: ceb26d172ec7e66418c1c6af977019dc, type: 3}
+  - {fileID: 21300000, guid: bd5689eb8b8ef5f42bd59a139fb2c3e2, type: 3}
+  - {fileID: 21300000, guid: fb709a25bf6728d4580cfc3770f323c8, type: 3}
+  - {fileID: 21300000, guid: 41c307f7c631f93438bf5fa256192465, type: 3}
+  - {fileID: 21300000, guid: 893c39f43611a6147ac32b45e809ae91, type: 3}
+  - {fileID: 21300000, guid: a158409ca5b464d4c987bce3791994e9, type: 3}
+  - {fileID: 21300000, guid: c9a606c6fbcef15429570e3cbfd8cac8, type: 3}
+  - {fileID: 21300000, guid: 42ffe256572e0d347b58bd5c98e96158, type: 3}
+  - {fileID: 21300000, guid: a3c09c784e538cd428305286f80e3906, type: 3}
+  - {fileID: 21300000, guid: 59c3d0bec6d7ac04f9fac3d11e1164e6, type: 3}
+  - {fileID: 21300000, guid: 47b6318a8a524e44d8192af89029e60d, type: 3}
+  - {fileID: 21300000, guid: c8a9b8c8a78c31a47950b579508f4ea9, type: 3}
+  - {fileID: 21300000, guid: 0a5e222bdc56a5c468faa597936d475f, type: 3}
+  - {fileID: 21300000, guid: 2438a1e3f3ad51242b6b913cccc32029, type: 3}
+  - {fileID: 21300000, guid: b7419defa2e93e74d9851007e80274d2, type: 3}

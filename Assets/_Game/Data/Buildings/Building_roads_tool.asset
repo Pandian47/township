@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e191ebff23be4446877666abc2909f9, type: 3}
+  m_Name: Building_roads_tool
+  m_EditorClassIdentifier: TownBuilder.Runtime::TownBuilder.BuildingDefinition
+  id: roads_tool
+  displayName: Roads & Paths
+  category: 3
+  sprite: {fileID: 21300000, guid: 580e87c4546962a4085470469cd44708, type: 3}
+  footprint: {x: 1, y: 1}
+  unlockLevel: 1
+  coinCost: 0
+  removable: 0
+  maxCount: 0
+  movable: 1
+  showInShop: 1
+  happiness: 0
+  landscapeTool: 1
+  landscapeToolKind: 1
+  seasonal: 0
+  season: 0
+  eventOnly: 0
+  chimney: {x: 0, y: 0}
+  isFarmPlot: 0
+  fruit: {fileID: 0}
+  storageCapacityBonus: 0
+  recipes: []
+  productionSlots: 3
+  buildSeconds: 0
+  buildXp: 0

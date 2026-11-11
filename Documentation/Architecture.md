@@ -337,6 +337,26 @@ calendar (`Tick`, called every second by `EventPanel`), counts harvests / produc
 set of unlocked decorations and filters the shop (`BuildingShopPanel.SetListingFilter`). `EventPanel` = the town button
 + window. DEV "Start weekend event now" runs one from today for two days. Saved in `SaveData.events`.
 
+## 6g6m. Roads, paving and landscape tools (v0.36.0)
+
+Domain (`Domain/Town/Landscape.cs`): `Terrain` gained DirtPath, BrickLane, Boardwalk, CheckerTiles, StoneSlabs, Meadow
+(appended; saved by name, no migration). `LandscapeTool` (Ground/Roads/Paving), `LandscapePalette` (styles per tool and
+their names), `TerrainRules.IsRoad/IsPaving/IsBlocking` (all roads block), `RoadRoute.Path` (grid route with at most one
+corner), `RoadJoins.Mask` (which sides touch a road), and `LandscapeEdit` strokes (`BeginStroke/EndStroke`,
+`UndoLastStroke`) plus `Check` (dry run for the route preview).
+
+`JoinedRoadTile` (Scripts/Grid) is a `TileBase` with 16 sprites indexed by the neighbour mask; it refreshes its four
+neighbours. `RoadTileBuilder` (Editor) draws the 16 kerbed pictures per road style from the flat tile PNG into
+`Art/Environment/Tiles/Roads` (ProjectSetup: missing ones; AiArtImporter: styles whose texture was imported). The
+starter map's roads use the joined Stone road tile.
+
+`LandscapeController.Begin(tool)`: paving/ground paint freehand (one stroke per drag or tap); roads draw a pending
+route (`SetRoute`, `FlipCorner`, `LayRoute`, `DiscardRoute`) shown with the cell highlight sprites (green/red) and a flag
+(`PH_RouteFlag`). `Confirm` = lay route or Done; `Back` = discard route or Cancel; `SelectEraser`; `Undo`.
+`LandscapePanel` renders the bar from the controller state (`Render(...)`, also used by the editor preview).
+Three seeds: `roads_tool`, `paving_tool`, `landscape` (`BuildingDefinition.LandscapeTool`, shop order Roads, Paving,
+Landscape).
+
 ## 6g6l. Settings, credits, app icon, store screenshots (v0.35.0, launch prep)
 
 `SettingsPanel` (Scripts/UI) is one window used by both scenes, built by `SceneBuilder.BuildSettingsPanel` in the

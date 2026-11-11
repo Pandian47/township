@@ -101,7 +101,7 @@ namespace TownBuilder.EditorTools
             // Show a placement preview (bakery) on free grass.
             var bakery = content.Buildings.First(b => b.Id == "bakery");
             var previewOrigin = new GridCoord(10, 24);
-            if (!_storeMode || hud == HudState.Placing)
+            if ((!_storeMode || hud == HudState.Placing) && hud != HudState.Landscape)
                 highlighter.Show(previewOrigin, bakery.FootprintSize, new Color(0.35f, 1f, 0.45f, 0.55f));
             if (hud == HudState.Placing)
             {
@@ -137,22 +137,26 @@ namespace TownBuilder.EditorTools
             if (hud != HudState.None) PrepareTownHud(cam, content, bakery, hud);
             if (hud == HudState.Landscape)
             {
-                // A pavement square around the fountain, a sandy path and a little pond.
+                // v0.36.0: checker tiles around the fountain, a brick lane joining a dirt path, a meadow, and a stone road
+                // being drawn (green route + flag) with the Roads & paths bar open.
                 var map = new LandscapeMap();
                 for (int x = 12; x <= 15; x++)
                 for (int y = 12; y <= 15; y++)
-                    if (x < 13 || x > 14 || y < 13 || y > 14) map.Set(new GridCoord(x, y), Terrain.Pavement);
-                for (int y = 17; y <= 21; y++) map.Set(new GridCoord(12, y), Terrain.Sand);
-                foreach (var (x, y) in new[] { (11, 23), (12, 23), (11, 24), (12, 24) }) map.Set(new GridCoord(x, y), Terrain.Water);
-                UnityEngine.Object.FindAnyObjectByType<LandscapeController>()?.ApplySaved(map);
+                    if (x < 13 || x > 14 || y < 13 || y > 14) map.Set(new GridCoord(x, y), Terrain.CheckerTiles);
+                for (int y = 12; y <= 16; y++) map.Set(new GridCoord(16, y), Terrain.BrickLane);
+                for (int x = 12; x <= 15; x++) map.Set(new GridCoord(x, 16), Terrain.DirtPath);
+                for (int x = 12; x <= 14; x++)
+                for (int y = 17; y <= 18; y++)
+                    map.Set(new GridCoord(x, y), Terrain.Meadow);
+                var landscape = UnityEngine.Object.FindAnyObjectByType<LandscapeController>();
+                landscape.ApplySaved(map);
+                landscape.ShowRoutePreview(RoadRoute.Path(new GridCoord(21, 14), new GridCoord(24, 16), true), true);
                 var canvas = UnityEngine.Object.FindAnyObjectByType<Canvas>();
-                var bar = Find(canvas, "LandscapePanel").transform.Find("Root").gameObject;
-                bar.SetActive(true);
+                var bar = Find(canvas, "LandscapePanel");
+                bar.transform.Find("Root").gameObject.SetActive(true);
                 Find(canvas, "BottomNavigation").SetActive(false);
-                bar.transform.Find("Inner/Hint/Text").GetComponent<TMPro.TMP_Text>().text = "Painting Pavement: drag your finger over your land, then tap Done.";
-                var frames = bar.GetComponentsInChildren<UnityEngine.UI.Button>(true).Where(b => b.name.StartsWith("Swatch_")).ToArray();
-                for (int i = 0; i < frames.Length; i++)
-                    frames[i].GetComponent<UnityEngine.UI.Image>().color = i == 3 ? new Color(1f, 0.82f, 0.25f) : new Color(1f, 1f, 1f, 0.9f);
+                Find(canvas, "TasksPanel").SetActive(false);
+                bar.GetComponent<LandscapePanel>().Render(LandscapeTool.Roads, Terrain.Road, false, true, true, true);
             }
 
             if (hud == HudState.Autumn || hud == HudState.Winter)
@@ -620,7 +624,7 @@ namespace TownBuilder.EditorTools
                 shopRoot.transform.Find("Window").gameObject.SetActive(true);
                 shopPanel.SetTitle(category);
                 var template = shopRoot.GetComponentsInChildren<ShopItemView>(true).First();
-                foreach (var def in content.Buildings.Where(d => d.ShowInShop && !d.EventOnly && (!d.IsSeasonal || d.Season == Season.Autumn) && d.Category == category).OrderByDescending(d => d.IsLandscapeTool))
+                foreach (var def in content.Buildings.Where(d => d.ShowInShop && !d.EventOnly && (!d.IsSeasonal || d.Season == Season.Autumn) && d.Category == category).OrderByDescending(d => d.IsLandscapeTool).ThenBy(d => d.IsLandscapeTool ? d.LandscapeToolOrder : 0))
                 {
                     var item = UnityEngine.Object.Instantiate(template, template.transform.parent);
                     item.gameObject.SetActive(true);

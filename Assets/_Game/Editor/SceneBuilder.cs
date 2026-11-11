@@ -290,7 +290,8 @@ namespace TownBuilder.EditorTools
             WireArray(seasons, "treeSprites", seasonArt.Trees);
             var streetLife = Go("StreetLife", world.transform).AddComponent<StreetLife>();
             Wire(landscape, ("grid", isoGrid), ("pointerInput", input), ("placement", placement), ("seasons", seasons), ("streetLife", streetLife),
-                ("groundTilemap", ground), ("roadTilemap", road), ("waterTilemap", water), ("railTilemap", rail));
+                ("groundTilemap", ground), ("roadTilemap", road), ("waterTilemap", water), ("railTilemap", rail),
+                ("cellSprite", art.CellHighlight), ("flagSprite", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.RouteFlagPath)));
             WireArray(landscape, "tiles", PlaceholderArtGenerator.LoadLandscapeTiles());
             Wire(streetLife, ("grid", isoGrid), ("roadTilemap", road),
                 ("carFront", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CarFrontPath)),
@@ -434,7 +435,10 @@ namespace TownBuilder.EditorTools
             }
 
             ground.SetTiles(groundCells.ToArray(), groundTiles.ToArray());
-            road.SetTiles(roadCells.ToArray(), Enumerable.Repeat<TileBase>(art.Road, roadCells.Count).ToArray());
+            // Joined road tiles (v0.36.0): kerbs only where a road ends or turns.
+            TileBase roadTile = AssetDatabase.LoadAssetAtPath<JoinedRoadTile>(RoadTileBuilder.TilePath(TownBuilder.Domain.Terrain.Road));
+            if (roadTile == null) roadTile = art.Road;
+            road.SetTiles(roadCells.ToArray(), Enumerable.Repeat(roadTile, roadCells.Count).ToArray());
             water.SetTiles(waterCells.ToArray(), Enumerable.Repeat<TileBase>(art.Water, waterCells.Count).ToArray());
 
             foreach (var map in new[] { ground, road, water })
@@ -1459,9 +1463,13 @@ namespace TownBuilder.EditorTools
             return panel;
         }
 
-        /// <summary>Landscape paint bar: six ground swatches (tile pictures), a hint, Cancel and Done.</summary>
+        /// <summary>
+        /// Landscape tool bar (v0.36.0): title, hint, Flip corner (roads), up to five style slots, Eraser, Undo, the red
+        /// button (remove the pending road / cancel) and the green button (build the road / done).
+        /// </summary>
         private static LandscapePanel BuildLandscapePanel(RectTransform safe, params GameObject[] hide)
         {
+            const int slotCount = 5;
             var outline = AssetDatabase.LoadAssetAtPath<Material>(ProjectSetup.UIFontOutlineMaterialPath);
             var brown = new Color(0.40f, 0.24f, 0.10f);
             var container = Stretch("LandscapePanel", safe);
@@ -1469,51 +1477,79 @@ namespace TownBuilder.EditorTools
             AddImage(root, new Color(0.30f, 0.17f, 0.07f));
             var inner = Stretch("Inner", root, 8f);
             AddImage(inner, new Color(1f, 0.96f, 0.86f));
-            var title = Label(MakeRect("Title", inner, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(24, -8), new Vector2(520, 54)),
-                "Text", "Paint the ground", 40, TextAnchor.MiddleLeft, brown, FontStyle.Bold);
-            var hint = Label(MakeRect("Hint", inner, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, 1f), new Vector2(560, -8), new Vector2(-900, 54)),
+            var title = Label(MakeRect("Title", inner, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(24, -8), new Vector2(420, 54)),
+                "Text", "Roads & paths", 40, TextAnchor.MiddleLeft, brown, FontStyle.Bold);
+            var hint = Label(MakeRect("Hint", inner, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, 1f), new Vector2(460, -8), new Vector2(-720, 54)),
                 "Text", "", 26, TextAnchor.MiddleLeft, new Color(0.45f, 0.42f, 0.38f));
             hint.enableAutoSizing = true;
             hint.fontSizeMin = 18;
             hint.fontSizeMax = 26;
 
-            var tiles = PlaceholderArtGenerator.LoadLandscapeTiles();
-            string[] names = { "Grass", "Sand", "Soil", "Pavement", "Water", "Road" };
-            var swatches = new Button[6];
-            var frames = new Image[6];
-            for (int i = 0; i < 6; i++)
+            var flip = MakeButton(inner, "FlipButton", "Flip corner", new Vector2(220, 56), Blue, 28);
+            var flipRect = (RectTransform)flip.transform;
+            flipRect.anchorMin = flipRect.anchorMax = flipRect.pivot = new Vector2(1f, 1f);
+            flipRect.anchoredPosition = new Vector2(-18, -8);
+
+            var sprites = PlaceholderArtGenerator.LoadLandscapeSprites();
+            Image Slot(string name, float x, string label, out Button button, out Image picture, out TMP_Text text)
             {
-                var slot = MakeRect($"Swatch_{names[i]}", inner, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(24 + i * 190, 14), new Vector2(176, 168));
-                frames[i] = AddImage(slot, Color.white);
-                swatches[i] = slot.gameObject.AddComponent<Button>();
-                swatches[i].targetGraphic = frames[i];
-                var pic = MakeRect("Tile", slot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -12), new Vector2(150, 76));
-                var img = pic.gameObject.AddComponent<Image>();
-                img.sprite = tiles[i] is UnityEngine.Tilemaps.Tile t ? t.sprite : null;
-                img.preserveAspect = true;
-                img.raycastTarget = false;
-                Label(MakeRect("Name", slot, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 10), new Vector2(-10, 52)),
-                    "Text", names[i], 30, TextAnchor.MiddleCenter, brown, FontStyle.Bold);
+                var slot = MakeRect(name, inner, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(x, 14), new Vector2(156, 164));
+                var frame = AddImage(slot, Color.white);
+                button = slot.gameObject.AddComponent<Button>();
+                button.targetGraphic = frame;
+                var pic = MakeRect("Tile", slot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -14), new Vector2(132, 66));
+                picture = pic.gameObject.AddComponent<Image>();
+                picture.preserveAspect = true;
+                picture.raycastTarget = false;
+                text = Label(MakeRect("Name", slot, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 10), new Vector2(-10, 60)),
+                    "Text", label, 26, TextAnchor.MiddleCenter, brown, FontStyle.Bold);
+                text.enableAutoSizing = true;
+                text.fontSizeMin = 18;
+                text.fontSizeMax = 26;
+                return frame;
             }
 
-            var cancel = MakeButton(inner, "CancelButton", "X", new Vector2(150, 150), Red, 60);
+            var slots = new Button[slotCount];
+            var frames = new Image[slotCount];
+            var pictures = new Image[slotCount];
+            var names = new TMP_Text[slotCount];
+            for (int i = 0; i < slotCount; i++)
+                frames[i] = Slot($"Slot{i + 1}", 24 + i * 168, "Style", out slots[i], out pictures[i], out names[i]);
+            var eraserFrame = Slot("EraserSlot", 24 + slotCount * 168 + 10, "Eraser", out var eraser, out var eraserPic, out _);
+            eraserPic.sprite = sprites[(int)TownBuilder.Domain.Terrain.Grass] as Sprite;
+            var cross = Label(MakeRect("Cross", eraserPic.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(80, 66)),
+                "Text", "X", 54, TextAnchor.MiddleCenter, new Color(0.86f, 0.33f, 0.29f), FontStyle.Bold);
+            if (outline != null) cross.fontSharedMaterial = outline;
+
+            var undo = MakeButton(inner, "UndoButton", "Undo", new Vector2(150, 150), Slate, 36);
+            var undoRect = (RectTransform)undo.transform;
+            undoRect.anchorMin = undoRect.anchorMax = undoRect.pivot = new Vector2(0f, 0f);
+            undoRect.anchoredPosition = new Vector2(24 + (slotCount + 1) * 168 + 24, 18);
+
+            var cancel = MakeButton(inner, "CancelButton", "X", new Vector2(150, 150), Red, out var cancelLabel, 60);
             var cancelRect = (RectTransform)cancel.transform;
             cancelRect.anchorMin = cancelRect.anchorMax = cancelRect.pivot = new Vector2(1f, 0f);
             cancelRect.anchoredPosition = new Vector2(-196, 18);
-            var done = MakeButton(inner, "DoneButton", "Done", new Vector2(170, 150), Green, 40);
+            var done = MakeButton(inner, "DoneButton", "Done", new Vector2(170, 150), Green, out var doneLabel, 40);
             var doneRect = (RectTransform)done.transform;
             doneRect.anchorMin = doneRect.anchorMax = doneRect.pivot = new Vector2(1f, 0f);
             doneRect.anchoredPosition = new Vector2(-18, 18);
             if (outline != null)
             {
-                cancel.GetComponentInChildren<TMP_Text>().fontSharedMaterial = outline;
-                done.GetComponentInChildren<TMP_Text>().fontSharedMaterial = outline;
+                cancelLabel.fontSharedMaterial = outline;
+                doneLabel.fontSharedMaterial = outline;
+                undo.GetComponentInChildren<TMP_Text>().fontSharedMaterial = outline;
+                flip.GetComponentInChildren<TMP_Text>().fontSharedMaterial = outline;
             }
 
             var panel = container.gameObject.AddComponent<LandscapePanel>();
-            Wire(panel, ("panelRoot", root.gameObject), ("hintText", hint), ("cancelButton", cancel), ("doneButton", done));
-            WireArray(panel, "swatches", swatches);
-            WireArray(panel, "swatchFrames", frames);
+            Wire(panel, ("panelRoot", root.gameObject), ("titleText", title), ("hintText", hint), ("eraserButton", eraser), ("eraserFrame", eraserFrame),
+                ("undoButton", undo), ("flipButton", flip), ("cancelButton", cancel), ("cancelLabel", cancelLabel), ("doneButton", done), ("doneLabel", doneLabel));
+            WireArray(panel, "slots", slots);
+            WireArray(panel, "slotFrames", frames);
+            WireArray(panel, "slotPictures", pictures);
+            WireArray(panel, "slotNames", names);
+            WireArray(panel, "terrainSprites", sprites);
             WireArray(panel, "hideWhilePainting", hide);
             root.gameObject.SetActive(false);
             return panel;

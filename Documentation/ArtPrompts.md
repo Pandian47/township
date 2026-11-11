@@ -345,6 +345,23 @@ grass) so the game name can be added on top later. No text, no letters, no logos
 If the tool can't make 1024 × 500 exactly, make a wide image and crop/resize it to 1024 × 500 (JPG or PNG without
 transparency).
 
+## v0.36.0: road, paving and ground styles (optional, setup draws simple ones)
+
+Use the **ground texture prompt** from "17–20. Ground textures" (a flat, seamless, top-down square texture). The
+script turns each one into a diamond tile, and for roads it also draws the kerbs where roads end or turn, so **don't
+draw kerbs or edges** in the texture.
+
+* `dirt_path.png`: "a packed brown dirt path with a few small pebbles"
+* `brick_lane.png`: "red clay bricks laid in neat rows with light mortar lines"
+* `boardwalk.png`: "warm brown wooden planks laid side by side, small gaps between the planks"
+* `checker_tiles.png`: "a checkerboard of cream and terracotta square floor tiles"
+* `stone_slabs.png`: "large light grey square stone slabs with thin dark joints"
+* `meadow.png`: "short green grass with many tiny white, yellow and pink wildflowers"
+
+Shop cards (optional; same style as `landscape.png`): `roads_tool.png` "a single isometric block of ground with a grey
+road with a dashed white centre line on top", `paving_tool.png` "a single isometric block with cream and terracotta
+checker tiles on top".
+
 ## v0.34.0: landscape painting (optional)
 
 * `pavement.png`: same prompt as the grass texture, but "light grey and beige square stone paving slabs, seen from above"

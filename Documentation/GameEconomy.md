@@ -103,6 +103,18 @@ already there or their slot count.
 its ingredients, every recipe belongs to exactly one factory, and no recipe unlocks before its factory or any of
 its ingredients.
 
+## Roads, paving and landscape (v0.36.0, Build → Decorations, first three cards)
+
+* Three free tool cards: **Roads & Paths** (Stone road, Dirt path, Brick lane, Boardwalk), **Paving** (Patio tiles,
+  Checker tiles, Stone slabs) and **Landscape** (Grass, Meadow, Sand, Soil, Water).
+* **Roads:** tap where the road starts and drag the flag to where it ends. The road follows the grid with at most one
+  corner (**Flip corner** puts the corner on the other side). Green = can be built; red = it crosses a building or land
+  you don't own. **Build** lays it, **X** removes the pending road. Roads join up: kerbs only where a road ends or turns.
+* **Paving and Landscape:** drag a finger (or tap) over your land, as before.
+* **Eraser** (every tool) turns tiles back into grass; **Undo** takes back the last road, drag or tap. With nothing
+  pending, **Done** keeps everything and **X** undoes the whole session.
+* All roads block building (like water); paving and ground don't. Townsfolk and cars use every road style.
+
 ## Landscape painting (v0.34.0, Build → Decorations → Landscape)
 
 * The **Landscape** card is free and always first in Decorations. It opens paint mode: pick Grass, Sand, Soil,

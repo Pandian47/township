@@ -40,6 +40,8 @@ namespace TownBuilder
         [SerializeField, Min(0)] private int happiness;
         [Tooltip("Not a building: the shop card that opens landscape painting.")]
         [SerializeField] private bool landscapeTool;
+        [Tooltip("Which landscape tool the card opens: Ground (landscape), Roads (roads & paths) or Paving.")]
+        [SerializeField] private TownBuilder.Domain.LandscapeTool landscapeToolKind = TownBuilder.Domain.LandscapeTool.Ground;
         [Tooltip("Seasonal decoration: only sold during this season (ones already built stay).")]
         [SerializeField] private bool seasonal;
         [SerializeField] private TownBuilder.Domain.Season season;
@@ -90,6 +92,9 @@ namespace TownBuilder
         public int Happiness => happiness;
         public bool IsSeasonal => seasonal;
         public bool IsLandscapeTool => landscapeTool;
+        public TownBuilder.Domain.LandscapeTool LandscapeTool => landscapeToolKind;
+        /// <summary>Shop order of the tool cards: Roads, Paving, Landscape.</summary>
+        public int LandscapeToolOrder => landscapeToolKind == TownBuilder.Domain.LandscapeTool.Roads ? 0 : landscapeToolKind == TownBuilder.Domain.LandscapeTool.Paving ? 1 : 2;
         public TownBuilder.Domain.Season Season => season;
         public Vector2 ChimneyPoint => chimney;
         public bool HasChimney => chimney != Vector2.zero;
@@ -99,7 +104,11 @@ namespace TownBuilder
         public void EditorSetCategory(BuildingCategory newCategory) => category = newCategory;
         public void EditorSetEventOnly(bool value) => eventOnly = value;
         public void EditorSetHappiness(int value) => happiness = value;
-        public void EditorSetLandscapeTool() => landscapeTool = true;
+        public void EditorSetLandscapeTool(TownBuilder.Domain.LandscapeTool kind = TownBuilder.Domain.LandscapeTool.Ground)
+        {
+            landscapeTool = true;
+            landscapeToolKind = kind;
+        }
 
         public void EditorSetSeason(TownBuilder.Domain.Season value)
         {

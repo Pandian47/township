@@ -182,7 +182,16 @@ namespace TownBuilder.EditorTools
             new Spec("water", Art + "/Environment/Tiles/PH_Tile_Water.png", Kind.Tile, 128),
             new Spec("road", Art + "/Environment/Tiles/PH_Tile_Road.png", Kind.Tile, 128),
             new Spec("pavement", Art + "/Environment/Tiles/PH_Tile_Pavement.png", Kind.Tile, 128),
+            // v0.36.0 landscape styles (top-down textures, turned into diamonds like the grass).
+            new Spec("dirt_path", Art + "/Environment/Tiles/PH_Tile_DirtPath.png", Kind.Tile, 128),
+            new Spec("brick_lane", Art + "/Environment/Tiles/PH_Tile_BrickLane.png", Kind.Tile, 128),
+            new Spec("boardwalk", Art + "/Environment/Tiles/PH_Tile_Boardwalk.png", Kind.Tile, 128),
+            new Spec("checker_tiles", Art + "/Environment/Tiles/PH_Tile_CheckerTiles.png", Kind.Tile, 128),
+            new Spec("stone_slabs", Art + "/Environment/Tiles/PH_Tile_StoneSlabs.png", Kind.Tile, 128),
+            new Spec("meadow", Art + "/Environment/Tiles/PH_Tile_Meadow.png", Kind.Tile, 128),
             new Spec("landscape", Art + "/Buildings/Decorations/PH_Building_landscape.png", Kind.Flat, 128),
+            new Spec("roads_tool", Art + "/Buildings/Decorations/PH_Building_roads_tool.png", Kind.Flat, 128),
+            new Spec("paving_tool", Art + "/Buildings/Decorations/PH_Building_paving_tool.png", Kind.Flat, 128),
 
             // v0.27.4: Build window and top bar art.
             new Spec("build_sign", Art + "/UI/Build/UI_BuildSign.png", Kind.Ui, 1024),
@@ -261,6 +270,15 @@ namespace TownBuilder.EditorTools
                 done.Add($"{spec.Source} -> {Path.GetFileName(spec.Target)} ({output.W}x{output.H})");
                 Debug.Log($"[AiArt] {spec.Source}: {image.W}x{image.H} -> {spec.Target} ({output.W}x{output.H})");
             }
+
+            // Joined roads (v0.36.0): redraw the kerbed pictures of every road style whose texture was just imported.
+            var roadSources = new System.Collections.Generic.Dictionary<string, TownBuilder.Domain.Terrain>
+            {
+                { "road", TownBuilder.Domain.Terrain.Road }, { "dirt_path", TownBuilder.Domain.Terrain.DirtPath },
+                { "brick_lane", TownBuilder.Domain.Terrain.BrickLane }, { "boardwalk", TownBuilder.Domain.Terrain.Boardwalk },
+            };
+            var redraw = done.Select(d => d.Split(' ')[0]).Where(roadSources.ContainsKey).Select(n => roadSources[n]).ToList();
+            RoadTileBuilder.BuildAll(redraw);
 
             // App icon (v0.35.0): a full square picture, kept as drawn (no background removal).
             if (AppIconTools.ImportFromSource(folder))

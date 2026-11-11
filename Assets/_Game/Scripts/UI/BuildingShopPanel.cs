@@ -118,7 +118,7 @@ namespace TownBuilder
             foreach (var item in _items) Destroy(item.gameObject);
             _items.Clear();
 
-            foreach (var definition in content.Buildings.Where(b => b != null).OrderByDescending(b => b.IsLandscapeTool))
+            foreach (var definition in content.Buildings.Where(b => b != null).OrderByDescending(b => b.IsLandscapeTool).ThenBy(b => b.IsLandscapeTool ? b.LandscapeToolOrder : 0))
             {
                 if (definition == null || !definition.ShowInShop) continue;
                 var item = Instantiate(itemTemplate, itemsParent);

@@ -408,6 +408,16 @@ Our own features in the farming / town genre (not copied from any game).
 | 4 | **Seasons**: the town's look follows the real month, seasonal decorations | Done (v0.33.0) |
 | 5 | **Launch prep**: settings, credits, privacy policy, app icon, store screenshots, AAB checklist | Done (v0.35.0) |
 
+### Device checklist (v0.36.0: roads, paving and landscape tools)
+- [ ] Build → Decorations starts with three free cards: Roads & Paths, Paving, Landscape
+- [ ] Roads & Paths: pick a style, tap where the road starts and drag: a green route and a flag follow your finger
+- [ ] Routes go along the grid with one corner; Flip corner moves the corner; over a building the route turns red
+- [ ] Build lays the road; roads join up (kerbs only along the sides and at dead ends, none between joined tiles)
+- [ ] X removes the pending road; with nothing pending X undoes the session and Done keeps it
+- [ ] Paving and Landscape paint with a finger; Eraser turns tiles back to grass; Undo takes back one step
+- [ ] You can't build on any road style; you can build on paving; townsfolk walk on the new roads
+- [ ] Everything is still there after closing and reopening the app
+
 ### Device checklist (v0.35.2: Tasks button)
 - [ ] The task list is closed when the town opens; a round green clipboard button sits under the level star
 - [ ] Its red badge shows how many tasks are ready to claim (hidden when none)

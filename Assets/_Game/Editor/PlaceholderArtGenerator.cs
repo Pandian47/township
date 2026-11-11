@@ -231,24 +231,63 @@ namespace TownBuilder.EditorTools
 
         // ------------------------------------------------------------------ Tiles
 
-        private enum TileStyle { Plain, Grass, Soil, Water, Road, Pavement }
+        private enum TileStyle { Plain, Grass, Soil, Water, Road, Pavement, Dirt, Brick, Boards, Checker, Slabs, Meadow }
 
         /// <summary>Light stone pavement tile (landscape painting).</summary>
         public static Tile CreatePavementTile() => CreateTile("PH_Tile_Pavement", new Color32(214, 206, 192, 255), TileStyle.Pavement);
 
-        /// <summary>Ground tiles in Terrain order: Grass, Sand, Soil, Pavement, Water, Road.</summary>
-        public static Object[] LoadLandscapeTiles() => new Object[]
+        /// <summary>v0.36.0 styles: Dirt path, Brick lane, Boardwalk (roads), Checker tiles, Stone slabs (paving), Meadow (ground).</summary>
+        public static void CreateLandscapeStyleTiles()
         {
-            AssetDatabase.LoadAssetAtPath<Tile>(TileAssetPath("PH_Tile_Grass")), AssetDatabase.LoadAssetAtPath<Tile>(TileAssetPath("PH_Tile_Sand")),
-            AssetDatabase.LoadAssetAtPath<Tile>(TileAssetPath("PH_Tile_Soil")), AssetDatabase.LoadAssetAtPath<Tile>(TileAssetPath("PH_Tile_Pavement")),
-            AssetDatabase.LoadAssetAtPath<Tile>(TileAssetPath("PH_Tile_Water")), AssetDatabase.LoadAssetAtPath<Tile>(TileAssetPath("PH_Tile_Road")),
-        };
+            CreateTile(TileNameFor(TownBuilder.Domain.Terrain.DirtPath), new Color32(170, 128, 84, 255), TileStyle.Dirt);
+            CreateTile(TileNameFor(TownBuilder.Domain.Terrain.BrickLane), new Color32(184, 92, 68, 255), TileStyle.Brick);
+            CreateTile(TileNameFor(TownBuilder.Domain.Terrain.Boardwalk), new Color32(184, 128, 76, 255), TileStyle.Boards);
+            CreateTile(TileNameFor(TownBuilder.Domain.Terrain.CheckerTiles), new Color32(238, 226, 200, 255), TileStyle.Checker);
+            CreateTile(TileNameFor(TownBuilder.Domain.Terrain.StoneSlabs), new Color32(192, 192, 186, 255), TileStyle.Slabs);
+            CreateTile(TileNameFor(TownBuilder.Domain.Terrain.Meadow), new Color32(112, 182, 76, 255), TileStyle.Meadow);
+        }
 
-        /// <summary>The Landscape shop card: a grass block with earth sides (isometric), pivot bottom centre.</summary>
-        public static Sprite CreateLandscapeIcon() =>
-            CreateSprite($"{DecorationsArtFolder}/PH_Building_landscape.png", RenderLandscapeIcon, new Vector2(0.5f, 0f), SpriteMeshType.Tight);
+        /// <summary>The flat tile picture of each ground style (file and tile asset name).</summary>
+        public static string TileNameFor(TownBuilder.Domain.Terrain t) => $"PH_Tile_{t}";
 
-        private static Texture2D RenderLandscapeIcon()
+        /// <summary>
+        /// Tiles in Terrain order (Grass, Sand, Soil, Pavement, Water, Road, DirtPath, BrickLane, Boardwalk, CheckerTiles,
+        /// StoneSlabs, Meadow). Roads are the joined road tiles (RoadTileBuilder) when they exist.
+        /// </summary>
+        public static Object[] LoadLandscapeTiles()
+        {
+            var values = (TownBuilder.Domain.Terrain[])System.Enum.GetValues(typeof(TownBuilder.Domain.Terrain));
+            var result = new Object[values.Length];
+            foreach (var t in values)
+            {
+                Object tile = null;
+                if (TownBuilder.Domain.TerrainRules.IsRoad(t)) tile = AssetDatabase.LoadAssetAtPath<JoinedRoadTile>(RoadTileBuilder.TilePath(t));
+                if (tile == null) tile = AssetDatabase.LoadAssetAtPath<Tile>(TileAssetPath(TileNameFor(t)));
+                result[(int)t] = tile;
+            }
+
+            return result;
+        }
+
+        /// <summary>Swatch pictures in Terrain order (roads: the joined picture with kerbs all round).</summary>
+        public static Object[] LoadLandscapeSprites()
+        {
+            var tiles = LoadLandscapeTiles();
+            var result = new Object[tiles.Length];
+            for (int i = 0; i < tiles.Length; i++)
+                result[i] = tiles[i] is JoinedRoadTile road ? road.Preview : tiles[i] is Tile t ? t.sprite : null;
+            return result;
+        }
+
+        /// <summary>The three landscape tool cards: an isometric block with grass, road or paving on top, pivot bottom centre.</summary>
+        public static Sprite CreateLandscapeIcon(TownBuilder.Domain.LandscapeTool tool = TownBuilder.Domain.LandscapeTool.Ground)
+        {
+            string file = tool == TownBuilder.Domain.LandscapeTool.Roads ? "PH_Building_roads_tool" :
+                tool == TownBuilder.Domain.LandscapeTool.Paving ? "PH_Building_paving_tool" : "PH_Building_landscape";
+            return CreateSprite($"{DecorationsArtFolder}/{file}.png", () => RenderLandscapeIcon(tool), new Vector2(0.5f, 0f), SpriteMeshType.Tight);
+        }
+
+        private static Texture2D RenderLandscapeIcon(TownBuilder.Domain.LandscapeTool tool)
         {
             const int w = 128, h = 96, depth = 30;
             var tex = NewTexture(w, h);
@@ -256,6 +295,12 @@ namespace TownBuilder.EditorTools
             var grass = new Color32(110, 190, 70, 255);
             var earthL = new Color32(150, 100, 60, 255);
             var earthR = new Color32(120, 78, 46, 255);
+            if (tool != TownBuilder.Domain.LandscapeTool.Ground)
+            {
+                earthL = new Color32(168, 164, 158, 255);
+                earthR = new Color32(136, 132, 126, 255);
+            }
+
             for (int y = 0; y < h; y++)
             for (int x = 0; x < w; x++)
             {
@@ -264,7 +309,26 @@ namespace TownBuilder.EditorTools
                 float d = Mathf.Abs(fx - 64f) / 64f + Mathf.Abs(fy - topY) / 32f;
                 if (d <= 1f)
                 {
-                    px[y * w + x] = Scale(grass, 0.92f + 0.16f * ((fy - depth) / 64f));
+                    float shade = 0.92f + 0.16f * ((fy - depth) / 64f);
+                    var top = grass;
+                    float dx = (fx - 64f) / 64f, dy = (fy - topY) / 32f;
+                    if (tool == TownBuilder.Domain.LandscapeTool.Roads)
+                    {
+                        // A road crossing the block along one grid axis, with light kerbs and a dashed centre line.
+                        float across = Mathf.Abs(dx + dy); // 0 on the road's centre line
+                        top = across < 0.08f && Mathf.Repeat((dx - dy) * 4f, 1f) < 0.5f ? new Color32(250, 246, 230, 255)
+                            : across < 0.62f ? new Color32(110, 110, 116, 255)
+                            : across < 0.74f ? new Color32(224, 220, 210, 255) : grass;
+                    }
+                    else if (tool == TownBuilder.Domain.LandscapeTool.Paving)
+                    {
+                        float u = (dx + dy) * 2f, v = (dx - dy) * 2f;
+                        bool odd = ((int)Mathf.Floor(u + 4f) + (int)Mathf.Floor(v + 4f)) % 2 == 0;
+                        top = odd ? new Color32(236, 224, 198, 255) : new Color32(192, 112, 82, 255);
+                        if (Mathf.Repeat(u, 1f) < 0.07f || Mathf.Repeat(v, 1f) < 0.07f) top = new Color32(150, 140, 128, 255);
+                    }
+
+                    px[y * w + x] = Scale(top, shade);
                     continue;
                 }
 
@@ -329,6 +393,65 @@ namespace TownBuilder.EditorTools
                         case TileStyle.Road:
                             if (d > 0.82f) shade *= 0.85f; // kerb
                             break;
+                        case TileStyle.Dirt:
+                        {
+                            float blotch = Mathf.Sin(px * 0.11f) * Mathf.Sin(py * 0.23f + px * 0.05f);
+                            if (blotch > 0.55f) shade *= 0.9f;
+                            if (Hash(x * 7 + 3, y * 11 + 5) > 0.965f) shade *= 1.25f; // pebbles
+                            break;
+                        }
+                        case TileStyle.Brick:
+                        {
+                            float u = (px / HalfW + py / HalfH) * 4f, v = (px / HalfW - py / HalfH) * 2f;
+                            float row = Mathf.Floor(v);
+                            float fu = Mathf.Repeat(u + (((int)row & 1) == 0 ? 0f : 0.5f), 1f), fv = v - row;
+                            if (fu < 0.09f || fv < 0.12f) { pixels[y * TileWidth + x] = Scale(new Color32(214, 198, 176, 255), shade); continue; }
+                            shade *= 0.9f + Hash((int)Mathf.Floor(u + (((int)row & 1) == 0 ? 0f : 0.5f)) * 13, (int)row * 7) * 0.2f;
+                            break;
+                        }
+                        case TileStyle.Boards:
+                        {
+                            float v = (px / HalfW - py / HalfH) * 3f;
+                            float plank = Mathf.Floor(v);
+                            if (v - plank < 0.1f) shade *= 0.62f; // gap between planks
+                            else shade *= 0.9f + Hash((int)plank * 17, 3) * 0.2f;
+                            if (Hash(x * 5, y * 3) > 0.985f) shade *= 0.8f; // knots
+                            break;
+                        }
+                        case TileStyle.Checker:
+                        {
+                            float u = (px / HalfW + py / HalfH) * 1.5f, v = (px / HalfW - py / HalfH) * 1.5f;
+                            float fu = u - Mathf.Floor(u), fv = v - Mathf.Floor(v);
+                            if (fu < 0.06f || fv < 0.06f) { pixels[y * TileWidth + x] = Scale(new Color32(150, 140, 128, 255), shade); continue; }
+                            if (((int)Mathf.Floor(u) + (int)Mathf.Floor(v + 8f)) % 2 == 0)
+                            {
+                                pixels[y * TileWidth + x] = Scale(new Color32(196, 108, 80, 255), shade);
+                                continue;
+                            }
+
+                            break;
+                        }
+                        case TileStyle.Slabs:
+                        {
+                            float u = px / HalfW + py / HalfH, v = (px / HalfW - py / HalfH) + 2f;
+                            float fu = u - Mathf.Floor(u), fv = v - Mathf.Floor(v);
+                            if (fu < 0.05f || fv < 0.05f) shade *= 0.72f;
+                            else shade *= 0.92f + Hash((int)Mathf.Floor(u) * 31, (int)Mathf.Floor(v) * 17) * 0.16f;
+                            break;
+                        }
+                        case TileStyle.Meadow:
+                        {
+                            if (Hash(x * 3 + 7, y * 5 + 1) > 0.93f) shade *= 0.85f;
+                            float f = Hash(x / 3 * 19 + 1, y / 3 * 23 + 7);
+                            if (f > 0.955f)
+                            {
+                                var flower = f > 0.985f ? new Color32(250, 120, 170, 255) : f > 0.97f ? new Color32(255, 220, 70, 255) : new Color32(255, 255, 250, 255);
+                                pixels[y * TileWidth + x] = flower;
+                                continue;
+                            }
+
+                            break;
+                        }
                         case TileStyle.Pavement:
                         {
                             // Square slabs along the two grid axes.
@@ -972,6 +1095,36 @@ namespace TownBuilder.EditorTools
             CreateSprite(ChestIconPath, RenderChest, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
 
         public static readonly string TasksIconPath = UiArtFolder + "/PH_Icon_Tasks.png";
+        public static readonly string RouteFlagPath = UiArtFolder + "/PH_RouteFlag.png";
+
+        /// <summary>The flag at the end of a road route (v0.36.0): a pole with a yellow pennant, pivot at the pole's foot.</summary>
+        public static Sprite CreateRouteFlag() =>
+            CreateSprite(RouteFlagPath, RenderRouteFlag, new Vector2(16f / 72f, 0f), SpriteMeshType.Tight);
+
+        private static Texture2D RenderRouteFlag()
+        {
+            const int w = 72, h = 112;
+            var tex = NewTexture(w, h);
+            var px = new Color32[w * h];
+            for (int y = 2; y < 108; y++)
+            for (int x = 13; x < 19; x++)
+                px[y * w + x] = x < 15 ? new Color32(250, 250, 250, 255) : new Color32(200, 200, 206, 255);
+            for (int y = 62; y < 104; y++)
+            {
+                float t = (y - 62) / 42f; // pennant: a triangle pointing right
+                int len = Mathf.RoundToInt(50f * (1f - Mathf.Abs(t - 0.5f) * 2f));
+                for (int x = 19; x < 19 + len && x < w - 2; x++)
+                    px[y * w + x] = t > 0.5f ? new Color32(255, 206, 64, 255) : new Color32(240, 176, 40, 255);
+            }
+
+            for (int y = 0; y < 6; y++)
+            for (int x = 8; x < 24; x++)
+                px[y * w + x] = new Color32(110, 110, 116, 255); // little base
+            AddOutline(px, w, h);
+            tex.SetPixels32(px);
+            tex.Apply();
+            return tex;
+        }
 
         /// <summary>Clipboard with three ticked lines (Tasks button, v0.35.2), 128x128.</summary>
         public static Sprite CreateTasksIcon() =>

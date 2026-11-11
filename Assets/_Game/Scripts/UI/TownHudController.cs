@@ -122,7 +122,7 @@ namespace TownBuilder
             if (adsOn) rewardedCoinsButton.Initialize(ads, wallet, content.AdsConfig.RewardedCoins);
             shopPanel.Initialize(content, wallet, progress, _placement.CanBuildMore, d =>
             {
-                if (d.IsLandscapeTool) _landscape?.Begin();
+                if (d.IsLandscapeTool) _landscape?.Begin(d.LandscapeTool);
                 else _placement.BeginPlacement(d);
             }, _placement.CountOwned);
 
