@@ -14,14 +14,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: TownBuilder.Runtime::TownBuilder.BuildingDefinition
   id: silo
   displayName: Silo
-  category: 2
+  category: 0
   sprite: {fileID: 21300000, guid: e5f90e94dad66d746bf703a56b278950, type: 3}
   footprint: {x: 1, y: 1}
   unlockLevel: 3
   coinCost: 250
   removable: 1
   maxCount: 0
+  movable: 1
+  showInShop: 1
+  chimney: {x: 0, y: 0}
   isFarmPlot: 0
+  fruit: {fileID: 0}
   storageCapacityBonus: 30
+  recipes: []
+  productionSlots: 3
   buildSeconds: 90
   buildXp: 6

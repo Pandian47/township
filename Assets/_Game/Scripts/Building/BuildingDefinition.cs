@@ -82,6 +82,7 @@ namespace TownBuilder
 
         public void EditorSetChimney(Vector2 point) => chimney = point;
         public void EditorSetFruit(CropDefinition crop) => fruit = crop;
+        public void EditorSetCategory(BuildingCategory newCategory) => category = newCategory;
 
         public void EditorConfigureLandmark(bool isMovable, bool inShop)
         {

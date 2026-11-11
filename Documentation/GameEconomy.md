@@ -105,7 +105,7 @@ its ingredients.
 
 ## Orchard and juice (Milestone 7 step 3)
 
-Fruit trees are 1×1 buildings (Build shop → Buildings, placed instantly, up to 8 of each). The fruit grows by itself,
+Fruit trees are 1×1 buildings (Build shop → Farm, placed instantly, up to 8 of each). The fruit grows by itself,
 with no seeds and no planting. Tap a ripe tree to pick it; it starts growing again straight away. Trees can be moved;
 removing one loses its fruit.
 

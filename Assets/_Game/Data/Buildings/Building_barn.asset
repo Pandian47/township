@@ -14,14 +14,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: TownBuilder.Runtime::TownBuilder.BuildingDefinition
   id: barn
   displayName: Barn
-  category: 2
+  category: 0
   sprite: {fileID: 21300000, guid: d034656df64a0b649965432b0f227554, type: 3}
   footprint: {x: 2, y: 2}
   unlockLevel: 1
   coinCost: 300
   removable: 1
   maxCount: 0
+  movable: 1
+  showInShop: 1
+  chimney: {x: 0, y: 0}
   isFarmPlot: 0
+  fruit: {fileID: 0}
   storageCapacityBonus: 50
+  recipes: []
+  productionSlots: 3
   buildSeconds: 60
   buildXp: 8

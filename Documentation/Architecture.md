@@ -310,8 +310,10 @@ Placeholder tree art is drawn from `tree.png` by `PlaceholderArtGenerator.Create
 ## 6g9. Decorations (Milestone 6 step 5)
 
 Decorations are ordinary `BuildingDefinition`s with `category = Decoration` (no recipes, no build time, `maxCount` 0), so
-placement, moving, saving and land rules all apply unchanged. `BuildingShopPanel` has two tabs and shows cards whose
-category is (or isn't) Decoration. Placeholder art: `PlaceholderArtGenerator.CreateDecoration` (setup seeds with `Deco`).
+placement, moving, saving and land rules all apply unchanged. `BuildingShopPanel` has one tab per `BuildingCategory`
+with something for sale (v0.27.2: Houses, Town, Factories, Farm, Decorations; order in `BuildingShopPanel.TabOrder`),
+cloned at runtime from a `ShopTabView` template with the picture of the category's first building. The look is our
+own (the existing shop window with picture tabs), not taken from any other game. Placeholder art: `PlaceholderArtGenerator.CreateDecoration` (setup seeds with `Deco`).
 
 ## 6h. UI text (TextMeshPro)
 

@@ -39,19 +39,29 @@ namespace TownBuilder.Tests
             var shop = Object.FindAnyObjectByType<BuildingShopPanel>();
             GameObject.Find("BuildButton").GetComponent<Button>().onClick.Invoke();
             Assert.IsTrue(shop.IsOpen);
-            Assert.IsFalse(shop.ShowingDecorations, "opens on Buildings");
+            Assert.AreEqual(BuildingCategory.Residential, shop.CurrentCategory, "opens on Houses");
+            Assert.IsFalse(shop.ShowingDecorations);
 
-            int buildings = content.Buildings.Count(b => b.ShowInShop && b.Category != BuildingCategory.Decoration);
-            int decorations = content.Buildings.Count(b => b.ShowInShop && b.Category == BuildingCategory.Decoration);
-            Assert.Greater(decorations, 0);
-            Assert.AreEqual(buildings, shop.VisibleItems);
+            // One tab per category with something for sale; each tab shows exactly that category.
+            var expected = BuildingShopPanel.TabOrder.Where(c => content.Buildings.Any(b => b.ShowInShop && b.Category == c)).ToList();
+            CollectionAssert.AreEqual(expected, shop.Categories.ToList());
+            int total = 0;
+            foreach (var category in expected)
+            {
+                GameObject.Find($"Tab_{category}").GetComponent<Button>().onClick.Invoke();
+                Assert.AreEqual(category, shop.CurrentCategory);
+                int count = content.Buildings.Count(b => b.ShowInShop && b.Category == category);
+                Assert.AreEqual(count, shop.VisibleItems, $"{category} tab");
+                total += count;
+            }
 
-            GameObject.Find("DecorationsTab").GetComponent<Button>().onClick.Invoke();
+            Assert.AreEqual(content.Buildings.Count(b => b.ShowInShop), total, "every shop item is in one tab");
+
+            // Factories tab: only factories. Fruit trees are on the Farm tab.
+            Assert.IsTrue(content.Buildings.Where(b => b.ShowInShop && b.Category == BuildingCategory.Production).All(b => b.IsFactory));
+            Assert.IsTrue(content.Buildings.Where(b => b.IsFruitTree).All(b => b.Category == BuildingCategory.Farming));
+            GameObject.Find("Tab_Decoration").GetComponent<Button>().onClick.Invoke();
             Assert.IsTrue(shop.ShowingDecorations);
-            Assert.AreEqual(decorations, shop.VisibleItems);
-
-            GameObject.Find("BuildingsTab").GetComponent<Button>().onClick.Invoke();
-            Assert.AreEqual(buildings, shop.VisibleItems);
         }
 
         [UnityTest]

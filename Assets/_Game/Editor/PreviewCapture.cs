@@ -134,7 +134,7 @@ namespace TownBuilder.EditorTools
             return outputPath;
         }
 
-        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals }
+        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm }
 
         /// <summary>Command line: renders MainMenu + Town (idle, shop, placing) with UI into the folder after -previewOut.</summary>
         public static void CaptureUiFromCommandLine()
@@ -148,6 +148,7 @@ namespace TownBuilder.EditorTools
                 Capture(Path.Combine(folder, "Preview_Town_Idle.png"), HudState.Idle);
                 Capture(Path.Combine(folder, "Preview_Town_Shop.png"), HudState.Shop);
                 Capture(Path.Combine(folder, "Preview_Town_Decorations.png"), HudState.ShopDecorations);
+                Capture(Path.Combine(folder, "Preview_Town_ShopFarm.png"), HudState.ShopFarm);
                 Capture(Path.Combine(folder, "Preview_Town_Placing.png"), HudState.Placing);
                 Capture(Path.Combine(folder, "Preview_Town_Field.png"), HudState.Field);
                 Capture(Path.Combine(folder, "Preview_Town_Barn.png"), HudState.Barn);
@@ -441,16 +442,17 @@ namespace TownBuilder.EditorTools
                 }
             }
 
-            if (state == HudState.Shop || state == HudState.ShopDecorations)
+            if (state == HudState.Shop || state == HudState.ShopDecorations || state == HudState.ShopFarm)
             {
-                bool decorations = state == HudState.ShopDecorations;
+                var category = state == HudState.ShopDecorations ? BuildingCategory.Decoration
+                    : state == HudState.ShopFarm ? BuildingCategory.Farming : BuildingCategory.Production;
                 var shopRoot = Find(canvas, "BuildingShopPanel").transform.Find("Root").gameObject;
                 shopRoot.SetActive(true);
-                var tabs = shopRoot.transform.Find("Window/Tabs");
-                tabs.Find("BuildingsTab").GetComponent<UnityEngine.UI.Image>().color = decorations ? new Color(0.62f, 0.62f, 0.6f) : new Color(0.3f, 0.66f, 0.3f);
-                tabs.Find("DecorationsTab").GetComponent<UnityEngine.UI.Image>().color = decorations ? new Color(0.3f, 0.66f, 0.3f) : new Color(0.62f, 0.62f, 0.6f);
+                var shopPanel = Find(canvas, "BuildingShopPanel").GetComponent<BuildingShopPanel>();
+                shopPanel.BuildTabs(content);
+                shopPanel.HighlightTab(category);
                 var template = shopRoot.GetComponentsInChildren<ShopItemView>(true).First();
-                foreach (var def in content.Buildings.Where(d => d.ShowInShop && (d.Category == BuildingCategory.Decoration) == decorations))
+                foreach (var def in content.Buildings.Where(d => d.ShowInShop && d.Category == category))
                 {
                     var item = UnityEngine.Object.Instantiate(template, template.transform.parent);
                     item.gameObject.SetActive(true);

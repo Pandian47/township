@@ -344,8 +344,13 @@ Design notes:
 - [ ] DEV → "Unlock everything (level 10)": Rising Star tiers 1 and 2 become claimable
 - [ ] Progress and claimed tiers are kept after closing and reopening the app
 
+### Device checklist (v0.27.2: shop categories)
+- [ ] Build opens on **Houses**; tabs: Houses, Town (Town Hall, Barn, Silo), Factories (only factories), Farm (Field,
+      Chicken Coop, Dairy Shed, Apple Tree, Cherry Tree), Decorations
+- [ ] Each tab shows only its own cards and scrolls back to the start when switched
+
 ### Device checklist (Milestone 7 step 3: orchard)
-- [ ] DEV → "Unlock everything (level 10)", then Build → Buildings: Apple Tree, Cherry Tree and Juice Press are there
+- [ ] DEV → "Unlock everything (level 10)", then Build → Farm: Apple Tree, Cherry Tree; Build → Factories: Juice Press
 - [ ] An Apple Tree is placed instantly and shows small green apples; tapping it shows "Apple: 29m left"
 - [ ] DEV → "Finish all timers": the apples turn red; tapping the tree picks 2 Apples and green apples appear again
 - [ ] A field's crop picker does **not** list Apple or Cherry

@@ -121,13 +121,13 @@ namespace TownBuilder.EditorTools
             new BuildingSeed { Id = "cottage", Name = "Cottage", Category = BuildingCategory.Residential, Folder = "Residential",
                 W = 2, H = 2, HeightPx = 80, Unlock = 1, Cost = 150, Removable = true, BuildSeconds = 30, BuildXp = 5,
                 Wall = new Color32(250, 236, 200, 255), Roof = new Color32(214, 92, 70, 255) },
-            new BuildingSeed { Id = "barn", Name = "Barn", Category = BuildingCategory.Production, Folder = "Production",
+            new BuildingSeed { Id = "barn", Name = "Barn", Category = BuildingCategory.Community, Folder = "Production",
                 W = 2, H = 2, HeightPx = 110, Unlock = 1, Cost = 300, Removable = true, StorageBonus = 50, BuildSeconds = 60, BuildXp = 8,
                 Wall = new Color32(190, 72, 56, 255), Roof = new Color32(120, 84, 64, 255) },
             new BuildingSeed { Id = "bakery", Name = "Bakery", Category = BuildingCategory.Production, Folder = "Production",
                 W = 2, H = 2, HeightPx = 95, Unlock = 1, Cost = 450, Removable = true, BuildSeconds = 120, BuildXp = 10,
                 Wall = new Color32(246, 214, 160, 255), Roof = new Color32(226, 140, 50, 255) },
-            new BuildingSeed { Id = "silo", Name = "Silo", Category = BuildingCategory.Production, Folder = "Production",
+            new BuildingSeed { Id = "silo", Name = "Silo", Category = BuildingCategory.Community, Folder = "Production",
                 W = 1, H = 1, HeightPx = 140, Unlock = 3, Cost = 250, Removable = true, StorageBonus = 30, BuildSeconds = 90, BuildXp = 6,
                 Wall = new Color32(186, 196, 206, 255), Roof = new Color32(120, 136, 150, 255) },
             new BuildingSeed { Id = "feed_mill", Name = "Feed Mill", Category = BuildingCategory.Production, Folder = "Production",
@@ -260,6 +260,7 @@ namespace TownBuilder.EditorTools
             PlaceholderArtGenerator.CreateSaleSign();
 
             CreateContent(art);
+            ConfigureShopCategories();
             CreateCrops();
             ConfigureOrchard();
             CreateProduction();
@@ -799,6 +800,21 @@ namespace TownBuilder.EditorTools
                 if (!merged.Contains(c)) merged.Add(c);
             content.EditorSetCrops(merged);
             EditorUtility.SetDirty(content);
+        }
+
+        /// <summary>
+        /// v0.27.2: storage buildings (Barn, Silo) moved from Production to Community, so the shop's Factories tab
+        /// only has factories. Only changes them while they are still in Production (keeps later designer edits).
+        /// </summary>
+        private static void ConfigureShopCategories()
+        {
+            var content = AssetDatabase.LoadAssetAtPath<GameContent>(ContentPath);
+            foreach (var id in new[] { "barn", "silo" })
+            {
+                if (!content.TryGetBuilding(id, out var def) || def.Category != BuildingCategory.Production) continue;
+                def.EditorSetCategory(BuildingCategory.Community);
+                EditorUtility.SetDirty(def);
+            }
         }
 
         /// <summary>Links each fruit tree to its fruit (only when not set yet).</summary>

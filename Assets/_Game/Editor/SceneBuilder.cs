@@ -1235,11 +1235,23 @@ namespace TownBuilder.EditorTools
             var titleRect = MakeRect("Title", window, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -16), new Vector2(-80, 70));
             Label(titleRect, "Text", "Build", 52, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
 
-            // Tabs next to the title.
-            var tabs = MakeRect("Tabs", window, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(220, -16), new Vector2(600, 74));
-            HRow(tabs, 14, TextAnchor.MiddleLeft);
-            var buildingsTab = MakeButton(tabs, "BuildingsTab", "Buildings", new Vector2(260, 70), Green, 32);
-            var decorationsTab = MakeButton(tabs, "DecorationsTab", "Decorations", new Vector2(280, 70), Slate, 32);
+            // Category tabs next to the title (cloned per category by BuildingShopPanel).
+            var tabs = MakeRect("Tabs", window, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, 1f), new Vector2(200, -12), new Vector2(-330, 80));
+            HRow(tabs, 12, TextAnchor.MiddleLeft);
+            var tabRect = MakeRect("TabTemplate", tabs, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(270, 78));
+            Prefer(tabRect, 270, 78);
+            var tabBg = AddImage(tabRect, Slate);
+            var tabButton = tabRect.gameObject.AddComponent<Button>();
+            tabButton.targetGraphic = tabBg;
+            var tabIconRect = MakeRect("Icon", tabRect, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(8, 0), new Vector2(66, 66));
+            var tabIcon = tabIconRect.gameObject.AddComponent<Image>();
+            tabIcon.preserveAspect = true;
+            tabIcon.raycastTarget = false;
+            var tabLabel = Label(MakeRect("Label", tabRect, new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(38, 0), new Vector2(-86, -8)),
+                "Text", "Tab", 30, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+            var tabView = tabRect.gameObject.AddComponent<ShopTabView>();
+            Wire(tabView, ("button", tabButton), ("background", tabBg), ("icon", tabIcon), ("label", tabLabel));
+            tabRect.gameObject.SetActive(false);
 
             var close = MakeButton(window, "CloseButton", "X", new Vector2(90, 90), Red, 44);
             var closeRect = (RectTransform)close.transform;
@@ -1274,8 +1286,7 @@ namespace TownBuilder.EditorTools
 
             var panel = container.gameObject.AddComponent<BuildingShopPanel>();
             Wire(panel, ("panelRoot", root.gameObject), ("itemsParent", items), ("itemTemplate", itemView), ("closeButton", close),
-                ("buildingsTab", buildingsTab), ("decorationsTab", decorationsTab),
-                ("buildingsTabImage", buildingsTab.GetComponent<Image>()), ("decorationsTabImage", decorationsTab.GetComponent<Image>()),
+                ("tabsParent", tabs), ("tabTemplate", tabView),
                 ("scroll", viewport.GetComponent<ScrollRect>()));
             root.gameObject.SetActive(false);
             return panel;
