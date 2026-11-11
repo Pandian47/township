@@ -39,12 +39,22 @@ namespace TownBuilder.Tests
             var shop = Object.FindAnyObjectByType<BuildingShopPanel>();
             GameObject.Find("BuildButton").GetComponent<Button>().onClick.Invoke();
             Assert.IsTrue(shop.IsOpen);
-            Assert.AreEqual(BuildingCategory.Residential, shop.CurrentCategory, "opens on Houses");
-            Assert.IsFalse(shop.ShowingDecorations);
+            Assert.IsTrue(shop.ShowingCategories, "opens on the category cards");
 
-            // One tab per category with something for sale; each tab shows exactly that category.
+            // One card and one tab per category with something for sale.
             var expected = BuildingShopPanel.TabOrder.Where(c => content.Buildings.Any(b => b.ShowInShop && b.Category == c)).ToList();
             CollectionAssert.AreEqual(expected, shop.Categories.ToList());
+            CollectionAssert.AreEqual(expected, shop.Cards.Select(c => c.Category).ToList());
+            var houses = shop.Cards.First(c => c.Category == BuildingCategory.Residential);
+            Assert.Greater(houses.BadgeCount, 0, "a new town can build a Cottage right away");
+
+            // Card -> that category's buildings; Back -> cards again.
+            GameObject.Find("Card_Residential").GetComponent<Button>().onClick.Invoke();
+            Assert.IsFalse(shop.ShowingCategories);
+            Assert.AreEqual(BuildingCategory.Residential, shop.CurrentCategory);
+            GameObject.Find("BackButton").GetComponent<Button>().onClick.Invoke();
+            Assert.IsTrue(shop.ShowingCategories);
+            GameObject.Find("Card_Production").GetComponent<Button>().onClick.Invoke();
             int total = 0;
             foreach (var category in expected)
             {

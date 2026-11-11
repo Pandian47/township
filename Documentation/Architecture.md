@@ -312,8 +312,11 @@ Placeholder tree art is drawn from `tree.png` by `PlaceholderArtGenerator.Create
 Decorations are ordinary `BuildingDefinition`s with `category = Decoration` (no recipes, no build time, `maxCount` 0), so
 placement, moving, saving and land rules all apply unchanged. `BuildingShopPanel` has one tab per `BuildingCategory`
 with something for sale (v0.27.2: Houses, Town, Factories, Farm, Decorations; order in `BuildingShopPanel.TabOrder`),
-cloned at runtime from a `ShopTabView` template with the picture of the category's first building. The look is our
-own (the existing shop window with picture tabs), not taken from any other game. Placeholder art: `PlaceholderArtGenerator.CreateDecoration` (setup seeds with `Deco`).
+cloned at runtime from a `ShopTabView` template with the picture of the category's first building.
+v0.27.3: the shop opens on a **category screen** first (`ShopCategoryCardView` cards: coloured ribbon, one of the
+category's buildings in a meadow scene from `PlaceholderArtGenerator.CreateBuildScreenArt`, "N buildings" or the
+unlock level, and a badge counting what can be built right now). Tapping a card opens that category's list; Back returns.
+The layout, names and art are our own; we don't copy another game's store screen (CLAUDE.md rule 10). Placeholder art: `PlaceholderArtGenerator.CreateDecoration` (setup seeds with `Deco`).
 
 ## 6h. UI text (TextMeshPro)
 

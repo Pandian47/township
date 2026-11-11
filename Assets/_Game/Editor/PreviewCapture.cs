@@ -134,7 +134,7 @@ namespace TownBuilder.EditorTools
             return outputPath;
         }
 
-        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm }
+        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm, ShopCards }
 
         /// <summary>Command line: renders MainMenu + Town (idle, shop, placing) with UI into the folder after -previewOut.</summary>
         public static void CaptureUiFromCommandLine()
@@ -149,6 +149,7 @@ namespace TownBuilder.EditorTools
                 Capture(Path.Combine(folder, "Preview_Town_Shop.png"), HudState.Shop);
                 Capture(Path.Combine(folder, "Preview_Town_Decorations.png"), HudState.ShopDecorations);
                 Capture(Path.Combine(folder, "Preview_Town_ShopFarm.png"), HudState.ShopFarm);
+                Capture(Path.Combine(folder, "Preview_Town_ShopCards.png"), HudState.ShopCards);
                 Capture(Path.Combine(folder, "Preview_Town_Placing.png"), HudState.Placing);
                 Capture(Path.Combine(folder, "Preview_Town_Field.png"), HudState.Field);
                 Capture(Path.Combine(folder, "Preview_Town_Barn.png"), HudState.Barn);
@@ -442,12 +443,25 @@ namespace TownBuilder.EditorTools
                 }
             }
 
+            if (state == HudState.ShopCards)
+            {
+                var shopRoot = Find(canvas, "BuildingShopPanel").transform.Find("Root").gameObject;
+                shopRoot.SetActive(true);
+                shopRoot.transform.Find("Window").gameObject.SetActive(false);
+                shopRoot.transform.Find("CardsWindow").gameObject.SetActive(true);
+                var shopPanel = Find(canvas, "BuildingShopPanel").GetComponent<BuildingShopPanel>();
+                shopPanel.BuildCards(content);
+                // Level 6 with the starting coins: some categories have things to build, the orchard is still locked.
+                shopPanel.RefreshCards(content, 6, d => d.UnlockLevel <= 6 && d.CoinCost <= wallet.Coins && d.MaxCount != 1);
+            }
+
             if (state == HudState.Shop || state == HudState.ShopDecorations || state == HudState.ShopFarm)
             {
                 var category = state == HudState.ShopDecorations ? BuildingCategory.Decoration
                     : state == HudState.ShopFarm ? BuildingCategory.Farming : BuildingCategory.Production;
                 var shopRoot = Find(canvas, "BuildingShopPanel").transform.Find("Root").gameObject;
                 shopRoot.SetActive(true);
+                shopRoot.transform.Find("CardsWindow").gameObject.SetActive(false);
                 var shopPanel = Find(canvas, "BuildingShopPanel").GetComponent<BuildingShopPanel>();
                 shopPanel.BuildTabs(content);
                 shopPanel.HighlightTab(category);

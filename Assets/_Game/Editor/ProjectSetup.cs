@@ -258,6 +258,7 @@ namespace TownBuilder.EditorTools
             PlaceholderArtGenerator.CreateCarSprite(true);
             PlaceholderArtGenerator.CreateCarSprite(false);
             PlaceholderArtGenerator.CreateSaleSign();
+            PlaceholderArtGenerator.CreateBuildScreenArt();
 
             CreateContent(art);
             ConfigureShopCategories();

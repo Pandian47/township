@@ -344,6 +344,13 @@ Design notes:
 - [ ] DEV → "Unlock everything (level 10)": Rising Star tiers 1 and 2 become claimable
 - [ ] Progress and claimed tiers are kept after closing and reopening the app
 
+### Device checklist (v0.27.3: Build screen)
+- [ ] Build opens a big "Build" window with 5 cards: Houses (blue), Town (yellow), Factories (orange), Farm (green),
+      Decorations (pink), each with a building picture and "N buildings"
+- [ ] The red number on a card = how many of its buildings you can build right now (unlocked, enough coins, not at the limit)
+- [ ] A category with nothing unlocked is darkened with a lock and "Level N"
+- [ ] Tapping a card opens its buildings; "< Back" returns to the cards; X closes from both screens
+
 ### Device checklist (v0.27.2: shop categories)
 - [ ] Build opens on **Houses**; tabs: Houses, Town (Town Hall, Barn, Silo), Factories (only factories), Farm (Field,
       Chicken Coop, Dairy Shed, Apple Tree, Cherry Tree), Decorations
