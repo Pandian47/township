@@ -186,7 +186,7 @@ namespace TownBuilder.EditorTools
             AttachCanvas(canvas, cam);
 
             var wallet = new Wallet(1350, 20);
-            var progress = new PlayerProgress(1, 0);
+            var progress = new PlayerProgress(1, 6, content.CreateLevelCurve());
             var barn = new Inventory(50); barn.TryAdd("wheat", 12); barn.TryAdd("corn", 6);
             UnityEngine.Object.FindAnyObjectByType<TopBarView>().Bind(wallet, progress, barn);
 

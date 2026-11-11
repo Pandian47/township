@@ -11,6 +11,9 @@ namespace TownBuilder
         [SerializeField] private TMP_Text coinsText;
         [SerializeField] private TMP_Text gemsText;
         [SerializeField] private TMP_Text barnText;
+        [Tooltip("XP progress bar next to the level star (optional).")]
+        [SerializeField] private Image xpFill;
+        [SerializeField] private TMP_Text xpText;
 
         private Wallet _wallet;
         private PlayerProgress _progress;
@@ -38,14 +41,31 @@ namespace TownBuilder
         private void Refresh()
         {
             if (_wallet == null || _progress == null) return;
-            levelText.text = _progress.HasCurve && !_progress.IsMaxLevel
-                ? $"Lv {_progress.Level}  ·  {_progress.XpIntoLevel}/{_progress.XpForNextLevel} XP"
-                : $"Lv {_progress.Level}  ·  {_progress.Xp:N0} XP";
-            coinsText.text = $"Coins  {_wallet.Coins:N0}";
-            gemsText.text = $"Gems  {_wallet.Gems:N0}";
+            bool hasNext = _progress.HasCurve && !_progress.IsMaxLevel;
+            if (xpFill != null)
+            {
+                // Star shows the level, the bar next to it the progress to the next one; the icons say what each pill is.
+                levelText.text = _progress.Level.ToString();
+                bool maxed = _progress.HasCurve && _progress.IsMaxLevel;
+                xpFill.fillAmount = hasNext && _progress.XpForNextLevel > 0
+                    ? Mathf.Clamp01((float)_progress.XpIntoLevel / _progress.XpForNextLevel) : maxed ? 1f : 0f;
+                if (xpText != null)
+                    xpText.text = hasNext ? $"{_progress.XpIntoLevel}/{_progress.XpForNextLevel} XP" : maxed ? "MAX" : $"{_progress.Xp:N0} XP";
+                coinsText.text = _wallet.Coins.ToString("N0");
+                gemsText.text = _wallet.Gems.ToString("N0");
+            }
+            else
+            {
+                levelText.text = hasNext
+                    ? $"Lv {_progress.Level}  ·  {_progress.XpIntoLevel}/{_progress.XpForNextLevel} XP"
+                    : $"Lv {_progress.Level}  ·  {_progress.Xp:N0} XP";
+                coinsText.text = $"Coins  {_wallet.Coins:N0}";
+                gemsText.text = $"Gems  {_wallet.Gems:N0}";
+            }
+
             if (_inventory != null && barnText != null)
             {
-                barnText.text = $"Barn  {_inventory.Total}/{_inventory.Capacity}";
+                barnText.text = xpFill != null ? $"{_inventory.Total}/{_inventory.Capacity}" : $"Barn  {_inventory.Total}/{_inventory.Capacity}";
                 barnText.color = _inventory.FreeSpace == 0 ? new Color(1f, 0.55f, 0.5f) : Color.white;
             }
 

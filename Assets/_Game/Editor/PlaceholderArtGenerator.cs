@@ -1484,12 +1484,35 @@ namespace TownBuilder.EditorTools
 
         public const string AwningPath = UiArtFolder + "/Build/PH_UI_Awning.png";
         public const string CirclePath = UiArtFolder + "/Build/PH_UI_Circle.png";
+        public const string MenuIconPath = UiArtFolder + "/PH_Icon_Menu.png";
 
         /// <summary>Build window pieces drawn in code: an awning stripe pair (tiled along the top) and a round badge.</summary>
         public static void CreateBuildScreenArt()
         {
             CreateSprite(AwningPath, RenderAwning, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
             CreateSprite(CirclePath, RenderCircle, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+            CreateSprite(MenuIconPath, RenderMenuIcon, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+        }
+
+        /// <summary>Three white rounded bars (menu icon), with a soft dark edge.</summary>
+        private static Texture2D RenderMenuIcon()
+        {
+            const int w = 72, h = 60;
+            var tex = NewTexture(w, h);
+            var px = new Color32[w * h];
+            foreach (float cy in new[] { 10f, 30f, 50f })
+            for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+            {
+                float dx = Mathf.Max(0f, Mathf.Abs(x + 0.5f - w / 2f) - 26f), dy = Mathf.Abs(y + 0.5f - cy);
+                float d = Mathf.Sqrt(dx * dx + dy * dy);
+                if (d > 8f) continue;
+                px[y * w + x] = d > 6.5f ? new Color32(20, 60, 120, 255) : new Color32(255, 255, 255, 255);
+            }
+
+            tex.SetPixels32(px);
+            tex.Apply();
+            return tex;
         }
 
         /// <summary>One blue and one white stripe (96x72), scalloped at the bottom; tiles seamlessly sideways.</summary>

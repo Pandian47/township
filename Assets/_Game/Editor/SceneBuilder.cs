@@ -403,20 +403,33 @@ namespace TownBuilder.EditorTools
             safe.gameObject.AddComponent<SafeAreaFitter>();
 
             // --- Top bar
-            var topBarRect = MakeRect("TopBar", safe, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -20), new Vector2(-60, 90));
-            HRow(topBarRect, 24, TextAnchor.MiddleLeft);
-            var levelText = Pill(topBarRect, "LevelPill", 350, PlaceholderArtGenerator.UiArtFolder + "/PH_Icon_Level.png", "Lv");
-            var coinsText = Pill(topBarRect, "CoinsPill", 330, PlaceholderArtGenerator.CoinIconPath);
-            var gemsText = Pill(topBarRect, "GemsPill", 260, PlaceholderArtGenerator.GemIconPath);
-            var barnText = Pill(topBarRect, "BarnPill", 310, PlaceholderArtGenerator.UiArtFolder + "/PH_Icon_Barn.png");
+            // Left: level star + XP bar. Right: coins, gems, barn, then the round menu button.
+            var topBarRect = MakeRect("TopBar", safe, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -16), new Vector2(-48, 120));
+            var levelText = LevelBadge(topBarRect, out var xpFill, out var xpText, out var levelPill);
+
+            var right = MakeRect("RightGroup", topBarRect, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), Vector2.zero, new Vector2(1240, 120));
+            HRow(right, 40, TextAnchor.MiddleRight);
+            var coinsText = Pill(right, "CoinsPill", 300, PlaceholderArtGenerator.CoinIconPath);
+            var gemsText = Pill(right, "GemsPill", 230, PlaceholderArtGenerator.GemIconPath);
+            var barnText = Pill(right, "BarnPill", 270, PlaceholderArtGenerator.UiArtFolder + "/PH_Icon_Barn.png");
+            var menuButton = MakeButton(right, "MenuButton", "", new Vector2(104, 104), new Color(0.18f, 0.52f, 0.95f), 30);
+            var menuImg = menuButton.GetComponent<Image>();
+            menuImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CirclePath);
+            menuImg.type = Image.Type.Simple;
+            var menuIcon = MakeRect("Icon", (RectTransform)menuButton.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(54, 45));
+            var menuIconImg = menuIcon.gameObject.AddComponent<Image>();
+            menuIconImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.MenuIconPath);
+            menuIconImg.raycastTarget = false;
+
             var barnPill = barnText.transform.parent.gameObject;
             var barnPillButton = barnPill.AddComponent<Button>();
             barnPillButton.targetGraphic = barnPill.GetComponent<Image>();
             var topBar = topBarRect.gameObject.AddComponent<TopBarView>();
-            Wire(topBar, ("levelText", levelText), ("coinsText", coinsText), ("gemsText", gemsText), ("barnText", barnText));
+            Wire(topBar, ("levelText", levelText), ("coinsText", coinsText), ("gemsText", gemsText), ("barnText", barnText),
+                ("xpFill", xpFill), ("xpText", xpText));
 
             // --- Bottom navigation
-            var nav = MakeRect("BottomNavigation", safe, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-30, 30), new Vector2(1560, 130));
+            var nav = MakeRect("BottomNavigation", safe, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-30, 30), new Vector2(1336, 130));
             HRow(nav, 24, TextAnchor.LowerRight);
             var adButton = MakeButton(nav, "RewardedAdButton", "Watch ad\n+100 coins", new Vector2(300, 120), new Color(0.95f, 0.65f, 0.15f), out var adLabel, 34);
             var rewarded = adButton.gameObject.AddComponent<RewardedCoinsButton>();
@@ -428,7 +441,6 @@ namespace TownBuilder.EditorTools
             var goalsBadgeText = Label(goalsBadge, "Text", "1", 30, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
             var ordersButton = MakeButton(nav, "OrdersButton", "Orders", new Vector2(220, 120), new Color(0.55f, 0.35f, 0.7f));
             var barnButton = MakeButton(nav, "BarnButton", "Barn", new Vector2(200, 120), new Color(0.62f, 0.38f, 0.25f));
-            var menuButton = MakeButton(nav, "MenuButton", "Menu", new Vector2(200, 120), Slate);
             var buildButton = MakeButton(nav, "BuildButton", "Build", new Vector2(260, 120), Green, 48);
 
             // --- Placement bar
@@ -476,7 +488,7 @@ namespace TownBuilder.EditorTools
             var rewardLayer = Stretch("RewardFlyLayer", canvas.transform);
             var rewardFlyer = rewardLayer.gameObject.AddComponent<RewardFlyer>();
             Wire(rewardFlyer, ("coinsTarget", (RectTransform)coinsText.transform.parent), ("gemsTarget", (RectTransform)gemsText.transform.parent),
-                ("xpTarget", (RectTransform)levelText.transform.parent),
+                ("xpTarget", levelPill),
                 ("coinSprite", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CoinIconPath)),
                 ("gemSprite", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.GemIconPath)),
                 ("xpSprite", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.XpIconPath)));
@@ -983,7 +995,7 @@ namespace TownBuilder.EditorTools
             var open = MakeButton(container, "DevButton", "DEV", new Vector2(110, 76), new Color(0.55f, 0.2f, 0.6f), 30);
             var openRect = (RectTransform)open.transform;
             openRect.anchorMin = openRect.anchorMax = openRect.pivot = new Vector2(1f, 1f);
-            openRect.anchoredPosition = new Vector2(-30, -20);
+            openRect.anchoredPosition = new Vector2(-34, -150); // below the menu button
 
             var root = Stretch("Root", container);
             AddImage(root, Dim, rounded: false);
@@ -1121,7 +1133,7 @@ namespace TownBuilder.EditorTools
         private static TasksPanel BuildTasksPanel(RectTransform safe)
         {
             const float width = 470f, rowHeight = 96f;
-            var container = MakeRect("TasksPanel", safe, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(30, -128),
+            var container = MakeRect("TasksPanel", safe, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(30, -150),
                 new Vector2(width, 52 + 3 * (rowHeight + 8) + 12));
             var root = Stretch("Root", container);
             AddImage(root, new Color(PanelColor.r, PanelColor.g, PanelColor.b, 0.94f), raycast: false);
@@ -1215,34 +1227,63 @@ namespace TownBuilder.EditorTools
             return toast;
         }
 
-        /// <summary>Top-bar pill: dark rounded bar, an icon overlapping its left end, the value text after it.</summary>
-        private static TMP_Text Pill(RectTransform parent, string name, float width, string iconPath = null, string iconLabel = null)
+        /// <summary>
+        /// Top-bar pill: a dark rounded bar with a big icon overlapping its left end and the number right-aligned
+        /// (white with an outline). The layout reserves room for the icon sticking out on the left.
+        /// </summary>
+        private static TMP_Text Pill(RectTransform parent, string name, float width, string iconPath)
         {
-            var rt = MakeRect(name, parent, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(width, 76));
+            var slot = MakeRect(name + "Slot", parent, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(width + 40, 110));
+            Prefer(slot, width + 40, 110);
+            var rt = MakeRect(name, slot, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), Vector2.zero, new Vector2(width, 70));
             AddImage(rt, PillColor);
-            Prefer(rt, width, 76);
-            var text = Label(rt, "Text", "-", 38, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+            var text = Label(rt, "Text", "-", 46, TextAnchor.MiddleRight, Color.white, FontStyle.Bold);
+            var outline = AssetDatabase.LoadAssetAtPath<Material>(ProjectSetup.UIFontOutlineMaterialPath);
+            if (outline != null) text.fontSharedMaterial = outline;
+            var textRect = (RectTransform)text.transform;
+            textRect.offsetMin = new Vector2(70, 0);
+            textRect.offsetMax = new Vector2(-22, 0);
 
-            var sprite = iconPath != null ? AssetDatabase.LoadAssetAtPath<Sprite>(iconPath) : null;
-            if (sprite == null) return text;
-            var iconRect = MakeRect("Icon", rt, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(30, 0), new Vector2(92, 92));
-            var icon = iconRect.gameObject.AddComponent<Image>();
-            icon.sprite = sprite;
-            icon.preserveAspect = true;
-            icon.raycastTarget = false;
-            if (iconLabel != null)
+            var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
+            if (sprite != null)
             {
-                var l = Label(iconRect, "Text", iconLabel, 30, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
-                var outline = AssetDatabase.LoadAssetAtPath<Material>(ProjectSetup.UIFontOutlineMaterialPath);
-                if (outline != null) l.fontSharedMaterial = outline;
-                ((RectTransform)l.transform).anchoredPosition = new Vector2(0, -4);
+                var iconRect = MakeRect("Icon", rt, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(6, 0), new Vector2(108, 108));
+                var icon = iconRect.gameObject.AddComponent<Image>();
+                icon.sprite = sprite;
+                icon.preserveAspect = true;
+                icon.raycastTarget = false;
             }
 
-            var textRect = (RectTransform)text.transform;
-            textRect.offsetMin = new Vector2(84, 0);
-            textRect.offsetMax = new Vector2(-14, 0);
-            text.alignment = TMPro.TextAlignmentOptions.Left;
             return text;
+        }
+
+        /// <summary>Level star with the level number in it, overlapping a blue XP bar (with "x/y XP" on it).</summary>
+        private static TMP_Text LevelBadge(RectTransform topBar, out Image xpFill, out TMP_Text xpText, out RectTransform pill)
+        {
+            var outline = AssetDatabase.LoadAssetAtPath<Material>(ProjectSetup.UIFontOutlineMaterialPath);
+            pill = MakeRect("LevelPill", topBar, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(64, 0), new Vector2(330, 62));
+            AddImage(pill, PillColor);
+            var fillArea = Stretch("Bar", pill, 7f);
+            AddImage(fillArea, new Color(0.10f, 0.22f, 0.38f, 0.9f), raycast: false);
+            xpFill = AddImage(Stretch("Fill", fillArea, 0f), new Color(0.20f, 0.66f, 1f), raycast: false);
+            xpFill.type = Image.Type.Filled;
+            xpFill.fillMethod = Image.FillMethod.Horizontal;
+            xpFill.fillAmount = 0.4f;
+            var shine = MakeRect("Shine", xpFill.rectTransform, new Vector2(0f, 0.55f), new Vector2(1f, 0.9f), new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
+            AddImage(shine, new Color(1f, 1f, 1f, 0.25f), rounded: false, raycast: false);
+            xpText = Label(MakeRect("XpText", pill, Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), new Vector2(30, 0), new Vector2(-70, 0)),
+                "Text", "0/15 XP", 30, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+            if (outline != null) xpText.fontSharedMaterial = outline;
+
+            var star = MakeRect("Star", pill, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-6, 2), new Vector2(124, 124));
+            var starImg = star.gameObject.AddComponent<Image>();
+            starImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.UiArtFolder + "/PH_Icon_Level.png");
+            starImg.preserveAspect = true;
+            starImg.raycastTarget = false;
+            var level = Label(MakeRect("Level", star, Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), new Vector2(0, -6), Vector2.zero),
+                "Text", "1", 50, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+            if (outline != null) level.fontSharedMaterial = outline;
+            return level;
         }
 
         private static BuildingShopPanel BuildShop(Transform canvas)
