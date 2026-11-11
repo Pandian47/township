@@ -45,6 +45,23 @@ Coins/min for recipes is the value added (product value minus the ingredients' s
 | 9 | Juice Press, Land ring 2 (2,400) | 884 | 11 | 380 | 24.3 (5.1) | 6.54 | 58 | 1,412 | 2,296 | 1.3 / 2.1 / 1.3 |
 | 10 | - | 3,296 | 12 | 470 | 26.9 (6.6) | 6.98 | 67 | 1,810 | 5,106 | 1.4 / 2.3 / 1.4 |
 
+## Bonus income and gems (45 min of play a day, daily reward every day, first 2 prizes of each weekend event)
+
+Bonus coins are not in the coin balance above. Gems to skip builds = 1 gem per minute of every key building's construction.
+
+| Level | Play time so far | Day | Bonus coins (daily + events) | Bonus vs normal coins so far | Goal tiers reached | Gems this level | Gems so far | Gems to skip all builds so far |
+|---|---|---|---|---|---|---|---|---|
+| 1 | 12 min | 1 | 71 | 137% | - | 0 | 20 | 3 |
+| 2 | 32 min | 1 | 0 | 20% | Green Fingers 1 | 3 | 23 | 3 |
+| 3 | 61 min | 2 | 101 | 21% | - | 1 | 24 | 5 |
+| 4 | 94 min | 3 | 82 | 17% | Rising Star 1 | 5 | 29 | 8 |
+| 5 | 127 min | 3 | 0 | 10% | Green Fingers 2, Busy Workshops 1, Town Planner 1 | 10 | 39 | 11 |
+| 6 | 167 min | 4 | 141 | 11% | - | 3 | 42 | 15 |
+| 7 | 214 min | 5 | 22 | 8% | - | 3 | 45 | 20 |
+| 8 | 267 min | 6 | 221 | 9% | Freight Master 1 | 4 | 49 | 26 |
+| 9 | 325 min | 8 | 393 | 11% | Land Owner 1, Rising Star 2 | 11 | 60 | 31 |
+| 10 | 393 min | 9 | 101 | 9% | Green Fingers 3 | 11 | 71 | 31 |
+
 ## Land: when the first plot of each ring is affordable
 
 | Ring | Unlocks at level | Price | Materials earned by level |

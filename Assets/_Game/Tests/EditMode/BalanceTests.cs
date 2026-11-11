@@ -65,6 +65,45 @@ namespace TownBuilder.Tests
         }
 
         [Test]
+        public void BonusCoins_DailyAndEvents_StayABonus()
+        {
+            // After the first minutes, daily rewards + weekend events add at most a quarter on top of normal play.
+            foreach (var row in EconomyReport.Levels(_content).Where(r => r.Level >= 2))
+                Assert.LessOrEqual(row.BonusShare, 0.25f,
+                    $"Level {row.Level}: bonus coins are {row.BonusShare:0%} of normal income so far (daily reward or event prizes too big)");
+        }
+
+        [Test]
+        public void Gems_NeverShort_ForSkippingEveryBuild()
+        {
+            foreach (var row in EconomyReport.Levels(_content))
+                Assert.GreaterOrEqual(row.GemsTotal, row.GemsToSkipBuildsTotal,
+                    $"Level {row.Level}: {row.GemsTotal} free gems but {row.GemsToSkipBuildsTotal} needed to skip every build");
+        }
+
+        [Test]
+        public void Goals_FirstTierReached_WithinThreeLevels()
+        {
+            Assert.IsTrue(EconomyReport.Levels(_content).Where(r => r.Level <= 3).Any(r => r.GoalsReached != "-"),
+                "no Goal tier is reached in the first three levels: the Goals screen would feel dead");
+        }
+
+        [Test]
+        public void WeekendEvents_AllPrizes_ReachableInOneWeekendOfPlay_AtLevel3()
+        {
+            var row = EconomyReport.Levels(_content).First(r => r.Level == 3);
+            float weekend = 2 * EconomyReport.PlayMinutesPerDay;
+            foreach (var ev in _content.WeekendEvents.Where(e => e != null && e.Milestones.Count > 0))
+            {
+                float perMinute = ev.PointsFrom == TownBuilder.Domain.AchievementKind.HarvestCrops ? row.CropsPerMinute
+                    : ev.PointsFrom == TownBuilder.Domain.AchievementKind.MakeProducts ? row.ProductsPerMinute : -1f;
+                if (perMinute < 0f) continue; // orders aren't in the model
+                float minutes = ev.Milestones.Last().goal / perMinute;
+                Assert.LessOrEqual(minutes, weekend, $"{ev.DisplayName}: the last prize takes {minutes:0} min of play at level 3");
+            }
+        }
+
+        [Test]
         public void NoRecipe_IsMoreThan2xBetter_ThanTheAverage()
         {
             var recipes = EconomyReport.Rates(_content).Where(r => !r.Kind.StartsWith("Crop")).ToList();

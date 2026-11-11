@@ -321,7 +321,7 @@ The backend moves to Milestone 9.
 | 2 | **Achievements**: long-term goals in tiers (harvest, produce, deliver, build, level) paying gems | Done (v0.26.0) |
 | 3 | **Orchard**: fruit trees (apples, cherries) that regrow after harvest + a **Juice Press** factory | Done (v0.27.0) |
 | 4 | **Weekend event**: a time-limited goal (e.g. "Harvest Festival") with a special reward and decoration | Done (v0.28.0) |
-| 5 | Balance pass (daily rewards, achievements and event income in the model) | Planned |
+| 5 | Balance pass (daily rewards, achievements and event income in the model) | Done (v0.29.0) |
 
 Design notes:
 * Days are counted in the phone's **local** time (`IClock` UTC + the device's time-zone offset). Offline means a player
@@ -388,8 +388,12 @@ Design notes:
 - [ ] Juice Press: 3 Apples → Apple Juice; 3 Cherries + 1 Sugar → Cherry Juice
 - [ ] Trees keep growing while the app is closed; moving a tree keeps its fruit
 
+**Milestone 7 complete (v0.29.0).** Open point from the balance pass: gems have only one use (finishing construction)
+and pile up (~71 by level 10 vs ~31 to skip every build). Recommended for Milestone 8: a second gem use.
+
 ## Milestone 8: Expansion
-Ship, helicopter, friends and co-op, monetisation, Google Play launch.
+Ship, helicopter, friends and co-op, monetisation, Google Play launch. First candidate: a second use for gems
+(see GameEconomy.md, "v0.29 balance pass").
 
 ## Milestone 9: Backend (moved from 7)
 Accounts, cloud saves with conflict resolution, server time (`IClock`), server-validated economy, analytics.

@@ -25,6 +25,13 @@ namespace TownBuilder.EditorTools
     ///   unlocked repeatable tasks. The report shows when the first plot's materials have been earned.
     /// * Train (once its station is unlocked): one visit per travel time + <see cref="TrainLoadingMinutes"/>, crates of the
     ///   average item the player can make; income counted is the extra over selling those items to the barn.
+    /// * Bonus income (Milestone 7): the player plays <see cref="PlayMinutesPerDay"/> active minutes a day, claims the daily
+    ///   reward every day (calendar in order), and reaches the first <see cref="EventPrizesPerWeekend"/> prizes of each weekend
+    ///   event (counted as an even share per day). Goals (achievements) pay their tier gems when the model's counters
+    ///   (crops, products, crates, buildings bought, land plots, level) reach them; orders are ignored, so Trusted Trader
+    ///   never pays here. Bonus coins are reported separately and NOT added to the coin balance above (errs on the poor side).
+    /// * Gems: starting gems + level-up gems + one-off task gems + daily + events + goals, against the gems it would cost to
+    ///   skip every key building's construction (1 gem per minute), the only gem sink so far.
     ///
     /// Menu: TownBuilder > Debug > Write Economy Report (writes Documentation/EconomyReport.md).
     /// </summary>
@@ -33,6 +40,8 @@ namespace TownBuilder.EditorTools
         public const float Efficiency = 0.5f;
         public const float TrainLoadingMinutes = 15f;
         public const float TaskMinutes = 12f;
+        public const float PlayMinutesPerDay = 45f;
+        public const int EventPrizesPerWeekend = 2;
 
         /// <summary>When the materials for the first plot of a land ring have been earned.</summary>
         public sealed class LandStatus
@@ -75,6 +84,26 @@ namespace TownBuilder.EditorTools
             /// <summary>Coins left after buying this level's new buildings (on arrival) — negative means the player has to wait.</summary>
             public long BalanceAfterBuying;
             public long BalanceAtEnd;
+
+            /// <summary>Active play minutes at the end of this level and the days played so far (day 1 = first day).</summary>
+            public float PlayMinutesTotal;
+            public int Days;
+            /// <summary>Daily-reward + weekend-event coins during this level, and the running totals.</summary>
+            public long BonusCoins;
+            public long BonusCoinsTotal;
+            /// <summary>Coins from normal play (earned + level-up rewards) up to the end of this level.</summary>
+            public long ActiveCoinsTotal;
+            /// <summary>Gems received during this level (all free sources) and the running total (including starting gems).</summary>
+            public long Gems;
+            public long GemsTotal;
+            /// <summary>Gems it would cost to skip every key building's construction up to this level.</summary>
+            public long GemsToSkipBuildsTotal;
+            public string GoalsReached;
+            /// <summary>Crops harvested / products made per minute of play at this level (model rates, after efficiency).</summary>
+            public float CropsPerMinute;
+            public float ProductsPerMinute;
+
+            public float BonusShare => ActiveCoinsTotal > 0 ? (float)BonusCoinsTotal / ActiveCoinsTotal : 0f;
         }
 
         public static List<Rate> Rates(GameContent content)
@@ -134,6 +163,20 @@ namespace TownBuilder.EditorTools
             var rows = new List<LevelRow>();
             long coins = content.StartingCoins;
             var keyBuildings = content.Buildings.Where(b => b.IsFactory || b.StorageCapacityBonus > 0 || b.Id == content.TrainStationId).ToList();
+
+            // Bonus income (Milestone 7).
+            float playMinutes = 0f;
+            int daysClaimed = 0;
+            long bonusTotal = 0, activeTotal = 0, gemsTotal = content.StartingGems, skipGems = 0;
+            var weekly = content.WeekendEvents.Where(e => e != null && e.Milestones.Count > 0).ToList();
+            float eventCoinsPerDay = weekly.Count == 0 ? 0f
+                : (float)weekly.Average(e => e.Milestones.Take(EventPrizesPerWeekend).Sum(m => m.coins)) / 7f;
+            float eventGemsPerDay = weekly.Count == 0 ? 0f
+                : (float)weekly.Average(e => e.Milestones.Take(EventPrizesPerWeekend).Sum(m => m.gems)) / 7f;
+            float eventGemCarry = 0f, eventCoinCarry = 0f;
+            var counters = new Dictionary<TownBuilder.Domain.AchievementKind, double>();
+            var claimedTiers = new Dictionary<string, int>();
+            int buildingsBought = 0, plotsBought = 0;
 
             for (int level = 1; level <= ReportLevels; level++)
             {
@@ -196,6 +239,82 @@ namespace TownBuilder.EditorTools
                 coins += row.Earned;
                 row.BalanceAtEnd = coins;
 
+                // ---- Bonus income: daily reward per new day, weekend events spread per day.
+                playMinutes += row.Minutes;
+                int days = 1 + (int)Math.Floor(playMinutes / PlayMinutesPerDay);
+                for (; daysClaimed < days; daysClaimed++)
+                {
+                    if (content.DailyRewards.Count > 0)
+                    {
+                        var d = content.DailyRewards[daysClaimed % content.DailyRewards.Count];
+                        row.BonusCoins += d.coins;
+                        row.Gems += d.gems;
+                    }
+
+                    eventCoinCarry += eventCoinsPerDay;
+                    eventGemCarry += eventGemsPerDay;
+                }
+
+                long eventCoins = (long)eventCoinCarry, eventGems = (long)eventGemCarry;
+                eventCoinCarry -= eventCoins;
+                eventGemCarry -= eventGems;
+                row.BonusCoins += eventCoins;
+                row.Gems += eventGems;
+                row.PlayMinutesTotal = playMinutes;
+                row.Days = days;
+                activeTotal += row.Earned + row.LevelUpReward;
+                bonusTotal += row.BonusCoins;
+                row.ActiveCoinsTotal = activeTotal;
+                row.BonusCoinsTotal = bonusTotal;
+
+                // ---- Gems from levels and one-off tasks; construction minutes as the gem sink.
+                if (level > 1) row.Gems += content.LevelUpGems;
+                row.Gems += content.Tasks.Where(t => t != null && !t.Repeatable && t.UnlockLevel == level).Sum(t => t.RewardGems);
+                skipGems += newOnes.Sum(b => (long)Math.Ceiling(b.BuildDurationMs / 60000.0));
+                buildingsBought += newOnes.Count(b => b.Movable);
+                plotsBought += land.Count(l => l.UnlockLevel == level);
+
+                // ---- Goals: counters from the model, gems for tiers reached during this level.
+                double eff = Efficiency * row.Minutes;
+                row.CropsPerMinute = row.Fields * bestCrop.HarvestYield / cropMinutes * Efficiency;
+                Add(counters, TownBuilder.Domain.AchievementKind.HarvestCrops, row.Fields * bestCrop.HarvestYield / cropMinutes * eff);
+                foreach (var factory in content.Buildings.Where(b => b.IsFactory && b.UnlockLevel <= level))
+                {
+                    var recipe = factory.Recipes.Where(r => r.UnlockLevel <= level)
+                        .OrderByDescending(r => (r.Output.SellPrice * r.OutputAmount - r.Ingredients.Sum(i => i.item.SellPrice * i.amount)) / (float)r.DurationSeconds)
+                        .FirstOrDefault();
+                    if (recipe == null) continue;
+                    row.ProductsPerMinute += recipe.OutputAmount / (recipe.DurationSeconds / 60f) * Efficiency;
+                    Add(counters, TownBuilder.Domain.AchievementKind.MakeProducts, recipe.OutputAmount / (recipe.DurationSeconds / 60f) * eff);
+                }
+
+                if (station != null && station.UnlockLevel <= level)
+                    Add(counters, TownBuilder.Domain.AchievementKind.LoadCrates,
+                        content.TrainCrates / (content.TrainTravelSeconds / 60f + TrainLoadingMinutes) * eff);
+                counters[TownBuilder.Domain.AchievementKind.OwnBuildings] = buildingsBought;
+                counters[TownBuilder.Domain.AchievementKind.BuyLand] = plotsBought;
+                counters[TownBuilder.Domain.AchievementKind.ReachLevel] = level + 1;
+
+                var goals = new List<string>();
+                foreach (var a in content.Achievements.Where(a => a != null && a.Tiers.Count > 0))
+                {
+                    int tier = claimedTiers.TryGetValue(a.Id, out var t) ? t : 0;
+                    double value = counters.TryGetValue(a.Kind, out var v) ? v : 0;
+                    while (tier < a.Tiers.Count && value >= a.Tiers[tier].goal)
+                    {
+                        row.Gems += a.Tiers[tier].gems;
+                        goals.Add($"{a.DisplayName} {tier + 1}");
+                        tier++;
+                    }
+
+                    claimedTiers[a.Id] = tier;
+                }
+
+                row.GoalsReached = goals.Count > 0 ? string.Join(", ", goals) : "-";
+                gemsTotal += row.Gems;
+                row.GemsTotal = gemsTotal;
+                row.GemsToSkipBuildsTotal = skipGems;
+
                 // Materials earned this level (repeatable tasks + train), plus one-off guide tasks unlocking now.
                 foreach (var pair in MaterialRates(content, level))
                 {
@@ -226,6 +345,9 @@ namespace TownBuilder.EditorTools
 
             return rows;
         }
+
+        private static void Add(Dictionary<TownBuilder.Domain.AchievementKind, double> counters, TownBuilder.Domain.AchievementKind kind, double amount) =>
+            counters[kind] = (counters.TryGetValue(kind, out var v) ? v : 0) + amount;
 
         /// <summary>Building materials earned per minute at a level, by material id (repeatable tasks + train crates).</summary>
         public static Dictionary<string, float> MaterialRates(GameContent content, int level)
@@ -319,6 +441,19 @@ namespace TownBuilder.EditorTools
                 sb.AppendLine(string.Format(ci, "| {0} | {1} | {2} | {3} | {4:N0} | {5} | {6:0.00} | {7:0} | {8:N0} | {9:N0} | {10} |",
                     row.Level, costs, after, row.Fields, row.XpToNext, cpm, row.XpPerMinute, row.Minutes, row.Earned, row.BalanceAtEnd, mats));
             }
+
+            sb.AppendLine();
+            sb.AppendLine(string.Format(ci, "## Bonus income and gems ({0:0} min of play a day, daily reward every day, first {1} prizes of each weekend event)",
+                PlayMinutesPerDay, EventPrizesPerWeekend));
+            sb.AppendLine();
+            sb.AppendLine("Bonus coins are not in the coin balance above. Gems to skip builds = 1 gem per minute of every key building's construction.");
+            sb.AppendLine();
+            sb.AppendLine("| Level | Play time so far | Day | Bonus coins (daily + events) | Bonus vs normal coins so far | Goal tiers reached | Gems this level | Gems so far | Gems to skip all builds so far |");
+            sb.AppendLine("|---|---|---|---|---|---|---|---|---|");
+            foreach (var row in Levels(content))
+                sb.AppendLine(string.Format(ci, "| {0} | {1:0} min | {2} | {3:N0} | {4:0%} | {5} | {6} | {7} | {8} |",
+                    row.Level, row.PlayMinutesTotal, row.Days, row.BonusCoins, row.BonusShare, row.GoalsReached, row.Gems, row.GemsTotal,
+                    row.GemsToSkipBuildsTotal));
 
             sb.AppendLine();
             sb.AppendLine("## Land: when the first plot of each ring is affordable");

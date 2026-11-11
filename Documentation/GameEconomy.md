@@ -337,6 +337,31 @@ plot's materials earned within one level of the ring unlocking, every land mater
 level, every level between 5 minutes and 2 hours, every crop and recipe earns coins and XP, and no recipe earns more
 than twice the average per minute.
 
+### v0.29 balance pass (Milestone 7 step 5): bonus income and gems
+
+The model now also follows **bonus income**: a player who plays ~45 active minutes a day, claims the daily reward
+every day and reaches the first two prizes of each weekend event (spread evenly over the week), and **Goals** that pay
+their tier gems when the model's counters (crops, products, crates, buildings, land, level) reach them. Bonus coins are
+reported separately and not added to the coin balance (the affordability checks stay on the poor side).
+
+What it shows (EconomyReport.md, "Bonus income and gems"):
+
+| Question | Answer | Verdict |
+|---|---|---|
+| Do daily rewards + events replace normal play? | After the first minutes they add **8–21 %** on top of normal coins | OK: a bonus, not a shortcut. No change. |
+| Are Goals reached early enough to feel alive? | First tier (Green Fingers) during level 2, then one every level or two | OK. No change. |
+| Can a weekend event be finished? | Harvest Festival's last prize takes ~60 min of play at level 3 (2 weekend days ≈ 90 min) | OK. Market Weekend counts orders, which the model ignores. |
+| Are gems scarce enough to matter? | **~71 free gems by level 10**, while skipping every construction costs only ~31 | **Too many for their one use.** See below. |
+
+**Gems decision (open):** finishing construction (1 gem per minute) is the only thing gems buy, so gems pile up.
+The recommendation is to keep the income and give gems a second use in Milestone 8 (for example "finish a factory
+job / crop now" for gems next to the ad button, or gem-only decorations), rather than cutting Goal gems now and having
+to raise them again later. Until then, nothing is out of balance for coins or pacing.
+
+New guard rails in `BalanceTests`: bonus coins at most 25 % of normal income from level 2 on; free gems never fewer than
+needed to skip every build; a Goal tier within the first three levels; every harvest/product event finishable within one
+weekend of play at level 3.
+
 ## Rules
 
 * All currency changes go through `Wallet` (domain), never through UI code.
