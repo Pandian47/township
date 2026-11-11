@@ -1112,14 +1112,14 @@ namespace TownBuilder.EditorTools
             return panel;
         }
 
-        /// <summary>Developer mode: "DEV" button top-right + a panel of testing shortcuts (hidden in Google Play builds).</summary>
+        /// <summary>Developer mode: "DEV" button bottom-left + a panel of testing shortcuts (hidden in Google Play builds).</summary>
         private static DevPanel BuildDevPanel(Transform canvas)
         {
             var container = Stretch("DevPanel", canvas);
             var open = MakeButton(container, "DevButton", "DEV", new Vector2(110, 76), new Color(0.55f, 0.2f, 0.6f), 30);
             var openRect = (RectTransform)open.transform;
-            openRect.anchorMin = openRect.anchorMax = openRect.pivot = new Vector2(1f, 1f);
-            openRect.anchoredPosition = new Vector2(-34, -150); // below the menu button
+            openRect.anchorMin = openRect.anchorMax = openRect.pivot = new Vector2(0f, 0f);
+            openRect.anchoredPosition = new Vector2(30, 30); // bottom-left corner: clear of every window's close button
 
             var root = Stretch("Root", container);
             AddImage(root, Dim, rounded: false);
@@ -1499,13 +1499,22 @@ namespace TownBuilder.EditorTools
             var outline = AssetDatabase.LoadAssetAtPath<Material>(ProjectSetup.UIFontOutlineMaterialPath);
             var brown = new Color(0.40f, 0.24f, 0.10f);
 
-            var frame = MakeRect("CardsWindow", root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -34),
-                new Vector2(1720, 860));
-            AddImage(frame, new Color(0.20f, 0.50f, 0.90f));
-            var inner = Stretch("Inner", frame, 16f);
+            // Wooden frame: dark outline, plank texture, a darker inner edge, then the cream panel.
+            var frame = MakeRect("CardsWindow", root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -40),
+                new Vector2(1820, 930));
+            AddImage(frame, new Color(0.30f, 0.17f, 0.07f));
+            var wood = Stretch("Wood", frame, 5f);
+            var woodImg = wood.gameObject.AddComponent<Image>();
+            woodImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.WoodPath);
+            woodImg.type = Image.Type.Tiled;
+            woodImg.raycastTarget = false;
+            if (woodImg.sprite == null) woodImg.color = new Color(0.72f, 0.46f, 0.22f);
+            var rim = Stretch("InnerEdge", frame, 26f);
+            AddImage(rim, new Color(0.36f, 0.21f, 0.09f), raycast: false);
+            var inner = Stretch("Inner", frame, 31f);
             AddImage(inner, new Color(1f, 0.96f, 0.86f));
 
-            var awning = MakeRect("Awning", frame, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -12), new Vector2(-28, 72));
+            var awning = MakeRect("Awning", frame, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -26), new Vector2(-62, 72));
             var awningImg = awning.gameObject.AddComponent<Image>();
             awningImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.AwningPath);
             awningImg.type = Image.Type.Tiled;
@@ -1525,7 +1534,7 @@ namespace TownBuilder.EditorTools
             }
 
             // Wooden sign with the title, poking out above the window.
-            var sign = MakeRect("Sign", frame, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0, -6), new Vector2(640, 154));
+            var sign = MakeRect("Sign", frame, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0, -4), new Vector2(680, 164));
             var signImg = sign.gameObject.AddComponent<Image>();
             signImg.sprite = Ui("UI_BuildSign");
             signImg.preserveAspect = true;
@@ -1535,14 +1544,14 @@ namespace TownBuilder.EditorTools
                 "Text", "BUILD", 84, TextAnchor.MiddleCenter, new Color(1f, 0.95f, 0.85f), FontStyle.Bold);
             if (outline != null) signText.fontSharedMaterial = outline;
 
-            Label(MakeRect("Subtitle", inner, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -112), new Vector2(-200, 64)),
+            Label(MakeRect("Subtitle", inner, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -96), new Vector2(-200, 56)),
                 "Text", "What would you like to build?", 42, TextAnchor.MiddleCenter, brown, FontStyle.Bold);
 
             close = MakeButton(frame, "CloseButton", "", new Vector2(130, 130), Red, 44);
             var closeRect = (RectTransform)close.transform;
             closeRect.anchorMin = closeRect.anchorMax = new Vector2(1f, 1f);
             closeRect.pivot = new Vector2(0.5f, 0.5f);
-            closeRect.anchoredPosition = new Vector2(-46, -20);
+            closeRect.anchoredPosition = new Vector2(-40, -18);
             var closeSprite = Ui("UI_CloseButton");
             if (closeSprite != null)
             {
@@ -1557,13 +1566,13 @@ namespace TownBuilder.EditorTools
                 close.GetComponentInChildren<TMP_Text>().text = "X";
             }
 
-            var row = MakeRect("Cards", inner, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 76), new Vector2(1620, 490));
-            HRow(row, 24, TextAnchor.MiddleCenter);
+            var row = MakeRect("Cards", inner, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 56), new Vector2(1740, 590));
+            HRow(row, 20, TextAnchor.MiddleCenter);
             cardsParent = row;
 
             // Card template (cloned per category by BuildingShopPanel).
-            var card = MakeRect("CardTemplate", row, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(300, 470));
-            Prefer(card, 300, 470);
+            var card = MakeRect("CardTemplate", row, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(332, 570));
+            Prefer(card, 332, 570);
             var cardBg = AddImage(card, new Color(1f, 0.985f, 0.94f));
             var shadow = card.gameObject.AddComponent<Shadow>();
             shadow.effectColor = new Color(0.45f, 0.30f, 0.15f, 0.35f);
@@ -1571,7 +1580,7 @@ namespace TownBuilder.EditorTools
             var button = card.gameObject.AddComponent<Button>();
             button.targetGraphic = cardBg;
 
-            var pictureRect = MakeRect("Picture", card, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -52), new Vector2(268, 284));
+            var pictureRect = MakeRect("Picture", card, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -62), new Vector2(306, 324));
             var picture = pictureRect.gameObject.AddComponent<Image>();
             picture.preserveAspect = true;
             picture.raycastTarget = false;
@@ -1585,7 +1594,7 @@ namespace TownBuilder.EditorTools
             lockIcon.raycastTarget = false;
             lockRect.gameObject.SetActive(false);
 
-            var ribbonRect = MakeRect("Ribbon", card, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0, -6), new Vector2(340, 150));
+            var ribbonRect = MakeRect("Ribbon", card, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0, -8), new Vector2(372, 164));
             var ribbon = ribbonRect.gameObject.AddComponent<Image>();
             ribbon.sprite = Ui("UI_Ribbon_Blue");
             ribbon.preserveAspect = true;
@@ -1594,19 +1603,19 @@ namespace TownBuilder.EditorTools
                 "Text", "HOUSES", 38, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
             title.enableAutoSizing = true;
             title.fontSizeMin = 24;
-            title.fontSizeMax = 40;
+            title.fontSizeMax = 44;
             title.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
             if (outline != null) title.fontSharedMaterial = outline;
 
-            var info = Label(MakeRect("Info", card, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 26), new Vector2(-20, 76)),
-                "Text", "3 buildings", 42, TextAnchor.MiddleCenter, brown, FontStyle.Bold);
+            var info = Label(MakeRect("Info", card, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 40), new Vector2(-20, 80)),
+                "Text", "3 buildings", 46, TextAnchor.MiddleCenter, brown, FontStyle.Bold);
 
-            var badge = MakeRect("Badge", card, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-34, -102), new Vector2(74, 74));
+            var badge = MakeRect("Badge", card, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-36, -118), new Vector2(80, 80));
             var badgeImg = badge.gameObject.AddComponent<Image>();
             badgeImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CirclePath);
             badgeImg.color = new Color(0.90f, 0.17f, 0.14f);
             badgeImg.raycastTarget = false;
-            var badgeText = Label(badge, "Text", "1", 38, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+            var badgeText = Label(badge, "Text", "1", 42, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
             if (outline != null) badgeText.fontSharedMaterial = outline;
             badge.gameObject.SetActive(false);
 

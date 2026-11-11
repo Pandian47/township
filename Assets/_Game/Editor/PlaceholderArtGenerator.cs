@@ -1509,7 +1509,8 @@ namespace TownBuilder.EditorTools
 
         // ------------------------------------------------------------------ Build window (v0.27.4)
 
-        public const string AwningPath = UiArtFolder + "/Build/PH_UI_Awning.png";
+        public const string AwningPath = UiArtFolder + "/Build/PH_UI_Awning_Green.png";
+        public const string WoodPath = UiArtFolder + "/Build/PH_UI_Wood.png";
         public const string CirclePath = UiArtFolder + "/Build/PH_UI_Circle.png";
         public const string MenuIconPath = UiArtFolder + "/PH_Icon_Menu.png";
 
@@ -1517,6 +1518,7 @@ namespace TownBuilder.EditorTools
         public static void CreateBuildScreenArt()
         {
             CreateSprite(AwningPath, RenderAwning, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+            CreateSprite(WoodPath, RenderWood, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
             CreateSprite(CirclePath, RenderCircle, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
             CreateSprite(MenuIconPath, RenderMenuIcon, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
         }
@@ -1548,9 +1550,9 @@ namespace TownBuilder.EditorTools
             const int w = 96, h = 72, stripe = 48;
             var tex = NewTexture(w, h);
             var px = new Color32[w * h];
-            var blue = new Color(0.20f, 0.52f, 0.92f);
-            var white = new Color(0.98f, 0.98f, 1f);
-            var rim = new Color(0.10f, 0.28f, 0.62f);
+            var blue = new Color(0.30f, 0.70f, 0.26f); // stripe colour (green)
+            var white = new Color(0.99f, 0.99f, 0.96f);
+            var rim = new Color(0.14f, 0.40f, 0.12f);
             for (int x = 0; x < w; x++)
             {
                 bool isBlue = x < stripe;
@@ -1567,6 +1569,35 @@ namespace TownBuilder.EditorTools
                     c.a = 1f;
                     px[y * w + x] = c;
                 }
+            }
+
+            tex.SetPixels32(px);
+            tex.Apply();
+            return tex;
+        }
+
+        /// <summary>Warm wooden planks (128x128, tiles seamlessly): horizontal grain, a plank seam, a few knots.</summary>
+        private static Texture2D RenderWood()
+        {
+            const int size = 128;
+            var tex = NewTexture(size, size);
+            var px = new Color32[size * size];
+            var light = new Color(0.80f, 0.53f, 0.27f);
+            var dark = new Color(0.60f, 0.36f, 0.16f);
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float u = x / (float)size, v = y / (float)size;
+                // Grain: wavy stripes that repeat exactly across the tile.
+                float g = Mathf.Sin((v * 9f + 0.35f * Mathf.Sin(u * Mathf.PI * 2f) + 0.12f * Mathf.Sin(u * Mathf.PI * 6f)) * Mathf.PI * 2f);
+                var c = Color.Lerp(dark, light, 0.55f + 0.3f * g);
+                c *= 0.95f + 0.1f * Hash(x, y / 3);
+                if (y % 64 < 3) c = dark * 0.75f;                    // seam between planks
+                else if (y % 64 < 6) c = Color.Lerp(c, light, 0.5f); // lit edge under the seam
+                float kx = (x - 40) / 7f, ky = (y - 92) / 4f;       // a knot
+                if (kx * kx + ky * ky < 1f) c = dark * 0.85f;
+                c.a = 1f;
+                px[y * size + x] = c;
             }
 
             tex.SetPixels32(px);

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 36c7f7f98ee5c3c4aa6e409ffe6a484e
+guid: c2a7de6ab4164104ab2f4d6b2cfa7c74
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2061219167157381552
-    second: PH_UI_Awning_0
+      213: 7835791152925237942
+    second: PH_UI_Wood_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -128,13 +128,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: PH_UI_Awning_0
+      name: PH_UI_Wood_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 2
-        width: 96
-        height: 70
+        y: 0
+        width: 128
+        height: 128
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -143,8 +143,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0b964a669ebea9c10800000000000000
-      internalID: 2061219167157381552
+      spriteID: 6b2e14ca9825ebc60800000000000000
+      internalID: 7835791152925237942
       vertices: []
       indices: 
       edges: []
@@ -163,7 +163,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      PH_UI_Awning_0: 2061219167157381552
+      PH_UI_Wood_0: 7835791152925237942
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

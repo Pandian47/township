@@ -344,6 +344,10 @@ Design notes:
 - [ ] DEV → "Unlock everything (level 10)": Rising Star tiers 1 and 2 become claimable
 - [ ] Progress and claimed tiers are kept after closing and reopening the app
 
+### Device checklist (v0.28.1: Build window look)
+- [ ] Build window has a wooden frame and a green-and-white awning; the 5 cards are bigger
+- [ ] The purple DEV button is in the bottom-left corner and no longer covers the close button
+
 ### Device checklist (Milestone 7 step 4: weekend event)
 - [ ] On a weekday there is no event button; DEV → "Start weekend event now" shows the orange button on the left (name + time left)
 - [ ] The event window: name, description, "Ends in ...", points this weekend, three prizes with progress bars
@@ -356,7 +360,7 @@ Design notes:
 - [ ] Top-left: blue star with your level number, blue XP bar filling up with "x/y XP"; after a level-up the number changes and the bar starts again
 - [ ] Top-right: coin, gem and barn pills with big icons and bold numbers; tapping the barn pill opens the Barn
 - [ ] Round blue menu button (top-right corner) opens the menu; the bottom bar no longer has a Menu button
-- [ ] DEV button sits under the menu button; nothing overlaps the Tasks panel
+- [ ] DEV button sits in the bottom-left corner (v0.28.1); nothing overlaps the Tasks panel
 
 ### Device checklist (v0.27.4: Build window art + new font)
 - [ ] All text uses the new round font (Fredoka); no missing letters or empty boxes anywhere (also numbers like 1,350 and "·")

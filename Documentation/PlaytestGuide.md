@@ -1,11 +1,11 @@
-# Playtest guide (v0.28.0)
+# Playtest guide (v0.28.1)
 
 One place for testing the game on a real Android phone. The detailed per-feature checklists stay in
 DevelopmentRoadmap.md; this guide is the order to play in and what to write down.
 
 ## 1. Install
 
-APK: `Builds/Android/TownBuilder-0.28.0-37.apk` (37 MB, test build, test ads only, developer mode included).
+APK: `Builds/Android/TownBuilder-0.28.1-38.apk` (37 MB, test build, test ads only, developer mode included).
 
 **Option A: copy the file (no cable needed)**
 1. Upload the APK to Google Drive (or send it to yourself), open it on the phone.
@@ -18,7 +18,7 @@ APK: `Builds/Android/TownBuilder-0.28.0-37.apk` (37 MB, test build, test ads onl
 2. Connect the cable, tap **Allow** on the "Allow USB debugging?" popup.
 3. Tell me, and I'll run the install with Unity's `adb`, or run it yourself:
    ```
-   "C:\Program Files\Unity\Hub\Editor\6000.6.8f1\Editor\Data\PlaybackEngines\AndroidPlayer\SDK\platform-tools\adb.exe" install -r "D:\01-Projects\05-Township\TownBuilder\Builds\Android\TownBuilder-0.28.0-37.apk"
+   "C:\Program Files\Unity\Hub\Editor\6000.6.8f1\Editor\Data\PlaybackEngines\AndroidPlayer\SDK\platform-tools\adb.exe" install -r "D:\01-Projects\05-Township\TownBuilder\Builds\Android\TownBuilder-0.28.1-38.apk"
    ```
 
 ## 2. Session A: a new town (30–45 minutes, sound on)
@@ -51,7 +51,7 @@ Start with **Menu → New Game**. Play normally and follow the Tasks panel; don'
 ## 4. Session C: later features (needs level 4–9)
 
 Reaching the train (level 5) or the outer land ring (level 9) takes **several hours** of normal play.
-Use **developer mode** to get there in a minute: tap the purple **DEV** button (top-right corner, test APKs only).
+Use **developer mode** to get there in a minute: tap the purple **DEV** button (bottom-left corner, test APKs only).
 
 | Button | What it does |
 |---|---|
