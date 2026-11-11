@@ -317,6 +317,34 @@ Icon prompt as bread (section 15–16):
 * `apple_juice`: "a glass bottle of golden apple juice with a small apple label and a green cap"
 * `cherry_juice`: "a glass bottle of deep red cherry juice with a cherry label and a yellow cap"
 
+## v0.35.0: app icon and store graphic (launch prep)
+
+**App icon → `app_icon.png`** (square, any size from 1024 × 1024; it is NOT cut out, so no magenta background):
+
+```
+A square mobile game app icon for a cosy farming and town-building game. Same art style as the cottage.
+A single small cottage with a red roof on a round green hill, a little fruit tree beside it, a bright sun and a
+fluffy cloud in a clear blue sky. Bright, cheerful colours, soft shading, clean shapes that read well when tiny.
+Keep the cottage and tree in the middle of the picture, with only sky and grass near the edges (the phone cuts the
+corners into a circle). The background fills the whole square edge to edge. No text, no letters, no border, no frame,
+no rounded corners.
+```
+
+Put it in the Sources folder and run the art import: it is centre-cropped to a square, scaled to 1024 × 1024 and set
+as the Android icon. Until then a simple drawn icon is used.
+
+**Feature graphic → `feature_graphic.png`** (for the Play Store page only, not used in the game):
+
+```
+A wide banner, 1024 x 500 pixels, for a cosy farming and town-building mobile game. Same art style as the cottage.
+A small cheerful town on green hills seen from a slight isometric angle: cottages with red roofs, a bakery, a wheat
+field, fruit trees, a little train at a station. Blue sky with soft clouds. Leave the left third calmer (sky and
+grass) so the game name can be added on top later. No text, no letters, no logos, no border.
+```
+
+If the tool can't make 1024 × 500 exactly, make a wide image and crop/resize it to 1024 × 500 (JPG or PNG without
+transparency).
+
 ## v0.34.0: landscape painting (optional)
 
 * `pavement.png`: same prompt as the grass texture, but "light grey and beige square stone paving slabs, seen from above"

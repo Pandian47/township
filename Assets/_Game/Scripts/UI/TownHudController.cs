@@ -52,7 +52,9 @@ namespace TownBuilder
         [SerializeField] private GameObject bottomNavigation;
         [SerializeField] private Button barnButton;
         [SerializeField] private Button buildButton;
+        [Tooltip("The round menu button opens Settings (sound, credits, privacy, main menu).")]
         [SerializeField] private Button menuButton;
+        [SerializeField] private SettingsPanel settingsPanel;
 
         [Header("Placement bar (placing / moving)")]
         [SerializeField] private GameObject placementBar;
@@ -129,7 +131,19 @@ namespace TownBuilder
                 _placement.Cancel();
                 shopPanel.Open();
             });
-            menuButton.onClick.AddListener(() => onMenu?.Invoke());
+            if (settingsPanel != null)
+            {
+                settingsPanel.Initialize(ads, content.AdsConfig != null ? content.AdsConfig.PrivacyPolicyUrl : "", onMenu);
+                menuButton.onClick.AddListener(() =>
+                {
+                    _placement.Cancel();
+                    settingsPanel.Open();
+                });
+            }
+            else
+            {
+                menuButton.onClick.AddListener(() => onMenu?.Invoke());
+            }
 
             confirmPlacementButton.onClick.AddListener(() => _placement.Confirm());
             cancelPlacementButton.onClick.AddListener(() => _placement.Cancel());
@@ -218,6 +232,8 @@ namespace TownBuilder
         }
 
         public LandscapePanel LandscapePanel => landscapePanel;
+        public SettingsPanel SettingsPanel => settingsPanel;
+        public Button MenuButton => menuButton;
 
         /// <summary>Collections: the chest button and window.</summary>
         public void InitializeCollections(CollectionService collections)

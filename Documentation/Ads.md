@@ -27,6 +27,8 @@ Real ads appear only in the Android build.
 
 ## Going live (do this only for the Play Store release)
 
+The full release list (privacy policy, data safety, store listing) is in `ReleaseChecklist.md`.
+
 1. In AdMob, create the app and two ad units: Rewarded and Interstitial.
 2. **Assets → Google Mobile Ads → Settings → Android App ID**: paste your real App ID (`ca-app-pub-…~…`).
 3. Open `ScriptableObjects/AdsConfig.asset`: paste the two ad unit ids (`ca-app-pub-…/…`) and untick **Use Test Ads**.

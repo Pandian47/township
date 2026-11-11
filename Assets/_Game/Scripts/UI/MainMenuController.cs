@@ -16,13 +16,7 @@ namespace TownBuilder
         [SerializeField] private TMP_Text statusText;
         [SerializeField] private ConfirmDialog confirmDialog;
 
-        [Header("Settings panel")]
-        [SerializeField] private GameObject settingsPanel;
-        [SerializeField] private Slider musicSlider;
-        [SerializeField] private Slider sfxSlider;
-        [SerializeField] private Button closeSettingsButton;
-        [Tooltip("Re-opens the ad consent form. Required by Google in GDPR regions; hidden elsewhere.")]
-        [SerializeField] private Button privacyOptionsButton;
+        [SerializeField] private SettingsPanel settingsPanel;
 
         private GameContext _context;
 
@@ -34,20 +28,10 @@ namespace TownBuilder
 
             continueButton.onClick.AddListener(OnContinue);
             newGameButton.onClick.AddListener(OnNewGame);
-            settingsButton.onClick.AddListener(() =>
-            {
-                privacyOptionsButton.gameObject.SetActive(_context.Ads.PrivacyOptionsRequired);
-                settingsPanel.SetActive(true);
-            });
-            privacyOptionsButton.onClick.AddListener(() => _context.Ads.ShowPrivacyOptions(null));
-            closeSettingsButton.onClick.AddListener(() => settingsPanel.SetActive(false));
+            var ads = _context.Content.AdsConfig;
+            settingsPanel.Initialize(_context.Ads, ads != null ? ads.PrivacyPolicyUrl : "", onMainMenu: null);
+            settingsButton.onClick.AddListener(settingsPanel.Open);
 
-            musicSlider.SetValueWithoutNotify(AudioPreferences.MusicVolume);
-            sfxSlider.SetValueWithoutNotify(AudioPreferences.SfxVolume);
-            musicSlider.onValueChanged.AddListener(v => AudioPreferences.MusicVolume = v);
-            sfxSlider.onValueChanged.AddListener(v => AudioPreferences.SfxVolume = v);
-
-            settingsPanel.SetActive(false);
             continueButton.interactable = _context.SaveStore.HasSave;
             statusText.text = string.Empty;
         }

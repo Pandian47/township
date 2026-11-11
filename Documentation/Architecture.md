@@ -335,6 +335,24 @@ calendar (`Tick`, called every second by `EventPanel`), counts harvests / produc
 set of unlocked decorations and filters the shop (`BuildingShopPanel.SetListingFilter`). `EventPanel` = the town button
 + window. DEV "Start weekend event now" runs one from today for two days. Saved in `SaveData.events`.
 
+## 6g6l. Settings, credits, app icon, store screenshots (v0.35.0, launch prep)
+
+`SettingsPanel` (Scripts/UI) is one window used by both scenes, built by `SceneBuilder.BuildSettingsPanel` in the
+wooden Build-window frame (`BuildShopFrame` now takes an optional size): music/sound sliders (`AudioPreferences`),
+Privacy policy (opens `AdsConfig.PrivacyPolicyUrl`, or explains it isn't set yet), Credits (a second framed window
+scrolling `Data/Text/Credits.txt`, `{version}` replaced), Privacy & ads (UMP form, only when
+`IAdService.PrivacyOptionsRequired`), Main menu (town only) and the version. The town's round menu button opens it;
+Main menu calls `TownSceneController.ReturnToMainMenu` (save, interstitial, load). `MainMenuController` uses the same
+panel without the Main menu button.
+
+`AppIconTools` (Editor) draws a placeholder `Art/AppIcon/AppIcon.png` (1024²) or imports `app_icon.png` from the art
+Sources folder (centre square, scaled, opaque), and sets it as the default icon and the Android adaptive icon's
+background layer (transparent foreground). Unity 6.6 has only adaptive icons on Android (min SDK 26), so keep the
+subject in the middle two thirds. Called from `ProjectSetup.Run` and `AiArtImporter.Import`.
+
+`PreviewCapture.CaptureStoreFromCommandLine` (-storeOut, default `Documentation/Store`) renders six 1920×1080 store
+screenshots without the DEV button and without the green placement footprint.
+
 ## 6g6k. Landscape painting (v0.34.0)
 
 `LandscapeEdit` (Domain): one paint session (before/after per cell, rules: editable = own land and not the railway;

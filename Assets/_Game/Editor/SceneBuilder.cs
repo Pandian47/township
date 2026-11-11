@@ -99,18 +99,7 @@ namespace TownBuilder.EditorTools
             var statusRect = MakeRect("Status", safe, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 60), new Vector2(1400, 80));
             var status = Label(statusRect, "Text", "", 36, TextAnchor.MiddleCenter, new Color(0.6f, 0.1f, 0.1f));
 
-            // Settings panel
-            var settingsRoot = Stretch("SettingsPanel", canvas.transform);
-            AddImage(settingsRoot, Dim, rounded: false);
-            var window = MakeRect("Window", settingsRoot, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(860, 680));
-            AddImage(window, PanelColor);
-            VColumn(window, 24, TextAnchor.UpperCenter, 40);
-            var header = Label(window, "Title", "Settings", 56, TextAnchor.MiddleCenter, Ink, FontStyle.Bold);
-            Prefer(header, 760, 80);
-            var music = SliderRow(window, "Music");
-            var sfx = SliderRow(window, "Sound effects");
-            var privacyButton = MakeButton(window, "PrivacyOptionsButton", "Privacy & ads", new Vector2(400, 90), Blue, 36);
-            var closeSettings = MakeButton(window, "CloseButton", "Close", new Vector2(300, 100), Slate);
+            var settingsPanel = BuildSettingsPanel(canvas.transform);
 
             var dialog = CreateConfirmDialog(canvas.transform);
 
@@ -123,13 +112,77 @@ namespace TownBuilder.EditorTools
                 ("settingsButton", settingsButton),
                 ("statusText", status),
                 ("confirmDialog", dialog),
-                ("settingsPanel", settingsRoot.gameObject),
-                ("musicSlider", music),
-                ("sfxSlider", sfx),
-                ("closeSettingsButton", closeSettings),
-                ("privacyOptionsButton", privacyButton));
+                ("settingsPanel", settingsPanel));
 
             EditorSceneManager.SaveScene(scene, MainMenuPath);
+        }
+
+        public const string CreditsTextPath = "Assets/_Game/Data/Text/Credits.txt";
+
+        /// <summary>
+        /// Settings window (v0.35.0), shared by the main menu and the town: wooden frame with the SETTINGS sign, music and
+        /// sound sliders, Privacy policy / Credits / Privacy and ads buttons, Main menu (town only), version. Credits is a
+        /// second framed window with the scrolling credits and font licence.
+        /// </summary>
+        private static SettingsPanel BuildSettingsPanel(Transform canvas)
+        {
+            var container = Stretch("SettingsPanel", canvas);
+            var root = Stretch("Root", container);
+            AddImage(root, Dim, rounded: false);
+            var frame = BuildShopFrame(root, "Window", "SETTINGS", out _, out var close, out _, new Vector2(1240, 880));
+
+            var body = Stretch("Body", frame);
+            body.offsetMin = new Vector2(80, 60);
+            body.offsetMax = new Vector2(-80, -130);
+            VColumn(body, 22, TextAnchor.UpperCenter);
+            var music = SliderRow(body, "Music");
+            var sfx = SliderRow(body, "Sound effects");
+
+            var links = MakeRect("Links", body, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(980, 100));
+            Prefer(links, 980, 100);
+            HRow(links, 24, TextAnchor.MiddleCenter);
+            var policy = MakeButton(links, "PrivacyPolicyButton", "Privacy policy", new Vector2(310, 100), Blue, 36);
+            var credits = MakeButton(links, "CreditsButton", "Credits", new Vector2(250, 100), Blue, 36);
+            var consent = MakeButton(links, "PrivacyOptionsButton", "Privacy & ads", new Vector2(310, 100), Slate, 36);
+
+            var mainMenu = MakeButton(body, "MainMenuButton", "Main menu", new Vector2(420, 110), Green, 44);
+            var message = Label(body, "Message", "", 30, TextAnchor.MiddleCenter, new Color(0.6f, 0.25f, 0.1f));
+            Prefer(message, 980, 70);
+            var version = Label(body, "Version", "Version", 26, TextAnchor.MiddleCenter, new Color(0.45f, 0.42f, 0.38f));
+            Prefer(version, 980, 40);
+
+            // Credits: a second framed window over the settings, with the credits text scrolling up and down.
+            var creditsRoot = Stretch("CreditsRoot", root);
+            AddImage(creditsRoot, Dim, rounded: false);
+            var creditsFrame = BuildShopFrame(creditsRoot, "CreditsWindow", "CREDITS", out _, out var creditsClose, out _, new Vector2(1600, 900));
+            var viewport = Stretch("Viewport", creditsFrame);
+            viewport.offsetMin = new Vector2(70, 60);
+            viewport.offsetMax = new Vector2(-70, -120);
+            viewport.gameObject.AddComponent<RectMask2D>();
+            AddImage(viewport, new Color(1f, 1f, 1f, 0f), rounded: false); // invisible, catches drags
+            var content = MakeRect("Content", viewport, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(0, 100));
+            var creditsText = AddText(content.gameObject, "Credits", 28, TextAnchor.UpperLeft, Ink);
+            creditsText.margin = new Vector4(10f, 10f, 10f, 30f);
+            content.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            var scroll = viewport.gameObject.AddComponent<ScrollRect>();
+            scroll.content = content;
+            scroll.viewport = viewport;
+            scroll.horizontal = false;
+            scroll.vertical = true;
+            scroll.movementType = ScrollRect.MovementType.Elastic;
+            scroll.inertia = true;
+            scroll.decelerationRate = 0.12f;
+            scroll.scrollSensitivity = 30f;
+
+            var panel = container.gameObject.AddComponent<SettingsPanel>();
+            Wire(panel, ("panelRoot", root.gameObject), ("musicSlider", music), ("sfxSlider", sfx), ("closeButton", close),
+                ("privacyOptionsButton", consent), ("privacyPolicyButton", policy), ("creditsButton", credits), ("mainMenuButton", mainMenu),
+                ("messageText", message), ("versionText", version), ("creditsRoot", creditsRoot.gameObject), ("creditsText", creditsText),
+                ("creditsCloseButton", creditsClose), ("creditsScroll", scroll),
+                ("creditsSource", AssetDatabase.LoadAssetAtPath<TextAsset>(CreditsTextPath)));
+            creditsRoot.gameObject.SetActive(false);
+            root.gameObject.SetActive(false);
+            return panel;
         }
 
         private static Slider SliderRow(RectTransform parent, string label)
@@ -510,6 +563,7 @@ namespace TownBuilder.EditorTools
             var collectionsPanel = BuildCollectionsPanel(canvas.transform, safe);
             var landscapePanel = BuildLandscapePanel(safe, nav.gameObject, tasksPanel.gameObject);
             var daily = BuildDailyRewardDialog(canvas.transform);
+            var settingsPanel = BuildSettingsPanel(canvas.transform);
             var rewardLayer = Stretch("RewardFlyLayer", canvas.transform);
             var rewardFlyer = rewardLayer.gameObject.AddComponent<RewardFlyer>();
             Wire(rewardFlyer, ("coinsTarget", (RectTransform)coinsText.transform.parent), ("gemsTarget", (RectTransform)gemsText.transform.parent),
@@ -555,6 +609,7 @@ namespace TownBuilder.EditorTools
                 ("buildButton", buildButton),
                 ("rewardedCoinsButton", rewarded),
                 ("menuButton", menuButton),
+                ("settingsPanel", settingsPanel),
                 ("placementBar", placementBar.gameObject),
                 ("placementInfoText", placementInfo),
                 ("confirmPlacementButton", confirmPlacement),
@@ -1823,14 +1878,14 @@ namespace TownBuilder.EditorTools
         /// in the bottom corners, round close button. Returns the frame; <paramref name="inner"/> is the cream panel.
         /// </summary>
         private static RectTransform BuildShopFrame(RectTransform root, string windowName, string title, out RectTransform inner, out Button close,
-            out TMP_Text signText)
+            out TMP_Text signText, Vector2? size = null)
         {
             Sprite Ui(string file) => AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/_Game/Art/UI/Build/{file}.png");
             var outline = AssetDatabase.LoadAssetAtPath<Material>(ProjectSetup.UIFontOutlineMaterialPath);
 
             // Wooden frame: dark outline, plank texture, a darker inner edge, then the cream panel.
             var frame = MakeRect(windowName, root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -40),
-                new Vector2(1820, 930));
+                size ?? new Vector2(1820, 930));
             AddImage(frame, new Color(0.30f, 0.17f, 0.07f));
             var wood = Stretch("Wood", frame, 5f);
             var woodImg = wood.gameObject.AddComponent<Image>();

@@ -406,7 +406,17 @@ Our own features in the farming / town genre (not copied from any game).
 | 2 | **Town happiness**: decorations near houses raise happiness; happy houses pay bonus coins | Done (v0.31.0) |
 | 3 | **Collections**: rare finds while harvesting / producing, 3 sets of 5, rewards per set | Done (v0.32.0) |
 | 4 | **Seasons**: the town's look follows the real month, seasonal decorations | Done (v0.33.0) |
-| 5 | **Launch prep**: settings, credits, privacy policy, app icon, store screenshots, AAB checklist | Next |
+| 5 | **Launch prep**: settings, credits, privacy policy, app icon, store screenshots, AAB checklist | Done (v0.35.0) |
+
+### Device checklist (Milestone 8 step 5: launch prep)
+- [ ] The phone's home screen shows the new TownBuilder icon (cottage on a hill) in the launcher's shape
+- [ ] In the town, the round menu button (top-right) opens Settings instead of leaving the town
+- [ ] Music and Sound effects sliders change the volume right away and are remembered after restarting
+- [ ] Credits opens a second window; the text scrolls with a finger to the end of the font licence; X goes back
+- [ ] Privacy policy says the link will be added before release (no address yet)
+- [ ] Privacy & ads appears only in regions where Google requires it (EU/UK); elsewhere it's hidden
+- [ ] Main menu saves and returns to the main menu; Continue brings the town back
+- [ ] Main menu → Settings has the same window without the Main menu button; the version at the bottom says 0.35.0
 
 ### Device checklist (v0.34.0: landscape painting)
 - [ ] Build → Decorations: the first card is Landscape (Free, "Paint the ground")

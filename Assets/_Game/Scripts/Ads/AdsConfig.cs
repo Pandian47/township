@@ -34,12 +34,18 @@ namespace TownBuilder
         [Tooltip("Set when the game targets children (changes consent and ad content rules).")]
         [SerializeField] private bool tagForUnderAgeOfConsent;
 
+        [Header("Store listing")]
+        [Tooltip("Web address of the hosted privacy policy (Documentation/PrivacyPolicy.md). Settings > Privacy policy opens it. "
+                 + "The same address goes into Play Console > App content > Privacy policy.")]
+        [SerializeField] private string privacyPolicyUrl = "";
+
         public bool AdsEnabled => adsEnabled;
         public bool UseTestAds => useTestAds;
         public int RewardedCoins => rewardedCoins;
         public float RewardedCooldownSeconds => rewardedCooldownSeconds;
         public float InterstitialCooldownSeconds => interstitialCooldownSeconds;
         public bool TagForUnderAgeOfConsent => tagForUnderAgeOfConsent;
+        public string PrivacyPolicyUrl => privacyPolicyUrl;
 
         public string RewardedAdUnitId => useTestAds || string.IsNullOrEmpty(rewardedAdUnitAndroid)
             ? GoogleTestRewardedAndroid

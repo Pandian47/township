@@ -16,6 +16,9 @@ namespace TownBuilder.EditorTools
     /// </summary>
     public static class PreviewCapture
     {
+        /// <summary>Store screenshots: no DEV button, no green placement footprint.</summary>
+        private static bool _storeMode;
+
         [MenuItem("TownBuilder/Debug/Capture Town Preview", priority = 40)]
         public static void CaptureMenu()
         {
@@ -98,7 +101,8 @@ namespace TownBuilder.EditorTools
             // Show a placement preview (bakery) on free grass.
             var bakery = content.Buildings.First(b => b.Id == "bakery");
             var previewOrigin = new GridCoord(10, 24);
-            highlighter.Show(previewOrigin, bakery.FootprintSize, new Color(0.35f, 1f, 0.45f, 0.55f));
+            if (!_storeMode || hud == HudState.Placing)
+                highlighter.Show(previewOrigin, bakery.FootprintSize, new Color(0.35f, 1f, 0.45f, 0.55f));
             if (hud == HudState.Placing)
             {
                 var ghost = UnityEngine.Object.Instantiate(prefab);
@@ -160,7 +164,37 @@ namespace TownBuilder.EditorTools
             return outputPath;
         }
 
-        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm, ShopCards, Event, Truck, Home, Collections, Autumn, Winter, Landscape }
+        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm, ShopCards, Event, Truck, Home, Collections, Autumn, Winter, Landscape, Settings, Credits }
+
+        /// <summary>
+        /// Command line (v0.35.0): Google Play phone screenshots, 1920x1080, without the DEV button, into the folder after
+        /// -storeOut (default Documentation/Store).
+        /// </summary>
+        public static void CaptureStoreFromCommandLine()
+        {
+            try
+            {
+                var args = Environment.GetCommandLineArgs();
+                int i = Array.IndexOf(args, "-storeOut");
+                string folder = i >= 0 && i + 1 < args.Length ? args[i + 1] : Path.Combine(Directory.GetCurrentDirectory(), "Documentation", "Store");
+                _storeMode = true;
+                Capture(Path.Combine(folder, "Store_01_Town.png"), HudState.Idle);
+                Capture(Path.Combine(folder, "Store_02_Build.png"), HudState.ShopCards);
+                Capture(Path.Combine(folder, "Store_03_Factory.png"), HudState.Factory);
+                Capture(Path.Combine(folder, "Store_04_Train.png"), HudState.Train);
+                Capture(Path.Combine(folder, "Store_05_Winter.png"), HudState.Winter);
+                Capture(Path.Combine(folder, "Store_06_Goals.png"), HudState.Goals);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                EditorApplication.Exit(1);
+            }
+            finally
+            {
+                _storeMode = false;
+            }
+        }
 
         /// <summary>Command line: renders MainMenu + Town (idle, shop, placing) with UI into the folder after -previewOut.</summary>
         public static void CaptureUiFromCommandLine()
@@ -194,6 +228,8 @@ namespace TownBuilder.EditorTools
                 Capture(Path.Combine(folder, "Preview_Town_Land.png"), HudState.Land);
                 Capture(Path.Combine(folder, "Preview_Town_Daily.png"), HudState.Daily);
                 Capture(Path.Combine(folder, "Preview_Town_Goals.png"), HudState.Goals);
+                Capture(Path.Combine(folder, "Preview_Town_Settings.png"), HudState.Settings);
+                Capture(Path.Combine(folder, "Preview_Town_Credits.png"), HudState.Credits);
             }
             catch (Exception e)
             {
@@ -230,7 +266,21 @@ namespace TownBuilder.EditorTools
 
             Find(canvas, "PlacementActionBar").SetActive(state == HudState.Placing);
             Find(canvas, "SelectionActionBar").SetActive(false);
-            Find(canvas, "BottomNavigation").SetActive(state == HudState.Idle);
+            Find(canvas, "BottomNavigation").SetActive(state == HudState.Idle || state == HudState.Settings);
+            if (_storeMode) Find(canvas, "DevPanel").SetActive(false);
+
+            if (state == HudState.Settings || state == HudState.Credits)
+            {
+                var root = Find(canvas, "SettingsPanel").transform.Find("Root").gameObject;
+                root.SetActive(true);
+                root.transform.Find("Window/Body/Version").GetComponent<TMPro.TMP_Text>().text = $"Version {PlayerSettings.bundleVersion}";
+                root.transform.Find("Window/Body/Links/PrivacyOptionsButton").gameObject.SetActive(false); // only in GDPR regions
+                var credits = root.transform.Find("CreditsRoot").gameObject;
+                credits.SetActive(state == HudState.Credits);
+                var source = AssetDatabase.LoadAssetAtPath<TextAsset>(SceneBuilder.CreditsTextPath);
+                credits.transform.Find("CreditsWindow/Viewport/Content").GetComponent<TMPro.TMP_Text>().text =
+                    source.text.Replace("{version}", PlayerSettings.bundleVersion);
+            }
             if (state == HudState.Idle) { var m = UnityEngine.Object.FindAnyObjectByType<TrainMover>(); m?.PreviewAt(m.StopY); } // train standing at the platform
             if (state == HudState.Idle) UnityEngine.Object.FindAnyObjectByType<StreetLife>()?.PreviewPopulate(8, 2);
 

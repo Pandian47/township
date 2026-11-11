@@ -9,5 +9,6 @@
 All game art is original: AI images made by the owner from our own prompts (`Documentation/ArtPrompts.md`) or drawn
 in code by `PlaceholderArtGenerator`.
 
-Before release, add the OFL text (fonts.google.com → Fredoka → "License") to the app's credits/licences screen or the
-store listing, as the licence asks when the font is redistributed.
+Since v0.35.0 the game shows the font copyrights and the full SIL Open Font License text in **Settings → Credits**
+(`Assets/_Game/Data/Text/Credits.txt`; the licence text is the official OFL 1.1 copy that ships with TextMeshPro).
+Add any new third-party asset both to this table and to that credits file.

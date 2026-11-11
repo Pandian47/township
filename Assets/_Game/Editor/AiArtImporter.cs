@@ -262,8 +262,16 @@ namespace TownBuilder.EditorTools
                 Debug.Log($"[AiArt] {spec.Source}: {image.W}x{image.H} -> {spec.Target} ({output.W}x{output.H})");
             }
 
+            // App icon (v0.35.0): a full square picture, kept as drawn (no background removal).
+            if (AppIconTools.ImportFromSource(folder))
+            {
+                AppIconTools.EnsureAndApply();
+                done.Add(AppIconTools.SourceFileName + " -> AppIcon.png (1024x1024)");
+            }
+
             AssetDatabase.SaveAssets();
             var unknown = Directory.GetFiles(folder, "*.png").Select(Path.GetFileNameWithoutExtension)
+                .Where(n => !string.Equals(n + ".png", AppIconTools.SourceFileName, StringComparison.OrdinalIgnoreCase))
                 .Where(n => Specs.All(s => !string.Equals(s.Source, n, StringComparison.OrdinalIgnoreCase))).ToList();
 
             return $"Imported {done.Count}: {string.Join(", ", done.Select(d => d.Split(' ')[0]))}." +
