@@ -1652,72 +1652,84 @@ namespace TownBuilder.EditorTools
             var root = Stretch("Root", container);
             AddImage(root, Dim, rounded: false);
 
-            var window = MakeRect("Window", root, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 30), new Vector2(-120, 470));
-            AddImage(window, PanelColor);
-
-            var back = MakeButton(window, "BackButton", "< Back", new Vector2(170, 78), Slate, 32);
+            // --- Screen 2: one category's buildings, in the same full window (sign = category name).
+            var brown = new Color(0.40f, 0.24f, 0.10f);
+            var window = BuildShopFrame(root, "Window", "HOUSES", out var listInner, out var close, out var listTitle);
+            var back = MakeButton(window, "BackButton", "<", new Vector2(120, 120), new Color(0.18f, 0.52f, 0.95f), 64);
             var backRect = (RectTransform)back.transform;
-            backRect.anchorMin = backRect.anchorMax = backRect.pivot = new Vector2(0f, 1f);
-            backRect.anchoredPosition = new Vector2(20, -12);
+            backRect.anchorMin = backRect.anchorMax = new Vector2(0f, 1f);
+            backRect.pivot = new Vector2(0.5f, 0.5f);
+            backRect.anchoredPosition = new Vector2(40, -18);
+            var backImg = back.GetComponent<Image>();
+            backImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CirclePath);
+            backImg.type = Image.Type.Simple;
+            var backOutline = AssetDatabase.LoadAssetAtPath<Material>(ProjectSetup.UIFontOutlineMaterialPath);
+            if (backOutline != null) back.GetComponentInChildren<TMP_Text>().fontSharedMaterial = backOutline;
 
-            // Category tabs next to the Back button (cloned per category by BuildingShopPanel).
-            var tabs = MakeRect("Tabs", window, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, 1f), new Vector2(200, -12), new Vector2(-330, 80));
-            HRow(tabs, 12, TextAnchor.MiddleLeft);
-            var tabRect = MakeRect("TabTemplate", tabs, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(270, 78));
-            Prefer(tabRect, 270, 78);
-            var tabBg = AddImage(tabRect, Slate);
-            var tabButton = tabRect.gameObject.AddComponent<Button>();
-            tabButton.targetGraphic = tabBg;
-            var tabIconRect = MakeRect("Icon", tabRect, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(8, 0), new Vector2(66, 66));
-            var tabIcon = tabIconRect.gameObject.AddComponent<Image>();
-            tabIcon.preserveAspect = true;
-            tabIcon.raycastTarget = false;
-            var tabLabel = Label(MakeRect("Label", tabRect, new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(38, 0), new Vector2(-86, -8)),
-                "Text", "Tab", 30, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
-            var tabView = tabRect.gameObject.AddComponent<ShopTabView>();
-            Wire(tabView, ("button", tabButton), ("background", tabBg), ("icon", tabIcon), ("label", tabLabel));
-            tabRect.gameObject.SetActive(false);
+            var viewport = MakeRect("Viewport", listInner, Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
+            viewport.offsetMin = new Vector2(24, 20);
+            viewport.offsetMax = new Vector2(-24, -86);
+            var items = HorizontalScrollList(viewport, "Items", 22);
+            items.GetComponent<HorizontalLayoutGroup>().padding = new RectOffset(6, 6, 0, 0);
 
-            var close = MakeButton(window, "CloseButton", "X", new Vector2(90, 90), Red, 44);
-            var closeRect = (RectTransform)close.transform;
-            closeRect.anchorMin = closeRect.anchorMax = closeRect.pivot = new Vector2(1f, 1f);
-            closeRect.anchoredPosition = new Vector2(-20, -16);
+            // Building card template (cloned per building by BuildingShopPanel).
+            var template = MakeRect("ItemTemplate", items, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400, 700));
+            Prefer(template, 400, 700);
+            var bg = AddImage(template, new Color(1f, 0.985f, 0.94f), raycast: false);
+            var cardShadow = template.gameObject.AddComponent<Shadow>();
+            cardShadow.effectColor = new Color(0.45f, 0.30f, 0.15f, 0.35f);
+            cardShadow.effectDistance = new Vector2(0f, -7f);
 
-            var viewport = MakeRect("Viewport", window, new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
-            viewport.offsetMin = new Vector2(30, 24);
-            viewport.offsetMax = new Vector2(-30, -100);
-            var items = HorizontalScrollList(viewport, "Items", 24);
+            var nameText = Label(MakeRect("Name", template, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -14), new Vector2(-30, 96)),
+                "Text", "Name", 40, TextAnchor.MiddleCenter, brown, FontStyle.Bold);
+            nameText.enableAutoSizing = true;
+            nameText.fontSizeMin = 26;
+            nameText.fontSizeMax = 40;
+            var countText = Label(MakeRect("Count", template, new Vector2(0f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, 1f), new Vector2(24, -116), new Vector2(-24, 48)),
+                "Text", "0/1", 32, TextAnchor.MiddleLeft, brown, FontStyle.Bold);
+            var bonusText = Label(MakeRect("Bonus", template, new Vector2(0.4f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-24, -116), new Vector2(0, 48)),
+                "Text", "", 30, TextAnchor.MiddleRight, new Color(0.2f, 0.5f, 0.2f), FontStyle.Bold);
+            bonusText.enableAutoSizing = true;
+            bonusText.fontSizeMin = 20;
+            bonusText.fontSizeMax = 30;
+            bonusText.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
+            var line = MakeRect("Line", template, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -170), new Vector2(-40, 3));
+            AddImage(line, new Color(0.85f, 0.78f, 0.64f), rounded: false, raycast: false);
 
-            // Item template (cloned per building by BuildingShopPanel)
-            var template = MakeRect("ItemTemplate", items, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(260, 330));
-            var bg = AddImage(template, Color.white);
-            Prefer(template, 260, 330);
-            var button = template.gameObject.AddComponent<Button>();
-            button.targetGraphic = bg;
-
-            var iconRect = MakeRect("Icon", template, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -12), new Vector2(-24, 200));
+            var iconRect = MakeRect("Icon", template, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -186), new Vector2(340, 330));
             var icon = iconRect.gameObject.AddComponent<Image>();
             icon.preserveAspect = true;
             icon.raycastTarget = false;
 
-            var nameRect = MakeRect("Name", template, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 62), new Vector2(-16, 50));
-            var nameText = Label(nameRect, "Text", "Name", 32, TextAnchor.MiddleCenter, Ink, FontStyle.Bold);
-            var priceRect = MakeRect("Price", template, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 14), new Vector2(-16, 46));
-            var priceText = Label(priceRect, "Text", "0", 30, TextAnchor.MiddleCenter, Ink);
-            priceText.textWrappingMode = TMPro.TextWrappingModes.NoWrap; // "30 coins  ·  +5 happy" shrinks to one line
-            priceText.enableAutoSizing = true;
-            priceText.fontSizeMin = 20;
-            priceText.fontSizeMax = 30;
+            var buy = MakeButton(template, "BuyButton", "", new Vector2(320, 110), Green, 44);
+            var buyRect = (RectTransform)buy.transform;
+            buyRect.anchorMin = buyRect.anchorMax = buyRect.pivot = new Vector2(0.5f, 0f);
+            buyRect.anchoredPosition = new Vector2(0, 30);
+            var coinRect = MakeRect("Coin", buyRect, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(64, 0), new Vector2(76, 76));
+            var coin = coinRect.gameObject.AddComponent<Image>();
+            coin.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CoinIconPath);
+            coin.preserveAspect = true;
+            coin.raycastTarget = false;
+            var priceText = buy.GetComponentInChildren<TMP_Text>();
+            var priceRect = (RectTransform)priceText.transform;
+            priceRect.offsetMin = new Vector2(100, 0);
+            priceRect.offsetMax = new Vector2(-16, 0);
+            priceText.text = "450";
+            priceText.alignment = TMPro.TextAlignmentOptions.Center;
+            if (backOutline != null) priceText.fontSharedMaterial = backOutline;
+            var statusText = Label(MakeRect("Status", template, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 30), new Vector2(-30, 110)),
+                "Text", "Built", 38, TextAnchor.MiddleCenter, brown, FontStyle.Bold);
 
             var itemView = template.gameObject.AddComponent<ShopItemView>();
-            Wire(itemView, ("button", button), ("icon", icon), ("nameText", nameText), ("priceText", priceText));
+            Wire(itemView, ("button", buy), ("icon", icon), ("nameText", nameText), ("priceText", priceText), ("countText", countText),
+                ("bonusText", bonusText), ("statusText", statusText), ("background", bg));
             template.gameObject.SetActive(false);
 
             var cards = BuildShopCardsScreen(root, out var cardsParent, out var cardTemplate, out var cardsClose);
 
             var panel = container.gameObject.AddComponent<BuildingShopPanel>();
             Wire(panel, ("panelRoot", root.gameObject), ("itemsParent", items), ("itemTemplate", itemView), ("closeButton", close),
-                ("tabsParent", tabs), ("tabTemplate", tabView), ("listScreen", window.gameObject), ("backButton", back),
+                ("listTitle", listTitle), ("listScreen", window.gameObject), ("backButton", back),
                 ("cardsScreen", cards), ("cardsParent", cardsParent), ("cardTemplate", cardTemplate), ("cardsCloseButton", cardsClose),
                 ("scroll", viewport.GetComponent<ScrollRect>()));
             WireArray(panel, "cardRibbons", RibbonArtNames.Select(n => (Object)AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/_Game/Art/UI/Build/UI_Ribbon_{n}.png")).ToArray());
@@ -1731,15 +1743,18 @@ namespace TownBuilder.EditorTools
         /// sign, a round close button, and one card per category (ribbon, picture, "N buildings", badge), leaves in the
         /// bottom corners. Art: Art/UI/Build (AI images, see ArtPrompts.md) + awning/badge drawn in code.
         /// </summary>
-        private static GameObject BuildShopCardsScreen(RectTransform root, out Transform cardsParent, out ShopCategoryCardView cardTemplate,
-            out Button close)
+        /// <summary>
+        /// The Build windows' shared frame (our own look): wooden frame, green-and-white awning, wooden title sign, leaves
+        /// in the bottom corners, round close button. Returns the frame; <paramref name="inner"/> is the cream panel.
+        /// </summary>
+        private static RectTransform BuildShopFrame(RectTransform root, string windowName, string title, out RectTransform inner, out Button close,
+            out TMP_Text signText)
         {
             Sprite Ui(string file) => AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/_Game/Art/UI/Build/{file}.png");
             var outline = AssetDatabase.LoadAssetAtPath<Material>(ProjectSetup.UIFontOutlineMaterialPath);
-            var brown = new Color(0.40f, 0.24f, 0.10f);
 
             // Wooden frame: dark outline, plank texture, a darker inner edge, then the cream panel.
-            var frame = MakeRect("CardsWindow", root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -40),
+            var frame = MakeRect(windowName, root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -40),
                 new Vector2(1820, 930));
             AddImage(frame, new Color(0.30f, 0.17f, 0.07f));
             var wood = Stretch("Wood", frame, 5f);
@@ -1750,7 +1765,7 @@ namespace TownBuilder.EditorTools
             if (woodImg.sprite == null) woodImg.color = new Color(0.72f, 0.46f, 0.22f);
             var rim = Stretch("InnerEdge", frame, 26f);
             AddImage(rim, new Color(0.36f, 0.21f, 0.09f), raycast: false);
-            var inner = Stretch("Inner", frame, 31f);
+            inner = Stretch("Inner", frame, 31f);
             AddImage(inner, new Color(1f, 0.96f, 0.86f));
 
             var awning = MakeRect("Awning", frame, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -26), new Vector2(-62, 72));
@@ -1779,12 +1794,14 @@ namespace TownBuilder.EditorTools
             signImg.preserveAspect = true;
             signImg.raycastTarget = false;
             if (signImg.sprite == null) signImg.color = new Color(0.85f, 0.5f, 0.2f);
-            var signText = Label(MakeRect("Title", sign, new Vector2(0.2f, 0f), new Vector2(0.8f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0, 4), Vector2.zero),
-                "Text", "BUILD", 84, TextAnchor.MiddleCenter, new Color(1f, 0.95f, 0.85f), FontStyle.Bold);
+            signText = Label(MakeRect("Title", sign, new Vector2(0.2f, 0f), new Vector2(0.8f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0, 4), Vector2.zero),
+                "Text", title, 84, TextAnchor.MiddleCenter, new Color(1f, 0.95f, 0.85f), FontStyle.Bold);
             if (outline != null) signText.fontSharedMaterial = outline;
+            signText.textWrappingMode = TMPro.TextWrappingModes.NoWrap; // long names ("DECORATIONS") shrink instead of wrapping
+            signText.enableAutoSizing = true;
+            signText.fontSizeMin = 40;
+            signText.fontSizeMax = 84;
 
-            Label(MakeRect("Subtitle", inner, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -96), new Vector2(-200, 56)),
-                "Text", "What would you like to build?", 42, TextAnchor.MiddleCenter, brown, FontStyle.Bold);
 
             close = MakeButton(frame, "CloseButton", "", new Vector2(130, 130), Red, 44);
             var closeRect = (RectTransform)close.transform;
@@ -1804,6 +1821,21 @@ namespace TownBuilder.EditorTools
             {
                 close.GetComponentInChildren<TMP_Text>().text = "X";
             }
+
+            return frame;
+        }
+
+        private static GameObject BuildShopCardsScreen(RectTransform root, out Transform cardsParent, out ShopCategoryCardView cardTemplate,
+            out Button close)
+        {
+            Sprite Ui(string file) => AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/_Game/Art/UI/Build/{file}.png");
+            var outline = AssetDatabase.LoadAssetAtPath<Material>(ProjectSetup.UIFontOutlineMaterialPath);
+            var brown = new Color(0.40f, 0.24f, 0.10f);
+
+            var frame = BuildShopFrame(root, "CardsWindow", "BUILD", out var inner, out close, out _);
+
+            Label(MakeRect("Subtitle", inner, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -96), new Vector2(-200, 56)),
+                "Text", "What would you like to build?", 42, TextAnchor.MiddleCenter, brown, FontStyle.Bold);
 
             var row = MakeRect("Cards", inner, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 56), new Vector2(1740, 590));
             HRow(row, 20, TextAnchor.MiddleCenter);

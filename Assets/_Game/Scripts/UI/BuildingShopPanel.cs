@@ -2,17 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TownBuilder.Domain;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace TownBuilder
 {
     /// <summary>
-    /// The Build shop, in two screens:
+    /// The Build shop, in two full windows:
     ///   1. Category cards (Houses, Town, Factories, Farm, Decorations): big picture cards with a coloured ribbon and a
     ///      badge counting what can be built right now.
-    ///   2. The buildings of one category (the card list), with category tabs to switch and Back to return.
-    /// Cards, tabs and item cards are cloned from hidden templates, so new content needs no scene changes.
+    ///   2. One category's buildings: the sign shows the category name, big cards scroll sideways, Back returns.
+    /// Category cards and building cards are cloned from hidden templates, so new content needs no scene changes.
     /// </summary>
     public sealed class BuildingShopPanel : MonoBehaviour
     {
@@ -67,14 +68,12 @@ namespace TownBuilder
         [SerializeField] private Transform itemsParent;
         [SerializeField] private ShopItemView itemTemplate;
         [SerializeField] private Button closeButton;
-        [SerializeField] private Transform tabsParent;
-        [SerializeField] private ShopTabView tabTemplate;
-        [SerializeField] private Color activeTabColor = new Color(0.3f, 0.66f, 0.3f);
-        [SerializeField] private Color idleTabColor = new Color(0.62f, 0.62f, 0.6f);
+        [Tooltip("The list window's sign text (category name).")]
+        [SerializeField] private TMP_Text listTitle;
         [SerializeField] private ScrollRect scroll;
 
         private readonly List<ShopItemView> _items = new List<ShopItemView>();
-        private readonly List<ShopTabView> _tabs = new List<ShopTabView>();
+        private readonly List<BuildingCategory> _categories = new List<BuildingCategory>();
         private readonly List<ShopCategoryCardView> _cards = new List<ShopCategoryCardView>();
         private GameContent _content;
         private Wallet _wallet;
@@ -82,6 +81,7 @@ namespace TownBuilder
         private Action<BuildingDefinition> _onSelected;
         private Func<BuildingDefinition, bool> _canBuildMore;
         private Func<BuildingDefinition, bool> _isListed = _ => true;
+        private Func<BuildingDefinition, int> _ownedCount;
 
         /// <summary>Hides cards that aren't for sale right now (event-only decorations not unlocked yet).</summary>
         public void SetListingFilter(Func<BuildingDefinition, bool> isListed) => _isListed = isListed ?? (_ => true);
@@ -90,15 +90,16 @@ namespace TownBuilder
         public bool ShowingCategories => cardsScreen != null && cardsScreen.activeSelf;
         public BuildingCategory CurrentCategory { get; private set; }
         public bool ShowingDecorations => CurrentCategory == BuildingCategory.Decoration;
-        public IReadOnlyList<BuildingCategory> Categories => _tabs.Select(t => t.Category).ToList();
+        public IReadOnlyList<BuildingCategory> Categories => _categories;
         public IReadOnlyList<ShopCategoryCardView> Cards => _cards;
 
-        /// <summary>Cards visible in the current tab (tests).</summary>
+        /// <summary>Building cards visible in the open category (tests).</summary>
         public int VisibleItems => _items.Count(i => i.gameObject.activeSelf);
 
         public void Initialize(GameContent content, Wallet wallet, PlayerProgress progress,
-            Func<BuildingDefinition, bool> canBuildMore, Action<BuildingDefinition> onSelected)
+            Func<BuildingDefinition, bool> canBuildMore, Action<BuildingDefinition> onSelected, Func<BuildingDefinition, int> ownedCount = null)
         {
+            _ownedCount = ownedCount;
             _content = content;
             _wallet = wallet;
             _progress = progress;
@@ -118,7 +119,6 @@ namespace TownBuilder
                 _items.Add(item);
             }
 
-            BuildTabs(content);
             BuildCards(content);
             closeButton.onClick.RemoveAllListeners();
             closeButton.onClick.AddListener(Close);
@@ -134,26 +134,8 @@ namespace TownBuilder
                 backButton.onClick.AddListener(ShowCategories);
             }
 
-            if (_tabs.Count > 0) ShowCategory(_tabs[0].Category);
+            if (_categories.Count > 0) ShowCategory(_categories[0]);
             Close();
-        }
-
-        /// <summary>Creates one tab per category with shop items (also used by the editor preview).</summary>
-        public void BuildTabs(GameContent content)
-        {
-            tabTemplate.gameObject.SetActive(false);
-            foreach (var tab in _tabs)
-                if (tab != null) Destroy(tab.gameObject);
-            _tabs.Clear();
-
-            foreach (var category in CategoriesWithItems(content))
-            {
-                var tab = Instantiate(tabTemplate, tabsParent);
-                tab.name = $"Tab_{category}";
-                tab.gameObject.SetActive(true);
-                tab.Bind(category, TabLabel(category), CardSprite(content, category), OpenCategory);
-                _tabs.Add(tab);
-            }
         }
 
         /// <summary>Creates one big card per category with shop items (also used by the editor preview).</summary>
@@ -164,6 +146,8 @@ namespace TownBuilder
             foreach (var card in _cards)
                 if (card != null) Destroy(card.gameObject);
             _cards.Clear();
+            _categories.Clear();
+            _categories.AddRange(CategoriesWithItems(content));
 
             foreach (var category in CategoriesWithItems(content))
             {
@@ -192,11 +176,11 @@ namespace TownBuilder
             }
         }
 
-        /// <summary>Highlights a tab without touching item cards (editor preview).</summary>
-        public void HighlightTab(BuildingCategory category)
+        /// <summary>Sets the open category and the sign text without touching the building cards (editor preview).</summary>
+        public void SetTitle(BuildingCategory category)
         {
             CurrentCategory = category;
-            foreach (var tab in _tabs) tab.SetSelected(tab.Category == category, activeTabColor, idleTabColor);
+            if (listTitle != null) listTitle.text = TabLabel(category).ToUpperInvariant();
         }
 
         /// <summary>Opens the shop on the category cards.</summary>
@@ -205,7 +189,8 @@ namespace TownBuilder
             foreach (var item in _items)
             {
                 var d = item.Definition;
-                item.Refresh(_progress.IsUnlocked(d.UnlockLevel), _wallet.CanAffordCoins(d.CoinCost), !CanBuildMore(d));
+                item.Refresh(_progress.IsUnlocked(d.UnlockLevel), _wallet.CanAffordCoins(d.CoinCost), !CanBuildMore(d),
+                    _ownedCount != null ? _ownedCount(d) : 0);
             }
 
             RefreshCards(_content, _progress.Level,
@@ -224,7 +209,7 @@ namespace TownBuilder
             if (listScreen != null) listScreen.SetActive(false);
         }
 
-        /// <summary>Screen 2 for a category (tapping a card or a tab).</summary>
+        /// <summary>Screen 2 for a category (tapping a category card).</summary>
         public void OpenCategory(BuildingCategory category)
         {
             if (cardsScreen != null) cardsScreen.SetActive(false);
@@ -235,7 +220,7 @@ namespace TownBuilder
         /// <summary>Shows the item cards of one category.</summary>
         public void ShowCategory(BuildingCategory category)
         {
-            HighlightTab(category);
+            SetTitle(category);
             foreach (var item in _items) item.gameObject.SetActive(item.Definition.Category == category && _isListed(item.Definition));
             if (scroll != null) scroll.horizontalNormalizedPosition = 0f;
         }

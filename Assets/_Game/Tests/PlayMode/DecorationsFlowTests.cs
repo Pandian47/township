@@ -41,7 +41,7 @@ namespace TownBuilder.Tests
             Assert.IsTrue(shop.IsOpen);
             Assert.IsTrue(shop.ShowingCategories, "opens on the category cards");
 
-            // One card and one tab per category with something for sale.
+            // One category card per category with something for sale.
             var expected = BuildingShopPanel.TabOrder.Where(c => content.Buildings.Any(b => b.ShowInShop && b.Category == c)).ToList();
             CollectionAssert.AreEqual(expected, shop.Categories.ToList());
             CollectionAssert.AreEqual(expected, shop.Cards.Select(c => c.Category).ToList());
@@ -54,15 +54,17 @@ namespace TownBuilder.Tests
             Assert.AreEqual(BuildingCategory.Residential, shop.CurrentCategory);
             GameObject.Find("BackButton").GetComponent<Button>().onClick.Invoke();
             Assert.IsTrue(shop.ShowingCategories);
-            GameObject.Find("Card_Production").GetComponent<Button>().onClick.Invoke();
             int total = 0;
             foreach (var category in expected)
             {
-                GameObject.Find($"Tab_{category}").GetComponent<Button>().onClick.Invoke();
+                GameObject.Find($"Card_{category}").GetComponent<Button>().onClick.Invoke();
+                Assert.IsFalse(shop.ShowingCategories, "the category opens in its own full window");
                 Assert.AreEqual(category, shop.CurrentCategory);
                 int count = content.Buildings.Count(b => b.ShowInShop && !b.EventOnly && b.Category == category);
-                Assert.AreEqual(count, shop.VisibleItems, $"{category} tab");
+                Assert.AreEqual(count, shop.VisibleItems, $"{category} window");
                 total += count;
+                GameObject.Find("BackButton").GetComponent<Button>().onClick.Invoke();
+                Assert.IsTrue(shop.ShowingCategories);
             }
 
             Assert.AreEqual(content.Buildings.Count(b => b.ShowInShop && !b.EventOnly), total, "every shop item is in one tab (event prizes stay hidden)");
@@ -70,7 +72,7 @@ namespace TownBuilder.Tests
             // Factories tab: only factories. Fruit trees are on the Farm tab.
             Assert.IsTrue(content.Buildings.Where(b => b.ShowInShop && b.Category == BuildingCategory.Production).All(b => b.IsFactory));
             Assert.IsTrue(content.Buildings.Where(b => b.IsFruitTree).All(b => b.Category == BuildingCategory.Farming));
-            GameObject.Find("Tab_Decoration").GetComponent<Button>().onClick.Invoke();
+            GameObject.Find("Card_Decoration").GetComponent<Button>().onClick.Invoke();
             Assert.IsTrue(shop.ShowingDecorations);
         }
 

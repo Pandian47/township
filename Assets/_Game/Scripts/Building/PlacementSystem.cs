@@ -221,6 +221,9 @@ namespace TownBuilder
         }
 
         /// <summary>False when the player already owns <see cref="BuildingDefinition.MaxCount"/> of this building.</summary>
+        /// <summary>How many of this building the town has.</summary>
+        public int CountOwned(BuildingDefinition definition) => _town == null || definition == null ? 0 : _town.CountOf(definition.Id);
+
         public bool CanBuildMore(BuildingDefinition definition) =>
             definition.MaxCount <= 0 || _town == null || _town.CountOf(definition.Id) < definition.MaxCount;
 

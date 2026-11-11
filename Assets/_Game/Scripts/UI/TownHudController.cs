@@ -116,7 +116,7 @@ namespace TownBuilder
             bool adsOn = content.AdsConfig != null && content.AdsConfig.AdsEnabled && !(ads is NoAdService);
             rewardedCoinsButton.gameObject.SetActive(adsOn);
             if (adsOn) rewardedCoinsButton.Initialize(ads, wallet, content.AdsConfig.RewardedCoins);
-            shopPanel.Initialize(content, wallet, progress, _placement.CanBuildMore, d => _placement.BeginPlacement(d));
+            shopPanel.Initialize(content, wallet, progress, _placement.CanBuildMore, d => _placement.BeginPlacement(d), _placement.CountOwned);
 
             buildButton.onClick.AddListener(() =>
             {

@@ -532,15 +532,16 @@ namespace TownBuilder.EditorTools
                 shopRoot.SetActive(true);
                 shopRoot.transform.Find("CardsWindow").gameObject.SetActive(false);
                 var shopPanel = Find(canvas, "BuildingShopPanel").GetComponent<BuildingShopPanel>();
-                shopPanel.BuildTabs(content);
-                shopPanel.HighlightTab(category);
+                shopRoot.transform.Find("Window").gameObject.SetActive(true);
+                shopPanel.SetTitle(category);
                 var template = shopRoot.GetComponentsInChildren<ShopItemView>(true).First();
                 foreach (var def in content.Buildings.Where(d => d.ShowInShop && !d.EventOnly && d.Category == category))
                 {
                     var item = UnityEngine.Object.Instantiate(template, template.transform.parent);
                     item.gameObject.SetActive(true);
                     item.Bind(def, null);
-                    item.Refresh(progress.IsUnlocked(def.UnlockLevel), wallet.CanAffordCoins(def.CoinCost), def.MaxCount == 1);
+                    bool landmarkOrOne = def.MaxCount == 1 && def.Category != BuildingCategory.Production;
+                    item.Refresh(progress.IsUnlocked(def.UnlockLevel), wallet.CanAffordCoins(def.CoinCost), landmarkOrOne, landmarkOrOne ? 1 : 0);
                 }
             }
         }

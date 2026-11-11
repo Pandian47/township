@@ -313,6 +313,9 @@ Decorations are ordinary `BuildingDefinition`s with `category = Decoration` (no 
 placement, moving, saving and land rules all apply unchanged. `BuildingShopPanel` has one tab per `BuildingCategory`
 with something for sale (v0.27.2: Houses, Town, Factories, Farm, Decorations; order in `BuildingShopPanel.TabOrder`),
 cloned at runtime from a `ShopTabView` template with the picture of the category's first building.
+v0.32.1: both screens are full windows built by `SceneBuilder.BuildShopFrame` (wooden frame, awning, sign, close); the
+category window's sign shows the category name, Back returns, and big `ShopItemView` cards (built/max, bonus, picture,
+price button or "Level N" / "Built" / "Max") scroll sideways. The category tabs were removed.
 v0.27.3: the shop opens on a **category screen** first (`ShopCategoryCardView` cards: coloured ribbon, one of the
 category's buildings in a meadow scene from `PlaceholderArtGenerator.CreateBuildScreenArt`, "N buildings" or the
 unlock level, and a badge counting what can be built right now). Tapping a card opens that category's list; Back returns.

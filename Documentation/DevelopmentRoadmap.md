@@ -408,6 +408,12 @@ Our own features in the farming / town genre (not copied from any game).
 | 4 | **Seasons**: the town's look follows the real month, seasonal decorations | Next |
 | 5 | **Launch prep**: settings, credits, privacy policy, app icon, store screenshots, AAB checklist | Planned |
 
+### Device checklist (v0.32.1: full-window Build categories)
+- [ ] Build → tap a category card: a second full window opens with the category name on the sign (e.g. HOUSES)
+- [ ] Big building cards scroll sideways: name, built/max, what it gives, picture, green price button with a coin
+- [ ] Locked buildings say "Level N required"; one-per-town buildings say "Built"; the round "<" goes back, X closes
+- [ ] Tapping the price button starts placing the building
+
 ### Device checklist (Milestone 8 step 3: collections)
 - [ ] A round chest button sits under the menu button (top-right); it opens the Collections window with 3 sets of 5
 - [ ] Harvesting / collecting products / delivering orders sometimes shows "Rare find: ..." and the item lights up
