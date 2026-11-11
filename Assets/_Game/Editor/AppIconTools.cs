@@ -9,14 +9,20 @@ namespace TownBuilder.EditorTools
     /// <summary>
     /// The app icon (v0.35.0). <see cref="IconPath"/> is a square 1024x1024 picture: either the owner's AI image
     /// (Sources/app_icon.png, imported by <see cref="ImportFromSource"/>) or a placeholder drawn here. It becomes the
-    /// default icon and the background layer of the Android adaptive icon (the launcher shows
-    /// roughly the middle two thirds, so the subject must sit in the centre). The foreground layer is transparent.
+    /// default icon and the 512x512 store icon. Android only uses adaptive icons, whose launcher shows roughly the middle
+    /// two thirds of the layer, so <see cref="AdaptivePath"/> is the same picture shrunk to <see cref="AdaptiveScale"/>
+    /// of the layer with its edges stretched outwards: the launcher then shows almost the whole picture. The foreground
+    /// layer is transparent.
     /// </summary>
     public static class AppIconTools
     {
         public const string Folder = "Assets/_Game/Art/AppIcon";
         public const string IconPath = Folder + "/AppIcon.png";
         public const string ForegroundPath = Folder + "/AppIcon_Foreground.png";
+        public const string AdaptivePath = Folder + "/AppIcon_Adaptive.png";
+        /// <summary>Picture size inside the adaptive layer. The visible window is 72/108 = 0.667 of the layer, so 0.75 shows
+        /// about 89% of the picture (the circle mask still rounds the corners).</summary>
+        public const float AdaptiveScale = 0.75f;
         public const string SourceFileName = "app_icon.png";
         public const int Size = 1024;
 
@@ -26,6 +32,8 @@ namespace TownBuilder.EditorTools
             PlaceholderArtGenerator.EnsureFolder(Folder);
             if (!File.Exists(IconPath))
                 WriteIcon(RenderPlaceholder());
+            if (!File.Exists(AdaptivePath))
+                WriteAdaptive();
             if (!File.Exists(ForegroundPath))
             {
                 var clear = new Texture2D(Size, Size, TextureFormat.RGBA32, false);
@@ -67,6 +75,7 @@ namespace TownBuilder.EditorTools
             Object.DestroyImmediate(src);
             PlaceholderArtGenerator.EnsureFolder(Folder);
             WriteIcon(dst);
+            WriteAdaptive();
             Debug.Log($"[AppIcon] Imported {path} ({side}x{side} centre) as the app icon.");
             return true;
         }
@@ -76,6 +85,32 @@ namespace TownBuilder.EditorTools
             File.WriteAllBytes(IconPath, tex.EncodeToPNG());
             Object.DestroyImmediate(tex);
             ImportIconTexture(IconPath);
+        }
+
+        /// <summary>The adaptive background: the icon shrunk into the middle, edge pixels stretched to fill the margin.</summary>
+        private static void WriteAdaptive()
+        {
+            var src = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+            src.LoadImage(File.ReadAllBytes(IconPath));
+            var px = new Color32[Size * Size];
+            float margin = (1f - AdaptiveScale) * 0.5f;
+            for (int y = 0; y < Size; y++)
+            for (int x = 0; x < Size; x++)
+            {
+                float u = Mathf.Clamp01(((x + 0.5f) / Size - margin) / AdaptiveScale);
+                float v = Mathf.Clamp01(((y + 0.5f) / Size - margin) / AdaptiveScale);
+                var c = src.GetPixelBilinear(u, v);
+                c.a = 1f;
+                px[y * Size + x] = c;
+            }
+
+            var dst = new Texture2D(Size, Size, TextureFormat.RGBA32, false);
+            dst.SetPixels32(px);
+            dst.Apply();
+            File.WriteAllBytes(AdaptivePath, dst.EncodeToPNG());
+            Object.DestroyImmediate(dst);
+            Object.DestroyImmediate(src);
+            ImportIconTexture(AdaptivePath);
         }
 
         private static void ImportIconTexture(string assetPath)
@@ -96,13 +131,15 @@ namespace TownBuilder.EditorTools
         {
             var icon = AssetDatabase.LoadAssetAtPath<Texture2D>(IconPath);
             var foreground = AssetDatabase.LoadAssetAtPath<Texture2D>(ForegroundPath);
+            var background = AssetDatabase.LoadAssetAtPath<Texture2D>(AdaptivePath);
             if (icon == null) return;
+            if (background == null) background = icon;
 
             PlayerSettings.SetIcons(NamedBuildTarget.Unknown, new[] { icon }, IconKind.Any);
             // Unity 6.6 only has adaptive icons on Android (fine: our minimum is Android 8.0, which introduced them).
             var android = NamedBuildTarget.Android;
             var adaptive = PlayerSettings.GetPlatformIcons(android, AndroidPlatformIconKind.Adaptive);
-            foreach (var slot in adaptive) slot.SetTextures(icon, foreground); // layer 0 = background, 1 = foreground
+            foreach (var slot in adaptive) slot.SetTextures(background, foreground); // layer 0 = background, 1 = foreground
             PlayerSettings.SetPlatformIcons(android, AndroidPlatformIconKind.Adaptive, adaptive);
             AssetDatabase.SaveAssets();
         }

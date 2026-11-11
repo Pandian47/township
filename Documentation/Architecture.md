@@ -346,9 +346,10 @@ Main menu calls `TownSceneController.ReturnToMainMenu` (save, interstitial, load
 panel without the Main menu button.
 
 `AppIconTools` (Editor) draws a placeholder `Art/AppIcon/AppIcon.png` (1024²) or imports `app_icon.png` from the art
-Sources folder (centre square, scaled, opaque), and sets it as the default icon and the Android adaptive icon's
-background layer (transparent foreground). Unity 6.6 has only adaptive icons on Android (min SDK 26), so keep the
-subject in the middle two thirds. Called from `ProjectSetup.Run` and `AiArtImporter.Import`.
+Sources folder (centre square, scaled, opaque), and sets it as the default icon. Unity 6.6 has only adaptive icons on
+Android (min SDK 26), whose launcher shows the middle two thirds of the layer, so the adaptive background
+`AppIcon_Adaptive.png` is the same picture shrunk to 75 % with its edge pixels stretched outwards (about 89 % of the
+picture stays visible); the foreground layer is transparent. Called from `ProjectSetup.Run` and `AiArtImporter.Import`.
 
 `PreviewCapture.CaptureStoreFromCommandLine` (-storeOut, default `Documentation/Store`) renders six 1920×1080 store
 screenshots without the DEV button and without the green placement footprint.

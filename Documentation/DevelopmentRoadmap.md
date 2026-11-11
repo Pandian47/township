@@ -409,7 +409,8 @@ Our own features in the farming / town genre (not copied from any game).
 | 5 | **Launch prep**: settings, credits, privacy policy, app icon, store screenshots, AAB checklist | Done (v0.35.0) |
 
 ### Device checklist (Milestone 8 step 5: launch prep)
-- [ ] The phone's home screen shows the new TownBuilder icon (cottage on a hill) in the launcher's shape
+- [ ] v0.35.1: the home screen shows the owner's icon (cottage, apple tree, sun); the tree and roof aren't cut off
+- [ ] v0.35.1: the new train (red engine, blue and green wagons) drives in, stops at the platform and leaves
 - [ ] In the town, the round menu button (top-right) opens Settings instead of leaving the town
 - [ ] Music and Sound effects sliders change the volume right away and are remembered after restarting
 - [ ] Credits opens a second window; the text scrolls with a finger to the end of the font licence; X goes back

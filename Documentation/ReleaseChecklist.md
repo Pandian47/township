@@ -38,7 +38,8 @@ Details for each step: `AndroidRelease.md` (builds and signing) and `Ads.md` (Ad
 ## 5. Store listing (Play Console → Grow → Store presence → Main store listing)
 
 - [ ] App name, short description (80 characters), full description (4000 characters): our own words.
-- [ ] **App icon 512 × 512 PNG**: scale `Assets/_Game/Art/AppIcon/AppIcon.png` (1024 × 1024) down to 512 × 512.
+- [ ] **App icon 512 × 512 PNG**: scale `Assets/_Game/Art/AppIcon/AppIcon.png` (1024 × 1024, the full picture) down to
+      512 × 512. (Not `AppIcon_Adaptive.png`, which is shrunk for the phone launcher.)
 - [ ] **Feature graphic 1024 × 500** (JPG or 24-bit PNG, no transparency): see the prompt in `ArtPrompts.md`.
 - [ ] **Phone screenshots** (2 to 8): `Documentation/Store/Store_*.png` (1920 × 1080, made by
       `PreviewCapture.CaptureStoreFromCommandLine`). Replace them with real phone screenshots later if you like.
