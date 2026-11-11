@@ -322,6 +322,16 @@ sign, round close button, ribbon + picture per category (`BuildingShopPanel.card
 `Art/UI/Build`, imported with `AiArtImporter` Kind.Ui), red round badges. Top-bar pills have icons (level star, coin,
 gem, barn).
 
+## 6g6e. Weekend events (Milestone 7 step 4)
+
+`WeekendCalendar` (Domain) turns a local day index into a weekday, the weekend's key (its Saturday) and the rotation
+index. `EventProgress` (Domain) holds the key, event id, points and claimed prizes; `Begin` resets it for a new weekend.
+`EventDefinition` (ScriptableObject) = name, description, `pointsFrom` (an `AchievementKind`), three `EventMilestone`s
+(goal, coins, gems, optional event-only decoration). `WeekendEventService` (Scripts/Events) picks the event from the
+calendar (`Tick`, called every second by `EventPanel`), counts harvests / products / orders, pays prizes, keeps the
+set of unlocked decorations and filters the shop (`BuildingShopPanel.SetListingFilter`). `EventPanel` = the town button
++ window. DEV "Start weekend event now" runs one from today for two days. Saved in `SaveData.events`.
+
 ## 6h0. Game font
 
 UI text uses **Fredoka SemiBold** (`Fonts/Fredoka-SemiBold SDF.asset`, a dynamic TMP font asset made by

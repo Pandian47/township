@@ -134,7 +134,7 @@ namespace TownBuilder.EditorTools
             return outputPath;
         }
 
-        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm, ShopCards }
+        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm, ShopCards, Event }
 
         /// <summary>Command line: renders MainMenu + Town (idle, shop, placing) with UI into the folder after -previewOut.</summary>
         public static void CaptureUiFromCommandLine()
@@ -150,6 +150,7 @@ namespace TownBuilder.EditorTools
                 Capture(Path.Combine(folder, "Preview_Town_Decorations.png"), HudState.ShopDecorations);
                 Capture(Path.Combine(folder, "Preview_Town_ShopFarm.png"), HudState.ShopFarm);
                 Capture(Path.Combine(folder, "Preview_Town_ShopCards.png"), HudState.ShopCards);
+                Capture(Path.Combine(folder, "Preview_Town_Event.png"), HudState.Event);
                 Capture(Path.Combine(folder, "Preview_Town_Placing.png"), HudState.Placing);
                 Capture(Path.Combine(folder, "Preview_Town_Field.png"), HudState.Field);
                 Capture(Path.Combine(folder, "Preview_Town_Barn.png"), HudState.Barn);
@@ -441,6 +442,28 @@ namespace TownBuilder.EditorTools
                     b.Bind(crop, null);
                     b.Refresh(true, true);
                 }
+            }
+
+            if (state == HudState.Event && content.WeekendEvents.Count > 0)
+            {
+                // Harvest Festival, Saturday afternoon: prize 1 claimed, prize 2 ready, prize 3 on the way.
+                var ev = content.WeekendEvents[0];
+                var p = new EventProgress();
+                p.Begin(20771, ev.Id, ev.Goals);
+                p.AddPoints(95);
+                p.TryClaim(0);
+                Find(canvas, "EventPanel").GetComponent<EventPanel>().PreviewRender(ev, p, "1d 9h");
+            }
+
+            if (state == HudState.Idle && content.WeekendEvents.Count > 0)
+            {
+                var ev = content.WeekendEvents[0];
+                var p = new EventProgress();
+                p.Begin(20771, ev.Id, ev.Goals);
+                p.AddPoints(35);
+                var panel = Find(canvas, "EventPanel").GetComponent<EventPanel>();
+                panel.PreviewRender(ev, p, "1d 9h");
+                Find(canvas, "EventPanel").transform.Find("Root").gameObject.SetActive(false);
             }
 
             if (state == HudState.ShopCards)

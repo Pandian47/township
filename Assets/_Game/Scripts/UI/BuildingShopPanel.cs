@@ -81,6 +81,10 @@ namespace TownBuilder
         private PlayerProgress _progress;
         private Action<BuildingDefinition> _onSelected;
         private Func<BuildingDefinition, bool> _canBuildMore;
+        private Func<BuildingDefinition, bool> _isListed = _ => true;
+
+        /// <summary>Hides cards that aren't for sale right now (event-only decorations not unlocked yet).</summary>
+        public void SetListingFilter(Func<BuildingDefinition, bool> isListed) => _isListed = isListed ?? (_ => true);
 
         public bool IsOpen => panelRoot.activeSelf;
         public bool ShowingCategories => cardsScreen != null && cardsScreen.activeSelf;
@@ -175,11 +179,13 @@ namespace TownBuilder
         }
 
         /// <summary>Updates the card lines and badges. <paramref name="canBuildNow"/> says if a building can be built now.</summary>
-        public void RefreshCards(GameContent content, int level, Func<BuildingDefinition, bool> canBuildNow)
+        public void RefreshCards(GameContent content, int level, Func<BuildingDefinition, bool> canBuildNow,
+            Func<BuildingDefinition, bool> isListed = null)
         {
             foreach (var card in _cards)
             {
-                var defs = content.Buildings.Where(b => b != null && b.ShowInShop && b.Category == card.Category).ToList();
+                var defs = content.Buildings.Where(b => b != null && b.ShowInShop && b.Category == card.Category
+                                                        && (isListed == null ? !b.EventOnly : isListed(b))).ToList();
                 bool anyUnlocked = defs.Any(d => d.UnlockLevel <= level);
                 int lockedUntil = anyUnlocked || defs.Count == 0 ? 0 : defs.Min(d => d.UnlockLevel);
                 card.Refresh(defs.Count, defs.Count(canBuildNow), lockedUntil);
@@ -203,7 +209,7 @@ namespace TownBuilder
             }
 
             RefreshCards(_content, _progress.Level,
-                d => _progress.IsUnlocked(d.UnlockLevel) && _wallet.CanAffordCoins(d.CoinCost) && CanBuildMore(d));
+                d => _progress.IsUnlocked(d.UnlockLevel) && _wallet.CanAffordCoins(d.CoinCost) && CanBuildMore(d), _isListed);
             panelRoot.SetActive(true);
             ShowCategories();
         }
@@ -230,7 +236,7 @@ namespace TownBuilder
         public void ShowCategory(BuildingCategory category)
         {
             HighlightTab(category);
-            foreach (var item in _items) item.gameObject.SetActive(item.Definition.Category == category);
+            foreach (var item in _items) item.gameObject.SetActive(item.Definition.Category == category && _isListed(item.Definition));
             if (scroll != null) scroll.horizontalNormalizedPosition = 0f;
         }
 

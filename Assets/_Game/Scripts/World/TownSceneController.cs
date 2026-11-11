@@ -50,6 +50,7 @@ namespace TownBuilder
         private LandPlots _land;
         private DailyRewardService _daily;
         private AchievementService _achievements;
+        private WeekendEventService _events;
         private TownAudioBridge _audioBridge;
         private float _saveDueAt = -1f;
 
@@ -70,6 +71,7 @@ namespace TownBuilder
         public LandPlots Land => _land;
         public DailyRewardService Daily => _daily;
         public AchievementService Achievements => _achievements;
+        public WeekendEventService Events => _events;
         public StreetLife StreetLife => streetLife;
         public TownEffects Effects => effects;
         public bool IsReady => _town != null;
@@ -167,6 +169,11 @@ namespace TownBuilder
                 trainController, _land);
             _achievements.Modified += ScheduleSave;
 
+            _events = new WeekendEventService(TownSaveMapper.LoadEvents(save), save.events.unlockedDecorations, content, _wallet,
+                _context.Clock, () => (long)System.TimeZoneInfo.Local.GetUtcOffset(System.DateTime.UtcNow).TotalMilliseconds,
+                farming, production, _orders);
+            _events.Modified += ScheduleSave;
+
             _train = new Train();
             TownSaveMapper.LoadTrain(save, content, _train, warnings);
             if (trainController != null)
@@ -191,6 +198,7 @@ namespace TownBuilder
             _daily.Modified += ScheduleSave;
             _audioBridge.AddDaily(_daily);
             _audioBridge.AddAchievements(_achievements);
+            _audioBridge.AddEvents(_events);
 
             if (effects != null) effects.Initialize(_town);
 
@@ -201,6 +209,7 @@ namespace TownBuilder
             hud.InitializeDev(this, _context.Content);
             hud.InitializeDaily(_daily);
             hud.InitializeAchievements(_achievements);
+            hud.InitializeEvents(_events);
         }
 
         private void OnDestroy()
@@ -226,6 +235,12 @@ namespace TownBuilder
                 _tasks.Modified -= ScheduleSave;
                 _tasks.Dispose();
             }
+            if (_events != null)
+            {
+                _events.Modified -= ScheduleSave;
+                _events.Dispose();
+            }
+
             if (_achievements != null)
             {
                 _achievements.Modified -= ScheduleSave;
@@ -263,6 +278,7 @@ namespace TownBuilder
                 TownSaveMapper.WriteLand(_context.ActiveSave, _land);
                 TownSaveMapper.WriteDaily(_context.ActiveSave, _daily.Track);
                 TownSaveMapper.WriteAchievements(_context.ActiveSave, _achievements.Book);
+                TownSaveMapper.WriteEvents(_context.ActiveSave, _events);
                 _context.SaveActive();
             }
             catch (Exception e)

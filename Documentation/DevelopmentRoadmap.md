@@ -320,7 +320,7 @@ The backend moves to Milestone 9.
 | 1 | **Daily reward**: a 7-day calendar with growing rewards (coins, materials, gems on day 7); missing a day restarts at day 1 | Done (v0.25.0) |
 | 2 | **Achievements**: long-term goals in tiers (harvest, produce, deliver, build, level) paying gems | Done (v0.26.0) |
 | 3 | **Orchard**: fruit trees (apples, cherries) that regrow after harvest + a **Juice Press** factory | Done (v0.27.0) |
-| 4 | **Weekend event**: a time-limited goal (e.g. "Harvest Festival") with a special reward and decoration | Planned |
+| 4 | **Weekend event**: a time-limited goal (e.g. "Harvest Festival") with a special reward and decoration | Done (v0.28.0) |
 | 5 | Balance pass (daily rewards, achievements and event income in the model) | Planned |
 
 Design notes:
@@ -343,6 +343,14 @@ Design notes:
 - [ ] Claim pays the gems (sound + toast), the row moves to the next tier; after tier 3 it turns gold "Complete!"
 - [ ] DEV → "Unlock everything (level 10)": Rising Star tiers 1 and 2 become claimable
 - [ ] Progress and claimed tiers are kept after closing and reopening the app
+
+### Device checklist (Milestone 7 step 4: weekend event)
+- [ ] On a weekday there is no event button; DEV → "Start weekend event now" shows the orange button on the left (name + time left)
+- [ ] The event window: name, description, "Ends in ...", points this weekend, three prizes with progress bars
+- [ ] Harvest Festival: harvesting crops raises the points; Market Weekend: delivering orders does
+- [ ] Reaching a prize: toast + red "!" on the button; Claim pays coins / gems; the last prize unlocks the decoration
+      in Build → Decorations (Scarecrow / Festival Lantern), which stays after the event
+- [ ] On a real Saturday the event starts by itself; on Monday it's gone
 
 ### Device checklist (v0.27.5: top bar)
 - [ ] Top-left: blue star with your level number, blue XP bar filling up with "x/y XP"; after a level-up the number changes and the bar starts again

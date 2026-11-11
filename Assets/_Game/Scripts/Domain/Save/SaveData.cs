@@ -27,6 +27,7 @@ namespace TownBuilder.Domain
         public LandSaveData land = new LandSaveData();
         public DailySaveData daily = new DailySaveData();
         public AchievementsSaveData achievements = new AchievementsSaveData();
+        public EventSaveData events = new EventSaveData();
     }
 
     /// <summary>One order-board slot. itemIds[i] / amounts[i] form one line.</summary>
@@ -39,6 +40,18 @@ namespace TownBuilder.Domain
         public long rewardCoins;
         public long rewardXp;
         public long availableAtUnixMs;
+    }
+
+    [Serializable]
+    public sealed class EventSaveData
+    {
+        /// <summary>Local day the current event started (its Saturday), long.MinValue = none yet.</summary>
+        public long key = long.MinValue;
+        public string eventId;
+        public int points;
+        public int claimed;
+        /// <summary>Event-only decorations unlocked by prizes (building ids). Kept forever.</summary>
+        public List<string> unlockedDecorations = new List<string>();
     }
 
     [Serializable]

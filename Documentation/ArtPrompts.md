@@ -317,6 +317,12 @@ Icon prompt as bread (section 15–16):
 * `apple_juice`: "a glass bottle of golden apple juice with a small apple label and a green cap"
 * `cherry_juice`: "a glass bottle of deep red cherry juice with a cherry label and a yellow cap"
 
+## Milestone 7 step 4: event decorations (optional, setup draws simple ones)
+
+Same decoration prompt style as `tree.png` (1x1 tile footprint, magenta background, no text):
+* `scarecrow.png`: "a friendly cartoon scarecrow on a wooden pole with a straw hat, a blue patched shirt and straw hands"
+* `festival_lantern.png`: "a dark iron lamp post with a hanging round orange paper festival lantern glowing warmly"
+
 ## v0.27.4: Build window and top bar → `Art/UI/Build`
 
 Files (owner-made, imported with `AiArtImporter` Kind.Ui; the biggest shape is kept, so crops with bits of neighbours are fine):

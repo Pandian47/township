@@ -565,7 +565,7 @@ namespace TownBuilder.EditorTools
         public const string ConstructionIconPath = UiArtFolder + "/PH_Icon_Construction.png";
 
         /// <summary>Hammer in a round badge, floated above buildings under construction. 128x128, pivot centre.</summary>
-        public enum DecorationStyle { Tree, FlowerBed, Bench, Fence, Fountain }
+        public enum DecorationStyle { Tree, FlowerBed, Bench, Fence, Fountain, Scarecrow, Lantern }
 
         public const string DecorationsArtFolder = BuildingsArtFolder + "/Decorations";
 
@@ -678,6 +678,33 @@ namespace TownBuilder.EditorTools
                     Ellipse(centre + new Vector2(0, 72), 26, 10, new Color32(176, 176, 182, 255), false);   // top bowl
                     Ellipse(centre + new Vector2(0, 92), 8, 18, new Color32(160, 215, 250, 220));            // water jet
                     break;
+                case DecorationStyle.Scarecrow:
+                {
+                    var wood = new Color32(140, 96, 56, 255);
+                    Rect(centre.x - 4, centre.y, centre.x + 4, centre.y + 110, wood);                        // pole
+                    Rect(centre.x - 40, centre.y + 70, centre.x + 40, centre.y + 77, wood);                  // arms
+                    Rect(centre.x - 22, centre.y + 40, centre.x + 22, centre.y + 82, new Color32(70, 120, 190, 255)); // shirt
+                    Rect(centre.x - 44, centre.y + 66, centre.x - 34, centre.y + 80, new Color32(230, 200, 90, 255)); // straw hands
+                    Rect(centre.x + 34, centre.y + 66, centre.x + 44, centre.y + 80, new Color32(230, 200, 90, 255));
+                    Ellipse(centre + new Vector2(0, 96), 15, 15, new Color32(236, 206, 150, 255));          // sack head
+                    Ellipse(centre + new Vector2(0, 112), 26, 6, new Color32(200, 150, 60, 255), false);    // hat brim
+                    Rect(centre.x - 13, centre.y + 112, centre.x + 13, centre.y + 128, new Color32(190, 140, 50, 255)); // hat
+                    Rect(centre.x - 13, centre.y + 114, centre.x + 13, centre.y + 118, new Color32(200, 60, 50, 255));  // hat band
+                    break;
+                }
+                case DecorationStyle.Lantern:
+                {
+                    var iron = new Color32(60, 62, 70, 255);
+                    Ellipse(centre + new Vector2(0, 4), 16, 7, new Color32(80, 82, 90, 255), false);        // foot
+                    Rect(centre.x - 3, centre.y, centre.x + 3, centre.y + 100, iron);                        // post
+                    Rect(centre.x, centre.y + 96, centre.x + 30, centre.y + 101, iron);                      // arm
+                    Rect(centre.x + 26, centre.y + 72, centre.x + 28, centre.y + 98, iron);                  // hook
+                    Ellipse(centre + new Vector2(27, 62), 14, 18, new Color32(255, 196, 70, 255));          // paper lantern
+                    Ellipse(centre + new Vector2(27, 62), 8, 12, new Color32(255, 236, 150, 255));          // glow
+                    Rect(centre.x + 17, centre.y + 77, centre.x + 37, centre.y + 81, new Color32(200, 60, 50, 255)); // cap
+                    Rect(centre.x + 17, centre.y + 43, centre.x + 37, centre.y + 47, new Color32(200, 60, 50, 255)); // bottom
+                    break;
+                }
             }
 
             AddOutline(pixels, texW, texH);

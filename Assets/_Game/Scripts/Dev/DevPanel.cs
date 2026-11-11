@@ -20,6 +20,7 @@ namespace TownBuilder
         [SerializeField] private Button finishTimersButton;
         [SerializeField] private Button unlockLandButton;
         [SerializeField] private Button dailyAgainButton;
+        [SerializeField] private Button eventButton;
 
         private TownSceneController _scene;
         private GameContent _content;
@@ -50,6 +51,12 @@ namespace TownBuilder
                     UnityEngine.Object.FindAnyObjectByType<DailyRewardDialog>()?.Open();
                     panelRoot.SetActive(false);
                 }, null);
+            if (eventButton != null)
+                Bind(eventButton, () =>
+                {
+                    _scene.Events?.DevStartNow();
+                    panelRoot.SetActive(false);
+                }, "Weekend event started (for 2 days)");
         }
 
         private void Bind(Button button, Action action, string message)

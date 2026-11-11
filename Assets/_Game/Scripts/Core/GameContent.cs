@@ -71,6 +71,10 @@ namespace TownBuilder
         [Tooltip("Chance that a crate also pays 1 building material.")]
         [SerializeField, Range(0f, 1f)] private float trainMaterialChance = 0.35f;
 
+        [Header("Weekend events")]
+        [Tooltip("One runs every Saturday + Sunday (local time); they take turns week by week, in this order.")]
+        [SerializeField] private List<EventDefinition> weekendEvents = new List<EventDefinition>();
+
         [Header("Achievements")]
         [Tooltip("Long-term goals in tiers, shown in this order on the Goals screen.")]
         [SerializeField] private List<AchievementDefinition> achievements = new List<AchievementDefinition>();
@@ -99,6 +103,9 @@ namespace TownBuilder
         private Dictionary<string, ProductDefinition> _productsById;
         private Dictionary<string, RecipeDefinition> _recipesById;
         private Dictionary<string, MaterialDefinition> _materialsById;
+
+        public IReadOnlyList<EventDefinition> WeekendEvents => weekendEvents;
+        public void EditorSetWeekendEvents(List<EventDefinition> list) => weekendEvents = list;
 
         public IReadOnlyList<AchievementDefinition> Achievements => achievements;
 

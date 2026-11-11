@@ -103,6 +103,22 @@ already there or their slot count.
 its ingredients, every recipe belongs to exactly one factory, and no recipe unlocks before its factory or any of
 its ingredients.
 
+## Weekend events (Milestone 7 step 4, `Data/Events`, GameContent → Weekend events)
+
+Every **Saturday and Sunday** (phone's local time, Saturday 00:00 to Monday 00:00) one event runs. The events take
+turns week by week. An orange event button appears on the left of the town; it has a red "!" when a prize is ready.
+
+| Event | Points from | Prize 1 | Prize 2 | Prize 3 |
+|---|---|---|---|---|
+| Harvest Festival | every crop harvested (fields and fruit trees) | 30 → 150 coins | 80 → 3 gems | 150 → 100 coins + **Scarecrow** |
+| Market Weekend | every order delivered | 4 → 150 coins | 10 → 3 gems | 18 → 100 coins + **Festival Lantern** |
+
+* Prizes are claimed in order. A new weekend starts again from 0 points.
+* The decoration prize unlocks it in Build → Decorations **for good** (80 coins each, like any decoration). Before
+  that it's hidden in the shop (`BuildingDefinition.eventOnly`).
+* A full event pays 250 coins + 3 gems + a decoration: a small extra, not a new income source.
+* Offline: changing the phone's date could start an event early (same accepted risk as the daily reward).
+
 ## Orchard and juice (Milestone 7 step 3)
 
 Fruit trees are 1×1 buildings (Build shop → Farm, placed instantly, up to 8 of each). The fruit grows by itself,

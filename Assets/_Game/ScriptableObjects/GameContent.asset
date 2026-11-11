@@ -33,6 +33,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 53cf103104d740a4993d6dbda542c685, type: 2}
   - {fileID: 11400000, guid: fb6fd552bb930bc44903590cad5c74d0, type: 2}
   - {fileID: 11400000, guid: 5c3f17c0216d97345afeeccef5bc07b6, type: 2}
+  - {fileID: 11400000, guid: 52615fd43c1403a499b5e4fffbd48973, type: 2}
+  - {fileID: 11400000, guid: cae09e1a6417a75469088928e89ebdac, type: 2}
   crops:
   - {fileID: 11400000, guid: a3036535aa3df024daad3d74b88f1f40, type: 2}
   - {fileID: 11400000, guid: 62b818b79b6cf7947af8159c1d81b0fa, type: 2}
@@ -145,6 +147,9 @@ MonoBehaviour:
   trainXpDivisor: 4
   trainFullBonusFraction: 0.5
   trainMaterialChance: 0.35
+  weekendEvents:
+  - {fileID: 11400000, guid: 3be905845b6c6fc4d8506257cecf3975, type: 2}
+  - {fileID: 11400000, guid: c2f0d7ebb215ad24e9acb671c76306d9, type: 2}
   achievements:
   - {fileID: 11400000, guid: e92cb5a9d236a6145b30c518ad999930, type: 2}
   - {fileID: 11400000, guid: 4c3c0ddf24ca5e0408c8828c84c1213d, type: 2}

@@ -127,6 +127,24 @@ namespace TownBuilder
         }
 
         /// <summary>Restores achievement counters (unknown kinds dropped) and claimed tiers (unknown ids dropped).</summary>
+        public static EventProgress LoadEvents(SaveData save)
+        {
+            var progress = new EventProgress();
+            if (save.events.key != long.MinValue)
+                progress.Restore(save.events.key, save.events.eventId, save.events.points, save.events.claimed);
+            return progress;
+        }
+
+        public static void WriteEvents(SaveData save, WeekendEventService events)
+        {
+            save.events.key = events.Progress.Key;
+            save.events.eventId = events.Progress.EventId;
+            save.events.points = events.Progress.Points;
+            save.events.claimed = events.Progress.Claimed;
+            save.events.unlockedDecorations.Clear();
+            save.events.unlockedDecorations.AddRange(events.UnlockedDecorations);
+        }
+
         public static void LoadAchievements(SaveData save, AchievementBook book)
         {
             var counts = new List<KeyValuePair<AchievementKind, long>>();

@@ -484,6 +484,7 @@ namespace TownBuilder.EditorTools
             var dialog = CreateConfirmDialog(canvas.transform);
             var levelUp = BuildLevelUpDialog(canvas.transform);
             var achievements = BuildAchievementsPanel(canvas.transform, goalsButton, goalsBadge.gameObject, goalsBadgeText);
+            var eventPanel = BuildEventPanel(canvas.transform, safe);
             var daily = BuildDailyRewardDialog(canvas.transform);
             var rewardLayer = Stretch("RewardFlyLayer", canvas.transform);
             var rewardFlyer = rewardLayer.gameObject.AddComponent<RewardFlyer>();
@@ -520,6 +521,7 @@ namespace TownBuilder.EditorTools
                 ("devPanel", devPanel),
                 ("dailyDialog", daily),
                 ("achievementsPanel", achievements),
+                ("eventPanel", eventPanel),
                 ("rewardFlyer", rewardFlyer),
                 ("bottomNavigation", nav.gameObject),
                 ("buildButton", buildButton),
@@ -601,6 +603,128 @@ namespace TownBuilder.EditorTools
             var panel = container.gameObject.AddComponent<OrdersPanel>();
             Wire(panel, ("panelRoot", root.gameObject), ("closeButton", close));
             WireArray(panel, "cards", cards);
+            root.gameObject.SetActive(false);
+            return panel;
+        }
+
+        /// <summary>
+        /// Weekend event: an orange button on the left of the town (under the tasks) and the event window with three
+        /// prize rows. Both are hidden on weekdays (EventPanel shows them during an event).
+        /// </summary>
+        private static EventPanel BuildEventPanel(Transform canvas, RectTransform safe)
+        {
+            var outline = AssetDatabase.LoadAssetAtPath<Material>(ProjectSetup.UIFontOutlineMaterialPath);
+            var brown = new Color(0.40f, 0.24f, 0.10f);
+            var orange = new Color(0.97f, 0.55f, 0.12f);
+
+            // --- Button in the town
+            var buttonRect = MakeRect("EventButton", safe, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(30, -546), new Vector2(330, 118));
+            var buttonBg = AddImage(buttonRect, orange);
+            var open = buttonRect.gameObject.AddComponent<Button>();
+            open.targetGraphic = buttonBg;
+            var star = MakeRect("Icon", buttonRect, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(50, 0), new Vector2(92, 92));
+            var starImg = star.gameObject.AddComponent<Image>();
+            starImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.GemIconPath);
+            starImg.preserveAspect = true;
+            starImg.raycastTarget = false;
+            var bTitle = Label(MakeRect("Title", buttonRect, new Vector2(0f, 0.5f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(46, -4), new Vector2(-110, 0)),
+                "Text", "Event", 30, TextAnchor.MiddleLeft, Color.white, FontStyle.Bold);
+            bTitle.enableAutoSizing = true;
+            bTitle.fontSizeMin = 20;
+            bTitle.fontSizeMax = 32;
+            bTitle.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
+            if (outline != null) bTitle.fontSharedMaterial = outline;
+            var bTimer = Label(MakeRect("Timer", buttonRect, new Vector2(0f, 0f), new Vector2(1f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(46, 6), new Vector2(-110, 0)),
+                "Text", "1d 4h", 28, TextAnchor.MiddleLeft, new Color(1f, 0.97f, 0.85f), FontStyle.Bold);
+            var badge = MakeRect("Badge", buttonRect, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-6, -6), new Vector2(54, 54));
+            var badgeImg = badge.gameObject.AddComponent<Image>();
+            badgeImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CirclePath);
+            badgeImg.color = new Color(0.90f, 0.17f, 0.14f);
+            badgeImg.raycastTarget = false;
+            var badgeText = Label(badge, "Text", "!", 34, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+            if (outline != null) badgeText.fontSharedMaterial = outline;
+            badge.gameObject.SetActive(false);
+            buttonRect.gameObject.SetActive(false);
+
+            // --- Window
+            var container = Stretch("EventPanel", canvas);
+            var root = Stretch("Root", container);
+            AddImage(root, Dim, rounded: false);
+            var frame = MakeRect("Window", root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -20), new Vector2(1360, 880));
+            AddImage(frame, orange);
+            var inner = Stretch("Inner", frame, 14f);
+            AddImage(inner, new Color(1f, 0.96f, 0.86f));
+
+            var title = Label(MakeRect("Title", inner, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -16), new Vector2(-260, 90)),
+                "Text", "Harvest Festival", 64, TextAnchor.MiddleCenter, new Color(0.88f, 0.42f, 0.08f), FontStyle.Bold);
+            var desc = Label(MakeRect("Description", inner, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -104), new Vector2(-160, 56)),
+                "Text", "", 32, TextAnchor.MiddleCenter, brown);
+            var timer = Label(MakeRect("Timer", inner, new Vector2(0f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, 1f), new Vector2(60, -170), new Vector2(-60, 56)),
+                "Text", "Ends in 1d 4h", 36, TextAnchor.MiddleLeft, new Color(0.80f, 0.20f, 0.12f), FontStyle.Bold);
+            var points = Label(MakeRect("Points", inner, new Vector2(0.5f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-60, -170), new Vector2(-60, 56)),
+                "Text", "", 36, TextAnchor.MiddleRight, brown, FontStyle.Bold);
+
+            var close = MakeButton(frame, "CloseButton", "", new Vector2(120, 120), Red, 44);
+            var closeRect = (RectTransform)close.transform;
+            closeRect.anchorMin = closeRect.anchorMax = new Vector2(1f, 1f);
+            closeRect.pivot = new Vector2(0.5f, 0.5f);
+            closeRect.anchoredPosition = new Vector2(-40, -36);
+            var closeSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Game/Art/UI/Build/UI_CloseButton.png");
+            if (closeSprite != null)
+            {
+                var closeImg = close.GetComponent<Image>();
+                closeImg.sprite = closeSprite;
+                closeImg.type = Image.Type.Simple;
+                closeImg.preserveAspect = true;
+                closeImg.color = Color.white;
+            }
+            else
+            {
+                close.GetComponentInChildren<TMP_Text>().text = "X";
+            }
+
+            var rows = new EventPrizeRowView[3];
+            for (int i = 0; i < rows.Length; i++)
+            {
+                var row = MakeRect($"Prize{i + 1}", inner, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -250 - i * 196), new Vector2(-100, 176));
+                var bg = AddImage(row, Color.white, raycast: false);
+                var step = Label(MakeRect("Step", row, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(30, -18), new Vector2(300, 60)),
+                    "Text", "Prize 1", 42, TextAnchor.MiddleLeft, brown, FontStyle.Bold);
+                var barBg = MakeRect("Bar", row, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(30, 40), new Vector2(380, 30));
+                AddImage(barBg, new Color(0.82f, 0.78f, 0.7f), raycast: false);
+                var fill = AddImage(Stretch("Fill", barBg, 3f), new Color(0.97f, 0.55f, 0.12f), raycast: false);
+                fill.type = Image.Type.Filled;
+                fill.fillMethod = Image.FillMethod.Horizontal;
+                var progress = Label(MakeRect("Progress", row, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(424, 30), new Vector2(220, 50)),
+                    "Text", "0/30", 34, TextAnchor.MiddleLeft, brown, FontStyle.Bold);
+
+                var iconRect = MakeRect("RewardIcon", row, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(680, 0), new Vector2(130, 130));
+                var icon = iconRect.gameObject.AddComponent<Image>();
+                icon.preserveAspect = true;
+                icon.raycastTarget = false;
+                var reward = Label(MakeRect("Reward", row, new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(0f, 0.5f), new Vector2(760, 0), new Vector2(-1000, -20)),
+                    "Text", "150 coins", 34, TextAnchor.MiddleLeft, brown, FontStyle.Bold);
+
+                var claim = MakeButton(row, "ClaimButton", "Claim", new Vector2(200, 96), Green, 38);
+                var claimRect = (RectTransform)claim.transform;
+                claimRect.anchorMin = claimRect.anchorMax = claimRect.pivot = new Vector2(1f, 0.5f);
+                claimRect.anchoredPosition = new Vector2(-24, 0);
+                var done = Label(MakeRect("Done", row, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-24, 0), new Vector2(200, 80)),
+                    "Text", "Claimed", 38, TextAnchor.MiddleCenter, new Color(0.25f, 0.55f, 0.2f), FontStyle.Bold);
+
+                var view = row.gameObject.AddComponent<EventPrizeRowView>();
+                Wire(view, ("background", bg), ("stepText", step), ("progressText", progress), ("progressFill", fill), ("rewardIcon", icon),
+                    ("rewardText", reward), ("claimButton", claim), ("doneText", done));
+                rows[i] = view;
+            }
+
+            var panel = container.gameObject.AddComponent<EventPanel>();
+            Wire(panel, ("buttonRoot", buttonRect.gameObject), ("openButton", open), ("buttonTitle", bTitle), ("buttonTimer", bTimer),
+                ("badge", badge.gameObject), ("panelRoot", root.gameObject), ("closeButton", close), ("titleText", title),
+                ("descriptionText", desc), ("timerText", timer), ("pointsText", points),
+                ("coinSprite", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CoinIconPath)),
+                ("gemSprite", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.GemIconPath)));
+            WireArray(panel, "rows", rows);
             root.gameObject.SetActive(false);
             return panel;
         }
@@ -999,13 +1123,13 @@ namespace TownBuilder.EditorTools
 
             var root = Stretch("Root", container);
             AddImage(root, Dim, rounded: false);
-            var window = MakeRect("Window", root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(640, 1010));
+            var window = MakeRect("Window", root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(640, 1000));
             AddImage(window, PanelColor);
-            VColumn(window, 16, TextAnchor.UpperCenter, 26);
+            VColumn(window, 10, TextAnchor.UpperCenter, 22);
             var title = Label(window, "Title", "Developer mode (test builds only)", 34, TextAnchor.MiddleCenter, Ink, FontStyle.Bold);
             Prefer(title, 560, 60);
 
-            Button Row(string name, string label, Color color) => MakeButton(window, name, label, new Vector2(560, 96), color, 32);
+            Button Row(string name, string label, Color color) => MakeButton(window, name, label, new Vector2(560, 86), color, 30);
             var coins = Row("CoinsButton", "+10,000 coins  +100 gems", new Color(0.95f, 0.65f, 0.15f));
             var levelUp = Row("LevelUpButton", "Level up (+1)", Blue);
             var unlockAll = Row("UnlockAllButton", "Unlock everything (level 10)", Blue);
@@ -1013,12 +1137,13 @@ namespace TownBuilder.EditorTools
             var finish = Row("FinishTimersButton", "Finish all timers + call train", Green);
             var land = Row("UnlockLandButton", "Unlock all land", Green);
             var dailyAgain = Row("DailyAgainButton", "Daily reward again", new Color(0.55f, 0.35f, 0.7f));
+            var startEvent = Row("DevEventButton", "Start weekend event now", new Color(0.95f, 0.5f, 0.15f));
             var close = Row("CloseButton", "Close", Slate);
 
             var panel = container.gameObject.AddComponent<DevPanel>();
             Wire(panel, ("openButton", open), ("panelRoot", root.gameObject), ("closeButton", close), ("coinsButton", coins),
                 ("levelUpButton", levelUp), ("unlockAllButton", unlockAll), ("fillBarnButton", fillBarn),
-                ("finishTimersButton", finish), ("unlockLandButton", land), ("dailyAgainButton", dailyAgain));
+                ("finishTimersButton", finish), ("unlockLandButton", land), ("dailyAgainButton", dailyAgain), ("eventButton", startEvent));
             root.gameObject.SetActive(false);
             return panel;
         }

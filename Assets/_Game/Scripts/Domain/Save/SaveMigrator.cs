@@ -61,6 +61,8 @@ namespace TownBuilder.Domain
             data.land ??= new LandSaveData();
             data.daily ??= new DailySaveData();
             data.achievements ??= new AchievementsSaveData();
+            data.events ??= new EventSaveData();
+            data.events.unlockedDecorations ??= new List<string>();
             data.achievements.counters ??= new List<AchievementCounterSaveData>();
             data.achievements.claimed ??= new List<AchievementClaimSaveData>();
             if (data.daily.streak < 0) data.daily.streak = 0;

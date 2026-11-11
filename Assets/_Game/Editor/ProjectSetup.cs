@@ -66,6 +66,8 @@ namespace TownBuilder.EditorTools
             public bool Removable, FarmPlot;
             /// <summary>Landmark: fixed place in every town, not movable, not sold in the shop.</summary>
             public bool Fixed;
+            /// <summary>Only in the shop after a weekend-event prize unlocked it.</summary>
+            public bool EventOnly;
             /// <summary>Decoration: drawn by PlaceholderArtGenerator.CreateDecoration (not as a box building).</summary>
             public PlaceholderArtGenerator.DecorationStyle? Deco;
             /// <summary>Fruit tree: drawn from the decoration tree with fruit; <see cref="Fruit"/> grows on it by itself.</summary>
@@ -176,6 +178,11 @@ namespace TownBuilder.EditorTools
                 W = 1, H = 1, Unlock = 4, Cost = 15, Removable = true, Deco = PlaceholderArtGenerator.DecorationStyle.Fence },
             new BuildingSeed { Id = "fountain", Name = "Fountain", Category = BuildingCategory.Decoration, Folder = "Decorations",
                 W = 2, H = 2, Unlock = 6, Cost = 400, Removable = true, Deco = PlaceholderArtGenerator.DecorationStyle.Fountain },
+            // Milestone 7 step 4: event-only decorations (weekend event prizes).
+            new BuildingSeed { Id = "scarecrow", Name = "Scarecrow", Category = BuildingCategory.Decoration, Folder = "Decorations",
+                W = 1, H = 1, Unlock = 1, Cost = 80, Removable = true, EventOnly = true, Deco = PlaceholderArtGenerator.DecorationStyle.Scarecrow },
+            new BuildingSeed { Id = "festival_lantern", Name = "Festival Lantern", Category = BuildingCategory.Decoration, Folder = "Decorations",
+                W = 1, H = 1, Unlock = 1, Cost = 80, Removable = true, EventOnly = true, Deco = PlaceholderArtGenerator.DecorationStyle.Lantern },
         };
 
         [MenuItem("TownBuilder/Setup/Run Full Setup", priority = 0)]
@@ -274,6 +281,7 @@ namespace TownBuilder.EditorTools
             ConfigureLand();
             ConfigureDailyRewards();
             CreateAchievements();
+            CreateWeekendEvents();
             CreateTasks();
             ConfigureAds();
             ConfigureAudio();
@@ -365,6 +373,12 @@ namespace TownBuilder.EditorTools
                 {
                     def.EditorConfigure(def.Id, def.DisplayName, def.Category, art.Buildings[s.Id],
                         new Vector2Int(def.FootprintSize.X, def.FootprintSize.Y), def.UnlockLevel, def.CoinCost, def.Removable, def.MaxCount);
+                    EditorUtility.SetDirty(def);
+                }
+
+                if (s.EventOnly && !def.EventOnly)
+                {
+                    def.EditorSetEventOnly(true);
                     EditorUtility.SetDirty(def);
                 }
 
@@ -648,6 +662,49 @@ namespace TownBuilder.EditorTools
             ("buy_land", "Land Owner", AchievementKind.BuyLand, new[] { 2, 8, 20 }),
             ("reach_level", "Rising Star", AchievementKind.ReachLevel, new[] { 5, 10, 15 }),
         };
+
+        /// <summary>Weekend events (existing assets are kept as they are). Example prizes; edit each Event asset.</summary>
+        private static void CreateWeekendEvents()
+        {
+            var content = AssetDatabase.LoadAssetAtPath<GameContent>(ContentPath);
+            PlaceholderArtGenerator.EnsureFolder(Root + "/Data/Events");
+            BuildingDefinition B(string id) => content.TryGetBuilding(id, out var b) ? b : null;
+            var seeds = new[]
+            {
+                ("harvest_festival", "Harvest Festival", "Bring in the harvest! Every crop you harvest this weekend counts.", AchievementKind.HarvestCrops,
+                    new List<EventMilestone>
+                    {
+                        new EventMilestone { goal = 30, coins = 150 },
+                        new EventMilestone { goal = 80, gems = 3 },
+                        new EventMilestone { goal = 150, coins = 100, decoration = B("scarecrow") },
+                    }),
+                ("market_weekend", "Market Weekend", "The town market is open! Every order you deliver this weekend counts.", AchievementKind.DeliverOrders,
+                    new List<EventMilestone>
+                    {
+                        new EventMilestone { goal = 4, coins = 150 },
+                        new EventMilestone { goal = 10, gems = 3 },
+                        new EventMilestone { goal = 18, coins = 100, decoration = B("festival_lantern") },
+                    }),
+            };
+
+            var list = content.WeekendEvents.Where(e => e != null).ToList();
+            foreach (var (id, name, text, kind, steps) in seeds)
+            {
+                var path = $"{Root}/Data/Events/Event_{id}.asset";
+                var def = AssetDatabase.LoadAssetAtPath<EventDefinition>(path);
+                if (def == null)
+                {
+                    def = ScriptableObject.CreateInstance<EventDefinition>();
+                    def.EditorConfigure(id, name, text, kind, steps);
+                    AssetDatabase.CreateAsset(def, path);
+                }
+
+                if (!list.Contains(def)) list.Add(def);
+            }
+
+            content.EditorSetWeekendEvents(list);
+            EditorUtility.SetDirty(content);
+        }
 
         /// <summary>Gems per tier (tier 1, 2, 3). Example values; edit each Achievement asset.</summary>
         private static readonly int[] AchievementTierGems = { 2, 4, 8 };

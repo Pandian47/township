@@ -60,12 +60,12 @@ namespace TownBuilder.Tests
             {
                 GameObject.Find($"Tab_{category}").GetComponent<Button>().onClick.Invoke();
                 Assert.AreEqual(category, shop.CurrentCategory);
-                int count = content.Buildings.Count(b => b.ShowInShop && b.Category == category);
+                int count = content.Buildings.Count(b => b.ShowInShop && !b.EventOnly && b.Category == category);
                 Assert.AreEqual(count, shop.VisibleItems, $"{category} tab");
                 total += count;
             }
 
-            Assert.AreEqual(content.Buildings.Count(b => b.ShowInShop), total, "every shop item is in one tab");
+            Assert.AreEqual(content.Buildings.Count(b => b.ShowInShop && !b.EventOnly), total, "every shop item is in one tab (event prizes stay hidden)");
 
             // Factories tab: only factories. Fruit trees are on the Farm tab.
             Assert.IsTrue(content.Buildings.Where(b => b.ShowInShop && b.Category == BuildingCategory.Production).All(b => b.IsFactory));

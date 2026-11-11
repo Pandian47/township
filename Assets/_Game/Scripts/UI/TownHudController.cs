@@ -17,6 +17,7 @@ namespace TownBuilder
         [SerializeField] private LandPanel landPanel;
         [SerializeField] private DailyRewardDialog dailyDialog;
         [SerializeField] private AchievementsPanel achievementsPanel;
+        [SerializeField] private EventPanel eventPanel;
         [SerializeField] private DevPanel devPanel;
         [SerializeField] private RewardFlyer rewardFlyer;
 
@@ -176,6 +177,17 @@ namespace TownBuilder
         }
 
         public AchievementsPanel AchievementsPanel => achievementsPanel;
+
+        /// <summary>Weekend events: the event button + window, and event-only decorations in the shop.</summary>
+        public void InitializeEvents(WeekendEventService events)
+        {
+            if (events == null) return;
+            if (eventPanel != null) eventPanel.Initialize(events);
+            if (shopPanel != null) shopPanel.SetListingFilter(events.IsListedInShop);
+            events.Notification += toast.Show;
+        }
+
+        public EventPanel EventPanel => eventPanel;
 
         public void InitializeLand(LandController land)
         {
