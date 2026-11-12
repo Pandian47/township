@@ -255,12 +255,8 @@ namespace TownBuilder
         /// <summary>World position of a 0-1 point on the building's sprite (same maths as the chimney point).</summary>
         public static Vector3 PointWorld(BuildingView view, Vector2 point)
         {
-            var sprite = view.SpriteRenderer.sprite;
-            if (sprite == null) return view.transform.position;
-            float ppu = sprite.pixelsPerUnit;
-            var local = new Vector3((point.x * sprite.rect.width - sprite.pivot.x) / ppu, (point.y * sprite.rect.height - sprite.pivot.y) / ppu, 0f);
-            // Unscaled: the rumble must not move the effects.
-            return view.transform.position + local;
+            // Unscaled: the rumble must not move the effects. Follows the rotated facing.
+            return view.transform.position + view.PointLocal(point);
         }
 
         /// <summary>

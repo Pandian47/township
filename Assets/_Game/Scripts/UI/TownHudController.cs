@@ -63,11 +63,14 @@ namespace TownBuilder
         [SerializeField] private TMP_Text placementInfoText;
         [SerializeField] private Button confirmPlacementButton;
         [SerializeField] private Button cancelPlacementButton;
+        [SerializeField] private Button rotatePlacementButton;
 
         [Header("Selection bar")]
         [SerializeField] private GameObject selectionBar;
         [SerializeField] private TMP_Text selectionNameText;
         [SerializeField] private Button moveButton;
+        [Tooltip("Turns the selected building to its other facing (v0.40.0).")]
+        [SerializeField] private Button rotateButton;
         [SerializeField] private Button removeButton;
         [SerializeField] private Button deselectButton;
 
@@ -151,6 +154,8 @@ namespace TownBuilder
             cancelPlacementButton.onClick.AddListener(() => _placement.Cancel());
 
             moveButton.onClick.AddListener(() => _placement.BeginMoveSelected());
+            if (rotateButton != null) rotateButton.onClick.AddListener(RotateSelected);
+            if (rotatePlacementButton != null) rotatePlacementButton.onClick.AddListener(() => _placement.Rotate());
             deselectButton.onClick.AddListener(() => _placement.Cancel());
             removeButton.onClick.AddListener(AskRemove);
 
@@ -333,6 +338,14 @@ namespace TownBuilder
             confirmDialog.Show($"Remove {definition.DisplayName}?{warning}", "Remove", () => _placement.RemoveSelected());
         }
 
+        /// <summary>Turns the selected building where it stands; explains when the turned footprint doesn't fit.</summary>
+        private void RotateSelected()
+        {
+            var result = _placement.Rotate();
+            if (result == PlacementResult.Valid || result == PlacementResult.NotFound) return;
+            toast.Show("No room to turn it here. Move it to a free spot, then rotate.");
+        }
+
         private void Refresh()
         {
             var mode = _placement.CurrentMode;
@@ -357,6 +370,7 @@ namespace TownBuilder
                 selectionNameText.text = definition.DisplayName;
                 removeButton.interactable = definition.Removable;
                 moveButton.interactable = definition.Movable;
+                if (rotateButton != null) rotateButton.interactable = definition.Movable;
             }
 
             string target = _placement.TargetInstanceId;

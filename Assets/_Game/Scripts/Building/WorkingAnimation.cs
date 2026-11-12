@@ -33,7 +33,7 @@ namespace TownBuilder
         [Tooltip("A second worker busy on the spot here (0 = none).")]
         public Vector2 workerSpot;
         [Tooltip("Gentle squash-and-stretch of the whole building while it works (0 = none).")]
-        public float rumble = 0.01f;
+        public float rumble;
 
         public static bool IsSet(Vector2 p) => p != Vector2.zero;
     }

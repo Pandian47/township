@@ -30,6 +30,8 @@ namespace TownBuilder
         [Tooltip("Movement (in inches) before a press becomes a drag instead of a tap.")]
         [SerializeField] private float dragThresholdInches = 0.06f;
         [SerializeField] private float minDragThresholdPixels = 8f;
+        [Tooltip("Seconds a finger must stay still before a press becomes a long press.")]
+        [SerializeField] private float longPressSeconds = 0.45f;
         [Tooltip("Zoom factor applied per mouse wheel notch in the Editor.")]
         [SerializeField] private float mouseWheelZoomStep = 0.1f;
 
@@ -43,6 +45,8 @@ namespace TownBuilder
         private bool _gestureCancelled;
         private bool _dragging;
         private bool _pinching;
+        private bool _longPressFired;
+        private float _pressTime;
         private Vector2 _pressPosition;
         private Vector2 _lastPosition;
         private Vector2 _lastPinchCenter;
@@ -51,6 +55,9 @@ namespace TownBuilder
 
         /// <summary>Screen position of a short press without movement.</summary>
         public event Action<Vector2> Tapped;
+
+        /// <summary>A finger held still for a moment (v0.40.0: picks up a building). The release after it is no tap.</summary>
+        public event Action<Vector2> LongPressed;
 
         /// <summary>(factor, screen focus point). factor &lt; 1 zooms in, &gt; 1 zooms out (multiplies orthographic size).</summary>
         public event Action<float, Vector2> ZoomRequested;
@@ -133,6 +140,8 @@ namespace TownBuilder
             if (!_pressed)
             {
                 _pressed = true;
+                _pressTime = Time.unscaledTime;
+                _longPressFired = false;
                 _pressPosition = _lastPosition = p0;
                 _startedOverUI = IsOverUI(p0);
                 if (count == 2 && !_startedOverUI) BeginPinch(p0, p1);
@@ -171,6 +180,13 @@ namespace TownBuilder
 
             if (!_dragging)
             {
+                if (!_longPressFired && (p0 - _pressPosition).magnitude < DragThresholdPixels &&
+                    Time.unscaledTime - _pressTime >= longPressSeconds)
+                {
+                    _longPressFired = true;
+                    LongPressed?.Invoke(_pressPosition); // a drag after it moves the picked-up building
+                }
+
                 if ((p0 - _pressPosition).magnitude >= DragThresholdPixels)
                 {
                     _dragging = true;
@@ -192,7 +208,7 @@ namespace TownBuilder
             if (!_startedOverUI && !_gestureCancelled && !_pinching)
             {
                 if (_dragging) _activeDragHandler?.EndDrag(_lastPosition);
-                else Tapped?.Invoke(_lastPosition);
+                else if (!_longPressFired) Tapped?.Invoke(_lastPosition);
             }
 
             ResetGesture();
@@ -205,6 +221,7 @@ namespace TownBuilder
             _gestureCancelled = false;
             _dragging = false;
             _pinching = false;
+            _longPressFired = false;
             _activeDragHandler = null;
         }
 

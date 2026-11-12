@@ -176,7 +176,7 @@ namespace TownBuilder.EditorTools
             return outputPath;
         }
 
-        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm, ShopCards, Event, Truck, Home, Collections, Autumn, Winter, Landscape, Settings, Credits, Tasks, MillLife, Quit }
+        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm, ShopCards, Event, Truck, Home, Collections, Autumn, Winter, Landscape, Settings, Credits, Tasks, MillLife, Quit, Rotate }
 
         /// <summary>
         /// Command line (v0.37.0): animation frames of the Feed Mill, idle then working, into &lt;-previewOut&gt;/MillLife
@@ -295,6 +295,7 @@ namespace TownBuilder.EditorTools
                 Capture(Path.Combine(folder, "Preview_Town_Credits.png"), HudState.Credits);
                 Capture(Path.Combine(folder, "Preview_Town_Tasks.png"), HudState.Tasks);
                 Capture(Path.Combine(folder, "Preview_Town_Quit.png"), HudState.Quit);
+                Capture(Path.Combine(folder, "Preview_Town_Rotate.png"), HudState.Rotate);
             }
             catch (Exception e)
             {
@@ -339,6 +340,15 @@ namespace TownBuilder.EditorTools
             Find(canvas, "BottomNavigation").SetActive(state == HudState.Idle || state == HudState.Settings || state == HudState.Tasks || state == HudState.Quit);
             if (_storeMode) Find(canvas, "DevPanel").SetActive(false);
             if (state == HudState.Quit) Find(canvas, "QuitDialog").transform.Find("Root").gameObject.SetActive(true);
+            if (state == HudState.Rotate)
+            {
+                // v0.40.0: the Feed Mill turned (mirrored), selected, with Move / Rotate / Remove in the bar.
+                var mill = UnityEngine.Object.FindObjectsByType<BuildingView>().First(v => v.Definition != null && v.Definition.Id == "feed_mill");
+                mill.SetFacing(true);
+                var bar = Find(canvas, "SelectionActionBar");
+                bar.SetActive(true);
+                bar.transform.Find("Name").GetComponent<TMPro.TMP_Text>().text = "Feed Mill";
+            }
 
             if (state == HudState.Settings || state == HudState.Credits)
             {

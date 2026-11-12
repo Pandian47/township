@@ -46,8 +46,11 @@ namespace TownBuilder.Domain
             return PlacementResult.Valid;
         }
 
-        public PlacementResult TryAdd(string instanceId, string definitionId, GridCoord origin, GridCoord size, out PlacedBuilding building)
+        /// <param name="size">The definition's footprint (unrotated); it's swapped here when <paramref name="flipped"/>.</param>
+        public PlacementResult TryAdd(string instanceId, string definitionId, GridCoord origin, GridCoord size, out PlacedBuilding building,
+            bool flipped = false)
         {
+            size = PlacedBuilding.SizeFor(size, flipped);
             building = null;
             if (string.IsNullOrEmpty(instanceId)) throw new ArgumentException("Instance id is required.", nameof(instanceId));
             if (string.IsNullOrEmpty(definitionId)) throw new ArgumentException("Definition id is required.", nameof(definitionId));
@@ -56,27 +59,36 @@ namespace TownBuilder.Domain
             var result = Check(origin, size);
             if (result != PlacementResult.Valid) return result;
 
-            building = new PlacedBuilding(instanceId, definitionId, origin, size);
+            building = new PlacedBuilding(instanceId, definitionId, origin, size, flipped);
             Occupancy.Occupy(instanceId, origin, size);
             _buildings.Add(instanceId, building);
             BuildingAdded?.Invoke(building);
             return PlacementResult.Valid;
         }
 
-        public PlacementResult TryMove(string instanceId, GridCoord newOrigin)
+        /// <summary>Moves a building, optionally to its other facing (<paramref name="flipped"/>; null = keep).</summary>
+        public PlacementResult TryMove(string instanceId, GridCoord newOrigin, bool? flipped = null)
         {
             if (!_buildings.TryGetValue(instanceId, out var building)) return PlacementResult.NotFound;
-            if (building.Origin == newOrigin) return PlacementResult.Valid;
+            bool newFlipped = flipped ?? building.Flipped;
+            if (building.Origin == newOrigin && building.Flipped == newFlipped) return PlacementResult.Valid;
 
-            var result = Check(newOrigin, building.Size, instanceId);
+            var newSize = newFlipped == building.Flipped ? building.Size : new GridCoord(building.Size.Y, building.Size.X);
+            var result = Check(newOrigin, newSize, instanceId);
             if (result != PlacementResult.Valid) return result;
 
             Occupancy.Release(instanceId, building.Origin, building.Size);
             building.Origin = newOrigin;
-            Occupancy.Occupy(instanceId, newOrigin, building.Size);
+            building.Size = newSize;
+            building.Flipped = newFlipped;
+            Occupancy.Occupy(instanceId, newOrigin, newSize);
             BuildingMoved?.Invoke(building);
             return PlacementResult.Valid;
         }
+
+        /// <summary>Turns a building to its other facing where it stands (fails if the turned footprint doesn't fit).</summary>
+        public PlacementResult TryRotate(string instanceId) =>
+            _buildings.TryGetValue(instanceId, out var b) ? TryMove(instanceId, b.Origin, !b.Flipped) : PlacementResult.NotFound;
 
         public bool Remove(string instanceId)
         {

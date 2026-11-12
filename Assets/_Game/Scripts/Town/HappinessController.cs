@@ -69,7 +69,7 @@ namespace TownBuilder
         public int Happiness(string homeId)
         {
             if (!_town.TryGet(homeId, out var home) || !_content.TryGetBuilding(home.DefinitionId, out var def)) return 0;
-            return TownHappiness.ForHome(home.Origin, def.FootprintSize, Sources(), Radius);
+            return TownHappiness.ForHome(home.Origin, home.Size, Sources(), Radius);
         }
 
         /// <summary>Average happiness of all homes (0 when there are none).</summary>
@@ -112,7 +112,7 @@ namespace TownBuilder
             var list = new List<HappinessSource>();
             foreach (var b in _town.Buildings)
                 if (_content.TryGetBuilding(b.DefinitionId, out var d) && d.Happiness > 0)
-                    list.Add(new HappinessSource(b.Origin, d.FootprintSize, d.Happiness));
+                    list.Add(new HappinessSource(b.Origin, b.Size, d.Happiness));
             return list;
         }
 

@@ -25,6 +25,8 @@ namespace TownBuilder
         [SerializeField] private string displayName;
         [SerializeField] private BuildingCategory category;
         [SerializeField] private Sprite sprite;
+        [Tooltip("Optional picture for the rotated facing (v0.40.0). Empty = the normal picture mirrored.")]
+        [SerializeField] private Sprite flippedSprite;
         [Tooltip("Footprint in grid cells: x = along the grid X axis (right-hand front edge), y = along the grid Y axis (left-hand front edge).")]
         [SerializeField] private Vector2Int footprint = new Vector2Int(2, 2);
         [SerializeField, Min(1)] private int unlockLevel = 1;
@@ -84,6 +86,7 @@ namespace TownBuilder
         public string DisplayName => string.IsNullOrEmpty(displayName) ? id : displayName;
         public BuildingCategory Category => category;
         public Sprite Sprite => sprite;
+        public Sprite FlippedSprite => flippedSprite;
         public GridCoord FootprintSize => new GridCoord(Mathf.Max(1, footprint.x), Mathf.Max(1, footprint.y));
         public int UnlockLevel => unlockLevel;
         public int CoinCost => coinCost;
@@ -103,6 +106,7 @@ namespace TownBuilder
         public bool HasChimney => chimney != Vector2.zero;
 
         public void EditorSetChimney(Vector2 point) => chimney = point;
+        public void EditorSetFlippedSprite(Sprite value) => flippedSprite = value;
         public void EditorSetWorking(WorkingAnimation value) => working = value;
         public void EditorSetFruit(CropDefinition crop) => fruit = crop;
         public void EditorSetCategory(BuildingCategory newCategory) => category = newCategory;

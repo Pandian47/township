@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: Feed Mill
   category: 2
   sprite: {fileID: 21300000, guid: 5bf661c4d719a1d42a3c73a3a11e9276, type: 3}
+  flippedSprite: {fileID: 0}
   footprint: {x: 2, y: 2}
   unlockLevel: 4
   coinCost: 600
@@ -29,19 +30,19 @@ MonoBehaviour:
   seasonal: 0
   season: 0
   eventOnly: 0
-  chimney: {x: 0.54, y: 0.975}
+  chimney: {x: 0, y: 0}
   working:
     enabled: 1
-    sleepPoint: {x: 0.7, y: 0.54}
-    streamPoint: {x: 0.215, y: 0.555}
-    streamFall: 0.065
-    streamColor: {r: 1, g: 0.84, b: 0.42, a: 1}
-    dustPoint: {x: 0.52, y: 0.57}
+    sleepPoint: {x: 0.26, y: 0.59}
+    streamPoint: {x: 0.6, y: 0.45}
+    streamFall: 0.05
+    streamColor: {r: 1, g: 0.82, b: 0.4, a: 1}
+    dustPoint: {x: 0.7, y: 0.47}
     dustColor: {r: 0.98, g: 0.9, b: 0.62, a: 0.7}
     walkFrom: {x: 0, y: 0}
     walkTo: {x: 0, y: 0}
     workerSpot: {x: 0, y: 0}
-    rumble: 0.008
+    rumble: 0
   isFarmPlot: 0
   fruit: {fileID: 0}
   storageCapacityBonus: 0

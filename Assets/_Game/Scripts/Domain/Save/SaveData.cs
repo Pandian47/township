@@ -215,6 +215,9 @@ namespace TownBuilder.Domain
 
         /// <summary>Extra production queue slots bought for this factory (0 = none).</summary>
         public int extraQueueSlots;
+
+        /// <summary>v0.40.0: turned to its other facing (false for older saves).</summary>
+        public bool flipped;
     }
 
     [Serializable]

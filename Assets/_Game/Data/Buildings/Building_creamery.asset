@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: Creamery
   category: 2
   sprite: {fileID: 21300000, guid: 914b5c55403a9a5479f18b31e85eb1ed, type: 3}
+  flippedSprite: {fileID: 0}
   footprint: {x: 2, y: 2}
   unlockLevel: 8
   coinCost: 1400
@@ -38,10 +39,10 @@ MonoBehaviour:
     streamColor: {r: 1, g: 0.78, b: 0.2, a: 1}
     dustPoint: {x: 0.425, y: 0.48}
     dustColor: {r: 1, g: 0.99, b: 0.92, a: 0.8}
-    walkFrom: {x: 0.2, y: 0.12}
-    walkTo: {x: 0.38, y: 0.05}
-    workerSpot: {x: 0.55, y: 0.07}
-    rumble: 0.006
+    walkFrom: {x: 0, y: 0}
+    walkTo: {x: 0, y: 0}
+    workerSpot: {x: 0, y: 0}
+    rumble: 0
   isFarmPlot: 0
   fruit: {fileID: 0}
   storageCapacityBonus: 0

@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: Juice Press
   category: 2
   sprite: {fileID: 21300000, guid: 3a1db824e5a263f498f6afb4ed3882c9, type: 3}
+  flippedSprite: {fileID: 0}
   footprint: {x: 2, y: 2}
   unlockLevel: 9
   coinCost: 1200
@@ -38,10 +39,10 @@ MonoBehaviour:
     streamColor: {r: 0.86, g: 0.12, b: 0.16, a: 1}
     dustPoint: {x: 0, y: 0}
     dustColor: {r: 0.98, g: 0.93, b: 0.8, a: 0.7}
-    walkFrom: {x: 0.33, y: 0.1}
-    walkTo: {x: 0.62, y: 0.07}
-    workerSpot: {x: 0.27, y: 0.08}
-    rumble: 0.006
+    walkFrom: {x: 0, y: 0}
+    walkTo: {x: 0, y: 0}
+    workerSpot: {x: 0, y: 0}
+    rumble: 0
   isFarmPlot: 0
   fruit: {fileID: 0}
   storageCapacityBonus: 0

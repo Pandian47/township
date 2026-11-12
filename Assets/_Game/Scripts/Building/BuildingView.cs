@@ -15,6 +15,32 @@ namespace TownBuilder
         public BuildingDefinition Definition { get; private set; }
         public SpriteRenderer SpriteRenderer => spriteRenderer;
 
+        /// <summary>Shown in its rotated facing (v0.40.0).</summary>
+        public bool Flipped { get; private set; }
+
+        /// <summary>True when the rotated facing is the normal picture mirrored (no own right-facing picture).</summary>
+        public bool Mirrored => Flipped && (Definition == null || Definition.FlippedSprite == null);
+
+        /// <summary>The picture for the current facing (frame 0 when animated).</summary>
+        public Sprite FacingSprite => Flipped && Definition != null && Definition.FlippedSprite != null ? Definition.FlippedSprite : Definition?.Sprite;
+
+        /// <summary>
+        /// Where a point measured 0-1 on the NORMAL picture (from its bottom-left) is now, relative to the building's anchor
+        /// (unscaled): effects such as chimney smoke, grain and Z letters use it, so they follow the rotated facing too.
+        /// A right-facing picture is assumed to be roughly the mirror image of the normal one.
+        /// </summary>
+        public Vector3 PointLocal(Vector2 point)
+        {
+            var sprite = spriteRenderer.sprite;
+            if (sprite == null) return Vector3.zero;
+            float ppu = sprite.pixelsPerUnit;
+            var rect = sprite.rect;
+            float y = (point.y * rect.height - sprite.pivot.y) / ppu;
+            if (Mirrored) return new Vector3(-(point.x * rect.width - sprite.pivot.x) / ppu, y, 0f);
+            float px = Flipped ? 1f - point.x : point.x;
+            return new Vector3((px * rect.width - sprite.pivot.x) / ppu, y, 0f);
+        }
+
         private void Awake()
         {
             if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
@@ -25,6 +51,8 @@ namespace TownBuilder
             if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
             InstanceId = instanceId;
             Definition = definition;
+            Flipped = false;
+            spriteRenderer.flipX = false;
             spriteRenderer.sprite = definition.Sprite;
             spriteRenderer.sortingLayerName = SortingLayers.Objects;
             spriteRenderer.spriteSortPoint = SpriteSortPoint.Pivot;
@@ -36,13 +64,24 @@ namespace TownBuilder
 
         public void SetAnchor(Vector3 worldAnchor) => transform.position = new Vector3(worldAnchor.x, worldAnchor.y, 0f);
 
+        /// <summary>
+        /// Shows the normal or rotated facing: the building's own right-facing picture if it has one, otherwise the
+        /// normal picture mirrored around its pivot (the footprint's bottom corner, so it stays on its cells).
+        /// </summary>
+        public void SetFacing(bool flipped)
+        {
+            Flipped = flipped;
+            spriteRenderer.sprite = FacingSprite;
+            spriteRenderer.flipX = Mirrored;
+        }
+
         public void SetTint(Color color) => spriteRenderer.color = color;
 
         /// <summary>Hit test against the building's isometric silhouette (footprint diamond extruded to the sprite top).</summary>
         public bool HitTest(Vector2 worldPoint, Vector2 axisX, Vector2 axisY)
         {
             if (Definition == null || spriteRenderer.sprite == null) return false;
-            var size = Definition.FootprintSize;
+            var size = Domain.PlacedBuilding.SizeFor(Definition.FootprintSize, Flipped);
             IsoMath.BuildingSilhouette(transform.position, axisX, axisY, size.X, size.Y, spriteRenderer.bounds.max.y, _silhouette);
             return IsoMath.ConvexContains(_silhouette, worldPoint);
         }

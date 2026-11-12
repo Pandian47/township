@@ -337,6 +337,19 @@ calendar (`Tick`, called every second by `EventPanel`), counts harvests / produc
 set of unlocked decorations and filters the shop (`BuildingShopPanel.SetListingFilter`). `EventPanel` = the town button
 + window. DEV "Start weekend event now" runs one from today for two days. Saved in `SaveData.events`.
 
+## 6g6p. Rotating buildings (v0.40.0)
+
+`PlacedBuilding.Flipped` (Domain) + `PlacedBuilding.SizeFor(size, flipped)` (footprint X/Y swap). `Town.TryAdd(...,
+flipped)`, `Town.TryMove(id, origin, flipped?)`, `Town.TryRotate(id)` (refused if the turned footprint doesn't fit).
+Saved as `BuildingSaveData.flipped` (new field, old saves = false). `BuildingView.SetFacing`: the definition's optional
+`FlippedSprite`, else the normal sprite with `flipX` (mirrored around the pivot = the footprint's bottom corner, which
+matches the swapped footprint). `BuildingView.PointLocal(point)` maps effect points (chimney, grain, dust, Z) onto the
+current facing. `PlacementSystem.Rotate()` turns the move/placement preview (Confirm keeps it, Cancel restores it) or a
+selected building in place; `PointerInput.LongPressed` (0.45 s still) → `PlacementSystem` picks the building up into
+Moving, and the release is no tap. HUD: Rotate buttons in the selection and placement bars. Art: `<id>_l.png` /
+`<id>_r.png` in Sources import as the normal and rotated pictures (the right one with the footprint swapped); without
+`_r`, the building rotates by mirroring.
+
 ## 6g6o. Phone back button and quit dialog (v0.39.0)
 
 `BackButtonHandler` (Scripts/UI, one per scene on the canvas, built by `SceneBuilder.BuildQuitDialog` as the last
@@ -355,7 +368,7 @@ point) for the idle sleep letters, a falling stream (chute tip, fall distance, c
 holds the measured values (re-measure if the art changes; setup rewrites them every run).
 
 `FactoryLife` (Scripts/Effects) scans `ProductionController.BuiltFactoryIds()` / `IsWorking(id)` twice a second and
-shows each factory idle (Z letters) or working (grain stream, dust, workers, squash-and-stretch from the pivot; skipped
+shows each factory idle (Z letters) or working (grain stream, dust; workers and squash-and-stretch are still supported but switched off for every building since v0.39.1 at the owner's request; rumble is skipped
 while a `PopAnimator` plays). Particles are pooled sprites on the Effects layer; workers are children of the building
 with a `SortingGroup`, so they are drawn in front of their own building but behind buildings in front of it. Everything
 is driven by `Step(dt)` so the editor preview can render frames:

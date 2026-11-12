@@ -7,7 +7,7 @@ using UnityEngine.TestTools;
 
 namespace TownBuilder.Tests
 {
-    /// <summary>v0.37.0: the Feed Mill comes alive (idle Z letters; working grain, dust, workers, rumble).</summary>
+    /// <summary>Production buildings come alive: idle Z letters; working streams and dust (v0.39.1: no workers, no rumble).</summary>
     public sealed class FactoryLifeTests
     {
         private string _saveDir;
@@ -51,11 +51,20 @@ namespace TownBuilder.Tests
                     if (WorkingAnimation.IsSet(p)) Assert.IsTrue(p.x > 0f && p.x < 1f && p.y > 0f && p.y < 1f, $"{id}: point {p} is on the sprite");
             }
 
-            // The Feed Mill's picture has its workers painted in: no walking workers on top of them.
+            // The Feed Mill's tower has no chimney (no smoke), but workers and grain.
             content.TryGetBuilding("feed_mill", out var feedMill);
-            Assert.IsFalse(WorkingAnimation.IsSet(feedMill.Working.walkFrom) || WorkingAnimation.IsSet(feedMill.Working.workerSpot));
+            Assert.IsFalse(feedMill.HasChimney);
+            Assert.IsTrue(WorkingAnimation.IsSet(feedMill.Working.streamPoint));
 
-            // The Sugar Mill has every kind of effect: stream, splashes, a carrier, rumble.
+            // v0.39.1: no building has workers or a bounce.
+            foreach (var id in new[] { "feed_mill", "bakery", "sugar_mill", "creamery", "juice_press", "chicken_coop", "dairy_shed" })
+            {
+                content.TryGetBuilding(id, out var def);
+                Assert.IsFalse(WorkingAnimation.IsSet(def.Working.walkFrom) || WorkingAnimation.IsSet(def.Working.workerSpot), $"{id}: no workers");
+                Assert.AreEqual(0f, def.Working.rumble, $"{id}: no bounce");
+            }
+
+            // The Sugar Mill has a stream and splashes.
             Assert.IsTrue(content.TryGetBuilding("sugar_mill", out var mill));
 
             var life = Object.FindAnyObjectByType<FactoryLife>();
@@ -85,9 +94,9 @@ namespace TownBuilder.Tests
             life.SetState(view, FactoryLife.State.Working);
             for (int i = 0; i < 10; i++) life.Step(0.05f);
             Assert.AreEqual(FactoryLife.State.Working, life.StateOf(view.InstanceId));
-            Assert.IsTrue(life.WorkersVisible(view.InstanceId), "workers appear");
+            Assert.IsFalse(life.WorkersVisible(view.InstanceId), "no workers");
             Assert.Greater(life.ParticleCount, 3, "juice is pouring");
-            Assert.AreNotEqual(Vector3.one, view.transform.localScale, "the mill rumbles");
+            Assert.AreEqual(Vector3.one, view.transform.localScale, "no bounce");
 
             life.SetState(view, FactoryLife.State.Idle);
             Assert.AreEqual(Vector3.one, view.transform.localScale, "back to its normal size");

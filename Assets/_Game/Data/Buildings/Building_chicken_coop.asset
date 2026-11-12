@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: Chicken Coop
   category: 4
   sprite: {fileID: 21300000, guid: fb1825ccbbaa64c4086493f91552580f, type: 3}
+  flippedSprite: {fileID: 0}
   footprint: {x: 2, y: 2}
   unlockLevel: 5
   coinCost: 800
@@ -40,7 +41,7 @@ MonoBehaviour:
     dustColor: {r: 0.98, g: 0.93, b: 0.8, a: 0.7}
     walkFrom: {x: 0, y: 0}
     walkTo: {x: 0, y: 0}
-    workerSpot: {x: 0.6, y: 0.03}
+    workerSpot: {x: 0, y: 0}
     rumble: 0
   isFarmPlot: 0
   fruit: {fileID: 0}

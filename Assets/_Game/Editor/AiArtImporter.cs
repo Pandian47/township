@@ -67,6 +67,10 @@ namespace TownBuilder.EditorTools
             /// <summary>Set by processing: sprite pivot (bottom corner of the footprint for buildings).</summary>
             public Vector2 Pivot = new Vector2(0.5f, 0f);
 
+            /// <summary>The same picture's settings for its rotated (right-facing) version: footprint X and Y swapped.</summary>
+            public Spec Rotated() => new Spec(Source + "_r", Target.Replace(".png", "_r.png"), Kind, Width, FootprintY, FootprintX)
+                { NudgeCells = new Vector2(NudgeCells.y, NudgeCells.x), NoFringeFix = NoFringeFix };
+
             public Spec(string source, string target, Kind kind, int width, int footprintX = 1, int footprintY = 1)
             {
                 Source = source;
@@ -255,13 +259,20 @@ namespace TownBuilder.EditorTools
         public static string Import(string folder)
         {
             if (!Directory.Exists(folder)) throw new DirectoryNotFoundException(folder);
+            var rotated = new List<(Spec spec, string path, string id)>();
             var done = new List<string>();
             var missing = new List<string>();
 
             foreach (var spec in Specs)
             {
-                string source = FindSource(folder, spec.Source);
+                // Buildings may come in two facings (v0.40.0): <name>_l = normal, <name>_r = rotated. A plain <name> still works.
+                string source = (spec.Kind == Kind.Building ? FindSource(folder, spec.Source + "_l") : null) ?? FindSource(folder, spec.Source);
                 if (source == null) { missing.Add(spec.Source); continue; }
+                if (spec.Kind == Kind.Building)
+                {
+                    var right = FindSource(folder, spec.Source + "_r");
+                    if (right != null) rotated.Add((spec.Rotated(), right, spec.Source));
+                }
 
                 var image = Load(source);
                 var output = Process(image, spec);
@@ -294,8 +305,33 @@ namespace TownBuilder.EditorTools
                 done.Add(AppIconTools.SourceFileName + " -> AppIcon.png (1024x1024)");
             }
 
+            // Rotated pictures: same processing with the footprint turned; set as the building's right-facing picture.
+            foreach (var (rspec, path, id) in rotated)
+            {
+                var image = Load(path);
+                var output = Process(image, rspec);
+                if (rspec.NudgeCells != Vector2.zero)
+                {
+                    var world = rspec.NudgeCells.x * new Vector2(0.5f, 0.25f) + rspec.NudgeCells.y * new Vector2(-0.5f, 0.25f);
+                    rspec.Pivot -= new Vector2(world.x * ArtConventions.PixelsPerUnit / output.W, world.y * ArtConventions.PixelsPerUnit / output.H);
+                }
+
+                WritePng(output, rspec.Target);
+                ConfigureImporter(rspec);
+                var content = AssetDatabase.LoadAssetAtPath<GameContent>(ProjectSetup.ContentPath);
+                if (content != null && content.TryGetBuilding(id, out var def))
+                {
+                    def.EditorSetFlippedSprite(AssetDatabase.LoadAssetAtPath<Sprite>(rspec.Target));
+                    EditorUtility.SetDirty(def);
+                }
+
+                done.Add($"{rspec.Source} -> {Path.GetFileName(rspec.Target)} ({output.W}x{output.H})");
+                Debug.Log($"[AiArt] {rspec.Source}: {image.W}x{image.H} -> {rspec.Target} ({output.W}x{output.H}), rotated facing of {id}");
+            }
+
             AssetDatabase.SaveAssets();
             var unknown = Directory.GetFiles(folder, "*.png").Select(Path.GetFileNameWithoutExtension)
+                .Select(n => n.EndsWith("_l") || n.EndsWith("_r") ? n.Substring(0, n.Length - 2) : n)
                 .Where(n => !string.Equals(n + ".png", AppIconTools.SourceFileName, StringComparison.OrdinalIgnoreCase))
                 .Where(n => Specs.All(s => !string.Equals(s.Source, n, StringComparison.OrdinalIgnoreCase))).ToList();
 

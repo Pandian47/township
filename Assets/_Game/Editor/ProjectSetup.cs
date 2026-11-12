@@ -42,7 +42,7 @@ namespace TownBuilder.EditorTools
         private static readonly Dictionary<string, Vector2> ChimneyPoints = new Dictionary<string, Vector2>
         {
             { "bakery", new Vector2(0.805f, 0.92f) },
-            { "feed_mill", new Vector2(0.54f, 0.975f) },  // v0.38.2 art: stone chimney
+            { "feed_mill", Vector2.zero },                 // v0.40.0 art (cottage mill): no chimney
             { "sugar_mill", new Vector2(0.637f, 0.965f) },
             { "creamery", new Vector2(0.655f, 0.97f) },
             { "juice_press", new Vector2(0.81f, 0.965f) },
@@ -1041,17 +1041,17 @@ namespace TownBuilder.EditorTools
         private static readonly Dictionary<string, WorkingAnimation> WorkingAnimations = new Dictionary<string, WorkingAnimation>
         {
             {
-                // v0.38.2 art (owner's new mill): the three workers are painted in, so no walking workers here.
+                // v0.40.0 art (owner's cottage mill with a wooden silo, wheat hopper and conveyor; rotates by mirroring).
                 "feed_mill", new WorkingAnimation
                 {
                     enabled = true,
-                    sleepPoint = new Vector2(0.70f, 0.54f),     // above the door
-                    streamPoint = new Vector2(0.215f, 0.555f),  // the shovel
-                    streamFall = 0.065f,                        // into the grain cart
-                    streamColor = new Color(1f, 0.84f, 0.42f),
-                    dustPoint = new Vector2(0.52f, 0.57f),      // where the conveyor enters the house
+                    sleepPoint = new Vector2(0.26f, 0.59f),     // above the arched door
+                    streamPoint = new Vector2(0.60f, 0.45f),    // the bottom of the conveyor
+                    streamFall = 0.05f,                         // into the wheat hopper
+                    streamColor = new Color(1f, 0.82f, 0.4f),
+                    dustPoint = new Vector2(0.70f, 0.47f),      // the wheat hopper
                     dustColor = new Color(0.98f, 0.9f, 0.62f, 0.7f),
-                    rumble = 0.008f,
+                    rumble = 0f,
                 }
             },
             // v0.38.0: the other production buildings.
@@ -1062,10 +1062,7 @@ namespace TownBuilder.EditorTools
                     sleepPoint = new Vector2(0.35f, 0.47f),     // above the door
                     dustPoint = new Vector2(0.72f, 0.34f),      // warm steam from the display
                     dustColor = new Color(1f, 0.98f, 0.94f, 0.75f),
-                    walkFrom = new Vector2(0.34f, 0.12f),       // the door
-                    walkTo = new Vector2(0.56f, 0.06f),
-                    workerSpot = new Vector2(0.80f, 0.13f),     // by the display
-                    rumble = 0.006f,
+                    rumble = 0f,
                 }
             },
             {
@@ -1078,9 +1075,7 @@ namespace TownBuilder.EditorTools
                     streamColor = new Color(0.98f, 0.94f, 0.78f),
                     dustPoint = new Vector2(0.80f, 0.14f),      // splashes under the water wheel
                     dustColor = new Color(0.78f, 0.92f, 1f, 0.7f),
-                    walkFrom = new Vector2(0.22f, 0.06f),       // the cane bundles
-                    walkTo = new Vector2(0.42f, 0.03f),         // the press
-                    rumble = 0.008f,
+                    rumble = 0f,
                 }
             },
             {
@@ -1090,10 +1085,7 @@ namespace TownBuilder.EditorTools
                     sleepPoint = new Vector2(0.32f, 0.53f),     // above the arch
                     dustPoint = new Vector2(0.425f, 0.48f),     // the butter churn
                     dustColor = new Color(1f, 0.99f, 0.92f, 0.8f),
-                    walkFrom = new Vector2(0.20f, 0.12f),       // the milk can
-                    walkTo = new Vector2(0.38f, 0.05f),
-                    workerSpot = new Vector2(0.55f, 0.07f),     // next to the churn
-                    rumble = 0.006f,
+                    rumble = 0f,
                 }
             },
             {
@@ -1104,10 +1096,7 @@ namespace TownBuilder.EditorTools
                     streamPoint = new Vector2(0.19f, 0.30f),    // the barrel tap
                     streamFall = 0.08f,                         // into the bottle
                     streamColor = new Color(0.86f, 0.12f, 0.16f),
-                    walkFrom = new Vector2(0.33f, 0.10f),       // the apple crates
-                    walkTo = new Vector2(0.62f, 0.07f),
-                    workerSpot = new Vector2(0.27f, 0.08f),     // at the press
-                    rumble = 0.006f,
+                    rumble = 0f,
                 }
             },
             {
@@ -1118,7 +1107,6 @@ namespace TownBuilder.EditorTools
                     streamPoint = new Vector2(0.225f, 0.37f),   // the feeder
                     streamFall = 0.05f,
                     streamColor = new Color(1f, 0.82f, 0.3f),
-                    workerSpot = new Vector2(0.60f, 0.03f),     // at the gate
                     rumble = 0f,
                 }
             },
@@ -1129,7 +1117,6 @@ namespace TownBuilder.EditorTools
                     sleepPoint = new Vector2(0.27f, 0.52f),     // above the stable door
                     dustPoint = new Vector2(0.40f, 0.18f),      // hay at the trough
                     dustColor = new Color(0.96f, 0.86f, 0.42f, 0.65f),
-                    workerSpot = new Vector2(0.47f, 0.03f),     // by the fence
                     rumble = 0f,
                 }
             },

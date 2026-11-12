@@ -419,6 +419,12 @@ Our own features in the farming / town genre (not copied from any game).
 - [ ] Idle Bakery, Sugar Mill, Creamery, Juice Press, Chicken Coop and Dairy Shed show Z letters
 - [ ] v0.38.1: Z letters come in bursts of three, then 5-10 s of quiet (buildings not in step)
 - [ ] v0.38.3: pinch zooms in about 1.5x closer than before; buildings still look sharp enough
+- [ ] v0.40.0: long-pressing a building picks it up (move mode) without tapping Move first; drag it, then Place
+- [ ] v0.40.0: Rotate (in the move bar and the selection bar) turns the building to its mirrored facing; it stays on its cells
+- [ ] v0.40.0: a building that would not fit turned shows "No room to turn it here"; Cancel while moving restores the facing
+- [ ] v0.40.0: the facing is kept after closing and reopening the app; grain/dust/Z letters follow the turned picture
+- [ ] v0.40.0: the new Feed Mill (cottage, wooden silo, wheat hopper) fits its plot (its sign text reads backwards when turned)
+- [ ] v0.39.1: no building bounces and no little workers walk around any more; streams, steam, dust and Z letters stay
 - [ ] v0.38.2: the new Feed Mill (grain cart, conveyor, silo) fits its 2x2 plot; working: grain falls from the shovel, dust at the conveyor, chimney smoke
 - [ ] Bakery working: warm steam at the display, a worker carrying sacks from the door, a baker by the display
 - [ ] Sugar Mill: cane juice pours into the bucket, water splashes under the wheel, a worker brings cane to the press

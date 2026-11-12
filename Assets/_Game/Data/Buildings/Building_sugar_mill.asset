@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: Sugar Mill
   category: 2
   sprite: {fileID: 21300000, guid: 1a86ee9083a5ab94d84f36699d48f48d, type: 3}
+  flippedSprite: {fileID: 0}
   footprint: {x: 2, y: 2}
   unlockLevel: 7
   coinCost: 1000
@@ -38,10 +39,10 @@ MonoBehaviour:
     streamColor: {r: 0.98, g: 0.94, b: 0.78, a: 1}
     dustPoint: {x: 0.8, y: 0.14}
     dustColor: {r: 0.78, g: 0.92, b: 1, a: 0.7}
-    walkFrom: {x: 0.22, y: 0.06}
-    walkTo: {x: 0.42, y: 0.03}
+    walkFrom: {x: 0, y: 0}
+    walkTo: {x: 0, y: 0}
     workerSpot: {x: 0, y: 0}
-    rumble: 0.008
+    rumble: 0
   isFarmPlot: 0
   fruit: {fileID: 0}
   storageCapacityBonus: 0

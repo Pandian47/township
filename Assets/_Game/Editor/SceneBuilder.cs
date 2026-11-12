@@ -559,21 +559,23 @@ namespace TownBuilder.EditorTools
             var buildButton = MakeButton(nav, "BuildButton", "Build", new Vector2(260, 120), Green, 48);
 
             // --- Placement bar
-            var placementBar = MakeRect("PlacementActionBar", safe, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 30), new Vector2(1100, 160));
+            var placementBar = MakeRect("PlacementActionBar", safe, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 30), new Vector2(1260, 160));
             AddImage(placementBar, PanelColor);
             HRow(placementBar, 24, TextAnchor.MiddleCenter, 24);
             var placementInfo = Label(placementBar, "Info", "", 34, TextAnchor.MiddleLeft, Ink);
-            Prefer(placementInfo, 640, 120);
+            Prefer(placementInfo, 600, 120);
+            var rotatePlacement = MakeButton(placementBar, "RotateButton", "Rotate", new Vector2(180, 110), new Color(0.13f, 0.58f, 0.6f));
             var cancelPlacement = MakeButton(placementBar, "CancelButton", "Cancel", new Vector2(180, 110), Red);
             var confirmPlacement = MakeButton(placementBar, "ConfirmButton", "Place", new Vector2(180, 110), Green);
 
             // --- Selection bar
-            var selectionBar = MakeRect("SelectionActionBar", safe, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 30), new Vector2(1100, 150));
+            var selectionBar = MakeRect("SelectionActionBar", safe, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 30), new Vector2(1200, 150));
             AddImage(selectionBar, PanelColor);
             HRow(selectionBar, 24, TextAnchor.MiddleCenter, 22);
             var selectionName = Label(selectionBar, "Name", "", 42, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
-            Prefer(selectionName, 420, 100);
+            Prefer(selectionName, 320, 100);
             var moveButton = MakeButton(selectionBar, "MoveButton", "Move", new Vector2(180, 100), Blue);
+            var rotateButton = MakeButton(selectionBar, "RotateButton", "Rotate", new Vector2(180, 100), new Color(0.13f, 0.58f, 0.6f));
             var removeButton = MakeButton(selectionBar, "RemoveButton", "Remove", new Vector2(190, 100), Red);
             var deselectButton = MakeButton(selectionBar, "CloseButton", "Close", new Vector2(170, 100), Slate);
 
@@ -659,6 +661,8 @@ namespace TownBuilder.EditorTools
                 ("placementInfoText", placementInfo),
                 ("confirmPlacementButton", confirmPlacement),
                 ("cancelPlacementButton", cancelPlacement),
+                ("rotatePlacementButton", rotatePlacement),
+                ("rotateButton", rotateButton),
                 ("selectionBar", selectionBar.gameObject),
                 ("selectionNameText", selectionName),
                 ("moveButton", moveButton),

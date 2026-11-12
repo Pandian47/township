@@ -80,12 +80,8 @@ namespace TownBuilder
         /// <summary>World position of a building's chimney top (sprite-relative point → world).</summary>
         public static Vector3 ChimneyWorld(BuildingView view)
         {
-            var sprite = view.SpriteRenderer.sprite;
-            var point = view.Definition.ChimneyPoint;
-            if (sprite == null) return view.transform.position;
-            float ppu = sprite.pixelsPerUnit;
-            var local = new Vector3((point.x * sprite.rect.width - sprite.pivot.x) / ppu, (point.y * sprite.rect.height - sprite.pivot.y) / ppu, 0f);
-            return view.transform.TransformPoint(local);
+            if (view.SpriteRenderer.sprite == null) return view.transform.position;
+            return view.transform.TransformPoint(view.PointLocal(view.Definition.ChimneyPoint));
         }
 
         private void Scan()

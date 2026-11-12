@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: Dairy Shed
   category: 4
   sprite: {fileID: 21300000, guid: 59120b1d5e9e53744ac144e0cda1065f, type: 3}
+  flippedSprite: {fileID: 0}
   footprint: {x: 2, y: 2}
   unlockLevel: 6
   coinCost: 1000
@@ -40,7 +41,7 @@ MonoBehaviour:
     dustColor: {r: 0.96, g: 0.86, b: 0.42, a: 0.65}
     walkFrom: {x: 0, y: 0}
     walkTo: {x: 0, y: 0}
-    workerSpot: {x: 0.47, y: 0.03}
+    workerSpot: {x: 0, y: 0}
     rumble: 0
   isFarmPlot: 0
   fruit: {fileID: 0}

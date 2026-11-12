@@ -8,7 +8,9 @@ namespace TownBuilder
     /// Player interaction with buildings: select, place new (with preview), move, remove.
     ///
     ///   Idle --tap building--> Selected --Move--> Moving --Confirm/Cancel--> Selected
+    ///   Idle --long press building-------------> Moving (v0.40.0)
     ///   Idle --shop item-----> PlacingNew --Confirm/Cancel--> Idle
+    ///   Rotate (Selected / Moving / PlacingNew) turns the building to its other facing (footprint X and Y swap).
     ///
     /// During PlacingNew/Moving the preview follows taps, and can be dragged (drag starting on the preview).
     /// All rules (bounds, overlap, terrain) are evaluated by the domain <see cref="Town"/>.
@@ -50,6 +52,8 @@ namespace TownBuilder
         private string _targetInstanceId;       // Selected / moving building.
         private GridCoord _previewOrigin;
         private GridCoord _moveStartOrigin;
+        private bool _previewFlipped;
+        private bool _moveStartFlipped;
         private GridCoord _dragCellOffset;
 
         public event Action StateChanged;
@@ -88,6 +92,8 @@ namespace TownBuilder
         public Mode CurrentMode { get; private set; } = Mode.Idle;
         public PlacementResult PreviewValidity { get; private set; } = PlacementResult.Valid;
         public BuildingDefinition ActiveDefinition => _definition;
+        /// <summary>The facing shown by the placement/move preview.</summary>
+        public bool PreviewFlipped => _previewFlipped;
         public string TargetInstanceId => _targetInstanceId;
         public int DragPriority => 100;
 
@@ -111,6 +117,7 @@ namespace TownBuilder
             if (pointerInput == null) return;
             pointerInput.RegisterDragHandler(this);
             pointerInput.Tapped += OnTapped;
+            pointerInput.LongPressed += OnLongPressed;
         }
 
         private void OnDisable()
@@ -118,6 +125,7 @@ namespace TownBuilder
             if (pointerInput == null) return;
             pointerInput.UnregisterDragHandler(this);
             pointerInput.Tapped -= OnTapped;
+            pointerInput.LongPressed -= OnLongPressed;
         }
 
         // ---------------------------------------------------------------- Commands (called by UI)
@@ -134,6 +142,7 @@ namespace TownBuilder
             ClearSelectionTint();
             _definition = definition;
             _targetInstanceId = null;
+            _previewFlipped = false;
             _preview = buildings.CreatePreview(definition);
 
             var size = definition.FootprintSize;
@@ -154,6 +163,8 @@ namespace TownBuilder
 
             _preview = view;
             _moveStartOrigin = building.Origin;
+            _moveStartFlipped = building.Flipped;
+            _previewFlipped = building.Flipped;
             _previewOrigin = building.Origin;
             SetMode(Mode.Moving);
             RefreshPreview();
@@ -170,7 +181,7 @@ namespace TownBuilder
                 if (!_wallet.TrySpendCoins(definition.CoinCost)) return false;
 
                 string id = Guid.NewGuid().ToString("N");
-                var result = _town.TryAdd(id, definition.Id, _previewOrigin, definition.FootprintSize, out var placed);
+                var result = _town.TryAdd(id, definition.Id, _previewOrigin, definition.FootprintSize, out var placed, _previewFlipped);
                 if (result != PlacementResult.Valid)
                 {
                     _wallet.AddCoins(definition.CoinCost); // refund; should not happen because CanConfirm checked it
@@ -187,7 +198,7 @@ namespace TownBuilder
 
             if (CurrentMode == Mode.Moving)
             {
-                var result = _town.TryMove(_targetInstanceId, _previewOrigin);
+                var result = _town.TryMove(_targetInstanceId, _previewOrigin, _previewFlipped);
                 if (result != PlacementResult.Valid) return false;
                 string id = _targetInstanceId;
                 _preview = null;
@@ -213,6 +224,36 @@ namespace TownBuilder
             CancelActive();
             EnterIdle();
         }
+
+        /// <summary>
+        /// Turns the building to its other facing: the placement/move preview turns in place (Confirm keeps it); a selected
+        /// building turns where it stands if the turned footprint fits there. Returns the result for messages.
+        /// </summary>
+        public PlacementResult Rotate()
+        {
+            if (_town == null) return PlacementResult.NotFound;
+            if ((CurrentMode == Mode.PlacingNew || CurrentMode == Mode.Moving) && _preview != null)
+            {
+                _previewFlipped = !_previewFlipped;
+                _preview.SetFacing(_previewFlipped);
+                _previewOrigin = _town.Bounds.ClampOrigin(_previewOrigin, PreviewSize);
+                RefreshPreview();
+                return PreviewValidity;
+            }
+
+            if (CurrentMode != Mode.Selected || !_town.TryGet(_targetInstanceId, out var building)) return PlacementResult.NotFound;
+            if (_content.TryGetBuilding(building.DefinitionId, out var def) && !def.Movable) return PlacementResult.NotFound;
+            var result = _town.TryRotate(building.InstanceId);
+            if (result != PlacementResult.Valid) return result;
+            SelectBuilding(building.InstanceId); // refresh the selection footprint
+            TownModified?.Invoke();
+            return result;
+        }
+
+        /// <summary>Whether the Rotate button should show (a movable building is selected, placed or moved).</summary>
+        public bool CanRotate =>
+            CurrentMode == Mode.PlacingNew || CurrentMode == Mode.Moving ||
+            (CurrentMode == Mode.Selected && _definition != null && _definition.Movable);
 
         public bool RemoveSelected()
         {
@@ -280,6 +321,21 @@ namespace TownBuilder
             }
         }
 
+        /// <summary>Long press on a building in Idle/Selected mode: pick it up straight into moving.</summary>
+        private void OnLongPressed(Vector2 screenPosition)
+        {
+            if (_town == null || TapsSuspended) return;
+            if (CurrentMode != Mode.Idle && CurrentMode != Mode.Selected) return;
+            var world = grid.ScreenToWorld(worldCamera, screenPosition);
+            if (!buildings.TryPick(world, out var building)) return;
+            if (!_content.TryGetBuilding(building.DefinitionId, out var def) || !def.Movable) return;
+            SelectBuilding(building.InstanceId);
+            BeginMoveSelected();
+        }
+
+        /// <summary>Same as a long press at a screen point (tests).</summary>
+        public void LongPressAt(Vector2 screenPosition) => OnLongPressed(screenPosition);
+
         public bool TryBeginDrag(Vector2 screenPosition)
         {
             if (_town == null || _preview == null) return false;
@@ -307,7 +363,7 @@ namespace TownBuilder
 
         // ---------------------------------------------------------------- Internals
 
-        private GridCoord PreviewSize => _definition != null ? _definition.FootprintSize : GridCoord.One;
+        private GridCoord PreviewSize => _definition != null ? PlacedBuilding.SizeFor(_definition.FootprintSize, _previewFlipped) : GridCoord.One;
 
         /// <summary>Moves the placement/move preview (clamped to the map). Used by taps, drags and tutorials.</summary>
         public void SetPreviewOrigin(GridCoord origin)
@@ -365,6 +421,8 @@ namespace TownBuilder
             }
             else if (CurrentMode == Mode.Moving && _preview != null)
             {
+                if (_preview.Flipped != _moveStartFlipped) _preview.SetFacing(_moveStartFlipped);
+                _previewFlipped = _moveStartFlipped;
                 _preview.SetAnchor(grid.FootprintAnchorWorld(_moveStartOrigin));
                 _preview.SetTint(Color.white);
                 _preview = null;

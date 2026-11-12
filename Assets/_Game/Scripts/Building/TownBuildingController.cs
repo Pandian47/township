@@ -65,13 +65,16 @@ namespace TownBuilder
 
             var view = Instantiate(buildingPrefab, buildingsRoot);
             view.Setup(b.InstanceId, definition);
+            view.SetFacing(b.Flipped);
             view.SetAnchor(grid.FootprintAnchorWorld(b.Origin));
             _views[b.InstanceId] = view;
         }
 
         private void OnBuildingMoved(PlacedBuilding b)
         {
-            if (_views.TryGetValue(b.InstanceId, out var view)) view.SetAnchor(grid.FootprintAnchorWorld(b.Origin));
+            if (!_views.TryGetValue(b.InstanceId, out var view)) return;
+            if (view.Flipped != b.Flipped) view.SetFacing(b.Flipped);
+            view.SetAnchor(grid.FootprintAnchorWorld(b.Origin));
         }
 
         private void OnBuildingRemoved(PlacedBuilding b)

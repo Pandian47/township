@@ -316,12 +316,13 @@ namespace TownBuilder
                 }
 
                 var origin = new GridCoord(entry.x, entry.y);
-                var result = town.TryAdd(entry.instanceId, entry.definitionId, origin, definition.FootprintSize, out _);
+                var result = town.TryAdd(entry.instanceId, entry.definitionId, origin, definition.FootprintSize, out _, entry.flipped);
                 if (result == PlacementResult.Valid) continue;
 
                 // The map changed under it (e.g. new railway): move it to the nearest free spot rather than lose it.
-                if (TryFindFreeOrigin(town, origin, definition.FootprintSize, null, out var free) &&
-                    town.TryAdd(entry.instanceId, entry.definitionId, free, definition.FootprintSize, out _) == PlacementResult.Valid)
+                var size = PlacedBuilding.SizeFor(definition.FootprintSize, entry.flipped);
+                if (TryFindFreeOrigin(town, origin, size, null, out var free) &&
+                    town.TryAdd(entry.instanceId, entry.definitionId, free, definition.FootprintSize, out _, entry.flipped) == PlacementResult.Valid)
                     warnings.Add($"Building '{entry.definitionId}' moved from ({entry.x},{entry.y}) to ({free.X},{free.Y}): {result}.");
                 else
                     warnings.Add($"Building '{entry.definitionId}' at ({entry.x},{entry.y}) skipped: {result}.");
@@ -513,6 +514,7 @@ namespace TownBuilder
                     x = b.Origin.X,
                     y = b.Origin.Y,
                     constructionEndsAtUnixMs = sites != null && sites.TryGet(b.InstanceId, out var site) ? site.EndUnixMs : 0,
+                    flipped = b.Flipped,
                 });
             }
         }

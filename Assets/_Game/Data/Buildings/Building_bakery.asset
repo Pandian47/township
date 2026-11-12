@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: Bakery
   category: 2
   sprite: {fileID: 21300000, guid: cdaa1c38245269c4d99616191cf295eb, type: 3}
+  flippedSprite: {fileID: 0}
   footprint: {x: 2, y: 2}
   unlockLevel: 1
   coinCost: 450
@@ -38,10 +39,10 @@ MonoBehaviour:
     streamColor: {r: 1, g: 0.78, b: 0.2, a: 1}
     dustPoint: {x: 0.72, y: 0.34}
     dustColor: {r: 1, g: 0.98, b: 0.94, a: 0.75}
-    walkFrom: {x: 0.34, y: 0.12}
-    walkTo: {x: 0.56, y: 0.06}
-    workerSpot: {x: 0.8, y: 0.13}
-    rumble: 0.006
+    walkFrom: {x: 0, y: 0}
+    walkTo: {x: 0, y: 0}
+    workerSpot: {x: 0, y: 0}
+    rumble: 0
   isFarmPlot: 0
   fruit: {fileID: 0}
   storageCapacityBonus: 0
