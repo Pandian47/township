@@ -42,7 +42,7 @@ namespace TownBuilder.EditorTools
         private static readonly Dictionary<string, Vector2> ChimneyPoints = new Dictionary<string, Vector2>
         {
             { "bakery", new Vector2(0.805f, 0.92f) },
-            { "feed_mill", new Vector2(0.447f, 0.965f) },
+            { "feed_mill", new Vector2(0.54f, 0.975f) },  // v0.38.2 art: stone chimney
             { "sugar_mill", new Vector2(0.637f, 0.965f) },
             { "creamery", new Vector2(0.655f, 0.97f) },
             { "juice_press", new Vector2(0.81f, 0.965f) },
@@ -1041,19 +1041,17 @@ namespace TownBuilder.EditorTools
         private static readonly Dictionary<string, WorkingAnimation> WorkingAnimations = new Dictionary<string, WorkingAnimation>
         {
             {
+                // v0.38.2 art (owner's new mill): the three workers are painted in, so no walking workers here.
                 "feed_mill", new WorkingAnimation
                 {
                     enabled = true,
-                    sleepPoint = new Vector2(0.28f, 0.42f),     // above the door
-                    streamPoint = new Vector2(0.893f, 0.384f),  // tip of the grain chute
-                    streamFall = 0.17f,                         // into the grain box below it
-                    streamColor = new Color(1f, 0.78f, 0.2f),
-                    dustPoint = new Vector2(0.895f, 0.30f),     // the grain box
-                    dustColor = new Color(0.98f, 0.93f, 0.8f, 0.7f),
-                    walkFrom = new Vector2(0.20f, 0.07f),       // in front of the door ramp
-                    walkTo = new Vector2(0.40f, 0.025f),        // in front of the sack pile
-                    workerSpot = new Vector2(0.75f, 0.06f),     // by the millstone
-                    rumble = 0.012f,
+                    sleepPoint = new Vector2(0.70f, 0.54f),     // above the door
+                    streamPoint = new Vector2(0.215f, 0.555f),  // the shovel
+                    streamFall = 0.065f,                        // into the grain cart
+                    streamColor = new Color(1f, 0.84f, 0.42f),
+                    dustPoint = new Vector2(0.52f, 0.57f),      // where the conveyor enters the house
+                    dustColor = new Color(0.98f, 0.9f, 0.62f, 0.7f),
+                    rumble = 0.008f,
                 }
             },
             // v0.38.0: the other production buildings.
@@ -1148,13 +1146,13 @@ namespace TownBuilder.EditorTools
             }
         }
 
-        /// <summary>Sets chimney points on factories that don't have one yet (keeps designer edits).</summary>
+        /// <summary>Sets the chimney points above on their factories (the list is the source of truth: re-measure after new art).</summary>
         private static void ConfigureChimneys()
         {
             var content = AssetDatabase.LoadAssetAtPath<GameContent>(ContentPath);
             foreach (var pair in ChimneyPoints)
             {
-                if (!content.TryGetBuilding(pair.Key, out var def) || def.HasChimney) continue;
+                if (!content.TryGetBuilding(pair.Key, out var def) || def.ChimneyPoint == pair.Value) continue;
                 def.EditorSetChimney(pair.Value);
                 EditorUtility.SetDirty(def);
             }

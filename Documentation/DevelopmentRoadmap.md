@@ -411,6 +411,7 @@ Our own features in the farming / town genre (not copied from any game).
 ### Device checklist (v0.38.0: every production building comes alive)
 - [ ] Idle Bakery, Sugar Mill, Creamery, Juice Press, Chicken Coop and Dairy Shed show Z letters
 - [ ] v0.38.1: Z letters come in bursts of three, then 5-10 s of quiet (buildings not in step)
+- [ ] v0.38.2: the new Feed Mill (grain cart, conveyor, silo) fits its 2x2 plot; working: grain falls from the shovel, dust at the conveyor, chimney smoke
 - [ ] Bakery working: warm steam at the display, a worker carrying sacks from the door, a baker by the display
 - [ ] Sugar Mill: cane juice pours into the bucket, water splashes under the wheel, a worker brings cane to the press
 - [ ] Creamery: puffs at the butter churn, a worker churning, one bringing milk; Juice Press: red juice into the bottle

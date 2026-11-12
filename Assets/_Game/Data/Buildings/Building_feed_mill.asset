@@ -29,19 +29,19 @@ MonoBehaviour:
   seasonal: 0
   season: 0
   eventOnly: 0
-  chimney: {x: 0.447, y: 0.965}
+  chimney: {x: 0.54, y: 0.975}
   working:
     enabled: 1
-    sleepPoint: {x: 0.28, y: 0.42}
-    streamPoint: {x: 0.893, y: 0.384}
-    streamFall: 0.17
-    streamColor: {r: 1, g: 0.78, b: 0.2, a: 1}
-    dustPoint: {x: 0.895, y: 0.3}
-    dustColor: {r: 0.98, g: 0.93, b: 0.8, a: 0.7}
-    walkFrom: {x: 0.2, y: 0.07}
-    walkTo: {x: 0.4, y: 0.025}
-    workerSpot: {x: 0.75, y: 0.06}
-    rumble: 0.012
+    sleepPoint: {x: 0.7, y: 0.54}
+    streamPoint: {x: 0.215, y: 0.555}
+    streamFall: 0.065
+    streamColor: {r: 1, g: 0.84, b: 0.42, a: 1}
+    dustPoint: {x: 0.52, y: 0.57}
+    dustColor: {r: 0.98, g: 0.9, b: 0.62, a: 0.7}
+    walkFrom: {x: 0, y: 0}
+    walkTo: {x: 0, y: 0}
+    workerSpot: {x: 0, y: 0}
+    rumble: 0.008
   isFarmPlot: 0
   fruit: {fileID: 0}
   storageCapacityBonus: 0
