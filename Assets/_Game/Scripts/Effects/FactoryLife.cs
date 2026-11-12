@@ -51,11 +51,14 @@ namespace TownBuilder
             public State State;
             public float Clock;
             public float NextGrain, NextDust, NextSleep;
+            public int SleepLeft; // Z letters left in the current burst
             public SpriteRenderer Carrier, Sack, Worker;
             public float WalkT;       // 0..1 along the walk
             public int WalkDir = 1;   // +1 from → to (carrying), -1 back
             public float Pause;
         }
+
+        private const int SleepBurst = 3;
 
         private readonly Dictionary<string, Life> _lives = new Dictionary<string, Life>();
         private readonly List<Particle> _particles = new List<Particle>();
@@ -107,6 +110,12 @@ namespace TownBuilder
 
             if (life.State == state) return;
             life.State = state;
+            if (state == State.Idle)
+            {
+                // First burst after a short random wait, so idle buildings don't snore in step.
+                life.NextSleep = life.Clock + Random.Range(0.5f, 4f);
+                life.SleepLeft = SleepBurst;
+            }
             bool working = state == State.Working;
             var spec = view.Definition.Working;
             if (working && WorkingAnimation.IsSet(spec.walkFrom) && life.Carrier == null) life.Carrier = CreateWorker(view, "Carrier", out life.Sack);
@@ -142,7 +151,14 @@ namespace TownBuilder
         {
             var spec = life.View.Definition.Working;
             if (!WorkingAnimation.IsSet(spec.sleepPoint) || sleepSprite == null || life.Clock < life.NextSleep) return;
-            life.NextSleep = life.Clock + 1.5f;
+            // Bursts: three Z letters half a second apart, then a 5-10 s rest.
+            if (--life.SleepLeft > 0) life.NextSleep = life.Clock + 0.55f;
+            else
+            {
+                life.SleepLeft = SleepBurst;
+                life.NextSleep = life.Clock + Random.Range(5f, 10f);
+            }
+
             Spawn(sleepSprite, PointWorld(life.View, spec.sleepPoint), new Vector2(0.12f, 0.32f), 0f, 2.2f, 0.35f, 0.75f,
                 Color.white, wobble: 1f);
         }

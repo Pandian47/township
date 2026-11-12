@@ -52,8 +52,23 @@ namespace TownBuilder.Tests
             var view = Object.FindAnyObjectByType<TownBuildingController>().CreatePreview(mill);
 
             life.SetState(view, FactoryLife.State.Idle);
-            life.Step(2f);
-            Assert.Greater(life.ParticleCount, 0, "idle: a sleepy Z rises");
+            // Idle: a burst of three Z letters within the first few seconds, then a rest of 5-10 s.
+            int most = 0;
+            for (int i = 0; i < 24; i++)
+            {
+                life.Step(0.25f);
+                most = Mathf.Max(most, life.ParticleCount);
+            }
+
+            Assert.AreEqual(3, most, "idle: a burst of three sleepy Z letters");
+            bool quiet = false; // the burst fades well before the next one (at least 5 s after its last Z)
+            for (int i = 0; i < 20; i++)
+            {
+                life.Step(0.25f);
+                quiet |= life.ParticleCount == 0;
+            }
+
+            Assert.IsTrue(quiet, "then a quiet gap");
             Assert.IsFalse(life.WorkersVisible(view.InstanceId), "nobody works while idle");
 
             life.SetState(view, FactoryLife.State.Working);
