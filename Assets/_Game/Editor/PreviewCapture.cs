@@ -189,7 +189,13 @@ namespace TownBuilder.EditorTools
                 var args = Environment.GetCommandLineArgs();
                 int i = Array.IndexOf(args, "-previewOut");
                 string folder = i >= 0 && i + 1 < args.Length ? args[i + 1] : Path.Combine(Directory.GetCurrentDirectory(), "Temp");
-                Capture(Path.Combine(folder, "MillLife"), HudState.MillLife);
+                int b = Array.IndexOf(args, "-buildings");
+                var ids = b >= 0 && b + 1 < args.Length ? args[b + 1].Split(',') : new[] { "feed_mill" };
+                foreach (var id in ids)
+                {
+                    _lifeBuilding = id;
+                    Capture(Path.Combine(folder, id == "feed_mill" ? "MillLife" : $"Life_{id}"), HudState.MillLife);
+                }
             }
             catch (Exception e)
             {
@@ -198,11 +204,13 @@ namespace TownBuilder.EditorTools
             }
         }
 
+        private static string _lifeBuilding = "feed_mill";
+
         private static void CaptureMillFrames(Camera cam, string folder)
         {
             var canvas = UnityEngine.Object.FindAnyObjectByType<Canvas>();
             if (canvas != null) canvas.gameObject.SetActive(false);
-            var mill = UnityEngine.Object.FindObjectsByType<BuildingView>().First(v => v.Definition != null && v.Definition.Id == "feed_mill");
+            var mill = UnityEngine.Object.FindObjectsByType<BuildingView>().First(v => v.Definition != null && v.Definition.Id == _lifeBuilding);
             var life = UnityEngine.Object.FindAnyObjectByType<FactoryLife>();
             var b = mill.SpriteRenderer.bounds;
             // Show the mill on its own: hide buildings standing in front of it (the sample barn hides the door side).

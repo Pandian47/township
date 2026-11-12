@@ -351,7 +351,9 @@ with a `SortingGroup`, so they are drawn in front of their own building but behi
 is driven by `Step(dt)` so the editor preview can render frames:
 `PreviewCapture.CaptureMillLifeFromCommandLine -previewOut Logs` → `Logs/MillLife/frame_*.png`
 (`Documentation/Images/FeedMill_Life.gif`). To add another building, measure its points and add it to
-`ProjectSetup.WorkingAnimations`.
+`ProjectSetup.WorkingAnimations`. v0.38.0 added Bakery, Sugar Mill, Creamery, Juice Press, Chicken Coop and Dairy Shed;
+`-buildings bakery,sugar_mill,...` renders frames for any of them into `Logs/Life_<id>`
+(`Documentation/Images/Factories_Life.gif`).
 
 ## 6g6m. Roads, paving and landscape tools (v0.36.0)
 

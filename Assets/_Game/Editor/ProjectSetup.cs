@@ -1056,6 +1056,85 @@ namespace TownBuilder.EditorTools
                     rumble = 0.012f,
                 }
             },
+            // v0.38.0: the other production buildings.
+            {
+                "bakery", new WorkingAnimation
+                {
+                    enabled = true,
+                    sleepPoint = new Vector2(0.35f, 0.47f),     // above the door
+                    dustPoint = new Vector2(0.72f, 0.34f),      // warm steam from the display
+                    dustColor = new Color(1f, 0.98f, 0.94f, 0.75f),
+                    walkFrom = new Vector2(0.34f, 0.12f),       // the door
+                    walkTo = new Vector2(0.56f, 0.06f),
+                    workerSpot = new Vector2(0.80f, 0.13f),     // by the display
+                    rumble = 0.006f,
+                }
+            },
+            {
+                "sugar_mill", new WorkingAnimation
+                {
+                    enabled = true,
+                    sleepPoint = new Vector2(0.36f, 0.50f),     // above the press
+                    streamPoint = new Vector2(0.335f, 0.245f),  // the spout
+                    streamFall = 0.12f,                         // into the bucket
+                    streamColor = new Color(0.98f, 0.94f, 0.78f),
+                    dustPoint = new Vector2(0.80f, 0.14f),      // splashes under the water wheel
+                    dustColor = new Color(0.78f, 0.92f, 1f, 0.7f),
+                    walkFrom = new Vector2(0.22f, 0.06f),       // the cane bundles
+                    walkTo = new Vector2(0.42f, 0.03f),         // the press
+                    rumble = 0.008f,
+                }
+            },
+            {
+                "creamery", new WorkingAnimation
+                {
+                    enabled = true,
+                    sleepPoint = new Vector2(0.32f, 0.53f),     // above the arch
+                    dustPoint = new Vector2(0.425f, 0.48f),     // the butter churn
+                    dustColor = new Color(1f, 0.99f, 0.92f, 0.8f),
+                    walkFrom = new Vector2(0.20f, 0.12f),       // the milk can
+                    walkTo = new Vector2(0.38f, 0.05f),
+                    workerSpot = new Vector2(0.55f, 0.07f),     // next to the churn
+                    rumble = 0.006f,
+                }
+            },
+            {
+                "juice_press", new WorkingAnimation
+                {
+                    enabled = true,
+                    sleepPoint = new Vector2(0.55f, 0.50f),     // above the door
+                    streamPoint = new Vector2(0.19f, 0.30f),    // the barrel tap
+                    streamFall = 0.08f,                         // into the bottle
+                    streamColor = new Color(0.86f, 0.12f, 0.16f),
+                    walkFrom = new Vector2(0.33f, 0.10f),       // the apple crates
+                    walkTo = new Vector2(0.62f, 0.07f),
+                    workerSpot = new Vector2(0.27f, 0.08f),     // at the press
+                    rumble = 0.006f,
+                }
+            },
+            {
+                "chicken_coop", new WorkingAnimation
+                {
+                    enabled = true,
+                    sleepPoint = new Vector2(0.41f, 0.55f),     // the coop door
+                    streamPoint = new Vector2(0.225f, 0.37f),   // the feeder
+                    streamFall = 0.05f,
+                    streamColor = new Color(1f, 0.82f, 0.3f),
+                    workerSpot = new Vector2(0.60f, 0.03f),     // at the gate
+                    rumble = 0f,
+                }
+            },
+            {
+                "dairy_shed", new WorkingAnimation
+                {
+                    enabled = true,
+                    sleepPoint = new Vector2(0.27f, 0.52f),     // above the stable door
+                    dustPoint = new Vector2(0.40f, 0.18f),      // hay at the trough
+                    dustColor = new Color(0.96f, 0.86f, 0.42f, 0.65f),
+                    workerSpot = new Vector2(0.47f, 0.03f),     // by the fence
+                    rumble = 0f,
+                }
+            },
         };
 
         private static void ConfigureWorkingAnimations()

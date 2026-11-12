@@ -23,7 +23,25 @@ MonoBehaviour:
   maxCount: 0
   movable: 1
   showInShop: 1
+  happiness: 0
+  landscapeTool: 0
+  landscapeToolKind: 0
+  seasonal: 0
+  season: 0
+  eventOnly: 0
   chimney: {x: 0.81, y: 0.965}
+  working:
+    enabled: 1
+    sleepPoint: {x: 0.55, y: 0.5}
+    streamPoint: {x: 0.19, y: 0.3}
+    streamFall: 0.08
+    streamColor: {r: 0.86, g: 0.12, b: 0.16, a: 1}
+    dustPoint: {x: 0, y: 0}
+    dustColor: {r: 0.98, g: 0.93, b: 0.8, a: 0.7}
+    walkFrom: {x: 0.33, y: 0.1}
+    walkTo: {x: 0.62, y: 0.07}
+    workerSpot: {x: 0.27, y: 0.08}
+    rumble: 0.006
   isFarmPlot: 0
   fruit: {fileID: 0}
   storageCapacityBonus: 0

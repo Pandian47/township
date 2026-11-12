@@ -408,6 +408,14 @@ Our own features in the farming / town genre (not copied from any game).
 | 4 | **Seasons**: the town's look follows the real month, seasonal decorations | Done (v0.33.0) |
 | 5 | **Launch prep**: settings, credits, privacy policy, app icon, store screenshots, AAB checklist | Done (v0.35.0) |
 
+### Device checklist (v0.38.0: every production building comes alive)
+- [ ] Idle Bakery, Sugar Mill, Creamery, Juice Press, Chicken Coop and Dairy Shed show Z letters
+- [ ] Bakery working: warm steam at the display, a worker carrying sacks from the door, a baker by the display
+- [ ] Sugar Mill: cane juice pours into the bucket, water splashes under the wheel, a worker brings cane to the press
+- [ ] Creamery: puffs at the butter churn, a worker churning, one bringing milk; Juice Press: red juice into the bottle
+- [ ] Chicken Coop / Dairy Shed: grain from the feeder / hay at the trough, a farmer by the gate / fence
+- [ ] Nothing draws on top of a building standing in front; the town stays smooth with several factories working
+
 ### Device checklist (v0.37.0: living Feed Mill)
 - [ ] An idle Feed Mill (nothing queued) has small "Z" letters drifting up from above the door
 - [ ] Start Cow Feed: grains stream from the chute into the box, dust puffs rise, the mill gently squashes and stretches
