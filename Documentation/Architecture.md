@@ -337,6 +337,16 @@ calendar (`Tick`, called every second by `EventPanel`), counts harvests / produc
 set of unlocked decorations and filters the shop (`BuildingShopPanel.SetListingFilter`). `EventPanel` = the town button
 + window. DEV "Start weekend event now" runs one from today for two days. Saved in `SaveData.events`.
 
+## 6g6o. Phone back button and quit dialog (v0.39.0)
+
+`BackButtonHandler` (Scripts/UI, one per scene on the canvas, built by `SceneBuilder.BuildQuitDialog` as the last
+child so it draws on top) reads the back button (Input System `Keyboard.escapeKey`, which Android's back button maps
+to). Order: quit dialog open → close it; otherwise press the top-most active Back/Close/Cancel/Deselect button in the
+canvas (later in the hierarchy = drawn on top; a BackButton in the same window wins, so the shop steps back to its
+categories; DEV buttons ignored); nothing open → show the quit dialog ("LEAVING?", Stay / Quit). Quit calls
+`BeforeQuit` (the town's `SaveNow`, set by `TownSceneController`) and then `QuitApplication` (`Application.Quit`,
+replaceable in tests). New windows only need a button named CloseButton (or BackButton) to work with it.
+
 ## 6g6n. Living production buildings (v0.37.0, Feed Mill first)
 
 `WorkingAnimation` (Scripts/Building) on `BuildingDefinition.Working`: points 0-1 on the sprite (like the chimney

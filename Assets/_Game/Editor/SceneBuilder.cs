@@ -102,6 +102,7 @@ namespace TownBuilder.EditorTools
             var settingsPanel = BuildSettingsPanel(canvas.transform);
 
             var dialog = CreateConfirmDialog(canvas.transform);
+            BuildQuitDialog(canvas.transform); // last: drawn on top, handles the phone's back button
 
             var controllerGo = Go("MainMenuController");
             var controller = controllerGo.AddComponent<MainMenuController>();
@@ -118,6 +119,35 @@ namespace TownBuilder.EditorTools
         }
 
         public const string CreditsTextPath = "Assets/_Game/Data/Text/Credits.txt";
+
+        /// <summary>
+        /// Quit dialog + phone back button (v0.39.0): wooden frame with the LEAVING? sign, a friendly message, green Stay
+        /// and red Quit. <see cref="BackButtonHandler"/> opens it when the back button is pressed with nothing else open.
+        /// </summary>
+        private static BackButtonHandler BuildQuitDialog(Transform canvas)
+        {
+            var outline = AssetDatabase.LoadAssetAtPath<Material>(ProjectSetup.UIFontOutlineMaterialPath);
+            var container = Stretch("QuitDialog", canvas);
+            var root = Stretch("Root", container);
+            AddImage(root, Dim, rounded: false);
+            var frame = BuildShopFrame(root, "Window", "LEAVING?", out _, out var close, out _, new Vector2(1120, 640));
+            var message = Label(MakeRect("Message", frame, new Vector2(0f, 0.5f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0, -60), new Vector2(-160, -150)),
+                "Text", "Leaving already?\nYour town is saved and will be waiting for you.", 44, TextAnchor.MiddleCenter, new Color(0.40f, 0.24f, 0.10f));
+            var buttons = MakeRect("Buttons", frame, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 70), new Vector2(-160, 130));
+            HRow(buttons, 60, TextAnchor.MiddleCenter);
+            var stay = MakeButton(buttons, "StayButton", "Stay", new Vector2(360, 130), Green, out var stayLabel, 56);
+            var quit = MakeButton(buttons, "QuitButton", "Quit", new Vector2(360, 130), Red, out var quitLabel, 56);
+            if (outline != null)
+            {
+                stayLabel.fontSharedMaterial = outline;
+                quitLabel.fontSharedMaterial = outline;
+            }
+
+            var handler = container.gameObject.AddComponent<BackButtonHandler>();
+            Wire(handler, ("quitRoot", root.gameObject), ("stayButton", stay), ("quitButton", quit), ("closeButton", close), ("messageText", message));
+            root.gameObject.SetActive(false);
+            return handler;
+        }
 
         /// <summary>
         /// Settings window (v0.35.0), shared by the main menu and the town: wooden frame with the SETTINGS sign, music and
@@ -585,6 +615,7 @@ namespace TownBuilder.EditorTools
                 ("gemSprite", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.GemIconPath)),
                 ("xpSprite", AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.XpIconPath)));
             var devPanel = BuildDevPanel(canvas.transform);
+            var backHandler = BuildQuitDialog(canvas.transform); // last: drawn on top, handles the phone's back button
 
             // Every panel and action bar fades/slides in when shown.
             foreach (var t in canvas.GetComponentsInChildren<Transform>(true))
@@ -623,6 +654,7 @@ namespace TownBuilder.EditorTools
                 ("rewardedCoinsButton", rewarded),
                 ("menuButton", menuButton),
                 ("settingsPanel", settingsPanel),
+                ("backButton", backHandler),
                 ("placementBar", placementBar.gameObject),
                 ("placementInfoText", placementInfo),
                 ("confirmPlacementButton", confirmPlacement),

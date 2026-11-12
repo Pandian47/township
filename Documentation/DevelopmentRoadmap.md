@@ -408,9 +408,17 @@ Our own features in the farming / town genre (not copied from any game).
 | 4 | **Seasons**: the town's look follows the real month, seasonal decorations | Done (v0.33.0) |
 | 5 | **Launch prep**: settings, credits, privacy policy, app icon, store screenshots, AAB checklist | Done (v0.35.0) |
 
+### Device checklist (v0.39.0: back button and quit dialog)
+- [ ] In the town with nothing open, the phone's back button shows "LEAVING?" with Stay and Quit
+- [ ] Back again or Stay or X closes it; Quit closes the game and the town is all there when you reopen it
+- [ ] With a window open (Build, Barn, Orders, Goals, Settings, Collections...), back closes that window first
+- [ ] In a Build category, back returns to the category cards first; while placing or with a building selected, back cancels
+- [ ] In the main menu, back asks to quit straight away
+
 ### Device checklist (v0.38.0: every production building comes alive)
 - [ ] Idle Bakery, Sugar Mill, Creamery, Juice Press, Chicken Coop and Dairy Shed show Z letters
 - [ ] v0.38.1: Z letters come in bursts of three, then 5-10 s of quiet (buildings not in step)
+- [ ] v0.38.3: pinch zooms in about 1.5x closer than before; buildings still look sharp enough
 - [ ] v0.38.2: the new Feed Mill (grain cart, conveyor, silo) fits its 2x2 plot; working: grain falls from the shovel, dust at the conveyor, chimney smoke
 - [ ] Bakery working: warm steam at the display, a worker carrying sacks from the door, a baker by the display
 - [ ] Sugar Mill: cane juice pours into the bucket, water splashes under the wheel, a worker brings cane to the press

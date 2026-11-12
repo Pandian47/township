@@ -55,6 +55,8 @@ namespace TownBuilder
         [Tooltip("The round menu button opens Settings (sound, credits, privacy, main menu).")]
         [SerializeField] private Button menuButton;
         [SerializeField] private SettingsPanel settingsPanel;
+        [Tooltip("Phone back button: closes the top window, or asks to quit.")]
+        [SerializeField] private BackButtonHandler backButton;
 
         [Header("Placement bar (placing / moving)")]
         [SerializeField] private GameObject placementBar;
@@ -238,6 +240,7 @@ namespace TownBuilder
 
         public LandscapePanel LandscapePanel => landscapePanel;
         public SettingsPanel SettingsPanel => settingsPanel;
+        public BackButtonHandler BackButton => backButton;
         public TasksPanel TasksPanel => tasksPanel;
         public Button MenuButton => menuButton;
 

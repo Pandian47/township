@@ -176,7 +176,7 @@ namespace TownBuilder.EditorTools
             return outputPath;
         }
 
-        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm, ShopCards, Event, Truck, Home, Collections, Autumn, Winter, Landscape, Settings, Credits, Tasks, MillLife }
+        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm, ShopCards, Event, Truck, Home, Collections, Autumn, Winter, Landscape, Settings, Credits, Tasks, MillLife, Quit }
 
         /// <summary>
         /// Command line (v0.37.0): animation frames of the Feed Mill, idle then working, into &lt;-previewOut&gt;/MillLife
@@ -294,6 +294,7 @@ namespace TownBuilder.EditorTools
                 Capture(Path.Combine(folder, "Preview_Town_Settings.png"), HudState.Settings);
                 Capture(Path.Combine(folder, "Preview_Town_Credits.png"), HudState.Credits);
                 Capture(Path.Combine(folder, "Preview_Town_Tasks.png"), HudState.Tasks);
+                Capture(Path.Combine(folder, "Preview_Town_Quit.png"), HudState.Quit);
             }
             catch (Exception e)
             {
@@ -335,8 +336,9 @@ namespace TownBuilder.EditorTools
 
             Find(canvas, "PlacementActionBar").SetActive(state == HudState.Placing);
             Find(canvas, "SelectionActionBar").SetActive(false);
-            Find(canvas, "BottomNavigation").SetActive(state == HudState.Idle || state == HudState.Settings || state == HudState.Tasks);
+            Find(canvas, "BottomNavigation").SetActive(state == HudState.Idle || state == HudState.Settings || state == HudState.Tasks || state == HudState.Quit);
             if (_storeMode) Find(canvas, "DevPanel").SetActive(false);
+            if (state == HudState.Quit) Find(canvas, "QuitDialog").transform.Find("Root").gameObject.SetActive(true);
 
             if (state == HudState.Settings || state == HudState.Credits)
             {

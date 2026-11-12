@@ -13,7 +13,8 @@ namespace TownBuilder
         [SerializeField] private PointerInput pointerInput;
 
         [Header("Zoom (orthographic size)")]
-        [SerializeField] private float minOrthographicSize = 2.5f;
+        [Tooltip("Closest zoom (v0.38.3: 1.6, was 2.5). Smaller = closer.")]
+        [SerializeField] private float minOrthographicSize = 1.6f;
         [SerializeField] private float maxOrthographicSize = 12f;
         [SerializeField] private float zoomSmoothTime = 0.08f;
 

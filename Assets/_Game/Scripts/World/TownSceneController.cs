@@ -256,6 +256,7 @@ namespace TownBuilder
             if (effects != null && happinessController != null) happinessController.Rewarded += effects.ShowReward;
 
             hud.Initialize(placement, farming, production, construction, _orders, _progression, _storage, _wallet, _progress, _context.Content, _context.Ads, ReturnToMainMenu);
+            if (hud.BackButton != null) hud.BackButton.BeforeQuit = SaveNow; // quitting from the back button saves first
             hud.InitializeTasks(_tasks);
             if (trainController != null) hud.InitializeTrain(trainController, _context.Content, _inventory, _context.Ads);
             if (truckController != null) hud.InitializeTruck(truckController, _context.Content, _inventory, _context.Ads);
