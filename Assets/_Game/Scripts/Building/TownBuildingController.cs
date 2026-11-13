@@ -38,7 +38,7 @@ namespace TownBuilder
         }
 
         /// <summary>Finds the front-most building whose silhouette contains the world point.</summary>
-        public bool TryPick(Vector2 worldPoint, out PlacedBuilding building)
+        public bool TryPick(Vector2 worldPoint, out PlacedBuilding building, string ignoreInstanceId = null)
         {
             building = null;
             BuildingView best = null;
@@ -46,13 +46,15 @@ namespace TownBuilder
             var axisY = grid.AxisY;
             foreach (var view in _views.Values)
             {
-                if (!view.HitTest(worldPoint, axisX, axisY)) continue;
+                if (view.InstanceId == ignoreInstanceId || !view.HitTest(worldPoint, axisX, axisY)) continue;
                 // Lower anchor = closer to the camera = drawn in front.
-                if (best == null || view.transform.position.y < best.transform.position.y) best = view;
+                if (best == null || view.Anchor.y < best.Anchor.y) best = view;
             }
 
             if (best != null) return _town.TryGet(best.InstanceId, out building);
-            return _town.TryGetAt(grid.WorldToCell(worldPoint), out building);
+            if (_town.TryGetAt(grid.WorldToCell(worldPoint), out building) && building.InstanceId != ignoreInstanceId) return true;
+            building = null;
+            return false;
         }
 
         private void OnBuildingAdded(PlacedBuilding b)

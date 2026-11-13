@@ -561,14 +561,21 @@ namespace TownBuilder.EditorTools
             var buildButton = MakeButton(nav, "BuildButton", "Build", new Vector2(260, 120), Green, 48);
 
             // --- Placement bar
-            var placementBar = MakeRect("PlacementActionBar", safe, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 30), new Vector2(1260, 160));
+            var placementBar = MakeRect("PlacementActionBar", safe, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 30), new Vector2(1400, 160));
             AddImage(placementBar, PanelColor);
             HRow(placementBar, 24, TextAnchor.MiddleCenter, 24);
             var placementInfo = Label(placementBar, "Info", "", 34, TextAnchor.MiddleLeft, Ink);
-            Prefer(placementInfo, 600, 120);
+            Prefer(placementInfo, 460, 120);
+            var removeEdit = MakeButton(placementBar, "RemoveButton", "Remove", new Vector2(190, 110), new Color(0.55f, 0.16f, 0.16f));
             var rotatePlacement = MakeButton(placementBar, "RotateButton", "Rotate", new Vector2(180, 110), new Color(0.13f, 0.58f, 0.6f));
             var cancelPlacement = MakeButton(placementBar, "CancelButton", "Cancel", new Vector2(180, 110), Red);
             var confirmPlacement = MakeButton(placementBar, "ConfirmButton", "Place", new Vector2(180, 110), Green);
+
+            // --- "Edit mode" pill (top centre, while a placed building is being moved)
+            var editPill = MakeRect("EditModePill", safe, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -150), new Vector2(460, 96));
+            AddImage(editPill, new Color(0.12f, 0.16f, 0.2f, 0.9f), raycast: false);
+            Label(editPill, "Text", "Edit mode", 48, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+            editPill.gameObject.SetActive(false);
 
             // --- Selection bar
             var selectionBar = MakeRect("SelectionActionBar", safe, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 30), new Vector2(1200, 150));
@@ -666,6 +673,8 @@ namespace TownBuilder.EditorTools
                 ("confirmPlacementButton", confirmPlacement),
                 ("cancelPlacementButton", cancelPlacement),
                 ("rotatePlacementButton", rotatePlacement),
+                ("removeEditButton", removeEdit),
+                ("editModePill", editPill.gameObject),
                 ("rotateButton", rotateButton),
                 ("selectionBar", selectionBar.gameObject),
                 ("selectionNameText", selectionName),

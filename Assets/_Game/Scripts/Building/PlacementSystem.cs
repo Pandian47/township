@@ -8,7 +8,7 @@ namespace TownBuilder
     /// Player interaction with buildings: select, place new (with preview), move, remove.
     ///
     ///   Idle --tap building--> Selected --Move--> Moving --Confirm/Cancel--> Selected
-    ///   Idle --long press building-------------> Moving (v0.40.0)
+    ///   Idle --long press building-------------> Moving (v0.40.0; "Edit mode": no production window, v0.42.0)
     ///   Idle --shop item-----> PlacingNew --Confirm/Cancel--> Idle
     ///   Rotate (Selected / Moving / PlacingNew) turns the building to its other facing (footprint X and Y swap).
     ///
@@ -38,6 +38,8 @@ namespace TownBuilder
         [SerializeField] private Color cellValidColor = new Color(0.35f, 1f, 0.45f, 0.55f);
         [SerializeField] private Color cellInvalidColor = new Color(1f, 0.3f, 0.3f, 0.6f);
         [SerializeField] private Color cellSelectedColor = new Color(1f, 0.95f, 0.4f, 0.45f);
+        [Tooltip("The shadow on the ground under a picked-up building (edit mode).")]
+        [SerializeField] private Color liftShadowColor = new Color(0.04f, 0.2f, 0.0f, 0.5f);
 
         [Tooltip("When a new building is picked from the shop, search this many cells around the screen centre for a free spot.")]
         [SerializeField] private int freeSpotSearchRadius = 12;
@@ -118,6 +120,7 @@ namespace TownBuilder
             pointerInput.RegisterDragHandler(this);
             pointerInput.Tapped += OnTapped;
             pointerInput.LongPressed += OnLongPressed;
+            pointerInput.LongPressProgress += OnHold;
         }
 
         private void OnDisable()
@@ -126,6 +129,7 @@ namespace TownBuilder
             pointerInput.UnregisterDragHandler(this);
             pointerInput.Tapped -= OnTapped;
             pointerInput.LongPressed -= OnLongPressed;
+            pointerInput.LongPressProgress -= OnHold;
         }
 
         // ---------------------------------------------------------------- Commands (called by UI)
@@ -144,6 +148,7 @@ namespace TownBuilder
             _targetInstanceId = null;
             _previewFlipped = false;
             _preview = buildings.CreatePreview(definition);
+            _preview.SetLifted(true);
 
             var size = definition.FootprintSize;
             var centerCell = grid.ScreenToCell(worldCamera, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
@@ -162,6 +167,7 @@ namespace TownBuilder
             if (!buildings.TryGetView(building.InstanceId, out var view)) return false;
 
             _preview = view;
+            view.SetLifted(true); // picked up
             _moveStartOrigin = building.Origin;
             _moveStartFlipped = building.Flipped;
             _previewFlipped = building.Flipped;
@@ -201,8 +207,9 @@ namespace TownBuilder
                 var result = _town.TryMove(_targetInstanceId, _previewOrigin, _previewFlipped);
                 if (result != PlacementResult.Valid) return false;
                 string id = _targetInstanceId;
+                _preview.SetLifted(false); // put down
                 _preview = null;
-                SelectBuilding(id);
+                EnterIdle(); // edit mode is over: no window opens
                 TownModified?.Invoke();
                 return true;
             }
@@ -213,14 +220,6 @@ namespace TownBuilder
         /// <summary>Cancels the current placement/move, or clears the selection.</summary>
         public void Cancel()
         {
-            if (CurrentMode == Mode.Moving)
-            {
-                string id = _targetInstanceId;
-                CancelActive();
-                SelectBuilding(id);
-                return;
-            }
-
             CancelActive();
             EnterIdle();
         }
@@ -255,11 +254,13 @@ namespace TownBuilder
             CurrentMode == Mode.PlacingNew || CurrentMode == Mode.Moving ||
             (CurrentMode == Mode.Selected && _definition != null && _definition.Movable);
 
+        /// <summary>Removes the selected building, or the one being edited (Remove in edit mode puts it back first).</summary>
         public bool RemoveSelected()
         {
-            if (CurrentMode != Mode.Selected || !_town.TryGet(_targetInstanceId, out var building)) return false;
+            if ((CurrentMode != Mode.Selected && CurrentMode != Mode.Moving) || !_town.TryGet(_targetInstanceId, out var building)) return false;
             if (_content.TryGetBuilding(building.DefinitionId, out var definition) && !definition.Removable) return false;
 
+            if (CurrentMode == Mode.Moving) CancelActive();
             _town.Remove(building.InstanceId);
             EnterIdle();
             TownModified?.Invoke();
@@ -291,6 +292,8 @@ namespace TownBuilder
                 case Mode.PlacingNew:
                 case Mode.Moving:
                 {
+                    // Edit mode: tapping another building puts this one down (when it fits) and picks that one up.
+                    if (CurrentMode == Mode.Moving && TrySwitchEditTarget(screenPosition)) break;
                     var size = PreviewSize;
                     var cell = grid.ScreenToCell(worldCamera, screenPosition);
                     SetPreviewOrigin(new GridCoord(cell.X - size.X / 2, cell.Y - size.Y / 2));
@@ -321,6 +324,30 @@ namespace TownBuilder
             }
         }
 
+        /// <summary>
+        /// Edit mode, tap on a different movable building: the one being edited is placed where it is when that spot is valid,
+        /// otherwise it goes back to where it stood before it was picked up; then the tapped one is picked up.
+        /// Returns true when the tap was used.
+        /// </summary>
+        private bool TrySwitchEditTarget(Vector2 screenPosition)
+        {
+            var world = grid.ScreenToWorld(worldCamera, screenPosition);
+            if (_preview != null && _preview.HitTest(world, grid.AxisX, grid.AxisY)) return false; // a tap on the held building itself
+            if (!buildings.TryPick(world, out var other, _targetInstanceId)) return false;
+            if (!_content.TryGetBuilding(other.DefinitionId, out var def) || !def.Movable) return false;
+
+            _quietChanges = true; // no flash of the first building's window or of the selection bar in between
+            try
+            {
+                if (CanConfirm) Confirm();   // fits: it stays here
+                else CancelActive();         // blocked spot: back to its old place
+                SelectBuilding(other.InstanceId);
+            }
+            finally { _quietChanges = false; }
+            BeginMoveSelected();
+            return true;
+        }
+
         /// <summary>Long press on a building in Idle/Selected mode: pick it up straight into moving.</summary>
         private void OnLongPressed(Vector2 screenPosition)
         {
@@ -329,9 +356,39 @@ namespace TownBuilder
             var world = grid.ScreenToWorld(worldCamera, screenPosition);
             if (!buildings.TryPick(world, out var building)) return;
             if (!_content.TryGetBuilding(building.DefinitionId, out var def) || !def.Movable) return;
-            SelectBuilding(building.InstanceId);
+            // Straight into edit mode: the UI must not see the in-between "Selected" state (it would flash the building's window).
+            _holdCue?.Hide();
+            _quietChanges = true;
+            try { SelectBuilding(building.InstanceId); }
+            finally { _quietChanges = false; }
             BeginMoveSelected();
         }
+
+        private LiftCue _holdCue;
+
+        /// <summary>A finger is being held on the screen: show the yellow arrow above a movable building under it.</summary>
+        private void OnHold(Vector2 screenPosition, float progress)
+        {
+            if (progress <= 0f || _town == null || TapsSuspended || (CurrentMode != Mode.Idle && CurrentMode != Mode.Selected))
+            {
+                _holdCue?.Hide();
+                return;
+            }
+
+            var world = grid.ScreenToWorld(worldCamera, screenPosition);
+            if (!buildings.TryPick(world, out var building) || !_content.TryGetBuilding(building.DefinitionId, out var def) || !def.Movable ||
+                !buildings.TryGetView(building.InstanceId, out var view))
+            {
+                _holdCue?.Hide();
+                return;
+            }
+
+            if (_holdCue == null) _holdCue = new GameObject("HoldCue").AddComponent<LiftCue>();
+            _holdCue.Show(view, progress);
+        }
+
+        /// <summary>Same as a tap at a screen point (tests).</summary>
+        public void TapAt(Vector2 screenPosition) => OnTapped(screenPosition);
 
         /// <summary>Same as a long press at a screen point (tests).</summary>
         public void LongPressAt(Vector2 screenPosition) => OnLongPressed(screenPosition);
@@ -384,7 +441,7 @@ namespace TownBuilder
 
             _preview.SetAnchor(grid.FootprintAnchorWorld(_previewOrigin));
             _preview.SetTint(valid ? previewValidTint : previewInvalidTint);
-            highlighter.Show(_previewOrigin, PreviewSize, valid ? cellValidColor : cellInvalidColor);
+            highlighter.ShowEdit(_previewOrigin, PreviewSize, valid, liftShadowColor, cellInvalidColor);
             StateChanged?.Invoke();
         }
 
@@ -425,6 +482,7 @@ namespace TownBuilder
                 _previewFlipped = _moveStartFlipped;
                 _preview.SetAnchor(grid.FootprintAnchorWorld(_moveStartOrigin));
                 _preview.SetTint(Color.white);
+                _preview.SetLifted(false);
                 _preview = null;
             }
         }
@@ -441,10 +499,12 @@ namespace TownBuilder
                 view.SetTint(Color.white);
         }
 
+        private bool _quietChanges;
+
         private void SetMode(Mode mode)
         {
             CurrentMode = mode;
-            StateChanged?.Invoke();
+            if (!_quietChanges) StateChanged?.Invoke();
         }
 
         /// <summary>Spiral search for the closest origin where the footprint fits; falls back to <paramref name="start"/>.</summary>

@@ -64,6 +64,10 @@ namespace TownBuilder
         [SerializeField] private Button confirmPlacementButton;
         [SerializeField] private Button cancelPlacementButton;
         [SerializeField] private Button rotatePlacementButton;
+        [Tooltip("Remove, shown in edit mode (long press on a building) when it can be removed (v0.42.0).")]
+        [SerializeField] private Button removeEditButton;
+        [Tooltip("The 'Edit mode' pill at the top, shown while a placed building is being moved (v0.42.0).")]
+        [SerializeField] private GameObject editModePill;
 
         [Header("Selection bar")]
         [SerializeField] private GameObject selectionBar;
@@ -161,6 +165,7 @@ namespace TownBuilder
             if (rotatePlacementButton != null) rotatePlacementButton.onClick.AddListener(() => _placement.Rotate());
             deselectButton.onClick.AddListener(() => _placement.Cancel());
             removeButton.onClick.AddListener(AskRemove);
+            if (removeEditButton != null) removeEditButton.onClick.AddListener(AskRemove);
 
             _placement.StateChanged += Refresh;
             _wallet.Changed += Refresh;
@@ -358,9 +363,11 @@ namespace TownBuilder
             bottomNavigation.SetActive(!placing && !selected); // also hides the rewarded-ad button inside it
             if ((placing || selected) && landPanel != null && landPanel.IsOpen) landPanel.Hide();
             placementBar.SetActive(placing);
-            selectionBar.SetActive(selected);
 
             _placement.TryGetTargetDefinition(out var definition);
+            bool editing = mode == PlacementSystem.Mode.Moving;
+            if (editModePill != null) editModePill.SetActive(editing);
+            if (removeEditButton != null) removeEditButton.gameObject.SetActive(editing && definition != null && definition.Removable);
 
             if (placing)
             {
@@ -400,6 +407,11 @@ namespace TownBuilder
             bool fieldSelected = selected && !building && definition != null && (definition.IsFarmPlot || definition.IsFruitTree);
             if (fieldSelected && fieldPanel.PlotId != _placement.TargetInstanceId) fieldPanel.ShowFor(_placement.TargetInstanceId);
             else if (!fieldSelected && fieldPanel.PlotId != null) fieldPanel.Hide();
+
+            // v0.42.0: a tap opens what the building does (its window) and nothing else; Move / Rotate / Remove are edit
+            // mode (long press). Buildings without a window (Town Hall, decorations...) keep the bar on tap.
+            bool hasWindow = building || factorySelected || stationSelected || homeSelected || depotSelected || fieldSelected;
+            selectionBar.SetActive(selected && !hasWindow);
         }
 
         private string BuildPlacementInfo(PlacementSystem.Mode mode, BuildingDefinition definition)

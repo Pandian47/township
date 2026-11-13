@@ -125,7 +125,8 @@ namespace TownBuilder.Tests
                 Assert.AreEqual(start, placed.Origin, "Cancel must restore the original position");
             }
 
-            Assert.AreEqual(PlacementSystem.Mode.Selected, scene.Placement.CurrentMode);
+            Assert.AreEqual(PlacementSystem.Mode.Idle, scene.Placement.CurrentMode, "placing or cancelling ends edit mode");
+            scene.Placement.SelectBuilding(placed.InstanceId);
             Assert.IsTrue(scene.Placement.RemoveSelected());
             Assert.IsFalse(scene.Town.Buildings.Any(b => b.DefinitionId == "barn"));
         }

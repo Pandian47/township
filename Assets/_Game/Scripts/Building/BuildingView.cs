@@ -11,6 +11,27 @@ namespace TownBuilder
 
         private readonly Vector2[] _silhouette = new Vector2[6];
 
+        /// <summary>How high a picked-up building rises (world units).</summary>
+        public const float LiftHeight = 0.28f;
+        private const float RaiseSeconds = 0.26f;
+        private const float LowerSeconds = 0.12f;
+        private const int LiftedSortingOrder = 1000;
+
+        private Vector3 _anchor;
+        private float _lift;
+        private float _liftTarget;
+        private float _liftFrom;
+        private float _liftAge = 1f;
+        private float _liftSeconds = RaiseSeconds;
+        private int _baseSortingOrder;
+        private bool _orderRaised;
+
+        /// <summary>The building's place on the ground (its position without the lift).</summary>
+        public Vector3 Anchor => _anchor;
+
+        /// <summary>True while the building is picked up (edit mode).</summary>
+        public bool Lifted => _liftTarget > 0f;
+
         public string InstanceId { get; private set; }
         public BuildingDefinition Definition { get; private set; }
         public SpriteRenderer SpriteRenderer => spriteRenderer;
@@ -69,7 +90,60 @@ namespace TownBuilder
             gameObject.name = $"{definition.Id}_{shortId}";
         }
 
-        public void SetAnchor(Vector3 worldAnchor) => transform.position = new Vector3(worldAnchor.x, worldAnchor.y, 0f);
+        public void SetAnchor(Vector3 worldAnchor)
+        {
+            _anchor = new Vector3(worldAnchor.x, worldAnchor.y, 0f);
+            ApplyLift();
+        }
+
+        /// <summary>
+        /// Picks the building up (rises a little and draws in front of everything) or puts it back down (v0.42.0).
+        /// Only the picture moves: <see cref="Anchor"/>, the footprint and hit tests stay on the ground. Instant with Reduce motion.
+        /// </summary>
+        public void SetLifted(bool lifted)
+        {
+            float target = lifted ? LiftHeight : 0f;
+            if (Mathf.Approximately(target, _liftTarget) && _liftAge >= 1f) return;
+            _liftTarget = target;
+            _liftFrom = _lift;
+            _liftAge = 0f;
+            _liftSeconds = lifted ? RaiseSeconds : LowerSeconds;
+            if (MotionPreferences.ReduceMotion || !isActiveAndEnabled)
+            {
+                _lift = _liftTarget;
+                _liftAge = 1f;
+            }
+
+            ApplyLift();
+        }
+
+        private void Update()
+        {
+            if (_liftAge >= 1f) return;
+            _liftAge = Mathf.Min(1f, _liftAge + Time.unscaledDeltaTime / _liftSeconds);
+            float t = _liftAge - 1f;
+            // Rising: ease-out-back, so it jumps up past its height and settles (the "bump"). Lowering: plain ease-out.
+            float e = _liftTarget > 0f ? 1f + 3.2f * t * t * t + 2.2f * t * t : 1f - t * t;
+            _lift = Mathf.LerpUnclamped(_liftFrom, _liftTarget, e);
+            ApplyLift();
+        }
+
+        private void ApplyLift()
+        {
+            transform.position = new Vector3(_anchor.x, _anchor.y + _lift, 0f);
+            bool raise = _lift > 0.0001f || _liftTarget > 0f;
+            if (raise && !_orderRaised)
+            {
+                _baseSortingOrder = spriteRenderer.sortingOrder;
+                spriteRenderer.sortingOrder = LiftedSortingOrder;
+                _orderRaised = true;
+            }
+            else if (!raise && _orderRaised)
+            {
+                spriteRenderer.sortingOrder = _baseSortingOrder;
+                _orderRaised = false;
+            }
+        }
 
         /// <summary>
         /// Shows the normal or rotated facing: the building's own right-facing picture if it has one, otherwise the
@@ -89,7 +163,7 @@ namespace TownBuilder
         {
             if (Definition == null || spriteRenderer.sprite == null) return false;
             var size = Domain.PlacedBuilding.SizeFor(Definition.FootprintSize, Flipped);
-            IsoMath.BuildingSilhouette(transform.position, axisX, axisY, size.X, size.Y, spriteRenderer.bounds.max.y, _silhouette);
+            IsoMath.BuildingSilhouette(_anchor, axisX, axisY, size.X, size.Y, spriteRenderer.bounds.max.y - _lift, _silhouette);
             return IsoMath.ConvexContains(_silhouette, worldPoint);
         }
     }

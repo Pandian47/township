@@ -375,6 +375,17 @@ Remove stay usable. Queuing flies a copy of the product icon (`FlyLayer`) into t
 `Close(onClosed)` (reverse, 0.18 s); `MotionPreferences.ReduceMotion` (PlayerPrefs, Settings button) makes it instant and
 skips flying icons, pops and bounces. Art: `PH_UI_Basket/BasketLocked/Ring/Glow` drawn by `PlaceholderArtGenerator`;
 owner art via the importer (`production_basket`, `production_basket_locked`).
+v0.42.0: tap and long press no longer mix. `TownHudController.Refresh` shows the Move/Rotate/Remove `selectionBar` only for a
+selected building that has no window of its own; a building with a window (factory, field, house, station, depot,
+construction) shows just the window. Long press goes straight to `Mode.Moving` ("Edit mode": pill `editModePill`,
+placement bar with `removeEditButton`); `PlacementSystem.OnLongPressed` suppresses `StateChanged` for the in-between
+Selected state so the window never flashes; `RemoveSelected` also works in Moving (it puts the building back first).
+v0.42.0 edit-mode look: `BuildingView.SetLifted` raises a picked-up building (ease-out-back "bump", drawn in front, Anchor
+stays on the ground; instant with Reduce motion). `FootprintHighlighter.ShowEdit` draws one soft diamond shadow and a lime
+(red when blocked) corner arrow under each lower edge instead of cell tiles. `PointerInput.LongPressProgress` drives
+`LiftCue`, the yellow arrow above the building during the hold. Tapping another building in edit mode places the held one
+(or sends it back to its old spot when blocked) and picks the tapped one up; Place and Cancel end edit mode (no window).
+`CueSprites` draws all three pictures in code (signed distance shapes), so there are no art files for them.
 v0.41.1: the products moved to their own wooden tray (`Root/Products`) under a shorter window; empty baskets show no
 ring; the +1 slot price is a coin pill. `DroppedArtFitter` (version 2) also resets a picture that is normal-size again
 to 128 px per cell and the importer's pivot (`AiArtImporter.TryStandardSettings`): before, a normal picture that replaced

@@ -59,6 +59,21 @@ namespace TownBuilder
         /// <summary>A finger held still for a moment (v0.40.0: picks up a building). The release after it is no tap.</summary>
         public event Action<Vector2> LongPressed;
 
+        /// <summary>
+        /// While a finger is held still: (screen position, 0-1 of the long-press time). Raised every frame; 0 means the hold
+        /// ended (picked up, moved, released, pinched). Drives the arrow above the building (v0.42.0).
+        /// </summary>
+        public event Action<Vector2, float> LongPressProgress;
+
+        private bool _holdShown;
+
+        private void EndHold()
+        {
+            if (!_holdShown) return;
+            _holdShown = false;
+            LongPressProgress?.Invoke(_pressPosition, 0f);
+        }
+
         /// <summary>(factor, screen focus point). factor &lt; 1 zooms in, &gt; 1 zooms out (multiplies orthographic size).</summary>
         public event Action<float, Vector2> ZoomRequested;
 
@@ -154,6 +169,7 @@ namespace TownBuilder
             {
                 if (!_pinching)
                 {
+                    EndHold();
                     EndDragIfActive();
                     BeginPinch(p0, p1);
                 }
@@ -180,15 +196,25 @@ namespace TownBuilder
 
             if (!_dragging)
             {
-                if (!_longPressFired && (p0 - _pressPosition).magnitude < DragThresholdPixels &&
-                    Time.unscaledTime - _pressTime >= longPressSeconds)
+                if (!_longPressFired && (p0 - _pressPosition).magnitude < DragThresholdPixels)
                 {
-                    _longPressFired = true;
-                    LongPressed?.Invoke(_pressPosition); // a drag after it moves the picked-up building
+                    float k = (Time.unscaledTime - _pressTime) / longPressSeconds;
+                    if (k >= 1f)
+                    {
+                        _longPressFired = true;
+                        EndHold();
+                        LongPressed?.Invoke(_pressPosition); // a drag after it moves the picked-up building
+                    }
+                    else if (k > 0.1f)
+                    {
+                        _holdShown = true;
+                        LongPressProgress?.Invoke(_pressPosition, k);
+                    }
                 }
 
                 if ((p0 - _pressPosition).magnitude >= DragThresholdPixels)
                 {
+                    EndHold();
                     _dragging = true;
                     _activeDragHandler = FindDragHandler(_pressPosition);
                     _activeDragHandler?.Drag(p0, p0 - _lastPosition);
@@ -205,6 +231,7 @@ namespace TownBuilder
 
         private void Release()
         {
+            EndHold();
             if (!_startedOverUI && !_gestureCancelled && !_pinching)
             {
                 if (_dragging) _activeDragHandler?.EndDrag(_lastPosition);
@@ -216,6 +243,7 @@ namespace TownBuilder
 
         private void ResetGesture()
         {
+            EndHold();
             _pressed = false;
             _startedOverUI = false;
             _gestureCancelled = false;

@@ -102,7 +102,7 @@ namespace TownBuilder.EditorTools
             var bakery = content.Buildings.First(b => b.Id == "bakery");
             var previewOrigin = new GridCoord(10, 24);
             if ((!_storeMode || hud == HudState.Placing) && hud != HudState.Landscape && hud != HudState.MillLife)
-                highlighter.Show(previewOrigin, bakery.FootprintSize, new Color(0.35f, 1f, 0.45f, 0.55f));
+                highlighter.ShowEdit(previewOrigin, bakery.FootprintSize, true, new Color(0.04f, 0.2f, 0f, 0.5f), new Color(1f, 0.3f, 0.3f, 0.6f));
             if (hud == HudState.Placing)
             {
                 var ghost = UnityEngine.Object.Instantiate(prefab);
@@ -167,6 +167,31 @@ namespace TownBuilder.EditorTools
                 bar.GetComponent<LandscapePanel>().Render(LandscapeTool.Roads, Terrain.Road, false, true, true, true);
             }
 
+            if (hud == HudState.Lift || hud == HudState.Hold)
+            {
+                // v0.42.0: the Feed Mill picked up (shadow, corner arrows, Edit mode) / being held (yellow arrow above it).
+                bool reduce = MotionPreferences.ReduceMotion;
+                MotionPreferences.ReduceMotion = true; // instant lift, no stretch
+                var mill = UnityEngine.Object.FindObjectsByType<BuildingView>().First(v => v.Definition != null && v.Definition.Id == "feed_mill");
+                var millOrigin = new GridCoord(23, 12);
+                highlighter.Hide();
+                if (hud == HudState.Lift)
+                {
+                    mill.SetLifted(true);
+                    highlighter.ShowEdit(millOrigin, mill.Definition.FootprintSize, true, new Color(0.04f, 0.2f, 0f, 0.5f), new Color(1f, 0.3f, 0.3f, 0.6f));
+                    var hudCanvas = UnityEngine.Object.FindAnyObjectByType<Canvas>();
+                    Find(hudCanvas, "PlacementActionBar").SetActive(true);
+                    Find(hudCanvas, "EditModePill").SetActive(true);
+                    Find(hudCanvas, "BottomNavigation").SetActive(false);
+                }
+                else
+                {
+                    new GameObject("HoldCue").AddComponent<LiftCue>().Show(mill, 1f);
+                }
+
+                MotionPreferences.ReduceMotion = reduce;
+            }
+
             if (hud == HudState.Autumn || hud == HudState.Winter)
                 UnityEngine.Object.FindAnyObjectByType<SeasonController>()?.Apply(hud == HudState.Autumn ? Season.Autumn : Season.Winter, cam);
             Render(cam, outputPath);
@@ -176,7 +201,7 @@ namespace TownBuilder.EditorTools
             return outputPath;
         }
 
-        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm, ShopCards, Event, Truck, Home, Collections, Autumn, Winter, Landscape, Settings, Credits, Tasks, MillLife, Quit, Rotate }
+        public enum HudState { None, Idle, Shop, Placing, Field, Barn, Factory, Orders, Construction, Effects, Train, Land, ShopDecorations, Daily, Goals, ShopFarm, ShopCards, Event, Truck, Home, Collections, Autumn, Winter, Landscape, Settings, Credits, Tasks, MillLife, Quit, Rotate, Lift, Hold }
 
         /// <summary>
         /// Command line (v0.37.0): animation frames of the Feed Mill, idle then working, into &lt;-previewOut&gt;/MillLife
@@ -296,6 +321,8 @@ namespace TownBuilder.EditorTools
                 Capture(Path.Combine(folder, "Preview_Town_Tasks.png"), HudState.Tasks);
                 Capture(Path.Combine(folder, "Preview_Town_Quit.png"), HudState.Quit);
                 Capture(Path.Combine(folder, "Preview_Town_Rotate.png"), HudState.Rotate);
+                Capture(Path.Combine(folder, "Preview_Town_Lift.png"), HudState.Lift);
+                Capture(Path.Combine(folder, "Preview_Town_Hold.png"), HudState.Hold);
             }
             catch (Exception e)
             {

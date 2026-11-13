@@ -408,6 +408,16 @@ Our own features in the farming / town genre (not copied from any game).
 | 4 | **Seasons**: the town's look follows the real month, seasonal decorations | Done (v0.33.0) |
 | 5 | **Launch prep**: settings, credits, privacy policy, app icon, store screenshots, AAB checklist | Done (v0.35.0) |
 
+### Device checklist (v0.42.0: tap vs long press, not built yet)
+- [ ] Tap a factory (or field, house, station, truck depot): its window opens and nothing else: no Move / Rotate / Remove bar
+- [ ] Long press a building: "Edit mode" pill at the top, the bar with Remove, Rotate, Cancel and Place; the window does not flash open
+- [ ] Remove in edit mode asks first, then takes the building away; Town Hall (cannot be removed) shows no Remove button
+- [ ] Tap Town Hall or a decoration (no window): the Move / Rotate / Remove bar still shows
+- [ ] Hold a finger on a building: a yellow arrow grows above it, then it lifts with a small bump, a dark shadow under it and a green arrow at each side
+- [ ] Drag while still holding: it follows the finger; a blocked spot turns the shadow and arrows red
+- [ ] In edit mode tap another building: the first is placed (or goes back if blocked), the tapped one lifts
+- [ ] Place and Cancel end edit mode without opening any window
+
 ### Device checklist (v0.41.1: fixes)
 - [ ] Bakery, Creamery, Sugar Mill, Barn and Feed Mill are full size on their plots (not small houses)
 - [ ] Production window: empty baskets look full colour with no ring; the price shows on a coin pill; the Ready tray only glows when something is ready (otherwise a faded picture of the factory)
