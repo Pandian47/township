@@ -159,7 +159,7 @@ namespace TownBuilder.EditorTools
             var container = Stretch("SettingsPanel", canvas);
             var root = Stretch("Root", container);
             AddImage(root, Dim, rounded: false);
-            var frame = BuildShopFrame(root, "Window", "SETTINGS", out _, out var close, out _, new Vector2(1240, 880));
+            var frame = BuildShopFrame(root, "Window", "SETTINGS", out _, out var close, out _, new Vector2(1240, 960));
 
             var body = Stretch("Body", frame);
             body.offsetMin = new Vector2(80, 60);
@@ -167,6 +167,7 @@ namespace TownBuilder.EditorTools
             VColumn(body, 22, TextAnchor.UpperCenter);
             var music = SliderRow(body, "Music");
             var sfx = SliderRow(body, "Sound effects");
+            var reduceMotion = MakeButton(body, "ReduceMotionButton", "Reduce motion: Off", new Vector2(460, 90), Slate, out var reduceMotionLabel, 36);
 
             var links = MakeRect("Links", body, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(980, 100));
             Prefer(links, 980, 100);
@@ -206,6 +207,7 @@ namespace TownBuilder.EditorTools
 
             var panel = container.gameObject.AddComponent<SettingsPanel>();
             Wire(panel, ("panelRoot", root.gameObject), ("musicSlider", music), ("sfxSlider", sfx), ("closeButton", close),
+                ("reduceMotionButton", reduceMotion), ("reduceMotionLabel", reduceMotionLabel),
                 ("privacyOptionsButton", consent), ("privacyPolicyButton", policy), ("creditsButton", credits), ("mainMenuButton", mainMenu),
                 ("messageText", message), ("versionText", version), ("creditsRoot", creditsRoot.gameObject), ("creditsText", creditsText),
                 ("creditsCloseButton", creditsClose), ("creditsScroll", scroll),
@@ -585,6 +587,8 @@ namespace TownBuilder.EditorTools
             // --- Farming: field panel (above the selection bar) and toast
             var fieldPanel = BuildFieldPanel(safe);
             var factoryPanel = BuildFactoryPanel(safe);
+            // The production window darkens the town but not the selection bar (Move / Rotate / Remove stay usable).
+            factoryPanel.transform.SetSiblingIndex(selectionBar.GetSiblingIndex());
             var trainPanel = BuildTrainPanel(safe);
             var truckPanel = BuildTruckPanel(safe);
             var landPanel = BuildLandPanel(safe);
@@ -1102,82 +1106,266 @@ namespace TownBuilder.EditorTools
             return panel;
         }
 
+        /// <summary>
+        /// v0.41.0 production window: our wooden window (as the Build screen) over the darkened town. Sign = factory name,
+        /// ‹ › step through your factories. Top: the Collect tray (left) and the shelf of baskets = the queue (right), with
+        /// the padlock basket that buys another slot. Middle right: Finish now buttons. Bottom: the products.
+        /// </summary>
         private static FactoryPanel BuildFactoryPanel(RectTransform safe)
         {
             var container = Stretch("FactoryPanel", safe);
-            var root = MakeRect("Root", container, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 196), new Vector2(1640, 330));
-            AddImage(root, PanelColor);
+            var root = Stretch("Root", container);
+            var dimImage = AddImage(root, Dim, rounded: false);
+            var dimmer = root.gameObject.AddComponent<Button>();
+            dimmer.targetGraphic = dimImage;
+            dimmer.transition = Selectable.Transition.None;
+            var frame = BuildShopFrame(root, "Window", "BAKERY", out var inner, out var close, out var title, new Vector2(1560, 500));
+            frame.anchoredPosition = new Vector2(0, 195); // the product tray sits below, clear of the selection bar
+            var arrowColor = new Color(0.95f, 0.6f, 0.15f);
+            var previous = MakeButton(frame, "PreviousButton", "<", new Vector2(104, 104), arrowColor, out _, 60);
+            var next = MakeButton(frame, "NextButton", ">", new Vector2(104, 104), arrowColor, out _, 60);
+            foreach (var (b, x) in new[] { (previous, -440f), (next, 440f) })
+            {
+                var r = (RectTransform)b.transform;
+                r.anchorMin = r.anchorMax = new Vector2(0.5f, 1f);
+                r.pivot = new Vector2(0.5f, 0.5f);
+                r.anchoredPosition = new Vector2(x, -4);
+                var img = b.GetComponent<Image>();
+                img.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CirclePath);
+                img.type = Image.Type.Simple;
+                img.color = arrowColor;
+            }
 
-            var titleRect = MakeRect("Title", root, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(24, -10), new Vector2(600, 54));
-            var title = Label(titleRect, "Text", "Bakery", 38, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
-            var queueTitleRect = MakeRect("QueueTitle", root, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-24, -10), new Vector2(772, 54));
-            var queueTitle = Label(queueTitleRect, "Text", "Queue 0/3", 32, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
+            Sprite Production(string path) => AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            var basketSprite = Production(PlaceholderArtGenerator.BasketPath);
+            var lockedSprite = Production(PlaceholderArtGenerator.LockedBasketPath);
+            var ringSprite = Production(PlaceholderArtGenerator.RingPath);
+            var glowSprite = Production(PlaceholderArtGenerator.GlowPath);
+            var circleSprite = Production(PlaceholderArtGenerator.CirclePath);
+            var woodSprite = Production(PlaceholderArtGenerator.WoodPath);
 
-            // Recipes (left), scrolls sideways when a factory has more than 3
-            var recipesViewport = MakeRect("RecipesViewport", root, new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), Vector2.zero, new Vector2(960, 0));
-            recipesViewport.offsetMin = new Vector2(24, 16);
-            recipesViewport.offsetMax = new Vector2(824, -70);
-            var recipes = HorizontalScrollList(recipesViewport, "Recipes", 16);
+            // Output machine (top left): a teal cabinet with a ready lamp, an output screen that shows the product that
+            // just came out (or the factory itself, faded), a chute and the Collect button.
+            var tray = MakeRect("CollectTray", inner, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(24, -64), new Vector2(270, 270));
+            AddImage(tray, new Color(0.08f, 0.22f, 0.26f));
+            var cabinet = Stretch("Cabinet", tray, 6f);
+            AddImage(cabinet, new Color(0.16f, 0.40f, 0.45f), raycast: false);
+            foreach (var x in new[] { 18f, 252f })
+                foreach (var y in new[] { -18f, -252f })
+                {
+                    var rivet = MakeRect("Rivet", tray, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(x, y), new Vector2(10, 10));
+                    var rivetImg = rivet.gameObject.AddComponent<Image>();
+                    rivetImg.sprite = circleSprite;
+                    rivetImg.color = new Color(0.72f, 0.85f, 0.86f);
+                    rivetImg.raycastTarget = false;
+                }
 
-            var template = MakeRect("RecipeTemplate", recipes, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(300, 240));
-            var bg = AddImage(template, Color.white);
-            Prefer(template, 300, 240);
-            var button = template.gameObject.AddComponent<Button>();
-            button.targetGraphic = bg;
-            var iconRect = MakeRect("Icon", template, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -6), new Vector2(-20, 100));
-            var icon = iconRect.gameObject.AddComponent<Image>();
-            icon.preserveAspect = true;
-            icon.raycastTarget = false;
-            var nameRect = MakeRect("Name", template, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 84), new Vector2(-12, 44));
-            var nameText = Label(nameRect, "Text", "Product", 30, TextAnchor.MiddleCenter, Ink, FontStyle.Bold);
-            var ingRect = MakeRect("Ingredients", template, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 6), new Vector2(-12, 76));
-            var ingText = Label(ingRect, "Text", "", 24, TextAnchor.MiddleCenter, Ink);
-            var recipeView = template.gameObject.AddComponent<RecipeButtonView>();
-            Wire(recipeView, ("button", button), ("icon", icon), ("nameText", nameText), ("ingredientsText", ingText));
-            template.gameObject.SetActive(false);
+            var trayLabel = Label(MakeRect("Title", tray, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(-14, -8), new Vector2(-110, 40)),
+                "Text", "Ready", 28, TextAnchor.MiddleLeft, new Color(1f, 0.95f, 0.8f), FontStyle.Bold);
+            trayLabel.raycastTarget = false;
+            var lampRing = MakeRect("Lamp", tray, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-34, -28), new Vector2(36, 36));
+            var lampRingImg = lampRing.gameObject.AddComponent<Image>();
+            lampRingImg.sprite = circleSprite;
+            lampRingImg.color = new Color(0.06f, 0.15f, 0.18f);
+            lampRingImg.raycastTarget = false;
+            var lampLight = MakeRect("Light", lampRing, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(26, 26));
+            var lamp = lampLight.gameObject.AddComponent<Image>();
+            lamp.sprite = circleSprite;
+            lamp.color = new Color(0.35f, 0.4f, 0.42f);
+            lamp.raycastTarget = false;
 
-            // Queue (right): slots + buttons
-            var queue = MakeRect("Queue", root, new Vector2(1f, 0f), new Vector2(1f, 1f), new Vector2(1f, 0.5f), Vector2.zero, Vector2.zero);
-            queue.offsetMin = new Vector2(-796, 16);
-            queue.offsetMax = new Vector2(-24, -70);
-            var slotsRow = MakeRect("Slots", queue, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(0, 140));
-            HRow(slotsRow, 8, TextAnchor.UpperLeft);
+            var screen = MakeRect("Screen", tray, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -50), new Vector2(222, 112));
+            AddImage(screen, new Color(0.05f, 0.13f, 0.16f), raycast: false);
+            var screenGlass = Stretch("Glass", screen, 4f);
+            AddImage(screenGlass, new Color(0.10f, 0.25f, 0.29f), raycast: false);
+            var trayGlow = MakeRect("Glow", tray, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0, -106), new Vector2(150, 150));
+            var trayGlowImg = trayGlow.gameObject.AddComponent<Image>();
+            trayGlowImg.sprite = glowSprite;
+            trayGlowImg.color = new Color(1f, 0.85f, 0.3f, 0.7f);
+            trayGlowImg.raycastTarget = false;
+            var collectIconRect = MakeRect("Icon", tray, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0, -106), new Vector2(92, 92));
+            var collectIcon = collectIconRect.gameObject.AddComponent<Image>();
+            collectIcon.preserveAspect = true;
+            collectIcon.raycastTarget = false;
+
+            // Chute under the screen.
+            var chute = MakeRect("Chute", tray, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -166), new Vector2(150, 12));
+            AddImage(chute, new Color(0.04f, 0.10f, 0.12f), raycast: false);
+
+            var collect = MakeButton(tray, "CollectButton", "Collect", new Vector2(226, 64), Green, out var collectLabel, 30);
+            var collectRect = (RectTransform)collect.transform;
+            collectRect.anchorMin = collectRect.anchorMax = new Vector2(0.5f, 0f);
+            collectRect.pivot = new Vector2(0.5f, 0f);
+            collectRect.anchoredPosition = new Vector2(0, 16);
+            collectLabel.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
+            collectLabel.enableAutoSizing = true;
+            collectLabel.fontSizeMin = 20;
+            collectLabel.fontSizeMax = 30;
+
+            // Shelf of baskets (top right).
+            var queueTitleRect = MakeRect("QueueTitle", inner, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(318, -64), new Vector2(400, 44));
+            var queueTitle = Label(queueTitleRect, "Text", "Queue 0/3", 30, TextAnchor.MiddleLeft, Ink, FontStyle.Bold);
+            // Conveyor belt under the baskets: dark frame, clipped moving belt strip, a roller at each end.
+            var shelf = MakeRect("Shelf", inner, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(0, 36));
+            shelf.offsetMin = new Vector2(310, shelf.offsetMin.y);
+            shelf.offsetMax = new Vector2(-20, shelf.offsetMax.y);
+            shelf.anchoredPosition = new Vector2(shelf.anchoredPosition.x, -314);
+            AddImage(shelf, new Color(0.10f, 0.11f, 0.13f), raycast: false);
+            var beltClip = Stretch("BeltClip", shelf, 3f);
+            beltClip.gameObject.AddComponent<RectMask2D>();
+            var beltStrip = Stretch("Strip", beltClip);
+            var beltImg = beltStrip.gameObject.AddComponent<Image>();
+            beltImg.sprite = Production(PlaceholderArtGenerator.BeltPath);
+            beltImg.type = Image.Type.Tiled;
+            beltImg.raycastTarget = false;
+            if (beltImg.sprite == null) beltImg.color = new Color(0.25f, 0.27f, 0.30f);
+            foreach (var (name, anchorX) in new[] { ("RollerLeft", 0f), ("RollerRight", 1f) })
+            {
+                var roller = MakeRect(name, shelf, new Vector2(anchorX, 0.5f), new Vector2(anchorX, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(44, 44));
+                var rollerImg = roller.gameObject.AddComponent<Image>();
+                rollerImg.sprite = circleSprite;
+                rollerImg.color = new Color(0.62f, 0.65f, 0.70f);
+                rollerImg.raycastTarget = false;
+                var hub = MakeRect("Hub", roller, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(16, 16));
+                var hubImg = hub.gameObject.AddComponent<Image>();
+                hubImg.sprite = circleSprite;
+                hubImg.color = new Color(0.30f, 0.32f, 0.36f);
+                hubImg.raycastTarget = false;
+            }
+
+            var belt = shelf.gameObject.AddComponent<BeltScroller>();
+            Wire(belt, ("strip", beltStrip));
+
+            var slotsRow = MakeRect("Slots", inner, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(0, 210));
+            slotsRow.offsetMin = new Vector2(318, slotsRow.offsetMin.y);
+            slotsRow.offsetMax = new Vector2(-28, slotsRow.offsetMax.y);
+            slotsRow.anchoredPosition = new Vector2(slotsRow.anchoredPosition.x, -112);
+            HRow(slotsRow, 10, TextAnchor.LowerLeft);
 
             // Base 3 slots + up to 3 bought ones (GameContent.maxExtraQueueSlots).
             var slotViews = new QueueSlotView[6];
             for (int i = 0; i < slotViews.Length; i++)
             {
-                var slot = MakeRect($"Slot{i + 1}", slotsRow, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(100, 140));
-                Prefer(slot, 100, 140);
-                var slotBg = AddImage(slot, Color.white, raycast: false);
-                var slotIconRect = MakeRect("Icon", slot, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -4), new Vector2(-16, 78));
+                var slot = MakeRect($"Slot{i + 1}", slotsRow, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(150, 210));
+                Prefer(slot, 150, 210);
+                var basketRect = MakeRect("Basket", slot, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), Vector2.zero, new Vector2(0, 125));
+                var basket = basketRect.gameObject.AddComponent<Image>();
+                basket.sprite = basketSprite;
+                basket.preserveAspect = true;
+                basket.raycastTarget = false;
+                var glowRect = MakeRect("Glow", slot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0, -62), new Vector2(150, 150));
+                var glow = glowRect.gameObject.AddComponent<Image>();
+                glow.sprite = glowSprite;
+                glow.raycastTarget = false;
+                var ringRect = MakeRect("Ring", slot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0, -62), new Vector2(116, 116));
+                var ringBack = ringRect.gameObject.AddComponent<Image>();
+                ringBack.sprite = ringSprite;
+                ringBack.color = new Color(0.36f, 0.21f, 0.09f, 0.35f);
+                ringBack.raycastTarget = false;
+                var fillRect = Stretch("Fill", ringRect);
+                var fill = fillRect.gameObject.AddComponent<Image>();
+                fill.sprite = ringSprite;
+                fill.color = Green;
+                fill.type = Image.Type.Filled;
+                fill.fillMethod = Image.FillMethod.Radial360;
+                fill.fillOrigin = (int)Image.Origin360.Top;
+                fill.fillClockwise = true;
+                fill.raycastTarget = false;
+                var slotIconRect = MakeRect("Icon", slot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0, -62), new Vector2(92, 92));
                 var slotIcon = slotIconRect.gameObject.AddComponent<Image>();
                 slotIcon.raycastTarget = false;
-                var statusRect = MakeRect("Status", slot, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 22), new Vector2(-8, 34));
-                var status = Label(statusRect, "Text", "Empty", 21, TextAnchor.MiddleCenter, Ink);
-                var barBg = MakeRect("Bar", slot, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 6), new Vector2(-16, 14));
-                AddImage(barBg, new Color(0.82f, 0.78f, 0.7f), raycast: false);
-                var fillRect = Stretch("Fill", barBg, 2f);
-                var fill = AddImage(fillRect, Green, raycast: false);
-                fill.type = Image.Type.Filled;
-                fill.fillMethod = Image.FillMethod.Horizontal;
+                var statusRect = MakeRect("Status", slot, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 26), new Vector2(-24, 40));
+                var status = Label(statusRect, "Text", "Empty", 24, TextAnchor.MiddleCenter, new Color(1f, 0.97f, 0.9f), FontStyle.Bold);
+                var outline = AssetDatabase.LoadAssetAtPath<Material>(ProjectSetup.UIFontOutlineMaterialPath);
+                if (outline != null) status.fontSharedMaterial = outline;
+                status.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
                 var view = slot.gameObject.AddComponent<QueueSlotView>();
-                Wire(view, ("background", slotBg), ("icon", slotIcon), ("statusText", status), ("progressFill", fill));
+                Wire(view, ("background", basket), ("icon", slotIcon), ("statusText", status), ("progressFill", fill), ("glow", glow));
                 slotViews[i] = view;
             }
 
-            var addSlot = MakeButton(slotsRow, "AddSlotButton", "+1 slot\n250", new Vector2(100, 140), Blue, out var addSlotLabel, 26);
-            addSlotLabel.textWrappingMode = TMPro.TextWrappingModes.NoWrap; // shrink to fit instead of wrapping "+1 slot"
-            addSlotLabel.margin = new Vector4(6f, 4f, 6f, 4f);
+            // Padlock basket: buy another slot.
+            var addSlotRect = MakeRect("AddSlotButton", slotsRow, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(150, 210));
+            Prefer(addSlotRect, 150, 210);
+            var lockedRect = MakeRect("Basket", addSlotRect, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), Vector2.zero, new Vector2(0, 125));
+            var locked = lockedRect.gameObject.AddComponent<Image>();
+            locked.sprite = lockedSprite;
+            locked.preserveAspect = true;
+            var addSlot = addSlotRect.gameObject.AddComponent<Button>();
+            addSlot.targetGraphic = locked;
+            // Price on a dark pill with a coin, above the padlock basket.
+            var pill = MakeRect("PricePill", addSlotRect, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -16), new Vector2(146, 54));
+            AddImage(pill, new Color(0.22f, 0.13f, 0.06f, 0.85f), raycast: false);
+            var coinRect = MakeRect("Coin", pill, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(4, 0), new Vector2(46, 46));
+            var coin = coinRect.gameObject.AddComponent<Image>();
+            coin.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PlaceholderArtGenerator.CoinIconPath);
+            coin.preserveAspect = true;
+            coin.raycastTarget = false;
+            var priceRect = MakeRect("Label", pill, Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
+            priceRect.offsetMin = new Vector2(52, 2);
+            priceRect.offsetMax = new Vector2(-8, -2);
+            var addSlotLabel = Label(priceRect, "Text", "250", 30, TextAnchor.MiddleCenter, new Color(1f, 0.93f, 0.6f), FontStyle.Bold);
+            addSlotLabel.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
+            addSlotLabel.enableAutoSizing = true;
+            addSlotLabel.fontSizeMin = 18;
+            addSlotLabel.fontSizeMax = 30;
 
-            var actions = MakeRect("Actions", queue, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), Vector2.zero, new Vector2(0, 90));
-            HRow(actions, 12, TextAnchor.MiddleLeft);
-            var collect = MakeButton(actions, "CollectButton", "Collect", new Vector2(220, 86), Green, out var collectLabel, 32);
-            var finish = MakeButton(actions, "FinishNowButton", "Finish now", new Vector2(270, 86), new Color(0.95f, 0.65f, 0.15f), out var finishLabel, 26);
-            var factoryGems = MakeButton(actions, "GemsButton", "Finish now\n1 gem", new Vector2(250, 86), new Color(0.3f, 0.6f, 0.85f), out var factoryGemsLabel, 26);
+            // Finish-now buttons (under the shelf, right).
+            var actions = MakeRect("Actions", inner, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-130, -352), new Vector2(700, 80));
+            HRow(actions, 12, TextAnchor.MiddleRight);
+            var finish = MakeButton(actions, "FinishNowButton", "Finish now", new Vector2(250, 76), new Color(0.95f, 0.65f, 0.15f), out var finishLabel, 24);
+            var factoryGems = MakeButton(actions, "GemsButton", "Finish now\n1 gem", new Vector2(230, 76), new Color(0.3f, 0.6f, 0.85f), out var factoryGemsLabel, 24);
+
+            // Products: their own wooden tray under the window, big round buttons (scroll sideways when there are many).
+            var products = MakeRect("Products", root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -208), new Vector2(1180, 236));
+            AddImage(products, new Color(0.30f, 0.17f, 0.07f));
+            var productsWood = Stretch("Wood", products, 5f);
+            var productsWoodImg = productsWood.gameObject.AddComponent<Image>();
+            productsWoodImg.sprite = woodSprite;
+            productsWoodImg.type = Image.Type.Tiled;
+            productsWoodImg.raycastTarget = false;
+            var productsInner = Stretch("Inner", products, 18f);
+            AddImage(productsInner, new Color(1f, 0.96f, 0.86f));
+            var recipesViewport = Stretch("RecipesViewport", productsInner, 6f);
+            var recipes = HorizontalScrollList(recipesViewport, "Recipes", 14);
+            // Centred: a factory with two products shows them in the middle of the tray (many still scroll).
+            recipes.anchorMin = new Vector2(0.5f, 0f);
+            recipes.anchorMax = new Vector2(0.5f, 1f);
+            recipes.pivot = new Vector2(0.5f, 0.5f);
+            recipes.anchoredPosition = Vector2.zero;
+
+            var template = MakeRect("RecipeTemplate", recipes, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(250, 188));
+            var bg = AddImage(template, new Color(1f, 1f, 1f, 0f));
+            Prefer(template, 250, 188);
+            var button = template.gameObject.AddComponent<Button>();
+            button.targetGraphic = bg;
+            var badgeRect = MakeRect("Badge", template, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0, -56), new Vector2(112, 112));
+            var badge = badgeRect.gameObject.AddComponent<Image>();
+            badge.sprite = circleSprite;
+            badge.color = new Color(0.78f, 0.92f, 0.62f);
+            badge.raycastTarget = false;
+            var iconRect = MakeRect("Icon", template, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0, -56), new Vector2(90, 90));
+            var icon = iconRect.gameObject.AddComponent<Image>();
+            icon.preserveAspect = true;
+            icon.raycastTarget = false;
+            var nameRect = MakeRect("Name", template, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 50), new Vector2(-8, 34));
+            var nameText = Label(nameRect, "Text", "Product", 26, TextAnchor.MiddleCenter, Ink, FontStyle.Bold);
+            var ingRect = MakeRect("Ingredients", template, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 0), new Vector2(-8, 52));
+            var ingText = Label(ingRect, "Text", "", 21, TextAnchor.MiddleCenter, Ink);
+            ingText.enableAutoSizing = true; // long recipes (Cake) shrink to fit the badge
+            ingText.fontSizeMin = 14;
+            ingText.fontSizeMax = 21;
+            var recipeView = template.gameObject.AddComponent<RecipeButtonView>();
+            Wire(recipeView, ("button", button), ("icon", icon), ("nameText", nameText), ("ingredientsText", ingText));
+            template.gameObject.SetActive(false);
+
+            var flyLayer = Stretch("FlyLayer", root);
 
             var panel = container.gameObject.AddComponent<FactoryPanel>();
             Wire(panel, ("panelRoot", root.gameObject), ("titleText", title), ("queueTitleText", queueTitle),
+                ("closeButton", close), ("dimmerButton", dimmer), ("previousButton", previous), ("nextButton", next),
+                ("flyLayer", flyLayer), ("collectIcon", collectIcon), ("collectGlow", trayGlow.gameObject),
+                ("collectLamp", lamp), ("belt", belt),
                 ("recipesParent", recipes), ("recipeTemplate", recipeView), ("collectButton", collect), ("collectLabel", collectLabel),
                 ("finishNowButton", finish), ("finishNowLabel", finishLabel), ("gemsButton", factoryGems), ("gemsLabel", factoryGemsLabel),
                 ("addSlotButton", addSlot), ("addSlotLabel", addSlotLabel));

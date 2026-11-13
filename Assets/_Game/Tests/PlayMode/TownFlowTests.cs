@@ -30,6 +30,7 @@ namespace TownBuilder.Tests
         {
             DestroyRoot();
             GameRoot.SaveDirectoryOverride = null;
+            GameRoot.AdServiceOverride = null;
             if (Directory.Exists(_saveDir)) Directory.Delete(_saveDir, true);
         }
 
@@ -148,6 +149,8 @@ namespace TownBuilder.Tests
         [UnityTest]
         public IEnumerator RewardedAdButton_GrantsCoins_AndSaves()
         {
+            // Ads are switched off in AdsConfig (v0.40.1); the ad flow is still tested with the simulated service.
+            GameRoot.AdServiceOverride = new SimulatedAdService();
             yield return LoadTown();
             var scene = Object.FindAnyObjectByType<TownSceneController>();
             var config = GameRoot.Current.Context.Content.AdsConfig;
@@ -165,6 +168,28 @@ namespace TownBuilder.Tests
 
             scene.SaveNow();
             Assert.AreEqual(before + config.RewardedCoins, GameRoot.Current.Context.SaveStore.Load().Data.player.coins);
+        }
+
+        [UnityTest]
+        public IEnumerator AdsOff_EveryAdButtonIsHidden()
+        {
+            yield return LoadTown();
+            var scene = Object.FindAnyObjectByType<TownSceneController>();
+            if (GameRoot.Current.Context.Content.AdsConfig.AdsEnabled) Assert.Ignore("ads are switched on in AdsConfig");
+            Assert.IsInstanceOf<NoAdService>(GameRoot.Current.Context.Ads, "Ads Enabled off = no ad service at all");
+            Assert.IsFalse(Object.FindAnyObjectByType<RewardedCoinsButton>(FindObjectsInactive.Include).gameObject.activeSelf,
+                "no Watch ad button in the HUD");
+
+            // Plant a field and select it: only the gems "Finish now" may show, never a "watch ad" one.
+            var field = scene.Town.Buildings.First(b => b.DefinitionId == "field").InstanceId;
+            GameRoot.Current.Context.Content.TryGetCrop("wheat", out var wheat);
+            Assert.AreEqual(PlantResult.Planted, scene.Farming.Plant(field, wheat));
+            scene.Placement.SelectBuilding(field);
+            yield return null;
+            var adLabels = Object.FindObjectsByType<TMPro.TMP_Text>(FindObjectsSortMode.None)
+                .Where(t => t.isActiveAndEnabled && (t.text.Contains("watch ad") || t.text.Contains("Ad loading")))
+                .Select(t => t.text).ToList();
+            Assert.IsEmpty(adLabels, "ad buttons showing: " + string.Join(" | ", adLabels));
         }
 
         // ------------------------------------------------------------------ helpers

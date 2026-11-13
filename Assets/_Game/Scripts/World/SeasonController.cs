@@ -127,7 +127,7 @@ namespace TownBuilder
             foreach (var view in FindObjectsByType<BuildingView>(FindObjectsInactive.Exclude))
             {
                 if (view.Definition == null || view.Definition.Id != seasonalTreeId || view.SpriteRenderer == null) continue;
-                var target = sprite != null ? sprite : view.Definition.Sprite;
+                var target = view.Fitted(sprite != null ? sprite : view.Definition.Sprite);
                 if (view.SpriteRenderer.sprite != target) view.SpriteRenderer.sprite = target;
             }
         }

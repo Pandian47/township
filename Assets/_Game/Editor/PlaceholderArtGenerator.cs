@@ -2272,6 +2272,13 @@ namespace TownBuilder.EditorTools
         public const string CirclePath = UiArtFolder + "/Build/PH_UI_Circle.png";
         public const string MenuIconPath = UiArtFolder + "/PH_Icon_Menu.png";
 
+        // v0.41.0 production window pieces (replace with UI_Production_*.png art via the AI art importer if you like).
+        public const string BasketPath = UiArtFolder + "/Production/PH_UI_Basket.png";
+        public const string LockedBasketPath = UiArtFolder + "/Production/PH_UI_BasketLocked.png";
+        public const string RingPath = UiArtFolder + "/Production/PH_UI_Ring.png";
+        public const string GlowPath = UiArtFolder + "/Production/PH_UI_Glow.png";
+        public const string BeltPath = UiArtFolder + "/Production/PH_UI_Belt.png";
+
         /// <summary>Build window pieces drawn in code: an awning stripe pair (tiled along the top) and a round badge.</summary>
         public static void CreateBuildScreenArt()
         {
@@ -2279,6 +2286,143 @@ namespace TownBuilder.EditorTools
             CreateSprite(WoodPath, RenderWood, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
             CreateSprite(CirclePath, RenderCircle, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
             CreateSprite(MenuIconPath, RenderMenuIcon, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+            CreateSprite(BasketPath, () => RenderBasket(false), new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+            CreateSprite(LockedBasketPath, () => RenderBasket(true), new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+            CreateSprite(RingPath, RenderRing, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+            CreateSprite(GlowPath, RenderGlow, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+            CreateSprite(BeltPath, RenderBelt, new Vector2(0.5f, 0.5f), SpriteMeshType.FullRect);
+        }
+
+        /// <summary>
+        /// A conveyor belt tile (tiles sideways): dark rubber with a lighter top edge, a shaded bottom and a row of
+        /// pale ">" chevrons that show which way it runs. 96 px wide so the pattern repeats cleanly.
+        /// </summary>
+        private static Texture2D RenderBelt()
+        {
+            const int w = 96, h = 32;
+            var tex = NewTexture(w, h);
+            var px = new Color32[w * h];
+            Color rubber = new Color(0.25f, 0.27f, 0.30f), edge = new Color(0.12f, 0.13f, 0.15f);
+            for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+            {
+                Color c = rubber;
+                if (y >= h - 3) c = Color.Lerp(rubber, Color.white, 0.28f); // lit top edge
+                else if (y < 4) c = Color.Lerp(rubber, edge, 0.7f);          // shaded bottom
+                else if (y < 8) c = Color.Lerp(rubber, edge, 0.3f);
+                // Chevron ">" every 48 px: two arms meeting at the right.
+                float cx = Mathf.Repeat(x + 8f, 48f), mid = (h - 1) * 0.5f;
+                float armY = Mathf.Abs(y - mid);
+                float line = cx - (28f - armY * 1.1f);
+                if (y > 6 && y < h - 5 && Mathf.Abs(line) < 2.2f) c = new Color(0.78f, 0.80f, 0.84f);
+                px[y * w + x] = c;
+            }
+
+            tex.SetPixels32(px);
+            tex.Apply();
+            return tex;
+        }
+
+        /// <summary>
+        /// A woven basket seen from the front: a dark opening at the top, a rolled rim, woven sides narrowing to the base.
+        /// The locked one is greyed, with a small gold padlock on the front.
+        /// </summary>
+        private static Texture2D RenderBasket(bool locked)
+        {
+            const int w = 180, h = 150;
+            var tex = NewTexture(w, h);
+            var px = new Color32[w * h];
+            Color light = locked ? new Color(0.72f, 0.70f, 0.66f) : new Color(0.86f, 0.62f, 0.32f);
+            Color dark = locked ? new Color(0.52f, 0.50f, 0.47f) : new Color(0.62f, 0.40f, 0.17f);
+            Color rimC = locked ? new Color(0.60f, 0.58f, 0.55f) : new Color(0.72f, 0.47f, 0.21f);
+            Color edge = new Color(0.30f, 0.18f, 0.08f);
+            const float top = 118f, bottom = 8f, halfTop = 84f, halfBottom = 62f;
+            for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+            {
+                float fx = x + 0.5f - w / 2f, fy = y + 0.5f;
+                Color c = Color.clear;
+                // Inside (dark opening, an ellipse above the rim).
+                float ex = fx / (halfTop - 6f), ey = (fy - top) / 14f;
+                if (ex * ex + ey * ey <= 1f && fy >= top) c = new Color(0.25f, 0.15f, 0.07f);
+                // Body: a trapezoid with rounded bottom corners.
+                float t = Mathf.InverseLerp(bottom, top, fy);
+                float half = Mathf.Lerp(halfBottom, halfTop, t);
+                if (fy >= bottom && fy <= top && Mathf.Abs(fx) <= half)
+                {
+                    bool weave = ((int)((fx + 200f) / 14f) + (int)(fy / 12f)) % 2 == 0;
+                    c = weave ? light : dark;
+                    float stripe = Mathf.Repeat(fy, 12f);
+                    if (stripe < 1.5f) c = Color.Lerp(c, edge, 0.35f);
+                    c = Color.Lerp(c, Color.black, Mathf.Clamp01((Mathf.Abs(fx) - half + 6f) / 6f) * 0.35f); // shaded sides
+                    if (Mathf.Abs(fx) > half - 2.5f || fy < bottom + 2.5f) c = edge;
+                }
+
+                // Rolled rim around the opening.
+                float rx = fx / (halfTop + 4f), ry = (fy - top) / 18f;
+                float r = rx * rx + ry * ry;
+                float rIn = (fx / (halfTop - 6f)) * (fx / (halfTop - 6f)) + ((fy - top) / 12f) * ((fy - top) / 12f);
+                if (r <= 1f && rIn >= 1f) c = r > 0.86f ? edge : Color.Lerp(rimC, Color.white, Mathf.Clamp01((fy - top) / 18f) * 0.35f);
+
+                if (locked && c.a > 0f)
+                {
+                    // Padlock: shackle (ring) above a gold body, centred on the front.
+                    float lx = fx, ly = fy - 58f;
+                    float sh = Mathf.Sqrt(lx * lx + (ly - 14f) * (ly - 14f));
+                    if (ly > 8f && sh >= 11f && sh <= 18f) c = sh > 16.5f || sh < 12.5f ? edge : new Color(0.75f, 0.76f, 0.8f);
+                    if (Mathf.Abs(lx) <= 24f && ly >= -24f && ly <= 10f)
+                    {
+                        c = Mathf.Abs(lx) > 21.5f || ly < -21.5f || ly > 7.5f ? edge : new Color(0.98f, 0.76f, 0.2f);
+                        if (lx * lx + (ly + 6f) * (ly + 6f) < 20f || (Mathf.Abs(lx) < 2.5f && ly < -6f && ly > -16f)) c = edge; // keyhole
+                    }
+                }
+
+                px[y * w + x] = c;
+            }
+
+            tex.SetPixels32(px);
+            tex.Apply();
+            return tex;
+        }
+
+        /// <summary>A white ring (tinted and radially filled by the progress ring Image).</summary>
+        private static Texture2D RenderRing()
+        {
+            const int size = 128;
+            var tex = NewTexture(size, size);
+            var px = new Color32[size * size];
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float dx = x + 0.5f - size / 2f, dy = y + 0.5f - size / 2f;
+                float d = Mathf.Sqrt(dx * dx + dy * dy);
+                float a = Mathf.Clamp01(size / 2f - d) * Mathf.Clamp01(d - (size / 2f - 12f));
+                px[y * size + x] = new Color(1f, 1f, 1f, a);
+            }
+
+            tex.SetPixels32(px);
+            tex.Apply();
+            return tex;
+        }
+
+        /// <summary>A soft round glow, bright in the middle and fading out (tinted gold behind finished products).</summary>
+        private static Texture2D RenderGlow()
+        {
+            const int size = 128;
+            var tex = NewTexture(size, size);
+            var px = new Color32[size * size];
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float dx = x + 0.5f - size / 2f, dy = y + 0.5f - size / 2f;
+                float d = Mathf.Clamp01(Mathf.Sqrt(dx * dx + dy * dy) / (size / 2f));
+                float a = (1f - d) * (1f - d);
+                px[y * size + x] = new Color(1f, 1f, 1f, a);
+            }
+
+            tex.SetPixels32(px);
+            tex.Apply();
+            return tex;
         }
 
         /// <summary>Three white rounded bars (menu icon), with a soft dark edge.</summary>

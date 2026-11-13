@@ -410,6 +410,18 @@ Files (owner-made, imported with `AiArtImporter` Kind.Ui; the biggest shape is k
 `build_sign`, `close_button`, `corner_leaves`, `ribbon_blue/yellow/orange/green/pink`,
 `card_houses/town/factories/farm/decorations`, `icon_level`, `icon_barn`. No text in any image (the game writes it).
 
+## v0.41.0: production window baskets (optional, setup draws simple ones) → `Art/UI/Production`
+
+Our own look: woven baskets on a wooden shelf (not cardboard boxes). Same UI prompt style as `close_button`: one object,
+flat magenta background, soft cartoon shading, no text.
+* `production_basket.png`: "a round woven wicker basket seen from the front, slightly from above, warm honey-brown
+  weave, a rolled rim and a dark empty inside, cute cartoon farming game style"
+* `production_basket_locked.png`: "the same wicker basket in muted grey, with a small shiny gold padlock hanging on its
+  front"
+The progress ring and the golden glow are drawn by setup and need no art.
+Imported (owner's art, v0.41.0). To import only some pictures without touching the rest, add `-only name1,name2` to
+the importer command line.
+
 ---
 
 Do a **test set first**: cottage, field, wheat_4, bread and grass. Send those, check them in the game preview, and

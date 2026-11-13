@@ -350,6 +350,40 @@ Moving, and the release is no tap. HUD: Rotate buttons in the selection and plac
 `<id>_r.png` in Sources import as the normal and rotated pictures (the right one with the footprint swapped); without
 `_r`, the building rotates by mirroring.
 
+## 6g6q. Oversized pictures fit their plot (v0.40.2)
+
+`SpriteFit.ForFootprint(sprite, footprint)` (Scripts/Building): when a building picture's visible part is more than
+`Tolerance` (1.15x) wider than its footprint diamond ((X + Y) / 2 cells), it returns a runtime sprite over the same
+texture and rectangle with a higher pixels-per-unit (visible width = plot width) and the pivot moved to the bottom-centre
+of the visible part. The visible part is read from the sprite's Tight mesh. Cached per sprite and plot width (turning
+keeps it). `BuildingView.FacingSprite` / `Fitted(...)` and the seasonal tree pictures go through it, so `PointLocal`,
+outlines and hit tests use the fitted sprite. The AI art importer still gives the sharpest and lightest result.
+Editor side, `DroppedArtFitter` (AssetPostprocessor) handles large building pictures put straight into the Art folder:
+`AiArtImporter.TryMeasureDropped` measures them like the importer (lower 40% walls, alpha >= 0.5) and sets the
+importer's pixels-per-unit and pivot; faint haze (alpha < 32) is cleared and the texture capped at 1024 px. Such
+sprites are not 128 px per cell, so `SpriteFit` leaves them alone.
+
+## 6g6r. Production window (v0.41.0)
+
+`FactoryPanel` is a modal window built by `SceneBuilder.BuildFactoryPanel` with the Build screen's wooden frame
+(`BuildShopFrame`): a dimmer (Button → `CloseRequested`), the sign (factory name), ‹ › (`NavigateRequested(id)`, the HUD
+selects that factory, order = `ProductionController.BuiltFactoryIds`), the Collect tray, a shelf of `QueueSlotView`
+baskets (radial progress ring, gold glow + one bounce when a job turns ready, `Pop()`), the padlock basket (+1 slot) and
+the product badges (`RecipeButtonView`). The window's container sits just below the selection bar, so Move / Rotate /
+Remove stay usable. Queuing flies a copy of the product icon (`FlyLayer`) into the target basket. Game rules are unchanged
+(`ProductionController` / Domain). `PanelTransition` now grows windows from 0.92 with a small overshoot (0.3 s) and has
+`Close(onClosed)` (reverse, 0.18 s); `MotionPreferences.ReduceMotion` (PlayerPrefs, Settings button) makes it instant and
+skips flying icons, pops and bounces. Art: `PH_UI_Basket/BasketLocked/Ring/Glow` drawn by `PlaceholderArtGenerator`;
+owner art via the importer (`production_basket`, `production_basket_locked`).
+v0.41.1: the products moved to their own wooden tray (`Root/Products`) under a shorter window; empty baskets show no
+ring; the +1 slot price is a coin pill. `DroppedArtFitter` (version 2) also resets a picture that is normal-size again
+to 128 px per cell and the importer's pivot (`AiArtImporter.TryStandardSettings`): before, a normal picture that replaced
+a large one kept the large one's fit and was drawn ~6x too small.
+The output area is a machine: `CollectTray` is a teal cabinet with a lamp (`collectLamp`: green while a product is ready),
+an output screen (Glow + Icon, the factory itself faded when nothing is ready), a chute and the Collect button. The shelf
+is a conveyor belt (`BeltScroller` slides a tiled `PH_UI_Belt` strip, clipped by a mask, while the factory is working;
+still with Reduce motion). `-only a,b` limits an importer run to those sources.
+
 ## 6g6o. Phone back button and quit dialog (v0.39.0)
 
 `BackButtonHandler` (Scripts/UI, one per scene on the canvas, built by `SceneBuilder.BuildQuitDialog` as the last

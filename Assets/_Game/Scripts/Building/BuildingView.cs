@@ -21,8 +21,15 @@ namespace TownBuilder
         /// <summary>True when the rotated facing is the normal picture mirrored (no own right-facing picture).</summary>
         public bool Mirrored => Flipped && (Definition == null || Definition.FlippedSprite == null);
 
-        /// <summary>The picture for the current facing (frame 0 when animated).</summary>
-        public Sprite FacingSprite => Flipped && Definition != null && Definition.FlippedSprite != null ? Definition.FlippedSprite : Definition?.Sprite;
+        /// <summary>
+        /// The picture for the current facing (frame 0 when animated), fitted to the footprint when it is much too
+        /// large (<see cref="SpriteFit"/>, v0.40.2).
+        /// </summary>
+        public Sprite FacingSprite => Definition == null ? null
+            : Fitted(Flipped && Definition.FlippedSprite != null ? Definition.FlippedSprite : Definition.Sprite);
+
+        /// <summary>Any picture of this building (seasonal ones too) as it should be drawn on its plot.</summary>
+        public Sprite Fitted(Sprite sprite) => Definition == null ? sprite : SpriteFit.ForFootprint(sprite, Definition.FootprintSize);
 
         /// <summary>
         /// Where a point measured 0-1 on the NORMAL picture (from its bottom-left) is now, relative to the building's anchor
@@ -53,7 +60,7 @@ namespace TownBuilder
             Definition = definition;
             Flipped = false;
             spriteRenderer.flipX = false;
-            spriteRenderer.sprite = definition.Sprite;
+            spriteRenderer.sprite = FacingSprite;
             spriteRenderer.sortingLayerName = SortingLayers.Objects;
             spriteRenderer.spriteSortPoint = SpriteSortPoint.Pivot;
             spriteRenderer.color = Color.white;

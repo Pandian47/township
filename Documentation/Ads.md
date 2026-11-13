@@ -3,6 +3,11 @@
 Plugin: **Google Mobile Ads Unity 11.6.0** (OpenUPM `com.google.ads.mobile`) with Unity External Dependency Manager.
 Everything currently uses Google's **test** ids, so only test ads are shown.
 
+> **Ads are switched off (v0.40.1).** `AdsConfig > Ads Enabled` is unticked, so the game uses `NoAdService`: every
+> "watch ad" button is hidden, Menu shows no interstitial and the AdMob SDK is never started (no consent form).
+> The plugin stays in the project. To bring ads back: tick **Ads Enabled** in `ScriptableObjects/AdsConfig.asset`
+> (Project window → select it → Inspector), save, rebuild.
+
 ## What's in the game
 
 | Ad | Where | Rule (AdsConfig) |

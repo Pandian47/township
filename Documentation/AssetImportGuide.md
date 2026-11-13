@@ -59,6 +59,11 @@ Keep your original images outside the project as a backup; the importer can be r
 ### Manual way
 
 1. Export your new art at the right **width** (table above) with a transparent background.
+   A much larger picture still works (v0.40.2): on import, `DroppedArtFitter` measures its lower walls (ignoring the faint
+   background haze some AI tools leave), sets pixels-per-unit and pivot so the building stands exactly on its plot,
+   clears the haze and caps the texture at 1024 px. The file itself is not changed. If a building looks off, use
+   **TownBuilder → Art → Refit Building Pictures**. A WebP file renamed to .png can't be read: save it as PNG.
+   The AI art importer still gives the sharpest, lightest result.
 2. Optional: rename it without the `PH_` prefix. If you rename it, do it **inside Unity** (Project window) so the `.meta` file follows.
 3. Easiest path: overwrite the PNG file **outside Unity, using the same file name**. The `.meta` file keeps the GUID, pivot, PPU and import settings, so every reference updates automatically.
 4. If the art is a new file instead, select it and apply the settings from section 1 in the Inspector

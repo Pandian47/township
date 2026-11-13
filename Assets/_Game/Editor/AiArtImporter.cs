@@ -220,6 +220,9 @@ namespace TownBuilder.EditorTools
             new Spec("card_decorations", Art + "/UI/Build/UI_Card_Decorations.png", Kind.Ui, 400),
             new Spec("icon_level", Art + "/UI/PH_Icon_Level.png", Kind.Ui, 160),
             new Spec("icon_barn", Art + "/UI/PH_Icon_Barn.png", Kind.Ui, 160),
+            // v0.41.0 production window baskets (optional; setup draws simple ones).
+            new Spec("production_basket", Art + "/UI/Production/PH_UI_Basket.png", Kind.Ui, 180),
+            new Spec("production_basket_locked", Art + "/UI/Production/PH_UI_BasketLocked.png", Kind.Ui, 180),
         };
 
         // Crop plants sit inside the field's soil: narrower than the field and lifted by the field's border height.
@@ -246,7 +249,12 @@ namespace TownBuilder.EditorTools
                 var args = Environment.GetCommandLineArgs();
                 int i = Array.IndexOf(args, "-artSource");
                 if (i < 0 || i + 1 >= args.Length) throw new ArgumentException("Pass -artSource <folder>");
-                Debug.Log("[AiArt] " + Import(args[i + 1]));
+                // Optional -only a,b: import just these source names (leaves every other picture in the project alone).
+                int o = Array.IndexOf(args, "-only");
+                var only = o >= 0 && o + 1 < args.Length
+                    ? new HashSet<string>(args[o + 1].Split(',').Select(n => n.Trim()), StringComparer.OrdinalIgnoreCase)
+                    : null;
+                Debug.Log("[AiArt] " + Import(args[i + 1], only));
             }
             catch (Exception e)
             {
@@ -256,7 +264,7 @@ namespace TownBuilder.EditorTools
         }
 
         /// <summary>Processes every known file found in <paramref name="folder"/>. Returns a short report.</summary>
-        public static string Import(string folder)
+        public static string Import(string folder, ICollection<string> only = null)
         {
             if (!Directory.Exists(folder)) throw new DirectoryNotFoundException(folder);
             var rotated = new List<(Spec spec, string path, string id)>();
@@ -265,6 +273,7 @@ namespace TownBuilder.EditorTools
 
             foreach (var spec in Specs)
             {
+                if (only != null && !only.Contains(spec.Source)) continue;
                 // Buildings may come in two facings (v0.40.0): <name>_l = normal, <name>_r = rotated. A plain <name> still works.
                 string source = (spec.Kind == Kind.Building ? FindSource(folder, spec.Source + "_l") : null) ?? FindSource(folder, spec.Source);
                 if (source == null) { missing.Add(spec.Source); continue; }
@@ -568,6 +577,84 @@ namespace TownBuilder.EditorTools
             minX = Array.FindIndex(cols, c => c >= minCount);
             maxX = Array.FindLastIndex(cols, c => c >= minCount);
             return minX >= 0 && minY >= 0;
+        }
+
+        /// <summary>A picture this many times wider than its spec counts as a large picture put in the Art folder directly.</summary>
+        public const float DroppedSizeFactor = 1.5f;
+
+        /// <summary>
+        /// v0.40.2: a building (or flat object) picture put straight into the Art folder at a large size, not through this
+        /// importer, is fitted by its import settings instead of being rewritten: <paramref name="pixelsPerUnit"/> makes the
+        /// footprint as wide as <see cref="Process"/> would (lower walls for buildings, ignoring faint background haze), and
+        /// <paramref name="pivot"/> puts the footprint's bottom corner under the building. False when the file is not a
+        /// known building picture or is already about the right size.
+        /// </summary>
+        /// <param name="pixels">Bottom row first, as <c>Texture2D.GetPixels32</c> returns them.</param>
+        public static bool TryMeasureDropped(string assetPath, Color32[] pixels, int w, int h, out float pixelsPerUnit, out Vector2 pivot)
+        {
+            pixelsPerUnit = ArtConventions.PixelsPerUnit;
+            pivot = new Vector2(0.5f, 0f);
+            var spec = FindSpec(assetPath);
+            if (spec == null || (spec.Kind != Kind.Building && spec.Kind != Kind.Flat)) return false;
+            if (w <= spec.Width * DroppedSizeFactor || pixels == null || pixels.Length != w * h) return false;
+
+            var img = new Img(w, h);
+            for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+                img[x, y] = pixels[y * w + x];
+            if (!FindBounds(img, out int minX, out int maxX, out int minY, out int maxY)) return false;
+
+            int left = minX, right = maxX;
+            if (spec.Kind == Kind.Building) MeasureBase(img, minY, maxY, out left, out right);
+            if (right <= left) return false;
+            float baseWidth = right - left + 1;
+            pixelsPerUnit = baseWidth / (spec.Width / ArtConventions.PixelsPerUnit);
+            float cornerShare = spec.FootprintY / (float)(spec.FootprintX + spec.FootprintY);
+            float cornerX = left + baseWidth * cornerShare;
+            pivot = new Vector2(cornerX / w, minY / (float)h);
+            if (spec.NudgeCells != Vector2.zero)
+            {
+                var world = spec.NudgeCells.x * new Vector2(0.5f, 0.25f) + spec.NudgeCells.y * new Vector2(-0.5f, 0.25f);
+                pivot -= new Vector2(world.x * pixelsPerUnit / w, world.y * pixelsPerUnit / h);
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// v0.41.1: the normal settings of a building picture that is about the importer's size (128 px per cell, the
+        /// footprint's bottom corner as <see cref="Process"/> places it). Used to undo a fit left over from a large
+        /// picture that was later replaced by a normal one. False when the file is not a known building picture.
+        /// </summary>
+        public static bool TryStandardSettings(string assetPath, int w, int h, out float pixelsPerUnit, out Vector2 pivot)
+        {
+            pixelsPerUnit = ArtConventions.PixelsPerUnit;
+            pivot = new Vector2(0.5f, 0f);
+            var spec = FindSpec(assetPath);
+            if (spec == null || (spec.Kind != Kind.Building && spec.Kind != Kind.Flat) || w <= 0 || h <= 0) return false;
+            float cornerShare = spec.FootprintY / (float)(spec.FootprintX + spec.FootprintY);
+            pivot = new Vector2(0.5f + spec.Width * (cornerShare - 0.5f) / w, 0f);
+            if (spec.NudgeCells != Vector2.zero)
+            {
+                var world = spec.NudgeCells.x * new Vector2(0.5f, 0.25f) + spec.NudgeCells.y * new Vector2(-0.5f, 0.25f);
+                pivot -= new Vector2(world.x * pixelsPerUnit / w, world.y * pixelsPerUnit / h);
+            }
+
+            return true;
+        }
+
+        /// <summary>The import spec whose target is this asset (its <c>_r</c> rotated picture too), or null.</summary>
+        private static Spec FindSpec(string assetPath)
+        {
+            string path = assetPath.Replace('\\', '/');
+            foreach (var s in Specs)
+            {
+                if (string.Equals(s.Target, path, StringComparison.OrdinalIgnoreCase)) return s;
+                if (s.Kind == Kind.Building && string.Equals(s.Target.Replace(".png", "_r.png"), path, StringComparison.OrdinalIgnoreCase))
+                    return s.Rotated();
+            }
+
+            return null;
         }
 
         /// <summary>

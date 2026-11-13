@@ -17,6 +17,8 @@ namespace TownBuilder
         public const string GoogleTestInterstitialAndroid = "ca-app-pub-3940256099942544/1033173712";
         public const string GoogleTestAppIdAndroid = "ca-app-pub-3940256099942544~3347511713";
 
+        [Tooltip("Off = no ads at all: every \"watch ad\" button is hidden, no interstitials, the ad SDK is not started. "
+                 + "Off since v0.40.1 (owner's choice).")]
         [SerializeField] private bool adsEnabled = true;
         [Tooltip("Use Google's sample ad units. Turn off only for the Play Store release build.")]
         [SerializeField] private bool useTestAds = true;

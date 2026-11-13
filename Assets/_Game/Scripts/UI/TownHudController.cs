@@ -109,6 +109,8 @@ namespace TownBuilder
             storage.Notification += toast.Show;
             production.Notification += toast.Show;
             factoryPanel.Initialize(production, content, ads, confirmDialog);
+            factoryPanel.CloseRequested += () => _placement.Cancel();
+            factoryPanel.NavigateRequested += id => _placement.SelectBuilding(id);
             constructionPanel.Initialize(construction, ads);
             construction.Notification += toast.Show;
             construction.Completed += OnConstructionCompleted;
@@ -122,7 +124,8 @@ namespace TownBuilder
             barnButton.onClick.AddListener(OpenBarn);
             barnPillButton.onClick.AddListener(OpenBarn);
 
-            bool adsOn = content.AdsConfig != null && content.AdsConfig.AdsEnabled && !(ads is NoAdService);
+            // Ads off (AdsConfig > Ads Enabled, or no ad SDK on this platform) = NoAdService: the button is hidden.
+            bool adsOn = content.AdsConfig != null && !(ads is NoAdService);
             rewardedCoinsButton.gameObject.SetActive(adsOn);
             if (adsOn) rewardedCoinsButton.Initialize(ads, wallet, content.AdsConfig.RewardedCoins);
             shopPanel.Initialize(content, wallet, progress, _placement.CanBuildMore, d =>

@@ -17,6 +17,9 @@ namespace TownBuilder
 
         public RecipeDefinition Recipe { get; private set; }
 
+        /// <summary>The product picture (flying icons start here).</summary>
+        public RectTransform IconRect => (RectTransform)icon.transform;
+
         public void Bind(RecipeDefinition recipe, Action<RecipeDefinition> onClicked)
         {
             Recipe = recipe;

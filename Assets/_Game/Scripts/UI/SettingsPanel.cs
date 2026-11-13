@@ -18,6 +18,9 @@ namespace TownBuilder
         [SerializeField] private Slider musicSlider;
         [SerializeField] private Slider sfxSlider;
         [SerializeField] private Button closeButton;
+        [Tooltip("v0.41.0: switches MotionPreferences.ReduceMotion (window and UI animations).")]
+        [SerializeField] private Button reduceMotionButton;
+        [SerializeField] private TMP_Text reduceMotionLabel;
         [Tooltip("Re-opens the ad consent form. Required by Google in GDPR regions; hidden elsewhere.")]
         [SerializeField] private Button privacyOptionsButton;
         [SerializeField] private Button privacyPolicyButton;
@@ -47,6 +50,7 @@ namespace TownBuilder
         public Button MainMenuButton => mainMenuButton;
         public Button PrivacyPolicyButton => privacyPolicyButton;
         public Button CreditsButton => creditsButton;
+        public Button ReduceMotionButton => reduceMotionButton;
 
         /// <param name="privacyPolicyUrl">Empty until the policy is hosted (AdsConfig > Privacy Policy Url).</param>
         /// <param name="onMainMenu">Null hides the Main menu button (when already in the main menu).</param>
@@ -70,6 +74,12 @@ namespace TownBuilder
                 });
                 musicSlider.onValueChanged.AddListener(v => AudioPreferences.MusicVolume = v);
                 sfxSlider.onValueChanged.AddListener(v => AudioPreferences.SfxVolume = v);
+                if (reduceMotionButton != null)
+                    reduceMotionButton.onClick.AddListener(() =>
+                    {
+                        MotionPreferences.ReduceMotion = !MotionPreferences.ReduceMotion;
+                        ShowReduceMotion();
+                    });
             }
 
             mainMenuButton.gameObject.SetActive(onMainMenu != null);
@@ -83,10 +93,16 @@ namespace TownBuilder
         {
             musicSlider.SetValueWithoutNotify(AudioPreferences.MusicVolume);
             sfxSlider.SetValueWithoutNotify(AudioPreferences.SfxVolume);
+            ShowReduceMotion();
             privacyOptionsButton.gameObject.SetActive(_ads != null && _ads.PrivacyOptionsRequired);
             messageText.text = string.Empty;
             creditsRoot.SetActive(false);
             panelRoot.SetActive(true);
+        }
+
+        private void ShowReduceMotion()
+        {
+            if (reduceMotionLabel != null) reduceMotionLabel.text = MotionPreferences.ReduceMotion ? "Reduce motion: On" : "Reduce motion: Off";
         }
 
         public void Close()

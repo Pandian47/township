@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d60fa5639d3b4d49bebe0515f1a0d8e, type: 3}
   m_Name: AdsConfig
   m_EditorClassIdentifier: TownBuilder.Runtime::TownBuilder.AdsConfig
-  adsEnabled: 1
+  adsEnabled: 0
   useTestAds: 1
   rewardedAdUnitAndroid: 
   interstitialAdUnitAndroid: 

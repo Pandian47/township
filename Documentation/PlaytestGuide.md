@@ -1,11 +1,11 @@
-# Playtest guide (v0.40.0)
+# Playtest guide (v0.41.1)
 
 One place for testing the game on a real Android phone. The detailed per-feature checklists stay in
 DevelopmentRoadmap.md; this guide is the order to play in and what to write down.
 
 ## 1. Install
 
-APK: `Builds/Android/TownBuilder-0.40.0-61.apk` (37 MB, test build, test ads only, developer mode included).
+APK: `Builds/Android/TownBuilder-0.41.1-65.apk` (test build, ads switched off, developer mode included).
 
 **Option A: copy the file (no cable needed)**
 1. Upload the APK to Google Drive (or send it to yourself), open it on the phone.
@@ -18,7 +18,7 @@ APK: `Builds/Android/TownBuilder-0.40.0-61.apk` (37 MB, test build, test ads onl
 2. Connect the cable, tap **Allow** on the "Allow USB debugging?" popup.
 3. Tell me, and I'll run the install with Unity's `adb`, or run it yourself:
    ```
-   "C:\Program Files\Unity\Hub\Editor\6000.6.8f1\Editor\Data\PlaybackEngines\AndroidPlayer\SDK\platform-tools\adb.exe" install -r "D:\01-Projects\05-Township\TownBuilder\Builds\Android\TownBuilder-0.40.0-61.apk"
+   "C:\Program Files\Unity\Hub\Editor\6000.6.8f1\Editor\Data\PlaybackEngines\AndroidPlayer\SDK\platform-tools\adb.exe" install -r "D:\01-Projects\05-Township\TownBuilder\Builds\Android\TownBuilder-0.41.1-65.apk"
    ```
 
 ## 2. Session A: a new town (30–45 minutes, sound on)
@@ -40,7 +40,7 @@ Start with **Menu → New Game**. Play normally and follow the Tasks panel; don'
 | Tasks | Claim a finished task (green button), a new one appears |
 | Level 2–3 | Level-up dialog lists the unlocks; Corn and Silo become available |
 | Land (level 3) | Dark land with signs around the town; tap it: "Land for sale" panel with coins + Planks + Nails |
-| Ads | "Watch ad +100 coins" plays a **test** ad and pays; "Finish now (ad)" works |
+| Ads | Switched off (v0.40.1): no "Watch ad" button, no "(watch ad)" Finish now / Call buttons, no ad when pressing Menu. Gem buttons still work |
 
 ## 3. Session B: closing the app (needs waiting)
 

@@ -408,6 +408,31 @@ Our own features in the farming / town genre (not copied from any game).
 | 4 | **Seasons**: the town's look follows the real month, seasonal decorations | Done (v0.33.0) |
 | 5 | **Launch prep**: settings, credits, privacy policy, app icon, store screenshots, AAB checklist | Done (v0.35.0) |
 
+### Device checklist (v0.41.1: fixes)
+- [ ] Bakery, Creamery, Sugar Mill, Barn and Feed Mill are full size on their plots (not small houses)
+- [ ] Production window: empty baskets look full colour with no ring; the price shows on a coin pill; the Ready tray only glows when something is ready (otherwise a faded picture of the factory)
+- [ ] The products sit on their own wooden tray under the window, in the middle
+- [ ] The left output machine (teal cabinet) shows the product that is ready on its screen, its lamp turns green, and Collect empties it
+- [ ] The conveyor belt under the baskets runs while something is being made, and stands still when nothing is (or with Reduce motion)
+
+### Device checklist (v0.41.0: production window)
+- [ ] Tapping a factory opens the wooden window over the darkened town (grows in smoothly); the Move/Rotate/Remove bar stays usable
+- [ ] Tapping a product flies its icon into the next basket, which pops; the first basket shows a filling ring and the time left
+- [ ] A finished product glows gold and bounces once; the Ready tray shows it and Collect puts it in the barn
+- [ ] The padlock basket shows the coin price and adds a basket after confirming
+- [ ] With two or more factories, the ‹ › arrows step through them (the town selection follows)
+- [ ] Close, the darkened town or the back button closes the window (shrinks away) and deselects the factory
+- [ ] Settings → Reduce motion: On makes windows open and close at once and stops the flying icons
+
+### Device checklist (v0.40.2: big pictures fit their plot)
+- [ ] A building whose picture is much larger than its plot shows exactly on its plot (no overlap with neighbours)
+- [ ] It can still be tapped, moved and rotated; its effects (Z letters, grain, dust) sit on the picture
+
+### Device checklist (v0.40.1: ads off)
+- [ ] No "Watch ad +100 coins" button in the bottom bar
+- [ ] A growing field, a working factory, a building site, the away train and the away truck show only the gem button (no "watch ad")
+- [ ] Pressing Menu goes straight to the main menu (no ad); Settings has no "Privacy & ads" button
+
 ### Device checklist (v0.39.0: back button and quit dialog)
 - [ ] In the town with nothing open, the phone's back button shows "LEAVING?" with Stay and Quit
 - [ ] Back again or Stay or X closes it; Quit closes the game and the town is all there when you reopen it

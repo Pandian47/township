@@ -23,6 +23,9 @@ namespace TownBuilder
         /// <summary>Tests set this to a <see cref="ManualClock"/> to fast-forward crop and production timers.</summary>
         public static IClock ClockOverride { get; set; }
 
+        /// <summary>Tests only: the ad service to use instead of the one AdsConfig picks.</summary>
+        public static IAdService AdServiceOverride { get; set; }
+
         public GameContext Context { get; private set; }
 
         public static GameRoot GetOrCreate(GameContent content)
@@ -50,7 +53,7 @@ namespace TownBuilder
                 ? SaveDirectoryOverride
                 : Path.Combine(Application.persistentDataPath, SaveFolderName);
             var store = new JsonSaveStore(saveDirectory);
-            Context = new GameContext(content, store, ClockOverride ?? new SystemClock(), CreateAdService(content.AdsConfig));
+            Context = new GameContext(content, store, ClockOverride ?? new SystemClock(), AdServiceOverride ?? CreateAdService(content.AdsConfig));
             Current = this;
 
             var audio = gameObject.AddComponent<GameAudio>();
